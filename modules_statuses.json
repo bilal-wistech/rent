@@ -1,0 +1,10 @@
+{
+    "Gateway": true,
+    "Addons": true,
+    "Paystack": true,
+    "Flutterwave": true,
+    "Paypal": true,
+    "Stripe": true,
+    "Razorpay": true,
+    "DirectBankTransfer": true
+}
