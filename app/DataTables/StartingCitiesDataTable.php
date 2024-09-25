@@ -3,6 +3,7 @@
 namespace App\DataTables;
 
 use App\Models\StartingCities;
+use Log;
 use Yajra\DataTables\Services\DataTable;
 
 class StartingCitiesDataTable extends DataTable
@@ -16,6 +17,7 @@ class StartingCitiesDataTable extends DataTable
         return datatables()
             ->of($startingCities)
             ->addColumn('image', function ($startingCities) {
+                Log::info($startingCities->image_url);
                 return '<img src="' . $startingCities->image_url . '" width="200" height="100">';
             })
             ->addColumn('action', function ($startingCities) {
