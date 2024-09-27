@@ -206,6 +206,69 @@ class BookingsController extends Controller
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+    public function edit($id)
+    {
+        $booking = Bookings::findOrFail($id);
+        $properties = Properties::all('id', 'name');
+        $customers = User::where('status', 'Active')->get();
+        $maxGuests = Properties::findOrFail($booking->property_id)->accommodates;
+        return view('admin.bookings.edit', compact('booking', 'properties', 'customers','maxGuests'));
+    }
+    public function update(Request $request, $id)
+    {
+        $currencyDefault = Currency::getAll()->where('default', 1)->first();
+        $booking = Bookings::findOrFail($id);
+
+        $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
+        $priceData = json_decode($priceDetails);
+        $property = Properties::findOrFail($request->property_id);
+
+        foreach ($priceData->date_with_price as $key => $value) {
+            $allData[$key]['price'] = Common::convert_currency('', $currencyDefault->code, $value->original_price);
+            $allData[$key]['date'] = setDateForDb($value->date);
+        }
+
+        DB::beginTransaction();
+        try {
+            $booking->update([
+                'property_id' => $request->property_id,
+                'user_id' => $request->user_id,
+                'host_id' => $property->host_id,
+                'booking_added_by' => $request->booking_added_by ?? 1,
+                'start_date' => setDateForDb($request->checkin),
+                'end_date' => setDateForDb($request->checkout),
+                'guest' => $request->number_of_guests,
+                'total_night' => $priceData->total_nights,
+                'service_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->service_fee),
+                'host_fee' => Common::convert_currency('', $currencyDefault->code, $priceData->host_fee),
+                'iva_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->iva_tax),
+                'accomodation_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->accomodation_tax),
+                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->additional_guest),
+                'security_money' => Common::convert_currency('', $currencyDefault->code, $priceData->security_fee),
+                'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->cleaning_fee),
+                'total' => Common::convert_currency('', $currencyDefault->code, $priceData->total),
+                'base_price' => Common::convert_currency('', $currencyDefault->code, $priceData->subtotal),
+                'currency_code' => $currencyDefault->code,
+                'booking_type' => $request->booking_type,
+                'renewal_type' => $request->renewal_type ?? 'none',
+                'status' => $request->status,
+                'cancellation' => $property->cancellation,
+                'per_night' => Common::convert_currency('', $currencyDefault->code, $priceData->property_price),
+                'date_with_price' => json_encode($allData),
+                'transaction_id' => '',
+                'payment_method_id' => '',
+            ]);
+
+            DB::commit();
+            Common::one_time_message('success', 'Booking Updated Successfully');
+            return redirect('admin/bookings');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Common::one_time_message('error', 'Failed to update booking. Please try again.');
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
     /**
      * Get Distinct currency total with symbol
      *
