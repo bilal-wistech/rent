@@ -116,7 +116,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     //iCalender routes end
 	Route::match(array('GET', 'POST'), 'edit_property/{id}', 'PropertiesController@update')->middleware(['permission:edit_properties']);
 	Route::get('delete-property/{id}', 'PropertiesController@delete')->middleware(['permission:delete_property']);
-	Route::get('bookings', 'BookingsController@index')->middleware(['permission:manage_bookings']);
+	Route::get('bookings', 'BookingsController@index')->middleware(['permission:manage_bookings'])->name('admin.bookings.index');
+    Route::get('bookings/create', 'BookingsController@create')->middleware(['permission:manage_bookings'])->name('admin.bookings.create');
+    Route::get('bookings/get-number-of-guests/{property_id}', 'BookingsController@getNumberofGuests')->middleware(['permission:manage_bookings'])->name('admin.bookings.get-number-of-guests');
+    Route::post('bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
 	Route::get('bookings/property_search', 'BookingsController@searchProperty')->middleware(['permission:manage_bookings']);
 	Route::get('bookings/customer_search', 'BookingsController@searchCustomer')->middleware(['permission:manage_bookings']);
 	//booking details
