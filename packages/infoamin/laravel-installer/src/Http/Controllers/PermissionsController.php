@@ -72,23 +72,23 @@ class PermissionsController extends PermissionsChecker
             return view('vendor.installer.purchasecode', ['errors' => $validator->errors(), 'old' => $request->old]);
         }
 
-        $domainName     = str_replace(
-            ['https://www.', 'http://www.', 'https://', 'http://', 'www.'], '', request()->getHttpHost()
-        );
-        $domainIp       = request()->ip();
+        // $domainName     = str_replace(
+        //     ['https://www.', 'http://www.', 'https://', 'http://', 'www.'], '', request()->getHttpHost()
+        // );
+        // $domainIp       = request()->ip();
 
-        $purchaseData = $purchaseChecker->getPurchaseStatus($domainName, $domainIp, $request->envatopurchasecode, $request->envatoUsername);
+        // $purchaseData = $purchaseChecker->getPurchaseStatus($domainName, $domainIp, $request->envatopurchasecode, $request->envatoUsername);
 
-        if ($purchaseData->status) {
-            changeEnvironmentVariable(base64_decode('SU5TVEFMTF9BUFBfU0VDUkVU'), $purchaseData->data);
-            if ($request->old == true) {
-                changeEnvironmentVariable('APP_INSTALL', 'true');
-                Cache::put('a_s_k', $purchaseData->data, 2629746);
-            }
-            return redirect('install/database');
-        } else {
-            return view('vendor.installer.purchasecode', ['responseError' => $purchaseData->data, 'old' => $request->old]);
-        }
+        // if ($purchaseData->status) {
+        //     changeEnvironmentVariable(base64_decode('SU5TVEFMTF9BUFBfU0VDUkVU'), $purchaseData->data);
+        //     if ($request->old == true) {
+        //         changeEnvironmentVariable('APP_INSTALL', 'true');
+        //         Cache::put('a_s_k', $purchaseData->data, 2629746);
+        //     }
+        //     return redirect('install/database');
+        // } else {
+        //     return view('vendor.installer.purchasecode', ['responseError' => $purchaseData->data, 'old' => $request->old]);
+        // }
     }
 
     public function isInstalled() {
