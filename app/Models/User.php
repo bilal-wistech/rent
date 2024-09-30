@@ -38,6 +38,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Document::class);
     }
+    public function emergencyContacts()
+{
+    return $this->hasMany(EmergencyContact::class);
+}
 
     protected $appends = ['profile_src'];
 

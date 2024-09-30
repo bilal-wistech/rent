@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AddonController;
 use App\Http\Controllers\Admin\CalendarController;
+use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\EmergencyContactController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 /*
@@ -57,7 +59,11 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('logout', 'AdminController@logout');
 	Route::get('dashboard', 'DashboardController@index');
 	Route::get('customers', 'CustomerController@index')->middleware(['permission:customers']);
-	Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
+
+    Route::resource('document', DocumentController::class);
+    Route::resource('emergencycontacts', EmergencyContactController::class);
+
+    Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
     Route::post('add-ajax-customer', 'CustomerController@ajaxCustomerAdd')->middleware(['permission:add_customer']);
 	Route::match(array('GET', 'POST'), 'add-customer', 'CustomerController@add')->middleware(['permission:add_customer']);
     Route::get('delete-customer/{id}', 'CustomerController@delete')->middleware(['permission:delete_customer']);
