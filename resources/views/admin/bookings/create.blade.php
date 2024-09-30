@@ -27,7 +27,8 @@
 
                             <input type="hidden" name="booking_added_by" id="booking_added_by"
                                 value="{{ Auth::guard('admin')->id() }}">
-
+                            <input type="hidden" name="booking_type" value="instant" id="booking_type">
+                            <input type="hidden" name="status" value="pending" id="status">
                             <div class="box-body">
 
                                 <div class="form-group row mt-3 property_id">
@@ -68,16 +69,21 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group row mt-3 user_id">
-                                    <label for="user_id" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                <div class="form-group row mt-3 host_id">
+                                    <label for="host_id" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
                                         Customer <span class="text-danger">*</span>
                                     </label>
 
                                     <div class="col-sm-6">
-                                        <select class="form-control select2" name="user_id" id="user_id">
+                                        <select class="form-control select2" name="user_id" id="host_id">
                                             <option value="">Select a Customer</option>
                                         </select>
                                         <span class="text-danger">{{ $errors->first('user_id') }}</span>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <a href="#" data-bs-toggle="modal" data-bs-target="#customerModal"
+                                            class=" btn btn-primary btn-sm customer-modal"><span
+                                                class="fa fa-user"></span></a>
                                     </div>
                                 </div>
 
@@ -90,60 +96,10 @@
                                     <div class="col-sm-6">
                                         <select class="form-control select2" name="number_of_guests" id="number_of_guests">
                                             <option value="">Select Number of Guests</option>
-                                            <!-- Assuming number of guests is dynamically generated -->
-                                            <option value="1" {{ old('number_of_guests') == 1 ? 'selected' : '' }}>1
-                                            </option>
-                                            <option value="2" {{ old('number_of_guests') == 2 ? 'selected' : '' }}>2
-                                            </option>
-                                            <!-- Add more options as necessary -->
                                         </select>
                                         <span class="text-danger">{{ $errors->first('number_of_guests') }}</span>
                                     </div>
                                 </div>
-
-                                <div class="form-group row mt-3 booking_type">
-                                    <label for="booking_type"
-                                        class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                        Booking Type <span class="text-danger">*</span>
-                                    </label>
-
-                                    <div class="col-sm-6">
-                                        <select class="form-control select2" name="booking_type" id="booking_type">
-                                            <option value="">Select a Booking Type</option>
-                                            <option value="instant"
-                                                {{ old('booking_type') == 'instant' ? 'selected' : '' }}>Instant</option>
-                                            <option value="request"
-                                                {{ old('booking_type') == 'request' ? 'selected' : '' }}>Request</option>
-                                        </select>
-                                        <span class="text-danger">{{ $errors->first('booking_type') }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row mt-3 status">
-                                    <label for="status" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                        Booking Status <span class="text-danger">*</span>
-                                    </label>
-
-                                    <div class="col-sm-6">
-                                        <select class="form-control select2" name="status" id="status">
-                                            <option value="">Select a Status</option>
-                                            <option value="Accepted" {{ old('status') == 'Accepted' ? 'selected' : '' }}>
-                                                Accepted</option>
-                                            <option value="Pending" {{ old('status') == 'Pending' ? 'selected' : '' }}>
-                                                Pending</option>
-                                            <option value="Cancelled"
-                                                {{ old('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                            <option value="Declined" {{ old('status') == 'Declined' ? 'selected' : '' }}>
-                                                Declined</option>
-                                            <option value="Expired" {{ old('status') == 'Expired' ? 'selected' : '' }}>
-                                                Expired</option>
-                                            <option value="Processing"
-                                                {{ old('status') == 'Processing' ? 'selected' : '' }}>Processing</option>
-                                        </select>
-                                        <span class="text-danger">{{ $errors->first('status') }}</span>
-                                    </div>
-                                </div>
-
                                 <div class="form-group row mt-3 renewal_type">
                                     <label for="renewal_type"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
@@ -153,12 +109,12 @@
                                     <div class="col-sm-6">
                                         <select class="form-control select2" name="renewal_type" id="renewal_type">
                                             <option value="">Select a Renewal Type</option>
+                                            <option value="none" {{ old('renewal_type') == 'none' ? 'selected' : '' }}>
+                                                None</option>
                                             <option value="weekly"
                                                 {{ old('renewal_type') == 'weekly' ? 'selected' : '' }}>Weekly</option>
                                             <option value="monthly"
                                                 {{ old('renewal_type') == 'monthly' ? 'selected' : '' }}>Monthly</option>
-                                            <option value="none" {{ old('renewal_type') == 'none' ? 'selected' : '' }}>
-                                                None</option>
                                         </select>
                                         <span class="text-danger">{{ $errors->first('renewal_type') }}</span>
                                     </div>
@@ -176,11 +132,106 @@
                 </div>
             </div>
         </section>
+        <div class="modal" id="customerModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content ">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="theModalLabel"></h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" id="signup_form" method="post" name="signup_form"
+                            action="{{ url('admin/add-ajax-customer') }}" accept-charset='UTF-8'>
+                            {{ csrf_field() }}
+
+                            <h4 class="text-info text-center ml-40">Customer Information</h4>
+                            <input type="hidden" name="default_country" id="default_country" class="form-control">
+                            <input type="hidden" name="carrier_code" id="carrier_code" class="form-control">
+                            <input type="hidden" name="formatted_phone" id="formatted_phone" class="form-control">
+
+                            <div class="form-group row mt-3">
+                                <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">First
+                                    Name<span class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control f-14" name="first_name" id="first_name"
+                                        placeholder="">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-3">
+                                <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">Last
+                                    Name<span class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control f-14" name="last_name" id="last_name"
+                                        placeholder="">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-3">
+                                <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">Email<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control error f-14" name="email" id="email"
+                                        placeholder="">
+                                    <div id="emailError"></div>
+                                </div>
+                            </div>
+                            <div class="form-group row mt-3">
+                                <label for="exampleInputPassword1"
+                                    class="control-label col-sm-3 mt-2 fw-bold">Phone</label>
+                                <div class="col-sm-8">
+                                    <input type="tel" class="form-control f-14" id="phone" name="phone">
+                                    <span id="phone-error" class="text-danger"></span>
+                                    <span id="tel-error" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row mt-3">
+                                <label for="Password" class="control-label col-sm-3 mt-2 fw-bold">Password<span
+                                        class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="password" class="form-control f-14" name="password" id="password"
+                                        placeholder="">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-3">
+                                <label for="exampleInputPassword1"
+                                    class="control-label col-sm-3 mt-2 fw-bold">Status</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control f-14" name="status" id="status">
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer mt-2">
+                                <button type="submit" id="customerModalBtn"
+                                    class="btn btn-info pull-left f-14">Submit</button>
+                                <button class="btn btn-danger pull-left f-14" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 @section('validate_script')
     <script type="text/javascript" src="{{ asset('backend/dist/js/validate.min.js') }}"></script>
     <script src="{{ asset('backend/js/admin-date-range-picker.min.js') }}"></script>
+    <script src="{{ asset('backend/js/intl-tel-input-13.0.0/build/js/intlTelInput.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('backend/js/isValidPhoneNumber.js') }}" type="text/javascript"></script>
+    <script type="text/javascript">
+        let validEmailText = "Please enter a valid email address.";
+        let checkUserURL = "{{ route('checkUser.check') }}";
+        var token = "{{ csrf_token() }}";
+        let emailExistText = "Email address is already Existed.";
+        let validInternationalNumber = "Please enter a valid International Phone Number.";
+        let numberExists = "The number has already been taken!";
+        let signedUpText = "Sign Up..";
+        let baseURL = "{{ url('/') }}";
+        let duplicateNumberCheckURL = "{{ url('duplicate-phone-number-check') }}";
+    </script>
+    <script src="{{ asset('backend/js/add_customer_for_properties.min.js') }}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
             $('#property_id').select2({
@@ -211,7 +262,7 @@
                 minimumInputLength: 0,
             });
 
-            $('#user_id').select2({
+            $('#host_id').select2({
                 ajax: {
                     url: '{{ route('admin.bookings.form_customer_search') }}',
                     dataType: 'json',
