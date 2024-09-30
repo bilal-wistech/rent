@@ -279,8 +279,11 @@ class PayoutController extends Controller
         $walletMoney->save();
 
         try {
+
             $email_controller = new EmailController;
             $email_controller->notifyAdminOfPayoutRequest($withdrawal->id);
+
+
         } catch (\Exception $e) {
             Common::one_time_message('danger', __('Email was not sent due to :x', ['x' => __($e->getMessage())]));
             return redirect('users/payout-list');
@@ -288,5 +291,6 @@ class PayoutController extends Controller
 
         Common::one_time_message('success', __('Payout request successfully Sent.'));
         return redirect('users/payout-list');
+
     }
 }
