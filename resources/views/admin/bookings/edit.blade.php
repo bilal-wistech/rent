@@ -28,10 +28,9 @@
 
                             <input type="hidden" name="booking_added_by" id="booking_added_by"
                                 value="{{ Auth::guard('admin')->id() }}">
-                                <input type="hidden" name="booking_type" id="booking_type"
+                            <input type="hidden" name="booking_type" id="booking_type"
                                 value="{{ $booking->booking_type }}">
-                                <input type="hidden" name="status" id="status"
-                                value="{{ $booking->status }}">
+                            <input type="hidden" name="status" id="status" value="{{ $booking->status }}">
                             <div class="box-body">
                                 <div class="form-group row mt-3 property_id">
                                     <label for="property_id"
@@ -40,13 +39,9 @@
                                     <div class="col-sm-6">
                                         <select class="form-control select2" name="property_id" id="property_id" required>
                                             <option value="">Select a Property</option>
-                                            @if (!empty($properties))
-                                                @foreach ($properties as $property)
-                                                    <option value="{{ $property->id }}"
-                                                        {{ $property->id == $booking->property_id ? 'selected' : '' }}>
-                                                        {{ $property->name }}
-                                                    </option>
-                                                @endforeach
+                                            @if ($booking->property_id)
+                                                <option value="{{ $booking->property_id }}" selected>
+                                                    {{ $booking->properties->name }}</option>
                                             @endif
                                         </select>
                                         <span class="text-danger">{{ $errors->first('property_id') }}</span>
@@ -82,13 +77,10 @@
                                     <div class="col-sm-6">
                                         <select class="form-control select2" name="user_id" id="user_id" required>
                                             <option value="">Select a Customer</option>
-                                            @if (!empty($customers))
-                                                @foreach ($customers as $customer)
-                                                    <option value="{{ $customer->id }}"
-                                                        {{ $customer->id == $booking->user_id ? 'selected' : '' }}>
-                                                        {{ $customer->first_name ?? '' }} {{ $customer->last_name ?? '' }}
-                                                    </option>
-                                                @endforeach
+                                            @if ($booking->user_id)
+                                                <option value="{{ $booking->user_id }}" selected>
+                                                    {{ $booking->users->first_name ?? '' }}
+                                                    {{ $booking->users->last_name ?? '' }}</option>
                                             @endif
                                         </select>
                                         <span class="text-danger">{{ $errors->first('user_id') }}</span>
@@ -160,14 +152,86 @@
     <script src="{{ asset('backend/js/admin-date-range-picker.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            $('#property_id').select2();
+            $('#property_id').select2({
+                ajax: {
+                    url: '{{ route('admin.bookings.form_property_search') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || null,
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
 
-            // Function to populate number of guests
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination.more
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: 'Select a Property',
+                minimumInputLength: 0,
+
+                templateResult: function(item) {
+                    return item.text;
+                },
+                templateSelection: function(item) {
+                    return item.text;
+                }
+            });
+            var existingPropertyId = "{{ old('property_id', $booking->property_id) }}";
+            if (existingPropertyId) {
+                $('#property_id').val(existingPropertyId).trigger('change');
+            }
+
+            $('#user_id').select2({
+                ajax: {
+                    url: '{{ route('admin.bookings.form_customer_search') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || null,
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination.more
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: 'Select a Customer',
+                minimumInputLength: 0,
+
+                templateResult: function(item) {
+                    return item.text;
+                },
+                templateSelection: function(item) {
+                    return item.text;
+                }
+            });
+            var existingUserId = "{{ old('user_id', $booking->user_id) }}";
+            if (existingUserId) {
+                $('#user_id').val(existingUserId).trigger('change');
+            }
+
             function populateNumberOfGuests(property_id, selected_guests = null) {
                 $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
 
                 if (property_id) {
-                    // Generate the correct URL using Laravel route
                     let url = "{{ route('admin.bookings.get-number-of-guests', ':property_id') }}".replace(
                         ':property_id', property_id);
 
@@ -190,16 +254,14 @@
                 }
             }
 
-            // Fetch number of guests when property changes
             $('#property_id').on('change', function() {
                 let property_id = $(this).val();
                 populateNumberOfGuests(property_id);
             });
 
-            // Populate number of guests on page load based on existing booking
             let selectedPropertyId = $('#property_id').val();
             let selectedGuests =
-                "{{ old('number_of_guests', $booking->guest) }}"; // Use old value or existing booking value
+                "{{ old('number_of_guests', $booking->guest) }}";
             populateNumberOfGuests(selectedPropertyId, selectedGuests);
         });
     </script>
