@@ -27,6 +27,7 @@ use App\Models\{
 };
 use Modules\DirectBankTransfer\Entities\DirectBankTransfer;
 use App\Models\PaymentMethods;
+use App\Http\Requests\AddAdminBookingRequest;
 
 class BookingsController extends Controller
 {
@@ -142,6 +143,122 @@ class BookingsController extends Controller
         isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
         return $dataTable->render('admin.bookings.view', $data);
     }
+    public function create(Request $request)
+    {
+        $properties = Properties::all('id', 'name');
+        $customers = User::where('status', 'Active')->get();
+        return view('admin.bookings.create', compact('properties', 'customers'));
+    }
+    public function getNumberofGuests($property_id)
+    {
+        $propety = Properties::findOrFail($property_id);
+        return response()->json([
+            'numberofguests' => $propety->accommodates ?? 0
+        ]);
+    }
+    public function store(AddAdminBookingRequest $request)
+    {
+        $currencyDefault = Currency::getAll()->where('default', 1)->first();
+        $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
+        $priceData = json_decode($priceDetails);
+        $property = Properties::findOrFail($request->property_id);
+        foreach ($priceData->date_with_price as $key => $value) {
+            $allData[$key]['price'] = Common::convert_currency('', $currencyDefault->code, $value->original_price);
+            $allData[$key]['date'] = setDateForDb($value->date);
+        }
+        // dd($request, $priceData);
+        DB::beginTransaction();
+        try {
+            $booking = Bookings::create([
+                'property_id' => $request->property_id,
+                'user_id' => $request->user_id,
+                'host_id' => $property->host_id,
+                'booking_added_by' => $request->booking_added_by ?? 1,
+                'start_date' => setDateForDb($request->checkin),
+                'end_date' => setDateForDb($request->checkout),
+                'guest' => $request->number_of_guests,
+                'total_night' => $priceData->total_nights,
+                'service_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->service_fee),
+                'host_fee' => Common::convert_currency('', $currencyDefault->code, $priceData->host_fee),
+                'iva_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->iva_tax),
+                'accomodation_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->accomodation_tax),
+                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->additional_guest),
+                'security_money' => Common::convert_currency('', $currencyDefault->code, $priceData->security_fee),
+                'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->cleaning_fee),
+                'total' => Common::convert_currency('', $currencyDefault->code, $priceData->total),
+                'base_price' => Common::convert_currency('', $currencyDefault->code, $priceData->subtotal),
+                'currency_code' => $currencyDefault->code,
+                'booking_type' => $request->booking_type,
+                'renewal_type' => $request->renewal_type ?? 'none',
+                'status' => $request->status,
+                'cancellation' => $property->cancellation,
+                'per_night' => Common::convert_currency('', $currencyDefault->code, $priceData->property_price),
+                'date_with_price' => json_encode($allData),
+                'transaction_id' => '',
+                'payment_method_id' => '',
+            ]);
+            DB::commit();
+            Common::one_time_message('success', 'Booking Added Successfully');
+            return redirect('admin/bookings');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Common::one_time_message('error', 'Failed to add booking. Please try again.');
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+    public function edit($id)
+    {
+        $booking = Bookings::findOrFail($id);
+        $properties = Properties::all('id', 'name');
+        $customers = User::where('status', 'Active')->get();
+        $maxGuests = Properties::findOrFail($booking->property_id)->accommodates;
+        return view('admin.bookings.edit', compact('booking', 'properties', 'customers', 'maxGuests'));
+    }
+    public function update(Request $request, $id)
+    {
+        $currencyDefault = Currency::getAll()->where('default', 1)->first();
+        $booking = Bookings::findOrFail($id);
+
+        $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
+        $priceData = json_decode($priceDetails);
+        $property = Properties::findOrFail($request->property_id);
+
+        foreach ($priceData->date_with_price as $key => $value) {
+            $allData[$key]['price'] = Common::convert_currency('', $currencyDefault->code, $value->original_price);
+            $allData[$key]['date'] = setDateForDb($value->date);
+        }
+
+        DB::beginTransaction();
+        try {
+            $booking->update([
+                'property_id' => $request->property_id,
+                'user_id' => $request->user_id,
+                'host_id' => $property->host_id,
+                'booking_added_by' => $request->booking_added_by ?? 1,
+                'start_date' => setDateForDb($request->checkin),
+                'end_date' => setDateForDb($request->checkout),
+                'guest' => $request->number_of_guests,
+                'total_night' => $priceData->total_nights,
+                'service_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->service_fee),
+                'host_fee' => Common::convert_currency('', $currencyDefault->code, $priceData->host_fee),
+                'iva_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->iva_tax),
+                'accomodation_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->accomodation_tax),
+                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->additional_guest),
+                'security_money' => Common::convert_currency('', $currencyDefault->code, $priceData->security_fee),
+                'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->cleaning_fee),
+                'total' => Common::convert_currency('', $currencyDefault->code, $priceData->total),
+                'base_price' => Common::convert_currency('', $currencyDefault->code, $priceData->subtotal),
+                'currency_code' => $currencyDefault->code,
+                'booking_type' => $request->booking_type,
+                'renewal_type' => $request->renewal_type ?? 'none',
+                'status' => $request->status,
+                'cancellation' => $property->cancellation,
+                'per_night' => Common::convert_currency('', $currencyDefault->code, $priceData->property_price),
+                'date_with_price' => json_encode($allData),
+                'transaction_id' => '',
+                'payment_method_id' => '',
+            ]);
 
     // get booking by id
     public function getbookingbyid($id)
@@ -439,6 +556,113 @@ class BookingsController extends Controller
         $wallet_code = Currency::getAll()->firstWhere('id', $walletBalance->currency_id)->code;
         $balance = ($walletBalance->balance + Common::convert_currency($default_code, $wallet_code, $booking->total) - Common::convert_currency($default_code, $wallet_code, $booking->service_charge) - Common::convert_currency($default_code, $wallet_code, $booking->accomodation_tax) - Common::convert_currency($default_code, $wallet_code, $booking->iva_tax));
         Wallet::where(['user_id' => $booking->host_id])->update(['balance' => $balance]);
+    }
+
+    public function searchFormProperty(Request $request)
+    {
+        $str = $request->term;
+        $page = $request->page ?? 1;
+        $perPage = 5;
+
+        $query = Properties::with('property_address')
+            ->where('status', 'Listed')
+            ->select('properties.id', 'properties.name AS text');
+
+        if ($str != null) {
+            $query->where(function ($query) use ($str) {
+                $query->where('properties.name', 'LIKE', '%' . $str . '%')
+                    ->orWhereHas('property_address', function ($query) use ($str) {
+                        $query->where(function ($query) use ($str) {
+                            $query->where('city', 'LIKE', '%' . $str . '%')
+                                ->orWhere('state', 'LIKE', '%' . $str . '%')
+                                ->orWhere('country', 'LIKE', '%' . $str . '%')
+                                ->orWhere('area', 'LIKE', '%' . $str . '%');
+                        });
+                    });
+            });
+        }
+
+        $myresult = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $myArr = [];
+
+        if ($myresult->isEmpty()) {
+            $myArr = null;
+        } else {
+            $arr2 = array(
+                "id" => "",
+                "text" => "All"
+            );
+            $myArr[] = $arr2;
+
+            foreach ($myresult as $result) {
+                $arr = array(
+                    "id" => $result->id,
+                    "text" => $result->text,
+                    "property_address" => [
+                        'address_line_1' => $result->property_address->address_line_1 ?? '',
+                        'address_line_2' => $result->property_address->address_line_2 ?? '',
+                        'city' => $result->property_address->city ?? '',
+                        'state' => $result->property_address->state ?? '',
+                        'country' => $result->property_address->country ?? '',
+                        'postal_code' => $result->property_address->postal_code ?? '',
+                    ],
+                );
+                $myArr[] = $arr;
+            }
+        }
+        return response()->json([
+            'results' => $myArr,
+            'pagination' => [
+                'more' => $myresult->hasMorePages(),
+            ],
+        ]);
+    }
+    public function searchFormCustomer(Request $request)
+    {
+        $str = $request->term;
+        $page = $request->page ?? 1;
+        $perPage = 5;
+
+
+        $query = User::select('id', 'first_name', 'last_name');
+
+        if ($str) {
+            $query->where(function ($query) use ($str) {
+                $query->where('first_name', 'LIKE', '%' . $str . '%')
+                    ->orWhere('last_name', 'LIKE', '%' . $str . '%');
+            });
+        }
+
+        $myresult = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $myArr = [];
+
+        if ($myresult->isEmpty()) {
+            $myArr = null;
+        } else {
+            $arr2 = [
+                "id" => "",
+                "text" => "All"
+            ];
+            $myArr[] = $arr2;
+
+            foreach ($myresult as $result) {
+                $arr = [
+                    "id" => $result->id,
+                    "text" => $result->first_name . " " . $result->last_name
+                ];
+                $myArr[] = $arr;
+            }
+        }
+
+
+        return response()->json([
+            'results' => $myArr,
+            'pagination' => [
+                'more' => $myresult->hasMorePages(),
+            ],
+        ]);
     }
 
 

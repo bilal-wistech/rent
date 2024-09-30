@@ -1,7 +1,7 @@
 @extends('template')
 @push('css')
-	<link rel="stylesheet" type="text/css" href="{{ asset('public/css/daterangepicker.min.css') }}" />
-	<link rel="stylesheet" type="text/css" href="{{ asset('public/css/user-front.min.css') }}" />
+	<link rel="stylesheet" type="text/css" href="{{ asset('css/daterangepicker.min.css') }}" />
+	<link rel="stylesheet" type="text/css" href="{{ asset('css/user-front.min.css') }}" />
 
 @endpush
 
@@ -254,10 +254,10 @@
 
 @section('validation_script')
 	<script type="text/javascript" src='https://maps.google.com/maps/api/js?key={{ config("vrent.google_map_key") }}&libraries=places'></script>
-	<script type="text/javascript" src="{{ asset('public/js/moment.min.js') }}"></script>
-	<script src="{{ asset('public/js/sweetalert.min.js') }}"></script>
-	<script type="text/javascript" src="{{ asset('public/js/daterangepicker.min.js') }}"></script>
-	<script type="text/javascript" src="{{ asset('public/js/daterangecustom.js') }}"></script>
+	<script type="text/javascript" src="{{ asset('js/moment.min.js') }}"></script>
+	<script src="{{ asset('js/sweetalert.min.js') }}"></script>
+	<script type="text/javascript" src="{{ asset('js/daterangepicker.min.js') }}"></script>
+	<script type="text/javascript" src="{{ asset('js/daterangecustom.js') }}"></script>
     <script type="text/javascript">
         'use strict'
         var success = "{{ __('Success') }}";
@@ -272,7 +272,7 @@
         var dateFormat = '{{ $date_format }}';
 		const BaseURL = '{{ url("/") }}';
     </script>
-    <script src="{{ asset('public/js/front.min.js') }}"></script>
+    <script src="{{ asset('js/front.min.js') }}"></script>
 
 @endsection
 
