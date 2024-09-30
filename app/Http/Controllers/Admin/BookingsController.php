@@ -212,7 +212,7 @@ class BookingsController extends Controller
         $properties = Properties::all('id', 'name');
         $customers = User::where('status', 'Active')->get();
         $maxGuests = Properties::findOrFail($booking->property_id)->accommodates;
-        return view('admin.bookings.edit', compact('booking', 'properties', 'customers','maxGuests'));
+        return view('admin.bookings.edit', compact('booking', 'properties', 'customers', 'maxGuests'));
     }
     public function update(Request $request, $id)
     {
@@ -541,6 +541,112 @@ class BookingsController extends Controller
         $wallet_code = Currency::getAll()->firstWhere('id', $walletBalance->currency_id)->code;
         $balance = ($walletBalance->balance + Common::convert_currency($default_code, $wallet_code, $booking->total) - Common::convert_currency($default_code, $wallet_code, $booking->service_charge) - Common::convert_currency($default_code, $wallet_code, $booking->accomodation_tax) - Common::convert_currency($default_code, $wallet_code, $booking->iva_tax));
         Wallet::where(['user_id' => $booking->host_id])->update(['balance' => $balance]);
+    }
+
+    public function searchFormProperty(Request $request)
+    {
+        $str = $request->term;
+        $page = $request->page ?? 1;
+        $perPage = 5;
+
+        $query = Properties::with('property_address')
+            ->where('status', 'Listed')
+            ->select('properties.id', 'properties.name AS text');
+
+        if ($str != null) {
+            $query->where(function ($query) use ($str) {
+                $query->where('properties.name', 'LIKE', '%' . $str . '%')
+                    ->orWhereHas('property_address', function ($query) use ($str) {
+                        $query->where(function ($query) use ($str) {
+                            $query->where('city', 'LIKE', '%' . $str . '%')
+                                ->orWhere('state', 'LIKE', '%' . $str . '%')
+                                ->orWhere('country', 'LIKE', '%' . $str . '%');
+                        });
+                    });
+            });
+        }
+
+        $myresult = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $myArr = [];
+
+        if ($myresult->isEmpty()) {
+            $myArr = null;
+        } else {
+            $arr2 = array(
+                "id" => "",
+                "text" => "All"
+            );
+            $myArr[] = $arr2;
+
+            foreach ($myresult as $result) {
+                $arr = array(
+                    "id" => $result->id,
+                    "text" => $result->text,
+                    "property_address" => [
+                        'address_line_1' => $result->property_address->address_line_1 ?? '',
+                        'address_line_2' => $result->property_address->address_line_2 ?? '',
+                        'city' => $result->property_address->city ?? '',
+                        'state' => $result->property_address->state ?? '',
+                        'country' => $result->property_address->country ?? '',
+                        'postal_code' => $result->property_address->postal_code ?? '',
+                    ],
+                );
+                $myArr[] = $arr;
+            }
+        }
+        return response()->json([
+            'results' => $myArr,
+            'pagination' => [
+                'more' => $myresult->hasMorePages(),
+            ],
+        ]);
+    }
+    public function searchFormCustomer(Request $request)
+    {
+        $str = $request->term;
+        $page = $request->page ?? 1;
+        $perPage = 5;
+
+
+        $query = User::select('id', 'first_name', 'last_name');
+
+        if ($str) {
+            $query->where(function ($query) use ($str) {
+                $query->where('first_name', 'LIKE', '%' . $str . '%')
+                    ->orWhere('last_name', 'LIKE', '%' . $str . '%');
+            });
+        }
+
+        $myresult = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $myArr = [];
+
+        if ($myresult->isEmpty()) {
+            $myArr = null;
+        } else {
+            $arr2 = [
+                "id" => "",
+                "text" => "All"
+            ];
+            $myArr[] = $arr2;
+
+            foreach ($myresult as $result) {
+                $arr = [
+                    "id" => $result->id,
+                    "text" => $result->first_name . " " . $result->last_name
+                ];
+                $myArr[] = $arr;
+            }
+        }
+
+
+        return response()->json([
+            'results' => $myArr,
+            'pagination' => [
+                'more' => $myresult->hasMorePages(),
+            ],
+        ]);
     }
 
 

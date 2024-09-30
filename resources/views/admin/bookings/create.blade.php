@@ -37,16 +37,8 @@
                                     </label>
 
                                     <div class="col-sm-6">
-                                        <select class="form-control select2" name="property_id" id="property_id">
+                                        <select class="form-control select2-ajax" name="property_id" id="property_id">
                                             <option value="">Select a Property</option>
-                                            @if (!empty($properties))
-                                                @foreach ($properties as $property)
-                                                    <option value="{{ $property->id }}"
-                                                        {{ old('property_id') == $property->id ? 'selected' : '' }}>
-                                                        {{ $property->name }}
-                                                    </option>
-                                                @endforeach
-                                            @endif
                                         </select>
                                         <span class="text-danger">{{ $errors->first('property_id') }}</span>
                                     </div>
@@ -84,14 +76,6 @@
                                     <div class="col-sm-6">
                                         <select class="form-control select2" name="user_id" id="user_id">
                                             <option value="">Select a Customer</option>
-                                            @if (!empty($customers))
-                                                @foreach ($customers as $customer)
-                                                    <option value="{{ $customer->id }}"
-                                                        {{ old('user_id') == $customer->id ? 'selected' : '' }}>
-                                                        {{ $customer->first_name ?? '' }} {{ $customer->last_name ?? '' }}
-                                                    </option>
-                                                @endforeach
-                                            @endif
                                         </select>
                                         <span class="text-danger">{{ $errors->first('user_id') }}</span>
                                     </div>
@@ -196,12 +180,65 @@
 @endsection
 @section('validate_script')
     <script type="text/javascript" src="{{ asset('backend/dist/js/validate.min.js') }}"></script>
-    <script src="{{ asset('backend/js/property_customer_dropdown.min.js') }}"></script>
-    <script src="{{ asset('backend/js/reset-btn.min.js') }}"></script>
     <script src="{{ asset('backend/js/admin-date-range-picker.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            $('#property_id').select2();
+            $('#property_id').select2({
+                ajax: {
+                    url: '{{ route('admin.bookings.form_property_search') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || null,
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination.more
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: 'Select a Property',
+                minimumInputLength: 0,
+            });
+
+            $('#user_id').select2({
+                ajax: {
+                    url: '{{ route('admin.bookings.form_customer_search') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || null,
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination.more
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: 'Select a Customer',
+                minimumInputLength: 0,
+            });
+
             $('#property_id').on('change', function() {
                 let property_id = $(this).val();
 

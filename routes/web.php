@@ -126,7 +126,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::put('bookings/update/{id}', 'BookingsController@update')->middleware(['permission:manage_bookings'])->name('admin.bookings.update');
 
     Route::get('bookings/property_search', 'BookingsController@searchProperty')->middleware(['permission:manage_bookings']);
-    Route::get('bookings/customer_search', 'BookingsController@searchCustomer')->middleware(['permission:manage_bookings']);
+    Route::get('bookings/form_property_search', 'BookingsController@searchFormProperty')->middleware(['permission:manage_bookings'])->name('admin.bookings.form_property_search');
+    Route::get('bookings/customer_search', 'BookingsController@searchCustomer')->middleware(['permission:manage_bookings'])->name('admin.bookings.customer_search');
+    Route::get('bookings/form_customer_search', 'BookingsController@searchFormCustomer')->middleware(['permission:manage_bookings'])->name('admin.bookings.form_customer_search');
     //booking details
     Route::get('bookings/detail/{id}', 'BookingsController@details')->middleware(['permission:manage_bookings']);
     Route::get('bookings/edit/{req}/{id}', 'BookingsController@updateBookingStatus')->middleware(['permission:manage_bookings']);
