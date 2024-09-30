@@ -560,7 +560,8 @@ class BookingsController extends Controller
                         $query->where(function ($query) use ($str) {
                             $query->where('city', 'LIKE', '%' . $str . '%')
                                 ->orWhere('state', 'LIKE', '%' . $str . '%')
-                                ->orWhere('country', 'LIKE', '%' . $str . '%');
+                                ->orWhere('country', 'LIKE', '%' . $str . '%')
+                                ->orWhere('area', 'LIKE', '%' . $str . '%');
                         });
                     });
             });
