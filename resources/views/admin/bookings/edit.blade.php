@@ -28,6 +28,10 @@
 
                             <input type="hidden" name="booking_added_by" id="booking_added_by"
                                 value="{{ Auth::guard('admin')->id() }}">
+                                <input type="hidden" name="booking_type" id="booking_type"
+                                value="{{ $booking->booking_type }}">
+                                <input type="hidden" name="status" id="status"
+                                value="{{ $booking->status }}">
                             <div class="box-body">
                                 <div class="form-group row mt-3 property_id">
                                     <label for="property_id"
@@ -110,52 +114,6 @@
                                         <span class="text-danger">{{ $errors->first('number_of_guests') }}</span>
                                     </div>
                                 </div>
-                                <div class="form-group row mt-3">
-                                    <label for="booking_type"
-                                        class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Booking Type <span
-                                            class="text-danger">*</span></label>
-                                    <div class="col-sm-6">
-                                        <select class="form-control" name="booking_type" id="booking_type" required>
-                                            <option value="instant"
-                                                {{ old('booking_type', $booking->booking_type) == 'instant' ? 'selected' : '' }}>
-                                                Instant</option>
-                                            <option value="request"
-                                                {{ old('booking_type', $booking->booking_type) == 'request' ? 'selected' : '' }}>
-                                                Request</option>
-                                        </select>
-                                        <span class="text-danger">{{ $errors->first('booking_type') }}</span>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-3 status">
-                                    <label for="status" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                        Booking Status <span class="text-danger">*</span>
-                                    </label>
-
-                                    <div class="col-sm-6">
-                                        <select class="form-control select2" name="status" id="status">
-                                            <option value="">Select a Status</option>
-                                            <option value="Accepted"
-                                                {{ old('status', $booking->status) == 'Accepted' ? 'selected' : '' }}>
-                                                Accepted</option>
-                                            <option value="Pending"
-                                                {{ old('status', $booking->status) == 'Pending' ? 'selected' : '' }}>
-                                                Pending</option>
-                                            <option value="Cancelled"
-                                                {{ old('status', $booking->status) == 'Cancelled' ? 'selected' : '' }}>
-                                                Cancelled</option>
-                                            <option value="Declined"
-                                                {{ old('status', $booking->status) == 'Declined' ? 'selected' : '' }}>
-                                                Declined</option>
-                                            <option value="Expired"
-                                                {{ old('status', $booking->status) == 'Expired' ? 'selected' : '' }}>
-                                                Expired</option>
-                                            <option value="Processing"
-                                                {{ old('status', $booking->status) == 'Processing' ? 'selected' : '' }}>
-                                                Processing</option>
-                                        </select>
-                                        <span class="text-danger">{{ $errors->first('status') }}</span>
-                                    </div>
-                                </div>
                                 <div class="form-group row mt-3 renewal_type">
                                     <label for="renewal_type"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
@@ -165,15 +123,15 @@
                                     <div class="col-sm-6">
                                         <select class="form-control select2" name="renewal_type" id="renewal_type">
                                             <option value="">Select a Renewal Type</option>
+                                            <option value="none"
+                                                {{ old('renewal_type', $booking->renewal_type) == 'none' ? 'selected' : '' }}>
+                                                None</option>
                                             <option value="weekly"
                                                 {{ old('renewal_type', $booking->renewal_type) == 'weekly' ? 'selected' : '' }}>
                                                 Weekly</option>
                                             <option value="monthly"
                                                 {{ old('renewal_type', $booking->renewal_type) == 'monthly' ? 'selected' : '' }}>
                                                 Monthly</option>
-                                            <option value="none"
-                                                {{ old('renewal_type', $booking->renewal_type) == 'none' ? 'selected' : '' }}>
-                                                None</option>
                                         </select>
                                         <span class="text-danger">{{ $errors->first('renewal_type') }}</span>
                                     </div>
