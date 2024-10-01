@@ -7,12 +7,10 @@
             <div class="col-md-12">
                 <div class="box">
                     @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="alert alert-success" role="alert">
                         {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" >
-                        </button>
-                    </div>
-                @endif
+                      </div>
+                    @endif
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <h4 class="mb-0 mx-auto">Emergency Contact</h4>
                     </div>

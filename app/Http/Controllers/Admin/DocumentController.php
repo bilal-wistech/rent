@@ -38,7 +38,7 @@ class DocumentController extends Controller
     { $document = Document::where('user_id', $id)->first();
       if ($document) {
         $user = User::findOrFail($id);
-        return view('admin.customers.editDocument', ['document' => $document, 'user' => $user]);
+        return view('admin.customers.editDocument', ['document' => $document, 'user' => $user, 'documentActive' =>'active',]);
         }
    else {
             abort(404, 'Document not found for this user.');
@@ -71,7 +71,8 @@ class DocumentController extends Controller
         return redirect()->back()->with([
             'success' => 'Document updated successfully.',
             'user' => $user,
-            'document'=> $doc
+            'document'=> $doc,
+            'documentActive' =>'active'
         ]);
 
     }

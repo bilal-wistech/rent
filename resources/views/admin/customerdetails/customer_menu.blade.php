@@ -20,10 +20,10 @@
 				<li class="{{ isset($wallet) ? $wallet : '' }}">
 					<a href='{{ url("admin/customer/wallet/" . $user?->id) }}' >Wallet</a>
 				</li>
-                <li>
+                <li class="{{ isset($documentActive) ? $documentActive : '' }}">
                     <a href="{{ route('document.edit', $user?->id) }}">Document</a>
                 </li>
-                <li>
+                <li class="{{ isset($emergencyActive) ? $emergencyActive : '' }}">
                     <a href="{{ route('emergencycontacts.edit', $user?->id) }}">Emergency Contacts</a>
                 </li>
 
