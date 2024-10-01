@@ -26,6 +26,7 @@ use App\Models\{
     Wallet
 };
 use Modules\DirectBankTransfer\Entities\DirectBankTransfer;
+use App\Models\PaymentMethods;
 use App\Http\Requests\AddAdminBookingRequest;
 
 class BookingsController extends Controller
@@ -259,16 +260,31 @@ class BookingsController extends Controller
                 'payment_method_id' => '',
             ]);
 
-            DB::commit();
-            Common::one_time_message('success', 'Booking Updated Successfully');
-            return redirect('admin/bookings');
+    // get booking by id
+    public function getbookingbyid($id)
+    {
+        // Find the booking by ID
+        $booking = Bookings::find($id);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Common::one_time_message('error', 'Failed to update booking. Please try again.');
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        // Check if the booking exists
+        if (!$booking) {
+            return response()->json(['message' => 'Booking not found'], 404);
         }
+
+        // Get the user associated with the booking
+        $user = User::find($booking->user_id);
+        $currency = Currency::where('code', $booking->currency_code)->get();
+        $properties = Properties::where('id', $booking->property_id)->get();
+
+        // Return both booking and user data as JSON
+        return response()->json([
+            'booking' => $booking,
+            'user' => $user,
+            'currency' => $currency,
+            'properties' => $properties
+        ]);
     }
+
     /**
      * Get Distinct currency total with symbol
      *
@@ -285,7 +301,6 @@ class BookingsController extends Controller
         }
         return $different_total_amounts;
     }
-
 
     public function details(Request $request)
     {
