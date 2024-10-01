@@ -219,16 +219,13 @@ class BookingsController extends Controller
     {
         $currencyDefault = Currency::getAll()->where('default', 1)->first();
         $booking = Bookings::findOrFail($id);
-
         $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
         $priceData = json_decode($priceDetails);
         $property = Properties::findOrFail($request->property_id);
-
         foreach ($priceData->date_with_price as $key => $value) {
             $allData[$key]['price'] = Common::convert_currency('', $currencyDefault->code, $value->original_price);
             $allData[$key]['date'] = setDateForDb($value->date);
         }
-
         DB::beginTransaction();
         try {
             $booking->update([
@@ -259,7 +256,15 @@ class BookingsController extends Controller
                 'transaction_id' => '',
                 'payment_method_id' => '',
             ]);
-
+            DB::commit();
+            Common::one_time_message('success', 'Booking Updated Successfully');
+            return redirect('admin/bookings');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Common::one_time_message('error', 'Failed to update booking. Please try again.');
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
     // get booking by id
     public function getbookingbyid($id)
     {
