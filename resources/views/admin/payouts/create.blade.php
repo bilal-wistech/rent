@@ -43,7 +43,7 @@
                                         <label for="" class="fw-bold fs-6 mb-2">Account Number
                                             <span class="text-danger">*</span></label>
                                         </label>
-                                        <input type="text" class="form-control" required>
+                                        <input type="number" class="form-control" name="account_number" required>
                                     </div>
 
                                     <div class="col-6">
@@ -90,6 +90,7 @@
                                             <span class="text-danger">*</span></label>
                                         </label>
                                         <input type="text" class="form-control" id="amount" name="amount" required>
+                                        <input type="hidden" name="user_id" id="user_id">
                                     </div>
                                 </div>
                             </div>
@@ -126,19 +127,10 @@
             let bookingId = $(this).val();
 
             if (!$(this).val()) {
-                $('#username').val('');
-                $('#currency').val('');
                 $('#UserEmail').val('');
-                $('#paymentMethod').val('');
+                $('#property').val('');
                 $('#amount').val('');
                 $('#submitbtn').attr('disabled', true);
-
-                // data for send
-                $('#user_id').val('');
-                $('#currency_id').val('');
-                $('#payment_method_id').val('');
-                $('#amountP').val('');
-
             }
 
             $.post({
@@ -148,20 +140,12 @@
                 },
                 success: function (response) {
                     if (response.booking && response.user) {
-                        $('#username').val(response.user.first_name + ' ' + response.user.last_name);
-                        $('#currency').val(response.booking.currency_code);
+                        
                         $('#UserEmail').val(response.user.email);
                         $('#amount').val(response.booking.total);
-                        $('#paymentMethod').val('DirectBankTransfer');
                         $('#property').val(response.properties[0].name);
+                        $('#user_id').val(response.booking.user_id);
                         $('#submitbtn').attr('disabled', false);
-
-                        // data for send
-                        $('#booking_id').val(response.booking.id);
-                        $('#user_id').val(response.user.id);
-                        $('#currency_id').val(response.currency[0].id);
-                        $('#payment_method_id').val(response.booking.payment_method_id);
-                        $('#amountP').val(response.booking.total);
 
                     } else {
                         alert('Booking or user data not found in response.');

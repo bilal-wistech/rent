@@ -132,10 +132,10 @@ class PayoutsController extends Controller
     {
         // user , payment method , currency,  amount ,
         // $bookings = Bookings::orderBy('id', 'desc')->where('payout_payment', '0')->get();
-        $bookings =  Bookings::where('status' , 'pending')->get();
+        $bookings = Bookings::where('status', 'pending')->get();
         $currency = Currency::all();
         $pMethods = PaymentMethods::all();
-        return view('admin.payouts.create', compact('bookings', 'currency' , 'pMethods'));
+        return view('admin.payouts.create', compact('bookings', 'currency', 'pMethods'));
     }
 
 
@@ -150,23 +150,26 @@ class PayoutsController extends Controller
         if (!$request->isMethod('post')) {
 
             $data['withDrawal'] = Withdrawal::where('id', $request->id)->first();
+            $data['currencies'] = Currency::all();
+            $data['pMethod'] = PaymentMethods::all();
 
             return view('admin.payouts.edit', $data);
         } else {
-
             if ($request->status == 'Success') {
 
-                $withDrawal = Withdrawal::find($request->id);
+                $withDrawal = Withdrawal::find($request->payout_id);
                 $wallet = Wallet::where('user_id', $withDrawal->user_id)->first();
-                $subTotal = $withDrawal->subtotal;
+                $subTotal = $withDrawal->amount;
 
                 if ($withDrawal->currency_id <> $wallet->currency_id) {
                     $subTotal = convert_currency($withDrawal->currency->code, $wallet->currency->code, $withDrawal->subtotal);
                 }
 
                 if ($wallet->balance >= $subTotal) {
-                    $withDrawal->currency_id = $wallet->currency_id;
+                    $withDrawal->currency_id = $request->currency_id;
                     $withDrawal->status = $request->status;
+                    $withDrawal->payment_method_id = $request->payment_method_id;
+                    $withDrawal->account_number = $request->account_number;
                     $withDrawal->amount = $subTotal;
                     $withDrawal->subtotal = 0;
                     $withDrawal->save();
@@ -188,6 +191,18 @@ class PayoutsController extends Controller
                     Common::one_time_message('error', "User doesn't have sufficient balance");
                     return redirect('admin/payouts');
                 }
+                
+            } else {
+
+                $withDrawal = Withdrawal::find($request->payout_id);
+                $subTotal = $withDrawal->amount;
+                $withDrawal->currency_id = $request->currency_id;
+                $withDrawal->payment_method_id = $request->payment_method_id;
+                $withDrawal->account_number = $request->account_number;
+                $withDrawal->amount = $request->amount;
+                $withDrawal->subtotal = 0;
+                $withDrawal->save();
+
             }
 
             Common::one_time_message('success', "Successfully updated");
@@ -307,7 +322,6 @@ class PayoutsController extends Controller
 
     public function asuccess(Request $request)
     {
-        dd($request->all());
         $userId = $request->user_id;
         $userdata = User::find($userId);
         $currencyID = $request->currency_id;
@@ -336,7 +350,7 @@ class PayoutsController extends Controller
         $withdrawal->email = $userdata->email;
         $withdrawal->status = "Success";
 
-        $withdrawal->account_number = $payoutSetting->account_number;
+        $withdrawal->account_number = $request->account_number;
         $withdrawal->bank_name = $payoutSetting->bank_name;
         $withdrawal->swift_code = $payoutSetting->swift_code;
         $withdrawal->amount = $requestedAmount;
@@ -346,11 +360,9 @@ class PayoutsController extends Controller
         $bookingId = $request->booking_id;
         $booking = Bookings::find($bookingId);
         if ($booking) {
-            $booking->payout_payment = '1';
+            $booking->status = 'Accepted';
             $booking->save();
         }
-
-
 
         // $walletMoney->balance               -=  $requestedAmount;
         // $walletMoney->save();
@@ -363,10 +375,10 @@ class PayoutsController extends Controller
 
         } catch (\Exception $e) {
             Common::one_time_message('danger', __('Email was not sent due to :x', ['x' => __($e->getMessage())]));
-            return redirect()->route('payouts');
+            return redirect('admin/payouts');
         }
 
         Common::one_time_message('success', __('Payout has been created successfully.'));
-        return redirect()->route('payouts');
+        return redirect('admin/payouts');
     }
 }
