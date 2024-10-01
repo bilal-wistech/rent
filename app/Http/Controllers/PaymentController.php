@@ -102,10 +102,10 @@ class PaymentController extends Controller
         $currencyDefault    = Currency::getAll()->where('default', 1)->first();
         $price_list         = json_decode(Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests));
         $amount             = round(Common::convert_currency($request->currency, $currencyDefault->code, $price_list->total),2);
-        
+
         $country            = $request->payment_country;
         $message_to_host    = $request->message_to_host;
-       
+
 
         Session::put('amount', $amount);
         Session::put('payment_method', $request->payment_method);
@@ -115,10 +115,10 @@ class PaymentController extends Controller
 
         Session::save();
 
-        if ($request->payment_method) { 
+        if ($request->payment_method) {
           return redirect(route('gateway.pay', (['gateway' => $request->payment_method])));
         } else {
-            
+
                 $data = [
                     'property_id'      => $request->property_id,
                     'checkin'          => $request->checkin,
@@ -134,14 +134,14 @@ class PaymentController extends Controller
                     'country'          => '',
                     'message_to_host'  => $message_to_host
                 ];
-    
+
                 $msg = explode('||', $this->store($data));
                 $code = $msg[0];
                 $errorMessage = $msg[1];
                 Common::one_time_message('success', __('Your request has been sent.'));
                 return redirect('booking/requested?code=' . $code);
 
-        }    
+        }
     }
 
     public function getDataForBooking() {
@@ -191,7 +191,6 @@ class PaymentController extends Controller
         $booking->attachment        = $data['attachment'] ?? null;
         $booking->bank_id           = $data['bank_id'] ?? null;
         $booking->note              = $data['note'] ?? null;
-        $booking->bank_id           = $data['bank_id'] ?? null;
         $booking->total_night       = $data['price_list']->total_nights;
         $booking->per_night         = Common::convert_currency('', $currencyDefault->code, $data['price_list']->property_price);
 
@@ -363,7 +362,7 @@ class PaymentController extends Controller
             $data['paymode']        = 'Bank';
             $booking->status        = 'Processing';
         }
-        
+
         $booking->save();
 
         $errorMessage = '';
@@ -446,10 +445,10 @@ class PaymentController extends Controller
         $instantBookingPaymentConfirm =__(':x Your payment is completed for :y', ['x' => $companyName,'y' => $booking?->properties?->name]);
 
         if ($data['paymode'] == 'Bank') {
-            
+
             $instantBookingConfirm = __(':x : Your booking is confirmed from :y to :z . Admin will approve the booking very soon', ['x' => $companyName,'y' => $booking->start_date, 'z' => $booking->end_date ]);
             $instantBookingPaymentConfirm =__(':x Your payment is completed for :y . Admin will approve the booking very soon', ['x' => $companyName,'y' => $booking?->properties?->name]);
-            
+
         }
 
 
@@ -500,7 +499,7 @@ class PaymentController extends Controller
         $data['results'] = Withdraw::where('user_id', Auth::user()->id)->get();
         return view('payment.withdraws', $data);
     }
-    
+
     public function addBookingPaymentInHostWallet($booking)
     {
         $walletBalance = Wallet::where('user_id', $booking->host_id)->first();

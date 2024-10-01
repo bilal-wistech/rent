@@ -13,7 +13,7 @@
             <div class="box-info">
 
             <table class="table table-borderless f-14">
-              <tbody >
+              <tbody>
                 <tr>
 
                   <th class="text-center" >User name</th>
