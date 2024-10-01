@@ -139,6 +139,24 @@ class PayoutsController extends Controller
     }
 
 
+    public function createpayoutbybookingid($id)
+    {
+        $booking = Bookings::find($id);
+        $user =  User::find($booking->user_id);
+        $accountNumber = PayoutSetting::where('user_id' , $user->id)->get()->first();  
+        if($accountNumber != null)
+        {
+            $accountNumber = $accountNumber->account_number; 
+        } else {
+            $accountNumber = '';
+        }
+        $property = Properties::find($booking->property_id);
+        $currency = Currency::all();
+        $pMethods = PaymentMethods::all();
+        return view('admin.bookings.payoutcreate' , compact('booking' , 'property' , 'currency', 'pMethods' , 'user' , 'accountNumber'));
+    }
+
+
 
     public function edit(Request $request)
     {
@@ -323,7 +341,6 @@ class PayoutsController extends Controller
     public function asuccess(Request $request)
     {
         $userId = $request->user_id;
-        $userdata = User::find($userId);
         $currencyID = $request->currency_id;
         $paymentSettingID = $request->payment_method_id;
         $requestedAmount = $request->amount;
@@ -347,7 +364,7 @@ class PayoutsController extends Controller
         $withdrawal->payment_method_id = '4';
         $withdrawal->uuid = uniqid();
         $withdrawal->subtotal = $requestedAmount;
-        $withdrawal->email = $userdata->email;
+        $withdrawal->email = $request->email;
         $withdrawal->status = "Success";
 
         $withdrawal->account_number = $request->account_number;
@@ -356,14 +373,12 @@ class PayoutsController extends Controller
         $withdrawal->amount = $requestedAmount;
         $withdrawal->save();
 
-
         $bookingId = $request->booking_id;
         $booking = Bookings::find($bookingId);
         if ($booking) {
             $booking->status = 'Accepted';
             $booking->save();
         }
-
         // $walletMoney->balance               -=  $requestedAmount;
         // $walletMoney->save();
 

@@ -130,6 +130,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
 	Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts'])->name('payouts');
 	//Admin Payout routes
 	Route::get('payouts/create', 'PayoutsController@create')->name('payouts.create');
+    Route::get('payouts/create/{id}' , 'PayoutsController@createpayoutbybookingid');
 	Route::post('payouts/create/success' , 'PayoutsController@asuccess')->name('payouts.asuccess');
 	Route::match(array('GET', 'POST'), 'payouts/edit/{id}', 'PayoutsController@edit');
 	Route::match(array('GET', 'POST'), 'payouts/delete/{id}', 'PayoutsController@delete');

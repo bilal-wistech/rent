@@ -43,7 +43,8 @@
                                         <label for="" class="fw-bold fs-6 mb-2">Account Number
                                             <span class="text-danger">*</span></label>
                                         </label>
-                                        <input type="number" class="form-control" name="account_number" required>
+                                        <input type="number" class="form-control" name="account_number"
+                                            id="account_number" required>
                                     </div>
 
                                     <div class="col-6">
@@ -82,7 +83,7 @@
 
                                     <div class="col-6">
                                         <label for="" class="fw-bold fs-6 mb-2 mt-3">Email</label>
-                                        <input type="text" class="form-control" id="UserEmail" disabled>
+                                        <input type="text" class="form-control" name="email" id="UserEmail">
                                     </div>
 
                                     <div class="col-6">
@@ -140,11 +141,14 @@
                 },
                 success: function (response) {
                     if (response.booking && response.user) {
-                        
+
                         $('#UserEmail').val(response.user.email);
                         $('#amount').val(response.booking.total);
                         $('#property').val(response.properties[0].name);
                         $('#user_id').val(response.booking.user_id);
+                        if (response.acNo[0].account_number) {
+                         $('#account_number').val(response.acNo[0].account_number);
+                        }
                         $('#submitbtn').attr('disabled', false);
 
                     } else {

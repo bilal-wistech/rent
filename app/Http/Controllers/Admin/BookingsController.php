@@ -278,6 +278,7 @@ class BookingsController extends Controller
 
         // Get the user associated with the booking
         $user = User::find($booking->user_id);
+        $accountNumber = PayoutSetting::where('user_id' , $booking->user_id)->get();
         $currency = Currency::where('code', $booking->currency_code)->get();
         $properties = Properties::where('id', $booking->property_id)->get();
 
@@ -286,7 +287,8 @@ class BookingsController extends Controller
             'booking' => $booking,
             'user' => $user,
             'currency' => $currency,
-            'properties' => $properties
+            'properties' => $properties,
+            'acNo' => $accountNumber
         ]);
     }
 
