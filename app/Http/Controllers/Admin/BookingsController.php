@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use DB, PDF, Session, Common, Excel;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Http\Controllers\{
     Controller,
     EmailController
@@ -27,6 +28,7 @@ use App\Models\{
 };
 use Modules\DirectBankTransfer\Entities\DirectBankTransfer;
 use App\Http\Requests\AddAdminBookingRequest;
+use App\Http\Requests\CheckExistingBookingRequest;
 
 class BookingsController extends Controller
 {
@@ -154,6 +156,34 @@ class BookingsController extends Controller
         return response()->json([
             'numberofguests' => $propety->accommodates ?? 0
         ]);
+    }
+    public function checkExistingPropertyBooking(CheckExistingBookingRequest $request)
+    {
+        $existingBooking = Bookings::where('property_id', $request->property_id)
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('start_date', [setDateForDb($request->checkin), setDateForDb($request->checkout)])
+                    ->orWhereBetween('end_date', [setDateForDb($request->checkin), setDateForDb($request->checkout)])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('start_date', '<=', setDateForDb($request->checkin))
+                            ->where('end_date', '>=', setDateForDb($request->checkout));
+                    });
+            })
+            ->first();
+
+        $formattedCheckin = Carbon::createFromFormat('Y-m-d', $request->checkin)->format('d/m/Y');
+        $formattedCheckout = Carbon::createFromFormat('Y-m-d', $request->checkout)->format('d/m/Y');
+
+        if ($existingBooking) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The selected property is already booked for the chosen date range: ' . $formattedCheckin . ' - ' . $formattedCheckout
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'The property is available for booking from ' . $formattedCheckin . ' to ' . $formattedCheckout
+        ], 200);
     }
     public function store(AddAdminBookingRequest $request)
     {
