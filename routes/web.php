@@ -300,6 +300,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('bookings', 'BookingsController@index')->middleware(['permission:manage_bookings'])->name('admin.bookings.index');
     Route::get('bookings/create', 'BookingsController@create')->middleware(['permission:manage_bookings'])->name('admin.bookings.create');
     Route::get('bookings/get-number-of-guests/{property_id}', 'BookingsController@getNumberofGuests')->middleware(['permission:manage_bookings'])->name('admin.bookings.get-number-of-guests');
+    Route::post('bookings/check-booking-exists', 'BookingsController@checkExistingPropertyBooking')->middleware(['permission:manage_bookings'])->name('admin.bookings.check-booking-exists');
     Route::post('bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
 
     Route::get('bookings/edit/{id}', 'BookingsController@edit')->middleware(['permission:manage_bookings'])->name('admin.bookings.edit');

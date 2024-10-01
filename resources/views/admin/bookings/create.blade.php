@@ -21,6 +21,7 @@
                                 </div>
                             </div>
                         @endif
+                        <div id="bookingMessage" class="mt-3"></div>
                         <form id="add_bookings" method="post" action="{{ route('admin.bookings.store') }}"
                             class="form-horizontal">
                             @csrf
@@ -40,6 +41,8 @@
                                     <div class="col-sm-6">
                                         <select class="form-control select2-ajax" name="property_id" id="property_id">
                                             <option value="">Select a Property</option>
+                                            <option value="{{ old('property_id') }}" selected>{{ old('property_name') }}
+                                            </option>
                                         </select>
                                         <span class="text-danger">{{ $errors->first('property_id') }}</span>
                                     </div>
@@ -68,7 +71,6 @@
                                         <span class="text-danger">{{ $errors->first('checkout') }}</span>
                                     </div>
                                 </div>
-
                                 <div class="form-group row mt-3 host_id">
                                     <label for="host_id" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
                                         Customer <span class="text-danger">*</span>
@@ -77,6 +79,7 @@
                                     <div class="col-sm-6">
                                         <select class="form-control select2" name="user_id" id="host_id">
                                             <option value="">Select a Customer</option>
+                                            <option value="{{ old('user_id') }}" selected>{{ old('user_name') }}</option>
                                         </select>
                                         <span class="text-danger">{{ $errors->first('user_id') }}</span>
                                     </div>
@@ -96,6 +99,8 @@
                                     <div class="col-sm-6">
                                         <select class="form-control select2" name="number_of_guests" id="number_of_guests">
                                             <option value="">Select Number of Guests</option>
+                                            <option value="{{ old('number_of_guests') }}" selected>
+                                                {{ old('number_of_guests') }}</option>
                                         </select>
                                         <span class="text-danger">{{ $errors->first('number_of_guests') }}</span>
                                     </div>
@@ -311,6 +316,69 @@
                             console.log(error);
                         }
                     });
+                }
+            });
+            let canSubmitForm = false;
+
+            function checkIfAllSelected() {
+                let property_id = $('#property_id').val();
+                let checkin = $('#startDate').val();
+                let checkout = $('#endDate').val();
+
+                if (property_id !== "" && checkin !== "" && checkout !== "") {
+
+                    checkExistingPropertyBooking(property_id, checkin, checkout);
+                }
+            }
+
+            $('#property_id, #startDate, #endDate').on('change', function() {
+                checkIfAllSelected();
+            });
+
+            function checkExistingPropertyBooking(property_id, checkin, checkout) {
+                $.ajax({
+                    url: "{{ route('admin.bookings.check-booking-exists') }}",
+                    type: "POST",
+                    data: {
+                        property_id: property_id,
+                        checkin: checkin,
+                        checkout: checkout,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        let messageBox = $('#bookingMessage');
+                        if (response.status === 'error') {
+                            messageBox.html('<div class="alert alert-danger">' + response.message +
+                                '</div>');
+                            canSubmitForm = false;
+                        } else {
+                            messageBox.html('<div class="alert alert-success">' + response.message +
+                                '</div>');
+                            canSubmitForm = true;
+                        }
+                        setTimeout(function() {
+                            messageBox.fadeOut('slow', function() {
+                                messageBox.html('')
+                                    .show();
+                            });
+                        }, 2500);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(xhr.responseText); // Log any errors
+                    }
+                });
+            }
+            $('#add_bookings').on('submit', function(e) {
+                if (!canSubmitForm) {
+                    e.preventDefault();
+                    $('#bookingMessage').html(
+                        '<div class="alert alert-danger">Please change the check-in or check-out dates to submit the form.</div>'
+                    );
+                    setTimeout(function() {
+                        $('#bookingMessage').fadeOut('slow', function() {
+                            $(this).html('').show();
+                        });
+                    }, 2500);
                 }
             });
         });
