@@ -11,7 +11,9 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Styles -->
+    <script type="text/javascript" src="{{ asset('js/sign-up-login.min.js') }}"></script>
     <link href="/css/app.css" rel="stylesheet">
+
 
     <!-- Scripts -->
     <script>
