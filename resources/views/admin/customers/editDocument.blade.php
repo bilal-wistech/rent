@@ -15,26 +15,24 @@
                       </div>
                     @endif
 
-                    <h4 class="text-center mt-4">Document Detail</h4>
+                    <h4 class="text-center mt-4">{{ $document ? 'Update Document' : 'Add Document' }}</h4>
 
                     <div class="box-body">
-                        <form action="{{ route('document.update', $document) }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ $document? route('document.update',$document) : route('document.store',$document) }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            @method('PUT')
 
+                            @if($document)
+                                @method('PUT')
                             <div class="form-group mt-3 row">
                                 <label class="control-label col-sm-3 mt-2 fw-bold">Uploaded Image</label>
                                 <div class="col-sm-8 d-flex align-items-center">
-                                    @if ($document->image)
                                     <div class="border border-light rounded p-1 me-3">
                                         <img src="{{ Storage::url($document->image) }}" class="document-image" style="height: 60px; width: 60px;">
                                     </div>
-                                    @else
-                                    <span>No image uploaded</span>
-                                    @endif
                                 </div>
                             </div>
-
+                            @endif
+                            <input type="hidden" name="user_id" value="{{ $user->id }}">
                             <div class="form-group mt-3 row">
                                 <label class="control-label col-sm-3 mt-2 fw-bold">New Image</label>
                                 <div class="col-sm-8">
@@ -46,7 +44,7 @@
                             <div class="form-group mt-3 row">
                                 <label class="control-label col-sm-3 mt-2 fw-bold">Expiry Date<span class="text-danger">*</span></label>
                                 <div class="col-sm-8">
-                                    <input type="date" class="form-control" name="expire" id="expiry_date" value="{{ $document->expire }}" required>
+                                    <input type="date" class="form-control" name="expire" id="expiry_date" value="{{ $document ? $document->expire : '' }}" required>
                                 </div>
                             </div>
 
@@ -55,10 +53,10 @@
                                 <div class="col-sm-8">
                                     <div class="d-flex align-items-center mt-3">
                                         <label class="me-3">
-                                            <input type="radio" name="type" value="passport" {{ $document->type == 'passport' ? 'checked' : '' }}> Passport
+                                            <input type="radio" name="type" value="passport" {{ $document && $document->type == 'passport' ? 'checked' : '' }}> Passport
                                         </label>
                                         <label>
-                                            <input type="radio" name="type" value="emirates" {{ $document->type == 'emirates' ? 'checked' : '' }}> Emirates
+                                            <input type="radio" name="type" value="emirates" {{ $document && $document->type == 'emirates' ? 'checked' : '' }}> Emirates
                                         </label>
                                     </div>
                                 </div>
@@ -66,7 +64,7 @@
 
                             <div class="form-group mt-3 row">
                                 <div class="col-sm-8 offset-sm-3 text-end">
-                                    <button type="submit" class="btn btn-info me-3">Update</button>
+                                    <button type="submit" class="btn btn-info me-3">{{ $document ? 'Update' : 'Create' }}</button>
                                 </div>
                             </div>
 

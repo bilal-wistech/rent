@@ -211,7 +211,9 @@ class CustomerController extends Controller
                     ]);
                 }
 
-                return "user is added successfully";
+                return view('admin.customers.view', [
+                   'success'=> "Customer successfully created"
+                ]);
             } catch (\Exception $e) {
                 return "Errorr occur ";
                   }

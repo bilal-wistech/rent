@@ -10,6 +10,12 @@
 			<div class="row">
 				<div class="col-xs-12">
 				<div class="box">
+                    @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                       {{session('success')  }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                    @endif
 					<div class="box-body">
 					<form class="form-horizontal" enctype='multipart/form-data' action="{{ url('admin/customers') }}" method="GET" accept-charset="UTF-8">
 						{{ csrf_field() }}
