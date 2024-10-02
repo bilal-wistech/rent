@@ -146,12 +146,14 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="form-group row mt-3">
-                                    <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">City
+                                <div class="form-group row mt-2">
+                                    <label for="exampleInputEmail1" class="control-label col-sm-3 mt-2 fw-bold">City
                                         <span class="text-danger">*</span></label>
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control f-14" id="city" name="city"
-                                            placeholder="" required>
+                                    <div class="col-sm-6" id="">
+                                        <select class="form-control select2" name="city" id="city">
+                                            <option value="">Select a City</option>
+
+                                        </select>
                                         @if ($errors->has('city'))
                                             <p class="error-tag">{{ $errors->first('city') }}</p>
                                         @endif
@@ -315,7 +317,7 @@
                     $('.flat_no').addClass('d-none');
                 }
             });
-            $('#country').select2();
+            $('#country, #city').select2();
             $('#host_id').select2({
                 ajax: {
                     url: '{{ route('admin.bookings.form_customer_search') }}',
@@ -342,6 +344,36 @@
                 },
                 placeholder: 'Select a Landlord',
                 minimumInputLength: 0,
+            });
+            $('#country').on('change', function() {
+                var selectedCountry = $(this).val();
+
+                if (selectedCountry) {
+                    $.ajax({
+                        url: '/admin/properties/cities-by-country/' +
+                        selectedCountry,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.cities) {
+                                $('#city').empty();
+
+                                $('#city').append('<option value="">Select a City</option>');
+
+                                $.each(response.cities, function(key, city) {
+                                    $('#city').append('<option value="' + city.id +
+                                        '">' + city.name + '</option>');
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Error: ', error);
+                        }
+                    });
+                } else {
+
+                    $('#city').empty().append('<option value="">Select a City</option>');
+                }
             });
         });
     </script>

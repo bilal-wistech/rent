@@ -42,7 +42,8 @@ use App\Models\{
     User,
     Settings,
     Bookings,
-    Currency
+    Currency,
+    City
 };
 
 class PropertiesController extends Controller
@@ -151,7 +152,12 @@ class PropertiesController extends Controller
         $data['countries'] = Country::orderBy('name', 'ASC')->pluck('name', 'short_name');
         return view('admin.properties.add', $data);
     }
-
+    public function getCitiesByCountry($country)
+    {
+        $country = Country::where('short_name', $country)->first();
+        $cities = City::where('country_id', $country->id)->get();
+        return response()->json(['cities' => $cities]);
+    }
     public function listing(Request $request, CalendarController $calendar)
     {
 

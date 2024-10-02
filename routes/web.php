@@ -96,6 +96,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
 
     Route::get('properties', 'PropertiesController@index')->middleware(['permission:properties']);
     Route::match(array('GET', 'POST'), 'add-properties', 'PropertiesController@add')->middleware(['permission:add_properties']);
+    Route::get('properties/cities-by-country/{country}', 'PropertiesController@getCitiesByCountry')->name('cities-by-country');
     Route::get('properties/property_list_csv', 'PropertiesController@propertyCsv');
     Route::get('properties/property_list_pdf', 'PropertiesController@propertyPdf');
 
