@@ -17,12 +17,13 @@
                     </div>
                     <form action="{{ route('emergencycontacts.store') }}" method="POST">
                         @csrf
-
                         <div class="box-body" id="emergencyContactsContainer">
                             @foreach($emergencycontact as $contact)
+                            <input type="hidden" name="user_id" value="{{ $contact->user_id }}">
+
                                 <div class="emergency-contact-group">
                                     <input type="hidden" name="emergency_contact_id[]" value="{{ $contact->id }}">
-                                    <input type="hidden" name="id" value="{{ $user->id }}">
+
 
                                     <div class="form-group mt-3 row">
                                         <label class="control-label col-sm-3 mt-2 fw-bold">Name<span class="text-danger">*</span></label>
