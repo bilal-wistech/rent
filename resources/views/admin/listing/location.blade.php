@@ -79,6 +79,22 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">Building</label>
+                                        <input type="text" name="building" id="building"
+                                            value="{{ $result->property_address->building }}" class="form-control f-14">
+                                        <span class="text-danger">{{ $errors->first('building') }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">Flat No</label>
+                                        <input type="text" name="flat_no" id="flat_no"
+                                            value="{{ $result->property_address->flat_no }}" class="form-control f-14">
+                                        <span class="text-danger">{{ $errors->first('flat_no') }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
                                         <label class="label-large fw-bold">City / Town / District <span
                                                 class="text-danger">*</span></label>
                                         <input type="text" name="city" id="city"
@@ -88,10 +104,11 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-8 mb20">
-                                        <label class="label-large fw-bold">State / Province / County / Region <span
+                                        <label class="label-large fw-bold">State / Province / Country / Region <span
                                                 class="text-danger">*</span></label>
-                                        <input type="text" name="state" id="state"
-                                            value="{{ $result->property_address->state }}" class="form-control f-14">
+                                        <input type="text" name="state" id=""
+                                            value="{{ $result->property_address->state ?? ($result->property_address->country ?? '') }}"
+                                            class="form-control f-14">
                                         <span class="text-danger">{{ $errors->first('state') }}</span>
                                     </div>
                                 </div>
