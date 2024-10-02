@@ -78,7 +78,7 @@
 {!! $dataTable->scripts() !!}
 <script type="text/javascript">
     'use strict'
-    
+
     var sessionDate  = '{{strtoupper(Session::get('date_format_type'))}}';
     var user_id      = '{{ $user->id }}';
     var page         = '';

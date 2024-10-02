@@ -135,7 +135,7 @@
         var tel_error = '{{ __("Please enter a valid International Phone Number.") }}'
         var token = "{{ csrf_token() }}";
     </script>
-    
+
     <script src="{{ asset('backend/js/customer_edit.min.js') }}"></script>
 @endsection
-    
+

@@ -42,7 +42,8 @@ use App\Models\{
     User,
     Settings,
     Bookings,
-    Currency
+    Currency,
+    City
 };
 
 class PropertiesController extends Controller
@@ -69,21 +70,33 @@ class PropertiesController extends Controller
 
     public function add(Request $request)
     {
+        // dd($request);
         if ($request->isMethod('post')) {
             $rules = array(
                 'property_type_id' => 'required',
                 'space_type' => 'required',
                 'accommodates' => 'required',
-                'map_address' => 'required',
+                'name' => 'required',
                 'host_id' => 'required',
+                'country' => 'required',
+                'area' => 'required',
+                'city' => 'required',
             );
-
+            if ($request->property_type_id == 1) {
+                $rules['building'] = 'required';
+                $rules['flat_no'] = 'required';
+            }
             $fieldNames = array(
                 'property_type_id' => 'Home Type',
                 'space_type' => 'Room Type',
                 'accommodates' => 'Accommodates',
-                'map_address' => 'City',
-                'host_id' => 'Host'
+                'name' => 'Property Name',
+                'host_id' => 'Host',
+                'building' => 'Building',
+                'flat_no' => 'Flat Number',
+                'country' => 'Country',
+                'area' => 'Area',
+                'city' => 'City',
             );
 
             $validator = Validator::make($request->all(), $rules);
@@ -94,7 +107,7 @@ class PropertiesController extends Controller
             } else {
                 $property = new Properties;
                 $property->host_id = $request->host_id;
-                $property->name = SpaceType::find($request->space_type)->name . ' in ' . $request->city;
+                $property->name = SpaceType::find($request->space_type)->name . ' in ' . $request->name;
                 $property->property_type = $request->property_type_id;
                 $property->space_type = $request->space_type;
                 $property->accommodates = $request->accommodates;
@@ -111,6 +124,9 @@ class PropertiesController extends Controller
                 $property_address->postal_code = $request->postal_code;
                 $property_address->latitude = $request->latitude;
                 $property_address->longitude = $request->longitude;
+                $property_address->area = $request->area;
+                $property_address->building = $request->building;
+                $property_address->flat_no = $request->flat_no;
                 $property_address->save();
 
                 $property_price = new PropertyPrice;
@@ -133,9 +149,15 @@ class PropertiesController extends Controller
         $data['property_type'] = PropertyType::where('status', 'Active')->pluck('name', 'id');
         $data['space_type'] = SpaceType::where('status', 'Active')->pluck('name', 'id');
         $data['users'] = User::where('status', 'Active')->get();
+        $data['countries'] = Country::orderBy('name', 'ASC')->pluck('name', 'short_name');
         return view('admin.properties.add', $data);
     }
-
+    public function getCitiesByCountry($country)
+    {
+        $country = Country::where('short_name', $country)->first();
+        $cities = City::where('country_id', $country->id)->get();
+        return response()->json(['cities' => $cities]);
+    }
     public function listing(Request $request, CalendarController $calendar)
     {
 
@@ -225,7 +247,6 @@ class PropertiesController extends Controller
                     'country' => 'required',
                     'city' => 'required',
                     'state' => 'required',
-                    'latitude' => 'required|not_in:0',
                     'area' => 'required',
                 );
 
@@ -234,7 +255,6 @@ class PropertiesController extends Controller
                     'country' => 'Country',
                     'city' => 'City',
                     'state' => 'State',
-                    'latitude' => 'Map',
                     'area' => 'Area',
                 );
 
@@ -258,6 +278,8 @@ class PropertiesController extends Controller
                     $property_address->country = $request->country;
                     $property_address->postal_code = $request->postal_code;
                     $property_address->area = $request->area;
+                    $property_address->building = $request->building;
+                    $property_address->flat_no = $request->flat_no;
                     $property_address->save();
 
                     $property_steps = PropertySteps::where('property_id', $property_id)->first();
@@ -422,7 +444,7 @@ class PropertiesController extends Controller
         } elseif ($step == 'booking') {
             if ($request->isMethod('post')) {
 
-                $property_steps = PropertySteps::where('property_id', $property_id)->first();
+                $property_steps          = PropertySteps::where('property_id', $property_id)->first();
                 $property_steps->booking = 1;
                 $property_steps->save();
 
