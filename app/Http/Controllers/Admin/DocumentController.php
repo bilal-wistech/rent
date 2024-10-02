@@ -23,9 +23,34 @@ class DocumentController extends Controller
 
 
     public function store(Request $request)
-    {
-        //
+{
+    $request->validate([
+        'image' => 'required|image|mimes:jpeg,png,jpg',
+        'type' => 'required',
+        'expire' => 'required|date'
+    ]);
+
+    if ($request->hasFile('image')) {
+        $image = $request->file('image');
+        $filename = time() . '.' . $image->getClientOriginalExtension();
+        $path = $image->storeAs('documents', $filename, 'public');
     }
+
+    $document = Document::create([
+        'user_id' => $request->user_id,
+        'image' => $path,
+        'expire' => $request->expire,
+        'type' => $request->type,
+    ]);
+
+    return redirect()->back()->with([
+        'success' => 'Document created successfully.',
+        'user' => User::findOrFail($request->user_id),
+        'document' => $document,
+        'documentActive' => 'active'
+    ]);
+}
+
 
 
     public function show($id)
@@ -36,16 +61,18 @@ class DocumentController extends Controller
 
     public function edit($id)
     { $document = Document::where('user_id', $id)->first();
-      if ($document) {
         $user = User::findOrFail($id);
+      if ($document) {
         return view('admin.customers.editDocument', ['document' => $document, 'user' => $user, 'documentActive' =>'active',]);
         }
-   else {
-            abort(404, 'Document not found for this user.');
-       }
+        else {
+            return view('admin.customers.editDocument', [
+                'document' => null,
+                'user' => $user,
+                'documentActive' => 'active',
+            ]);
+        }
     }
-
-
 
     public function update(Request $request, Document $document)
     {
@@ -79,7 +106,7 @@ class DocumentController extends Controller
 
 
 
-    public function destroy($id)
+  public function destroy($id)
     {
         //
     }
