@@ -266,10 +266,10 @@ class AdminController extends Controller
 
                 if (Auth::guard('admin')->attempt(['email' => trim($request['email']), 'password' => trim($request['password'])])) {
 
-                    if (n_as_k_c()) {
-                        Session::flush();
-                        return view('vendor.installer.errors.admin');
-                    }
+                    // if (n_as_k_c()) {
+                    //     Session::flush();
+                    //     return view('vendor.installer.errors.admin');
+                    // }
 
                     $pref   = Settings::getAll()->where('type', 'preferences');
                     $prefer = [];

@@ -40,9 +40,11 @@ use App\Models\{
     Accounts,
     Country,
     Bookings,
+
     Messages
 };
-
+use App\Models\Document;
+use App\Models\EmergencyContact;
 class CustomerController extends Controller
 {
 
@@ -110,9 +112,11 @@ class CustomerController extends Controller
 
     public function add(Request $request, EmailController $email_controller)
     {
+        //
         if (! $request->isMethod('post')) {
             return view('admin.customers.add');
         } elseif ($request->isMethod('post')) {
+            // dd($request);
             $rules = array(
                 'first_name'    => 'required|max:255',
                 'last_name'     => 'required|max:255',
@@ -126,10 +130,10 @@ class CustomerController extends Controller
                 'email'         => 'Email',
                 'password'      => 'Password'
             );
-
+            // dd($fieldNames);
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
-
+            // dd($validator->setAttributeNames($fieldNames));
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput();
             } else {
@@ -145,29 +149,80 @@ class CustomerController extends Controller
                 $user->default_country = isset($request->default_country) ? $request->default_country : NULL;
                 $user->carrier_code    = isset($request->carrier_code) ? $request->carrier_code : NULL;
                 $user->formatted_phone = isset($request->formatted_phone) ? $request->formatted_phone : NULL;
-                  $user->save();
-
+                $user->save();
+                // dd($user);
 
                 $user_verification           = new UsersVerification;
                 $user_verification->user_id  =   $user->id;
                 $user_verification->save();
+                //dd($user);
                 $this->wallet($user->id);
-                $errorMessage = '';
+
+
+                // $errorMessage = '';
+                // try {
+
+                //     $email_controller->welcome_email($user);
+
+                // } catch (\Exception $e) {
+
+                //     $errorMessage = ' Email was not sent due to '.$e->getMessage();
+
+                // }
+
+              //  Common::one_time_message('success', 'Added Successfully.'.''./* $errorMessage */);
+            // return $user;
+            //Storing document
                 try {
+                    $request->validate([
+                        'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Validate image file type and size
+                        'expire' => 'required|date',
+                        'type' => 'required|string|max:255',
+                    ]);
+                    if ($request->hasFile('image')) {
+                        $image = $request->file('image');
+                        $filename = time() . '.' . $image->getClientOriginalExtension();
+                        $path = $image->storeAs('documents', $filename, 'public');}
 
-                    $email_controller->welcome_email($user);
 
-                } catch (\Exception $e) {
 
-                    $errorMessage = ' Email was not sent due to '.$e->getMessage();
+                $document = Document::create([
+                    'user_id' => $user->id,
+                    'image' => $path,
+                    'expire' => $request->expire,
+                    'type' => $request->type,
+                ]);
 
+            } catch (\Exception $e) {
+                return "Error storing document: " . $e->getMessage();
+            }
+            try {
+                $request->validate([
+                    'emergency_contact_name.*' => 'required|string|max:255',
+                    'emergency_contact_relation.*' => 'required|string|max:255',
+                    'emergency_contact_number.*' => 'required|string|max:30',
+                ]);
+                for ($i = 0; $i < count($request->emergency_contact_name); $i++) {
+                    EmergencyContact::create([
+                        'user_id' => $user->id,
+                        'name' => $request->emergency_contact_name[$i],
+                        'relation' => $request->emergency_contact_relation[$i],
+                        'contact_number' => $request->emergency_contact_number[$i],
+                    ]);
                 }
 
-                Common::one_time_message('success', 'Added Successfully.'.''.$errorMessage);
-                return redirect('admin/customers');
-            }
+                return "user is added successfully";
+            } catch (\Exception $e) {
+                return "Errorr occur ";
+                  }
+
+      // return redirect('admin/customers');
+
+
+        }
         }
     }
+
 
     public function ajaxCustomerAdd(Request $request, EmailController $email_controller)
     {

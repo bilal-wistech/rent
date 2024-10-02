@@ -422,7 +422,7 @@ class PropertiesController extends Controller
         } elseif ($step == 'booking') {
             if ($request->isMethod('post')) {
 
-                $property_steps = PropertySteps::where('property_id', $property_id)->first();
+                $property_steps          = PropertySteps::where('property_id', $property_id)->first();
                 $property_steps->booking = 1;
                 $property_steps->save();
 

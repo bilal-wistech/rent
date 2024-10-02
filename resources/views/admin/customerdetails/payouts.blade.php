@@ -62,13 +62,13 @@
 @push('scripts')
 <script src="{{ asset('backend/plugins/DataTables-1.10.18/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('backend/plugins/Responsive-2.2.2/js/dataTables.responsive.min.js') }}"></script>
-{!! $dataTable->scripts() !!} 
-@endpush 
+{!! $dataTable->scripts() !!}
+@endpush
 
 @section('validate_script')
 	<script type="text/javascript">
 		'use strict'
-		
+
 		var sessionDate  = '{{ strtoupper(Session::get('date_format_type')) }}';
 		var user_id      = '{{ $user?->id }}';
 		var page      	 = 'customer_payout';
