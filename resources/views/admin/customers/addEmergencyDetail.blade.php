@@ -23,8 +23,9 @@
 
 
                         <div class="box-body" id="emergencyContactsContainer">
+                            <input type="hidden" name="user_id" value="{{ $user->id }}">
                             <div class="emergency-contact-group">
-                                <input type="hidden" name="user_id" value="{{ $user->id }}">
+
 
                                 <div class="form-group mt-3 row">
                                     <label class="control-label col-sm-3 mt-2 fw-bold">Name<span class="text-danger">*</span></label>
