@@ -211,9 +211,8 @@ class CustomerController extends Controller
                     ]);
                 }
 
-                return view('admin.customers.view', [
-                   'success'=> "Customer successfully created"
-                ]);
+                Common::one_time_message('success', 'Customer Created Successfully');
+                    return redirect('admin/customers');
             } catch (\Exception $e) {
                 return "Errorr occur ";
                   }

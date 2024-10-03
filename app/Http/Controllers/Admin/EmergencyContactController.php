@@ -71,7 +71,8 @@ class EmergencyContactController extends Controller
                 [
                     'name' => $name,
                     'relation' => $relations[$index],
-                    'contact_number' => $contact_numbers[$index]
+                    'contact_number' => $contact_numbers[$index],
+                    'user_id' => $request->user_id
                 ]
             );
         }
@@ -79,9 +80,10 @@ class EmergencyContactController extends Controller
 
         return redirect()->back()->with([
             'emergencyActive' => 'active',
-            'success' => 'Emergency contacts updated successfully.',
+            'success' => 'Emergency contact information has been saved successfully.',
             'user' => $user,
         ]);
+
     }
 
 
@@ -96,6 +98,7 @@ class EmergencyContactController extends Controller
 {
     $emergencycontact = EmergencyContact::where('user_id', $id)->get();
     $user = User::findOrFail($id);
+
     if ($emergencycontact->isNotEmpty()) {
         $user = User::findOrFail($id);
         return view('admin.customers.editEmergencyContacts', [
@@ -105,13 +108,14 @@ class EmergencyContactController extends Controller
         ]);
           }
          else {
+            $user = User::findOrFail($id);
             return view('admin.customers.addEmergencyDetail', [
                 'user' => $user,
                 'emergencyActive' => 'active'
             ]);
 
         }
-}
+ }
 
 
 

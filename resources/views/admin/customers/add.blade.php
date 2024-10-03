@@ -11,6 +11,12 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="box">
+                        @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                           {{session('success')  }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                        @endif
                         <h4 class="text-center mt-4">Customer Detail</h4>
                         <form class="form-horizontal" action="{{ url('admin/add-customer') }}" id="add_customer" method="post"
                         enctype="multipart/form-data"  name="add_customer" accept-charset='UTF-8'>
