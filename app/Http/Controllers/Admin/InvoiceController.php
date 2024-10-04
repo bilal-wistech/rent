@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Properties;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\DataTables\InvoicesDataTable;
+use Illuminate\Support\Facades\Session;
 
 class InvoiceController extends Controller
 {
@@ -12,9 +16,64 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(InvoicesDataTable $dataTable)
     {
-        //
+        $data['from'] = isset(request()->from) ? request()->from : null;
+        $data['to'] = isset(request()->to) ? request()->to : null;
+
+        if (isset(request()->property)) {
+            $data['properties'] = Properties::where('properties.id', request()->property)->select('id', 'name')->get();
+        } else {
+            $data['properties'] = null;
+        }
+        if (isset(request()->customer)) {
+            $data['customers'] = User::where('users.id', request()->customer)->select('id', 'first_name', 'last_name')->get();
+        } else {
+            $data['customers'] = null;
+        }
+
+        if (!empty(request()->btn) || !empty(request()->status) || !empty(request()->from) || !empty(request()->property) || !empty(request()->customer)) {
+
+            $status = request()->status;
+            $from = request()->from;
+            $to = request()->to;
+            if (isset(request()->property)) {
+                $property = request()->property;
+            } else {
+                $property = null;
+            }
+
+            if (isset(request()->customer)) {
+                $customer = request()->customer;
+            } else {
+                $customer = null;
+            }
+        } else {
+            $status = null;
+            $property = null;
+            $customer = null;
+            $from = null;
+            $to = null;
+        }
+
+        if (n_as_k_c()) {
+            Session::flush();
+            return view('vendor.installer.errors.admin');
+        }
+
+
+        if (isset(request()->reset_btn)) {
+            $data['from'] = null;
+            $data['to'] = null;
+            $data['allstatus'] = null;
+            $data['allproperties'] = null;
+            $data['allcustomers'] = null;
+            return $dataTable->render('admin.invoices.index', $data);
+        }
+        isset(request()->property) ? $data['allproperties'] = request()->property : $data['allproperties'] = '';
+        isset(request()->customer) ? $data['allcustomers'] = request()->customer : $data['allcustomers'] = '';
+        isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
+        return $dataTable->render('admin.invoices.index', $data);
     }
 
     /**

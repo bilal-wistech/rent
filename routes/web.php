@@ -134,6 +134,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
 	Route::get('booking/need_pay_account/{id}/{type}', 'BookingsController@needPayAccount');
 	Route::get('booking/booking_list_csv', 'BookingsController@bookingCsv');
 	Route::get('booking/booking_list_pdf', 'BookingsController@bookingPdf');
+    Route::get('invoices', 'InvoiceController@index')->middleware(['permission:manage_invoices'])->name('admin.invoices.index');
 	Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts'])->name('payouts');
 	//Admin Payout routes
 	Route::get('payouts/create', 'PayoutsController@create')->name('payouts.create');
