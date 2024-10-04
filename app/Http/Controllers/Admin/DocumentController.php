@@ -12,13 +12,24 @@ class DocumentController extends Controller
 
     public function index()
     {
-        //
+
+        return view('admin.customers.addDocument', [ 'documentActive' =>'active',]);
+
     }
 
 
-    public function create()
+
+    public function create(Request $request)
     {
-        //
+        $document = Document::where('id', $request->id)->first();
+        $user = User::find($document->user_id);
+         return view('admin.customers.editDocument')->with([
+            'documentActive' => 'active',
+            'user'=>$user,
+            'document' => $document,
+            'success' => 'Emergency contact information has been saved successfully.',
+
+        ]);
     }
 
 
@@ -42,11 +53,11 @@ class DocumentController extends Controller
         'expire' => $request->expire,
         'type' => $request->type,
     ]);
-
-    return redirect()->back()->with([
+    $documents = Document::where('user_id', $request->user_id)->get();
+    return view('admin.customers.viewDocument')->with([
         'success' => 'Document created successfully.',
         'user' => User::findOrFail($request->user_id),
-        'document' => $document,
+        'document' => $documents,
         'documentActive' => 'active'
     ]);
 }
@@ -55,33 +66,33 @@ class DocumentController extends Controller
 
     public function show($id)
     {
-        //
+        $document = Document::where('user_id', $id)->get();
+        $user = User::findOrFail($id);
+      if ($document) {
+        return view('admin.customers.viewDocument', ['document' => $document, 'user' => $user, 'documentActive' =>'active',]);
+        }
     }
 
 
     public function edit($id)
-    { $document = Document::where('user_id', $id)->first();
+    {
         $user = User::findOrFail($id);
-      if ($document) {
-        return view('admin.customers.editDocument', ['document' => $document, 'user' => $user, 'documentActive' =>'active',]);
-        }
-        else {
-            return view('admin.customers.editDocument', [
-                'document' => null,
+
+          return view('admin.customers.addDocument', [
                 'user' => $user,
                 'documentActive' => 'active',
             ]);
-        }
+
     }
 
-    public function update(Request $request, Document $document)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'image' => 'nullable|image|mimes:jpeg,png,jpg',
             'type' => 'required',
             'expire' => 'required|date'
         ]);
-        $doc = Document::find($document->id);
+        $doc = Document::find($id);
         $doc->type = $request->type;
         $doc->expire = $request->expire;
         if ($request->hasFile('image')) {
@@ -94,7 +105,7 @@ class DocumentController extends Controller
             $doc->image = $path;
         }
         $doc->save();
-        $user = User::findOrFail($document->user_id);
+        $user = User::findOrFail($doc->user_id);
         return redirect()->back()->with([
             'success' => 'Document updated successfully.',
             'user' => $user,
@@ -106,8 +117,26 @@ class DocumentController extends Controller
 
 
 
-  public function destroy($id)
+    public function destroy($id)
     {
-        //
+        $document = Document::find($id);
+
+
+        if ($document) {
+            $user = User::find($document->user_id);
+           if ($document->image) {
+                Storage::delete($document->image);
+           }
+            $document->delete();
+
+            return redirect()->back()->with([
+                'success' => 'Document deleted successfully.',
+                'user' => $user
+            ]); } else {
+
+            return redirect()->back()->with('error', 'Document not found.');
+        }
+
     }
+
 }
