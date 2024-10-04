@@ -30,6 +30,7 @@ use Modules\DirectBankTransfer\Entities\DirectBankTransfer;
 use App\Models\PaymentMethods;
 use App\Http\Requests\AddAdminBookingRequest;
 use App\Http\Requests\CheckExistingBookingRequest;
+use App\Models\Invoice;
 
 class BookingsController extends Controller
 {
@@ -227,13 +228,25 @@ class BookingsController extends Controller
                 'transaction_id' => '',
                 'payment_method_id' => '',
             ]);
+            Invoice::create([
+                'property_id' => $property->id,
+                'customer_id' => $request->user_id,
+                'booking_id' => $booking->id,
+                'currency_code' => $currencyDefault->code,
+                'created_by' => $request->booking_added_by ?? 1,
+                'invoice_date' => Carbon::now(),
+                'due_date' => Carbon::now()->addDays(5),
+                'description' => 'Booking invoice for ' . $property->name,
+                'sub_total' => Common::convert_currency('', $currencyDefault->code, $priceData->subtotal),
+                'grand_total' => Common::convert_currency('', $currencyDefault->code, $priceData->total),
+            ]);
             DB::commit();
             Common::one_time_message('success', 'Booking Added Successfully');
             return redirect('admin/bookings');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Common::one_time_message('error', 'Failed to add booking. Please try again.');
+            Common::one_time_message('error', 'Failed to add booking. Please try again. ' . $e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
