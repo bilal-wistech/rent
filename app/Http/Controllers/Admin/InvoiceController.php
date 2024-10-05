@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Invoice;
 use App\Models\User;
 use App\Models\Properties;
 use Illuminate\Http\Request;
@@ -105,7 +106,8 @@ class InvoiceController extends Controller
      */
     public function show($id)
     {
-        //
+        $invoice = Invoice::findOrFail($id);
+        return view('admin.invoices.show', compact('invoice'));
     }
 
     /**

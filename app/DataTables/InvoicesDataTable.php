@@ -38,7 +38,7 @@ class InvoicesDataTable extends DataTable
                 return dateFormat($invoices->created_at);
             })
             ->addColumn('action', function ($invoices) {
-                return '<a href="' . url('admin/bookings/detail/' . $invoices->id) . '" class="btn btn-xs btn-primary" title="Detail View"><i class="fa fa-share"></i></a>&nbsp;' .
+                return '<a href="' . url('admin/invoices/show/' . $invoices->id) . '" class="btn btn-xs btn-primary" title="Show Invoice"><i class="fa fa-share"></i></a>&nbsp;' .
                     '<a href="' . url('admin/bookings/edit/' . $invoices->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>&nbsp;';
 
             })
