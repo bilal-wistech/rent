@@ -139,6 +139,7 @@
                                         {{ \Carbon\Carbon::parse($invoice->booking->start_date)->format('m-d-Y') }}</p>
                                     <p><strong>Check Out:</strong>
                                         {{ \Carbon\Carbon::parse($invoice->booking->end_date)->format('m-d-Y') }}</p>
+                                    <p><strong>Total Nights:</strong> {{ $invoice->booking->total_night }}</p>
                                     <p><strong>Guests:</strong> {{ $invoice->booking->guest }}</p>
                                 </div>
 
@@ -167,7 +168,7 @@
                                 <table class="table">
                                     <tr>
                                         <th>Per Night Charges:</th>
-                                        <td>{!! $invoice->booking->currency->symbol . ' ' . $invoice->booking->per_night !!}</td>
+                                        <td>{!! $invoice->booking->currency->symbol . ' ' . $invoice->booking->per_night !!} X {{ $invoice->booking->total_night }}</td>
                                     </tr>
                                     <tr>
                                         <th>Cleaning Charges:</th>
