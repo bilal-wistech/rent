@@ -37,6 +37,7 @@ use App\Models\{
     PaymentMethods,
     PayoutSetting,
     Bookings,
+    Admin
 
 };
 
@@ -132,10 +133,12 @@ class PayoutsController extends Controller
     {
         // user , payment method , currency,  amount ,
         // $bookings = Bookings::orderBy('id', 'desc')->where('payout_payment', '0')->get();
-        $bookings = Bookings::where('status', 'pending')->get();
+        // $bookings = Bookings::where('status', 'pending')->get();
+        $users = User::all();
         $currency = Currency::all();
         $pMethods = PaymentMethods::all();
-        return view('admin.payouts.create', compact('bookings', 'currency', 'pMethods'));
+        $admin =  Admin::all();
+        return view('admin.payouts.create', compact('users', 'currency', 'pMethods' , 'admin'));
     }
 
 

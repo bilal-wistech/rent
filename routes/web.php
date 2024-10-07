@@ -143,7 +143,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
 		Route::get('reviews/review_search', 'ReviewsController@searchReview');
 		Route::get('reviews/review_list_csv', 'ReviewsController@reviewCsv');
 		Route::get('reviews/review_list_pdf', 'ReviewsController@reviewPdf');
-
 	});
 
 	// Route::get('reports', 'ReportsController@index')->middleware(['permission:manage_reports']);

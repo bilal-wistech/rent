@@ -11,98 +11,153 @@
         </h1>
         @include('admin.common.breadcrumb')
     </section>
-
     <!-- Main content -->
     <section class="content">
         <div class="row">
             <!-- right column -->
             <div class="col-md-12">
                 <!-- Horizontal Form -->
-                <div class="box">
-                    <form action="{{ route('payouts.asuccess') }}" method="post">
-                        @csrf
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label for="" class="fs-6 fw-bold mb-2">Select User
-                                            <span class="text-danger">*</span></label>
-                                        <select name="booking_id" class="form-control" required id="SelectBooking">
-                                            <option value="" class="form-control"> --Select-- </option>
-                                            @foreach ($bookings as $list)
-                                                <option value="{{ $list->id }}">
-                                                    {{ $list->users->first_name . ' ' . $list->users->last_name  }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="row mt-3" id="data-section">
-                                    <div class="col-6">
-                                        <label for="" class="fw-bold fs-6 mb-2">Account Number
-                                            <span class="text-danger">*</span></label>
-                                        </label>
-                                        <input type="number" class="form-control" name="account_number"
-                                            id="account_number" required>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <label for="" class="fw-bold fs-6 mb-2">Currency
-                                            <span class="text-danger">*</span></label>
-                                        </label>
-                                        <select name="currency_id" id="" class="form-control" required>
-                                            <option value="">
-                                                --Select--
+                <form action="{{ route('payouts.asuccess') }}" method="post">
+                    @csrf
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header mb-2 bg-white d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold mt-2">Payment Details</h6>
+                            <p class="text-end text-success border border-1 border-success p-1 mb-2">
+                                RECEIPENT NUMBER : @php
+                                    $numbers = mt_rand(1, 3000);
+                                   @endphp
+                                {{ $numbers }}
+                            </p>
+                        </div>
+                        <div class="card-body ps-4 pr-4">
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="" class="fs-6 fw-bold mb-2">Customers
+                                        <span class="text-danger">*</span></label>
+                                    <select name="booking_id" class="form-control" required id="SelectBooking">
+                                        <option value="" class="form-control"> --Select-- </option>
+                                        @foreach ($users as $list)
+                                            <option value="{{ $list->id }}">
+                                                {{ $list->first_name . ' ' . $list->last_name  }}
                                             </option>
-                                            @foreach($currency as $list)
-                                                <option value="{{ $list->id }}"> {{ $list->name }} {!! $list->symbol !!}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="col-6 mt-2">
-                                        <label for="" class="fw-bold fs-6 mb-2">Property</label>
-                                        <input type="text" class="form-control" id="property" disabled>
-                                    </div>
-
-                                    <div class="col-6 mt-2">
-                                        <label for="" class="fw-bold fs-6 mb-2">Payment Method
-                                            <span class="text-danger">*</span></label>
-                                        </label>
-                                        <select name="payment_method_id" class="form-control" required>
-                                            <option value="" class="form-control"> --Select-- </option>
-                                            @foreach ($pMethods as $list)
-                                                <option value="{{ $list->id }}">
-                                                    {{  $list->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <label for="" class="fw-bold fs-6 mb-2 mt-3">Email</label>
-                                        <input type="text" class="form-control" name="email" id="UserEmail">
-                                    </div>
-
-                                    <div class="col-6">
-                                        <label for="" class="fw-bold fs-6 mb-2 mt-3">Amount Recieved
-                                            <span class="text-danger">*</span></label>
-                                        </label>
-                                        <input type="text" class="form-control" id="amount" name="amount" required>
-                                        <input type="hidden" name="user_id" id="user_id">
-                                    </div>
+                                        @endforeach
+                                    </select>
                                 </div>
-                            </div>
 
-                            <div class="card-footer border-0">
-                                <button type="submit" id="submitbtn" class="btn btn-sm btn-success float-right"
-                                    disabled>Payout</button>
+                                <div class="col-3">
+                                    <label for="" class="fw-bold fs-6 mb-2">Owner
+                                        <span class="text-danger">*</span></label>
+                                    </label>
+                                    <select type="number" class="form-control" name="account_number" id="account_number"
+                                        required>
+                                        <option value="">--Select--</option>
+                                        @foreach($admin as $list)
+                                            <option value="<?= $list->id ?>">{{ $list->username  }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+
+                                <div class="col-3">
+                                    <label for="" class="fw-bold fs-6 mb-2">Date
+                                        <span class="text-danger">*</span></label>
+                                    </label>
+                                    <input type="date" class="form-control" name="account_number" id="account_number"
+                                        required>
+                                </div>
+
+                                <div class="col-3">
+                                    <label for="" class="fw-bold fs-6 mb-2">Amount
+                                        <span class="text-danger">*</span></label>
+                                    </label>
+                                    <input type="number" class="form-control" name="account_number" id="account_number"
+                                        required>
+                                </div>
+
+                                <div class="col-3 mt-3">
+                                    <label for="" class="fw-bold fs-6 mb-2">Slip No
+                                        <span class="text-danger">*</span></label>
+                                    </label>
+                                    <input type="number" class="form-control" name="account_number" id="account_number"
+                                        required>
+                                </div>
+
+                                <div class="col-3 mt-3">
+                                    <label for="" class="fw-bold fs-6 mb-2">Type
+                                        <span class="text-danger">*</span></label>
+                                    </label>
+                                    <select name="" id="" class="form-control">
+                                        <option value=""> --Select-- </option>
+                                        @foreach ($pMethods as $list)
+                                            <option value="{{ $list->id }}">{{ $list->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-3 mt-3">
+                                    <label for="" class="fw-bold fs-6 mb-2">Currency
+                                        <span class="text-danger">*</span></label>
+                                    </label>
+                                    <select name="" id="" class="form-control">
+
+                                        @foreach ($currency as $list)
+                                            <option value="">{{ $list->name }} {!! $list->symbol !!}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-6 mt-3">
+                                    <label for="" class="fw-bold fs-6 mb-2">Note
+                                        <span class="text-danger">*</span></label>
+                                    </label>
+                                    <textarea name="" id="" class="form-control">
+                                    </textarea>
+                                </div>
+                                <div class="col-6 mt-5">
+                                    <input type="checkbox">
+                                    Adjustment
+                                    </input>
+                                    <br>
+                                    <input type="checkbox">
+                                    Out of Book
+                                    </input>
+                                    <br>
+                                    <input type="checkbox">
+                                    Bad Debts
+                                    </input>
+                                    <br>
+                                </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mt-4">
+                        <div class="card-header bg-white">
+                            <h6 class="fw-bold mt-2">Receipent Details</h6>
+                        </div>
+
+                        <div class="card-body border-0 shadow-sm">
+                            <table class="table table-striped table-bordered table-hover">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th></th>
+                                        <th>Invoice Number</th>
+                                        <th>Property</th>
+                                        <th>Amount</th>
+                                        <th>Currency</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pData">
+                                    <tr>
+                                        <td colspan="6" class="fw-bold pt-2 pb-2 text-center">Please Select User First !
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button class="btn btn-sm btn-success float-right" disabled id="payoutbtn">Payout</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </section>
@@ -110,29 +165,30 @@
 @endsection
 
 
-
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 
 <script>
     let csrfToken = "{{ csrf_token() }}";
     let bookingUrl = "{{ url('/admin/bookings/booking') }}";
 </script>
 
+
 <script>
 
-
+    //checkbox with booking id , inovice number , Property , Amount
     $(document).ready(function () {
         $('#SelectBooking').on('change', function () {
             let bookingId = $(this).val();
 
-            if (!$(this).val()) {
-                $('#UserEmail').val('');
-                $('#property').val('');
-                $('#amount').val('');
-                $('#submitbtn').attr('disabled', true);
+            if (!bookingId) {
+                $('#pData').empty();
+                let row = '<tr>' +
+                    '<td colspan="6" class="fw-bold pt-2 pb-2 text-center">Please Select User First!</td>' +
+                    '</tr>';
+                $('#payoutbtn').attr('disabled', 'false');
+                $('#pData').append(row);
             }
+
 
             $.post({
                 url: bookingUrl + '/' + bookingId,
@@ -140,28 +196,41 @@
                     _token: csrfToken,
                 },
                 success: function (response) {
-                    if (response.booking && response.user) {
+                    $('#pData').empty();
 
-                        $('#UserEmail').val(response.user.email);
-                        $('#amount').val(response.booking.total);
-                        $('#property').val(response.properties[0].name);
-                        $('#user_id').val(response.booking.user_id);
-                        if (response.acNo[0].account_number) {
-                         $('#account_number').val(response.acNo[0].account_number);
-                        }
-                        $('#submitbtn').attr('disabled', false);
+                    // Check if there are bookings in the response
+                    if (response.bookings && response.bookings.length > 0) {
+                        response.bookings.forEach(function (booking) {
+                            // Find the corresponding property for the current booking
+                            let property = response.properties.find(function (prop) {
+                                return prop.id === booking.property_id;
+                            });
 
-                    } else {
-                        alert('Booking or user data not found in response.');
+                            // Create a table row
+                            let row = '<tr>' +
+                                '<td><input type="checkbox" value="' + booking.id + '"></td>' +
+                                '<td>INV-' + booking.id + '</td>' +
+                                '<td>' + (property ? property.name : 'Unknown Property') + '</td>' + 
+                                '<td>' + booking.total + '</td>' +
+                                '<td>' + booking.currency_code + '</td>' +
+                                '</tr>';
+
+
+                            $('#payoutbtn').attr('disabled', false);
+                            $('#pData').append(row);
+
+                        });
+                    } else if (response.message) {
+                        let row = '<tr>' +
+                            '<td colspan="6" class="fw-bold pt-2 pb-2 text-center">' + response.message + '</td>' +
+                            '</tr>';
+                        $('#pData').append(row);
                     }
                 },
-
                 error: function (xhr, status, error) {
                     console.error('Error:', error);
-                }
+                },
             });
-
         });
     });
-
 </script>

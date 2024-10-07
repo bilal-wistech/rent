@@ -23,7 +23,8 @@ use App\Models\{
     Payouts,
     Settings,
     PayoutSetting,
-    Wallet
+    Wallet,
+    Admin
 };
 use Modules\DirectBankTransfer\Entities\DirectBankTransfer;
 use App\Models\PaymentMethods;
@@ -147,7 +148,7 @@ class BookingsController extends Controller
     {
         $properties = Properties::all('id', 'name');
         $customers = User::where('status', 'Active')->get();
-        return view('admin.bookings.create', compact('properties', 'customers'));
+        return view('admin.bookings.create', compact('properties', 'customers', 'admin'));
     }
     public function getNumberofGuests($property_id)
     {
@@ -268,29 +269,28 @@ class BookingsController extends Controller
     // get booking by id
     public function getbookingbyid($id)
     {
-        // Find the booking by ID
-        $booking = Bookings::find($id);
-
-        // Check if the booking exists
-        if (!$booking) {
-            return response()->json(['message' => 'Booking not found'], 404);
+        // Find the bookings by user ID and status 'pending'
+        $bookings = Bookings::where('user_id', $id)
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+    
+        // Check if no bookings are found
+        if ($bookings->isEmpty()) {
+            return response()->json(['message' => 'No pending bookings found'], 200);
         }
-
-        // Get the user associated with the booking
-        $user = User::find($booking->user_id);
-        $accountNumber = PayoutSetting::where('user_id' , $booking->user_id)->get();
-        $currency = Currency::where('code', $booking->currency_code)->get();
-        $properties = Properties::where('id', $booking->property_id)->get();
-
-        // Return both booking and user data as JSON
+    
+        // Retrieve the properties for the bookings
+        $propertyIds = $bookings->pluck('property_id')->unique(); // Get unique property IDs
+        $properties = properties::whereIn('id', $propertyIds)->get(); // Get properties by IDs
+    
+        // Return both bookings and properties as JSON
         return response()->json([
-            'booking' => $booking,
-            'user' => $user,
-            'currency' => $currency,
-            'properties' => $properties,
-            'acNo' => $accountNumber
+            'bookings' => $bookings,
+            'properties' => $properties, // Add properties to the response
         ]);
     }
+    
 
     /**
      * Get Distinct currency total with symbol
