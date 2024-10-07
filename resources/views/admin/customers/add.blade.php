@@ -110,19 +110,17 @@
                                     </div>
 
                                     <div class="form-group mt-3 row">
-                                        <label class="control-label col-sm-3 mt-2 fw-bold">Document Type<span
-                                                class="text-danger">*</span></label>
+                                        <label class="control-label col-sm-3 mt-2 fw-bold">Document Type<span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
-                                            <div class="d-flex align-items-center mt-3"> <!-- Added mt-3 here -->
-                                                <label class="me-3"><input type="radio" name="type"
-                                                        value="passport"> Passport</label>
-                                                <label><input type="radio" name="type" value="emirates">
-                                                    Emirates</label>
-                                            </div>
+                                            <select name="type" class="form-control mt-3">
+                                                <option value="" disabled selected>Select Document Type</option>
+                                                <option value="passport">Passport</option>
+                                                <option value="emirates">Emirates</option>
+                                                <option value="others">Others</option>
+                                            </select>
                                         </div>
-
-
                                     </div>
+
                                 </div>
 
 
