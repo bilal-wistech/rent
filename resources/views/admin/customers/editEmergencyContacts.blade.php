@@ -15,23 +15,24 @@
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <h4 class="mb-0 mx-auto">Emergency Contact</h4>
                     </div>
-                    <form action="{{ route('emergencycontacts.store') }}" method="POST">
+                    <form action="{{ route('emergencycontacts.update',$emergencycontacts->id) }}" method="POST">
                         @csrf
+                        @method('PUT')
                         <div class="box-body" id="emergencyContactsContainer">
-                            @foreach($emergencycontact as $contact)
-                            <input type="hidden" name="user_id" value="{{ $contact->user_id }}">
+
+                            <input type="hidden" name="user_id" value="{{ $emergencycontacts->user_id }}">
 
                                 <div class="emergency-contact-group">
-                                    <input type="hidden" name="emergency_contact_id[]" value="{{ $contact->id }}">
+                                    <input type="hidden" name="id" value="{{ $emergencycontacts->id }}">
 
 
                                     <div class="form-group mt-3 row">
                                         <label class="control-label col-sm-3 mt-2 fw-bold">Name<span class="text-danger">*</span></label>
                                         <div class="col-sm-8 d-flex">
                                             <input type="text" class="form-control"
-                                                   name="emergency_contact_name[]"
+                                                   name="emergency_contact_name"
                                                    placeholder="Enter name"
-                                                   value="{{ old('emergency_contact_name.' . $loop->index, $contact->name) }}"
+                                                   value="{{  $emergencycontacts->name }}"
                                                    required>
                                             {{-- <a class="btn btn-danger removeBtn"
                                                style="position:absolute; right:2rem; cursor:pointer;"
@@ -45,9 +46,9 @@
                                         <label class="control-label col-sm-3 mt-2 fw-bold">Relation<span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
                                             <input type="text" class="form-control"
-                                                   name="emergency_contact_relation[]"
+                                                   name="emergency_contact_relation"
                                                    placeholder="Enter relation"
-                                                   value="{{ old('emergency_contact_relation.' . $loop->index, $contact->relation) }}"
+                                                   value="{{ $emergencycontacts->relation }}"
                                                    required>
                                         </div>
                                     </div>
@@ -56,14 +57,14 @@
                                         <label class="control-label col-sm-3 mt-2 fw-bold">Contact Number<span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
                                             <input type="tel" class="form-control"
-                                                   name="emergency_contact_number[]"
+                                                   name="emergency_contact_number"
                                                    placeholder="Enter contact number"
-                                                   value="{{ old('emergency_contact_number.' . $loop->index, $contact->contact_number) }}"
+                                                   value="{{ $emergencycontacts->contact_number }}"
                                                    required>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+
                         </div>
 
                         <!-- Submit button -->

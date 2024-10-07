@@ -12,11 +12,11 @@ class CountryDataTable extends DataTable
         return datatables()
             ->eloquent($this->query())
             ->addColumn('action', function ($country) {
-
+                $view = '<a href="' . url('admin/settings/view-country/' . $country->id) . '" class="btn btn-xs btn-info"><i class="fa fa-home" style="color: white;"></i></a>';
                 $edit = '<a href="' . url('admin/settings/edit-country/' . $country->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
                 $delete = '<a href="' . url('admin/settings/delete-country/' . $country->id) . '" class="btn btn-xs btn-danger delete-warning"><i class="fa fa-trash"></i></a>';
 
-                return $edit . ' ' . $delete;
+                return $view .' '. $edit . ' ' . $delete;
             })
             ->rawColumns(['action'])
             ->make(true);

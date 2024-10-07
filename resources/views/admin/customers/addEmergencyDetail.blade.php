@@ -10,12 +10,12 @@
                 <div class="box">
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <h4 class="mb-0 mx-auto">Emergency Contact</h4>
-                        <div>
+                        {{-- <div>
                             <a class="btn btn-info f-14 text-white" style="margin-right: 2rem"
                                id="addMoreBtn" title="Add More">
                                 <i class="fa fa-plus"></i>
                             </a>
-                        </div>
+                        </div> --}}
                     </div>
 
                     <form action="{{ route('emergencycontacts.store') }}" method="POST" enctype="multipart/form-data">
@@ -31,11 +31,11 @@
                                     <label class="control-label col-sm-3 mt-2 fw-bold">Name<span class="text-danger">*</span></label>
                                     <div class="col-sm-8 d-flex">
                                         <input type="text" class="form-control"
-                                               name="emergency_contact_name[]" placeholder="Enter name" required>
-                                        <a class="btn btn-danger removeBtn"
+                                               name="emergency_contact_name" placeholder="Enter name" required>
+                                        {{-- <a class="btn btn-danger removeBtn"
                                            style="position:absolute; right:2rem; display: none;" title="Remove">
                                             <i class="fa fa-trash-o"></i>
-                                        </a>
+                                        </a> --}}
                                     </div>
                                 </div>
 
@@ -44,7 +44,7 @@
                                     <label class="control-label col-sm-3 mt-2 fw-bold">Relation<span class="text-danger">*</span></label>
                                     <div class="col-sm-8">
                                         <input type="text" class="form-control"
-                                               name="emergency_contact_relation[]" placeholder="Enter relation" required>
+                                               name="emergency_contact_relation" placeholder="Enter relation" required>
                                     </div>
                                 </div>
 
@@ -52,7 +52,7 @@
                                     <label class="control-label col-sm-3 mt-2 fw-bold">Contact Number<span class="text-danger">*</span></label>
                                     <div class="col-sm-8">
                                         <input type="tel" class="form-control"
-                                               name="emergency_contact_number[]"
+                                               name="emergency_contact_number"
                                                placeholder="Enter contact number" required>
                                     </div>
                                 </div>
