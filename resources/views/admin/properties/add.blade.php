@@ -115,7 +115,7 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="form-group row mt-3">
+                                {{-- <div class="form-group row mt-3">
                                     <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">Property
                                         Name
                                         <span class="text-danger">*</span></label>
@@ -126,7 +126,7 @@
                                             <p class="error-tag">{{ $errors->first('name') }}</p>
                                         @endif
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="form-group row mt-3">
                                     <label for="exampleInputEmail1"
                                         class="control-label col-sm-3 mt-2 fw-bold">Country</label>
