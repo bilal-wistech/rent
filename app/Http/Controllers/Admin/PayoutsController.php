@@ -37,6 +37,8 @@ use App\Models\{
     PaymentMethods,
     PayoutSetting,
     Bookings,
+    Invoice,
+    admin,
 
 };
 
@@ -132,10 +134,15 @@ class PayoutsController extends Controller
     {
         // user , payment method , currency,  amount ,
         // $bookings = Bookings::orderBy('id', 'desc')->where('payout_payment', '0')->get();
-        $bookings =  Bookings::where('status' , 'pending')->get();
+        $bookings = Bookings::where('status', 'pending')->get();
+        $invoice = Invoice::latest()->first();
+        $lastInvoice = Invoice::latest('id')->first(); // Get the last invoice based on the 'id'
+        $invNumber = ($lastInvoice ? $lastInvoice->invoice_no : 0) + 1; // Increment the id by 1
         $currency = Currency::all();
+        $admin = admin::all();
         $pMethods = PaymentMethods::all();
-        return view('admin.payouts.create', compact('bookings', 'currency' , 'pMethods'));
+        $users = User::all();
+        return view('admin.payouts.create', compact('bookings', 'admin', 'currency', 'pMethods', 'invNumber', 'users'));
     }
 
 
@@ -301,72 +308,26 @@ class PayoutsController extends Controller
         return $allPayouts;
     }
 
-
-
     // payout creat
 
     public function asuccess(Request $request)
     {
-        dd($request->all());
-        $userId = $request->user_id;
-        $userdata = User::find($userId);
-        $currencyID = $request->currency_id;
-        $paymentSettingID = $request->payment_method_id;
-        $requestedAmount = $request->amount;
-        // $walletMoney       = Wallet::where('user_id', $userId)->where('currency_id', $currencyID)->first();
-
-        // if ($walletMoney == null) {
-        //     Common::one_time_message('error', __("Sorry! this user don't have request currency Wallet."));
-        //     return redirect()->route('payouts.create')->withInput();
-        // }
-
-        // if ($walletMoney->balance_indefault < $requestedAmount) {
-        //     Common::one_time_message('error', __("Sorry! this user don't have sufficient balance."));
-        //     return redirect()->route('payouts.create')->withInput();
-        // }
-
-        $payoutSetting = PayoutSetting::find($paymentSettingID);
-        $withdrawal = new Withdrawal;
-        $withdrawal->user_id = $userId;
-        $withdrawal->currency_id = $currencyID;
-        $withdrawal->payout_id = $paymentSettingID;
-        $withdrawal->payment_method_id = '4';
-        $withdrawal->uuid = uniqid();
-        $withdrawal->subtotal = $requestedAmount;
-        $withdrawal->email = $userdata->email;
-        $withdrawal->status = "Success";
-
-        $withdrawal->account_number = $payoutSetting->account_number;
-        $withdrawal->bank_name = $payoutSetting->bank_name;
-        $withdrawal->swift_code = $payoutSetting->swift_code;
-        $withdrawal->amount = $requestedAmount;
-        $withdrawal->save();
-
-
-        $bookingId = $request->booking_id;
-        $booking = Bookings::find($bookingId);
-        if ($booking) {
-            $booking->payout_payment = '1';
-            $booking->save();
+        $invoices = Invoice::whereIn('id', $request->invoices)->get();
+        foreach ($invoices as $invoice) {
+            $withdrawal = new Withdrawal();
+            $withdrawal->user_id                = $invoice->customer_id;
+            $withdrawal->payout_id              = 1;
+            $withdrawal->payment_method_id      = 1;
+            $withdrawal->uuid                   = uniqid();
+            $withdrawal->amount                 = $invoice->grand_total;
+            $withdrawal->email                  = 'sikander@gmail.com';
+            $withdrawal->status                 = "success";
+            $withdrawal->save();
         }
 
+        return response()->json([
+               'inserted' => 'success'
+        ]);
 
-
-        // $walletMoney->balance               -=  $requestedAmount;
-        // $walletMoney->save();
-
-        try {
-
-            $email_controller = new EmailController;
-            $email_controller->notifyAdminOfPayoutRequest($withdrawal->id);
-
-
-        } catch (\Exception $e) {
-            Common::one_time_message('danger', __('Email was not sent due to :x', ['x' => __($e->getMessage())]));
-            return redirect()->route('payouts');
-        }
-
-        Common::one_time_message('success', __('Payout has been created successfully.'));
-        return redirect()->route('payouts');
     }
 }

@@ -143,4 +143,38 @@ class InvoiceController extends Controller
     {
         //
     }
+
+
+    public function getInvoiceByUserId($id)
+    {
+        // Find invoices by customer ID with unpaid status
+        $invoices = Invoice::where('customer_id', $id)
+            ->where('payment_status', 'unpaid')->get();
+
+        // Check if invoices exist
+        if ($invoices->isEmpty()) {
+            return response()->json(['message' => 'No unpaid invoices found for this customer'], 404);
+        }
+
+        $properties = [];
+        // Loop through each invoice and fetch associated property
+        foreach ($invoices as $invoice) {
+            // Assuming you want to fetch the property using property_id
+            $property = Properties::where('id', $invoice->property_id)->first();
+            if ($property) {
+                $properties[] = $property; // Store each property in an array
+            }
+        }
+
+        // Return both invoices and associated properties as JSON
+        return response()->json([
+            'invoices' => $invoices,
+            'properties' => $properties
+        ]);
+    }
+
+
+
+
+
 }
