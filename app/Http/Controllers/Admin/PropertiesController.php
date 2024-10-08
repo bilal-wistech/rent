@@ -76,7 +76,7 @@ class PropertiesController extends Controller
                 'property_type_id' => 'required',
                 'space_type' => 'required',
                 'accommodates' => 'required',
-                'name' => 'required',
+                // 'name' => 'required',
                 'host_id' => 'required',
                 'country' => 'required',
                 'area' => 'required',
@@ -90,7 +90,7 @@ class PropertiesController extends Controller
                 'property_type_id' => 'Home Type',
                 'space_type' => 'Room Type',
                 'accommodates' => 'Accommodates',
-                'name' => 'Property Name',
+                // 'name' => 'Property Name',
                 'host_id' => 'Host',
                 'building' => 'Building',
                 'flat_no' => 'Flat Number',
@@ -105,9 +105,21 @@ class PropertiesController extends Controller
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput();
             } else {
+                $addressParts = [$request->area];
+
+                if (!empty($request->building)) {
+                    $addressParts[] = $request->building;
+                }
+
+                if (!empty($request->flat_no)) {
+                    $addressParts[] = 'Flat ' . $request->flat_no;
+                }
+
+                $address = implode(', ', $addressParts);
+
                 $property = new Properties;
                 $property->host_id = $request->host_id;
-                $property->name = SpaceType::find($request->space_type)->name . ' in ' . $request->name;
+                $property->name = $address;
                 $property->property_type = $request->property_type_id;
                 $property->space_type = $request->space_type;
                 $property->accommodates = $request->accommodates;
