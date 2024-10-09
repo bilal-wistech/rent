@@ -152,40 +152,15 @@ class BookingsController extends Controller
         $customers = User::where('status', 'Active')->get();
         return view('admin.bookings.create', compact('properties', 'customers'));
     }
-    public function getNumberofGuests($property_id)
+    public function calander(Request $request, CalendarController $calendar)
     {
-        $propety = Properties::findOrFail($property_id);
-        return response()->json([
-            'numberofguests' => $propety->accommodates ?? 0
-        ]);
-    }
-    public function checkExistingPropertyBooking(CheckExistingBookingRequest $request)
-    {
-        $existingBooking = Bookings::where('property_id', $request->property_id)
-            ->where(function ($query) use ($request) {
-                $query->whereBetween('start_date', [setDateForDb($request->checkin), setDateForDb($request->checkout)])
-                    ->orWhereBetween('end_date', [setDateForDb($request->checkin), setDateForDb($request->checkout)])
-                    ->orWhere(function ($query) use ($request) {
-                        $query->where('start_date', '<=', setDateForDb($request->checkin))
-                            ->where('end_date', '>=', setDateForDb($request->checkout));
-                    });
-            })
-            ->first();
-
-        $formattedCheckin = Carbon::createFromFormat('Y-m-d', $request->checkin)->format('d/m/Y');
-        $formattedCheckout = Carbon::createFromFormat('Y-m-d', $request->checkout)->format('d/m/Y');
-
-        if ($existingBooking) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'The selected property is already booked for the chosen date range: ' . $formattedCheckin . ' - ' . $formattedCheckout
-            ], 200);
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'The property is available for booking from ' . $formattedCheckin . ' to ' . $formattedCheckout
-        ], 200);
+        $bookingCalander = $calendar->generate($request->property_id);
+        $property_id = $request->property_id;
+        $propertyName = Properties::findOrFail($property_id)->name;
+        $customer_id = $request->user_id;
+        $customerName = User::findOrFail($customer_id)->first_name . ' ' . User::findOrFail($customer_id)->last_name;
+        $numberOfGuests = Properties::findOrFail($property_id)->accommodates ?? 0;
+        return view('admin.bookings.calander', compact('bookingCalander', 'property_id', 'propertyName', 'customer_id', 'customerName', 'numberOfGuests'));
     }
     public function store(AddAdminBookingRequest $request)
     {
@@ -205,8 +180,8 @@ class BookingsController extends Controller
                 'user_id' => $request->user_id,
                 'host_id' => $property->host_id,
                 'booking_added_by' => $request->booking_added_by ?? 1,
-                'start_date' => setDateForDb($request->checkin),
-                'end_date' => setDateForDb($request->checkout),
+                'start_date' => setDateForDb($request->start_date),
+                'end_date' => setDateForDb($request->end_date),
                 'guest' => $request->number_of_guests,
                 'total_night' => $priceData->total_nights,
                 'service_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->service_fee),
