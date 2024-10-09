@@ -3,7 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\{
-    Controller, 
+    Controller,
     IcalendarController
 };
 use App\Models\{
@@ -141,7 +141,7 @@ class CalendarController extends Controller
                 //Price Type CALENDAR
                 if ( $dateGreaterThanToday && ($property_price->available()=='Not available') && ($property_price->type()=='calendar') && (($property_price->color())!=null)) {
                     $class = 'dt-available-with-events';
-                    
+
                     $out .= '<div class="col-md-02">
                                 <div class="calender_box date-package-modal-admin"  style="background-color:'.$property_price->color().' !important " id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'">
                                     <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
@@ -184,7 +184,7 @@ class CalendarController extends Controller
                     }
 
                     $out .= '<div class="col-md-02">
-                                    <div class="calender_box date-package-modal-admin '.$class.'" id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'">
+                                    <div class="calender_box date-package-modal-admin '.$class.'" id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'" data-bs-toggle="modal" data-bs-target="#hotel_date_package_admin">
                                         <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
                                         <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
                                     </div>

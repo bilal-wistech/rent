@@ -22,14 +22,8 @@
                             </div>
                         @endif
                         <div id="bookingMessage" class="mt-3"></div>
-                        <form id="add_bookings" method="post" action="{{ route('admin.bookings.store') }}"
+                        <form id="add_bookings" method="get" action="{{ route('admin.bookings.calander') }}"
                             class="form-horizontal">
-                            @csrf
-
-                            <input type="hidden" name="booking_added_by" id="booking_added_by"
-                                value="{{ Auth::guard('admin')->id() }}">
-                            <input type="hidden" name="booking_type" value="instant" id="booking_type">
-                            <input type="hidden" name="status" value="pending" id="status">
                             <div class="box-body">
 
                                 <div class="form-group row mt-3 property_id">
@@ -45,30 +39,6 @@
                                             </option>
                                         </select>
                                         <span class="text-danger">{{ $errors->first('property_id') }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row mt-3 checkin">
-                                    <label for="startDate" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                        Check In <span class="text-danger">*</span>
-                                    </label>
-
-                                    <div class="col-sm-6">
-                                        <input class="form-control" id="startDate" name="checkin" type="date"
-                                            value="{{ old('checkin') }}" required>
-                                        <span class="text-danger">{{ $errors->first('checkin') }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row mt-3 checkout">
-                                    <label for="endDate" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                        Check Out <span class="text-danger">*</span>
-                                    </label>
-
-                                    <div class="col-sm-6">
-                                        <input class="form-control" id="endDate" name="checkout" type="date"
-                                            value="{{ old('checkout') }}" required>
-                                        <span class="text-danger">{{ $errors->first('checkout') }}</span>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-3 host_id">
@@ -89,46 +59,11 @@
                                                 class="fa fa-user"></span></a>
                                     </div>
                                 </div>
-
-                                <div class="form-group row mt-3 number_of_guests">
-                                    <label for="number_of_guests"
-                                        class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                        Number of Guests <span class="text-danger">*</span>
-                                    </label>
-
-                                    <div class="col-sm-6">
-                                        <select class="form-control select2" name="number_of_guests" id="number_of_guests">
-                                            <option value="">Select Number of Guests</option>
-                                            <option value="{{ old('number_of_guests') }}" selected>
-                                                {{ old('number_of_guests') }}</option>
-                                        </select>
-                                        <span class="text-danger">{{ $errors->first('number_of_guests') }}</span>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-3 renewal_type">
-                                    <label for="renewal_type"
-                                        class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                        Renewal Type <span class="text-danger">*</span>
-                                    </label>
-
-                                    <div class="col-sm-6">
-                                        <select class="form-control select2" name="renewal_type" id="renewal_type">
-                                            <option value="">Select a Renewal Type</option>
-                                            <option value="none" {{ old('renewal_type') == 'none' ? 'selected' : '' }}>
-                                                None</option>
-                                            <option value="weekly"
-                                                {{ old('renewal_type') == 'weekly' ? 'selected' : '' }}>Weekly</option>
-                                            <option value="monthly"
-                                                {{ old('renewal_type') == 'monthly' ? 'selected' : '' }}>Monthly</option>
-                                        </select>
-                                        <span class="text-danger">{{ $errors->first('renewal_type') }}</span>
-                                    </div>
-                                </div>
-
                             </div>
 
-                            <div class="box-footer">
-                                <button type="submit" class="btn btn-info btn-space f-14 text-white me-2">Submit</button>
+                            <div class="box-footer d-flex justify-content-center">
+                                <button type="submit" class="btn btn-info btn-space f-14 text-white me-3">Proceed to
+                                    Booking Calendar</button>
                                 <a class="btn btn-danger f-14" href="{{ route('admin.bookings.index') }}">Cancel</a>
                             </div>
                         </form>
@@ -293,93 +228,6 @@
                 },
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
-            });
-
-            $('#property_id').on('change', function() {
-                let property_id = $(this).val();
-
-                $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
-
-                if (property_id) {
-                    $.ajax({
-                        url: 'get-number-of-guests/' + property_id,
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function(response) {
-                            let maxGuests = response.numberofguests;
-                            for (let i = 1; i <= maxGuests; i++) {
-                                $('#number_of_guests').append('<option value="' + i + '">' + i +
-                                    '</option>');
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.log(error);
-                        }
-                    });
-                }
-            });
-            let canSubmitForm = false;
-
-            function checkIfAllSelected() {
-                let property_id = $('#property_id').val();
-                let checkin = $('#startDate').val();
-                let checkout = $('#endDate').val();
-
-                if (property_id !== "" && checkin !== "" && checkout !== "") {
-
-                    checkExistingPropertyBooking(property_id, checkin, checkout);
-                }
-            }
-
-            $('#property_id, #startDate, #endDate').on('change', function() {
-                checkIfAllSelected();
-            });
-
-            function checkExistingPropertyBooking(property_id, checkin, checkout) {
-                $.ajax({
-                    url: "{{ route('admin.bookings.check-booking-exists') }}",
-                    type: "POST",
-                    data: {
-                        property_id: property_id,
-                        checkin: checkin,
-                        checkout: checkout,
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function(response) {
-                        let messageBox = $('#bookingMessage');
-                        if (response.status === 'error') {
-                            messageBox.html('<div class="alert alert-danger">' + response.message +
-                                '</div>');
-                            canSubmitForm = false;
-                        } else {
-                            messageBox.html('<div class="alert alert-success">' + response.message +
-                                '</div>');
-                            canSubmitForm = true;
-                        }
-                        setTimeout(function() {
-                            messageBox.fadeOut('slow', function() {
-                                messageBox.html('')
-                                    .show();
-                            });
-                        }, 2500);
-                    },
-                    error: function(xhr, status, error) {
-                        console.log(xhr.responseText); // Log any errors
-                    }
-                });
-            }
-            $('#add_bookings').on('submit', function(e) {
-                if (!canSubmitForm) {
-                    e.preventDefault();
-                    $('#bookingMessage').html(
-                        '<div class="alert alert-danger">Please change the check-in or check-out dates to submit the form.</div>'
-                    );
-                    setTimeout(function() {
-                        $('#bookingMessage').fadeOut('slow', function() {
-                            $(this).html('').show();
-                        });
-                    }, 2500);
-                }
             });
         });
     </script>
