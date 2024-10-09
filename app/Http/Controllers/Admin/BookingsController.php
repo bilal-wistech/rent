@@ -203,6 +203,25 @@ class BookingsController extends Controller
                 'transaction_id' => '',
                 'payment_method_id' => '',
             ]);
+            $start_date = date('Y-m-d', strtotime($request->start_date));
+            $end_date = date('Y-m-d', strtotime($request->end_date));
+
+            $start_date = strtotime($start_date);
+            $end_date = strtotime($end_date);
+
+            for ($i = $start_date; $i <= $end_date; $i += 86400) {
+                $date = date("Y-m-d", $i);
+
+                $data = [
+                    'property_id' => $request->property_id,
+                    'price' => ($request->price) ? $request->price : '0',
+                    'status' => $request->property_date_status,
+                    'min_day' => ($request->min_stay) ? $request->min_stay : '0',
+                    'min_stay' => ($request->min_stay) ? '1' : '0',
+                ];
+
+                PropertyDates::updateOrCreate(['property_id' => $request->id, 'date' => $date], $data);
+            }
             Invoice::create([
                 'property_id' => $property->id,
                 'customer_id' => $request->user_id,
@@ -215,6 +234,7 @@ class BookingsController extends Controller
                 'sub_total' => Common::convert_currency('', $currencyDefault->code, $priceData->subtotal),
                 'grand_total' => Common::convert_currency('', $currencyDefault->code, $priceData->total),
             ]);
+
             DB::commit();
             Common::one_time_message('success', 'Booking Added Successfully');
             return redirect('admin/bookings');

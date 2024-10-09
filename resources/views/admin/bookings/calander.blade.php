@@ -37,6 +37,8 @@
                                                 <input type="hidden" name="booking_added_by" id="booking_added_by"
                                                     value="{{ Auth::guard('admin')->id() }}">
                                                 <input type="hidden" name="booking_type" value="instant" id="booking_type">
+                                                <input type="hidden" class="form-control f-14" name="price"
+                                                            id='dtpc_price' placeholder="">
                                                 <input type="hidden" name="status" value="pending" id="status">
                                                 <div class="form-group row mt-3">
                                                     <label for="input_dob"
@@ -117,7 +119,21 @@
                                                             id="error-renewal_type">{{ $errors->first('renewal_type') }}</span>
                                                     </div>
                                                 </div>
-
+                                                <div class="form-group row mt-3">
+                                                    <label for="input_dob"
+                                                        class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Status<em
+                                                            class="text-danger">*</em></label>
+                                                    <div class="col-sm-6">
+                                                        <select class="form-control f-14" name="property_date_status"
+                                                            id="property_date_status">
+                                                            <option value="">--Please Select--</option>
+                                                            <option value="Available">Available</option>
+                                                            <option value="Not available">Not Available</option>
+                                                        </select>
+                                                        <span class="text-danger"
+                                                            id="error-property_date_status">{{ $errors->first('property_date_status') }}</span>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div class="modal-footer">
@@ -170,45 +186,45 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize datepickers
-            $('#dtpc_start_admin, #dtpc_end_admin').datepicker({
-                dateFormat: 'yy-mm-dd',
-                minDate: 0,
-                onSelect: function(selected) {
-                    if (this.id === 'dtpc_start_admin') {
-                        $('#dtpc_end_admin').datepicker('option', 'minDate', selected);
-                    }
-                }
-            });
-
-            // Basic form validation
             $('#booking_form').validate({
                 rules: {
                     start_date: {
-                        required: true
+                        required: true,
+                        date: true,
+                        dateNotInPast: true
                     },
                     end_date: {
-                        required: true
+                        required: true,
+                        date: true,
+                        dateGreaterThan: '#dtpc_start_admin'
                     },
                     number_of_guests: {
                         required: true
                     },
                     renewal_type: {
                         required: true
+                    },
+                    property_date_status: {
+                        required: true
                     }
                 },
                 messages: {
                     start_date: {
-                        required: "Please select a start date"
+                        required: "Please select a start date",
+                        dateNotInPast: "Start date cannot be in the past"
                     },
                     end_date: {
-                        required: "Please select an end date"
+                        required: "Please select an end date",
+                        dateGreaterThan: "End date must be after the start date"
                     },
                     number_of_guests: {
                         required: "Please select number of guests"
                     },
                     renewal_type: {
                         required: "Please select a renewal type"
+                    },
+                    property_date_status: {
+                        required: "Please select a Property  Status"
                     }
                 },
                 errorPlacement: function(error, element) {
