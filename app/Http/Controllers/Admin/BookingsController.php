@@ -245,13 +245,29 @@ class BookingsController extends Controller
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
-    public function edit($id)
+    public function edit(Request $request, CalendarController $calendar, $id)
     {
+        $property_id = Bookings::findOrFail($id)->property_id;
+        $customer_id = Bookings::findOrFail($id)->user_id;
+        // $booking = Bookings::findOrFail($id);
+        // $properties = Properties::all('id', 'name');
+        // $customers = User::where('status', 'Active')->get();
+        // $maxGuests = Properties::findOrFail($booking->property_id)->accommodates;
+        // return view('admin.bookings.edit', compact('booking', 'properties', 'customers', 'maxGuests'));
+        $bookingCalander = $calendar->generate($property_id);
+
+        $propertyName = Properties::findOrFail($property_id)->name;
+
+        $customerName = User::findOrFail($customer_id)->first_name . ' ' . User::findOrFail($customer_id)->last_name;
+        $numberOfGuests = Properties::findOrFail($property_id)->accommodates ?? 0;
         $booking = Bookings::findOrFail($id);
-        $properties = Properties::all('id', 'name');
-        $customers = User::where('status', 'Active')->get();
-        $maxGuests = Properties::findOrFail($booking->property_id)->accommodates;
-        return view('admin.bookings.edit', compact('booking', 'properties', 'customers', 'maxGuests'));
+        $propertyDates = PropertyDates::where('property_id', $property_id)
+            ->where(function ($query) use ($booking) {
+                $query->where('date', $booking->start_date)
+                    ->orWhere('date', $booking->end_date);
+            })
+            ->get();
+        return view('admin.bookings.calander', compact('bookingCalander', 'property_id', 'propertyName', 'customer_id', 'customerName', 'numberOfGuests', 'booking', 'propertyDates'));
     }
     public function update(Request $request, $id)
     {

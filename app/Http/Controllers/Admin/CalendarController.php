@@ -172,19 +172,19 @@ class CalendarController extends Controller
                 elseif ($dateGreaterThanToday && ($property_price->available() === 'Not available') && ($property_price->type() === 'normal')) {
                     // dd($property_price->type());
                     $class = 'dt-available-with-events';
-                    $out .= '<div class="col-md-02">
-                                    <div class="calender_box date-package-modal-admin ' . $class . '" id="' . $date . '" data-day="' . $day . '" data-month="' . $month . '" data-year="' . $year . '" data-price="' . $property_price->original_price() . '"data-status="' . $property_price->available() . '"data-minday="' . $property_price->min_day() . '">
-                                        <div class="wkText final_day">' . $finalDay . ' ' . $today . '</div>
-                                        <div class="dTfont wkText">' . $property_price->currency->org_symbol . $property_price->original_price() . '</div>
-                                    </div>
-                                </div>';
                     // $out .= '<div class="col-md-02">
-                    //     <div class="calender_box date-package-modal-admin '.$class.'" id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'"
-                    //     data-bs-toggle="modal" data-bs-target="#hotel_date_package_admin">
-                    //         <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
-                    //         <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
-                    //     </div>
-                    // </div>';
+                    //                 <div class="calender_box date-package-modal-admin ' . $class . '" id="' . $date . '" data-day="' . $day . '" data-month="' . $month . '" data-year="' . $year . '" data-price="' . $property_price->original_price() . '"data-status="' . $property_price->available() . '"data-minday="' . $property_price->min_day() . '">
+                    //                     <div class="wkText final_day">' . $finalDay . ' ' . $today . '</div>
+                    //                     <div class="dTfont wkText">' . $property_price->currency->org_symbol . $property_price->original_price() . '</div>
+                    //                 </div>
+                    //             </div>';
+                    $out .= '<div class="col-md-02">
+                        <div class="calender_box date-package-modal-admin '.$class.'" id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'"
+                        data-bs-toggle="modal" data-bs-target="#hotel_date_package_admin">
+                            <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
+                            <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
+                        </div>
+                    </div>';
                 } elseif ($dateGreaterThanToday && ($property_price->available() === 'Not available') && ($property_price->type() === 'normal')) {
                     if (!$dateGreaterThanToday) {
                         $class = 'dt-not-available';
