@@ -149,7 +149,8 @@ class InvoiceController extends Controller
     {
         // Find invoices by customer ID with unpaid status
         $invoices = Invoice::where('customer_id', $id)
-            ->where('payment_status', 'unpaid')->get();
+            ->where('payment_status', 'unpaid')
+            ->get();
 
         // Check if invoices exist
         if ($invoices->isEmpty()) {
@@ -169,7 +170,7 @@ class InvoiceController extends Controller
         // Return both invoices and associated properties as JSON
         return response()->json([
             'invoices' => $invoices,
-            'properties' => $properties
+            'properties' => $properties,
         ]);
     }
 
