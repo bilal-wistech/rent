@@ -252,6 +252,20 @@ class BookingsController extends Controller
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+    public function getPropertyDates($propertyId)
+    {
+        $propertyDates = PropertyDates::where('property_id', $propertyId)
+            ->get()
+            ->keyBy('date')
+            ->map(function ($item) {
+                return [
+                    'status' => $item->status,
+                    'price' => $item->price
+                ];
+            });
+
+        return response()->json($propertyDates);
+    }
     public function edit(Request $request, CalendarController $calendar, $id)
     {
         $property_id = Bookings::findOrFail($id)->property_id;

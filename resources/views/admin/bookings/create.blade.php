@@ -66,6 +66,18 @@
             color: lightgray;
             /* Color for disabled dates */
         }
+
+        .calendar-day.not-available {
+            background-color: #ffebee;
+            /* Light red */
+            color: #d32f2f;
+        }
+
+        .calendar-day.available {
+            background-color: #e8f5e9;
+            /* Light green */
+            color: #388e3c;
+        }
     </style>
 @endpush
 @section('main')
@@ -378,6 +390,7 @@
     <script>
         $(document).ready(function() {
             let calendar;
+            let propertyDates = {};
             $('#property_id').select2({
                 ajax: {
                     url: '{{ route('admin.bookings.form_property_search') }}',
@@ -455,6 +468,16 @@
                         }
                     });
                 }
+                $.ajax({
+                    url: 'get-property-dates/' +
+                        property_id, // You'll need to create this route
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        propertyDates = response;
+                        checkSelections(); // Refresh calendar with new data
+                    }
+                });
             });
 
             function checkSelections() {
@@ -468,8 +491,6 @@
                 }
             }
 
-            // Event listeners for changes
-            $('#property_id').on('change', checkSelections);
             $('#host_id').on('change', checkSelections);
 
             function renderCalendars() {
@@ -478,7 +499,6 @@
 
                 const today = moment();
 
-                // Create 12 month calendars
                 for (let i = 0; i < 12; i++) {
                     const currentMonth = moment(today).add(i, 'months');
                     const monthCalendar = createMonthCalendar(currentMonth);
@@ -489,23 +509,22 @@
             function createMonthCalendar(month) {
                 const monthDiv = $('<div>').addClass('month-calendar');
 
-                // Add month header
+                // Month header remains the same
                 monthDiv.append($('<div>').addClass('month-header').text(month.format('MMMM YYYY')));
 
-                // Add weekday header
+                // Weekday header remains the same
                 const weekdayHeader = $('<div>').addClass('weekday-header');
                 moment.weekdaysShort().forEach(day => {
                     weekdayHeader.append($('<div>').text(day));
                 });
                 monthDiv.append(weekdayHeader);
 
-                // Add days grid
                 const daysGrid = $('<div>').addClass('days-grid');
                 const firstDay = moment(month).startOf('month');
                 const lastDay = moment(month).endOf('month');
-                const today = moment(); // Current date
+                const today = moment();
 
-                // Fill in days before the first of the month
+                // Fill in empty days
                 for (let i = 0; i < firstDay.day(); i++) {
                     daysGrid.append($('<div>').addClass('calendar-day other-month'));
                 }
@@ -513,26 +532,32 @@
                 // Fill in the days of the month
                 for (let day = 1; day <= lastDay.date(); day++) {
                     const currentDate = moment(month).date(day);
+                    const dateString = currentDate.format('YYYY-MM-DD');
+
                     const dayDiv = $('<div>')
                         .addClass('calendar-day')
                         .text(day)
-                        .data('date', currentDate.format('YYYY-MM-DD'));
+                        .data('date', dateString);
 
-                    // Check if the current date is today
-                    if (currentDate.isSame(today, 'day')) {
-                        dayDiv.addClass('current-date'); // Highlight today
+                    // Apply color based on property date status
+                    if (propertyDates[dateString]) {
+                        if (propertyDates[dateString].status === 'Not available') {
+                            dayDiv.addClass('not-available'); // Add CSS for red background
+                        } else {
+                            dayDiv.addClass('available'); // Add CSS for green background
+                        }
                     }
 
-                    // Disable past dates
+                    if (currentDate.isSame(today, 'day')) {
+                        dayDiv.addClass('current-date');
+                    }
+
                     if (currentDate.isBefore(today, 'day')) {
-                        dayDiv.addClass('disabled'); // Add a disabled class for styling
-                        dayDiv.css('pointer-events', 'none'); // Disable clicks
+                        dayDiv.addClass('disabled');
+                        dayDiv.css('pointer-events', 'none');
                     } else {
                         dayDiv.click(function() {
-                            const clickedDate = $(this).data('date');
-                            const propertyId = $('#property_id').val();
-                            const userId = $('#host_id').val();
-                            handleDateClick(propertyId, userId, clickedDate);
+                            handleDateClick($('#property_id').val(), $('#host_id').val(), dateString);
                         });
                     }
 
@@ -543,12 +568,9 @@
                 return monthDiv;
             }
 
-
             function handleDateClick(propertyId, userId, date) {
-                // You can customize this function to handle the date click
                 $('#propertyId').val(propertyId);
                 $('#userId').val(userId);
-                // Show the modal
                 $('#booking_form_modal').modal('show');
             }
         });
