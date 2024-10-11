@@ -132,12 +132,6 @@
                                                         </span>
                                                     </div>
                                                 </div>
-                                                @php
-                                                    $status = null;
-                                                    if ($propertyDates->isNotEmpty()) {
-                                                        $status = $propertyDates->first()->status;
-                                                    }
-                                                @endphp
                                                 <div class="form-group row mt-3">
                                                     <label for="input_dob"
                                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">

@@ -152,6 +152,13 @@ class BookingsController extends Controller
         $customers = User::where('status', 'Active')->get();
         return view('admin.bookings.create', compact('properties', 'customers'));
     }
+    public function getNumberofGuests($property_id)
+    {
+        $propety = Properties::findOrFail($property_id);
+        return response()->json([
+            'numberofguests' => $propety->accommodates ?? 0
+        ]);
+    }
     public function calander(Request $request, CalendarController $calendar)
     {
         $bookingCalander = $calendar->generate($request->property_id);
@@ -267,7 +274,13 @@ class BookingsController extends Controller
                     ->orWhere('date', $booking->end_date);
             })
             ->get();
-        return view('admin.bookings.calander', compact('bookingCalander', 'property_id', 'propertyName', 'customer_id', 'customerName', 'numberOfGuests', 'booking', 'propertyDates'));
+
+        $status = null;
+        if ($propertyDates->isNotEmpty()) {
+            $status = $propertyDates->first()->status;
+        }
+
+        return view('admin.bookings.calander', compact('bookingCalander', 'property_id', 'propertyName', 'customer_id', 'customerName', 'numberOfGuests', 'booking', 'propertyDates', 'status'));
     }
     public function update(Request $request, $id)
     {
