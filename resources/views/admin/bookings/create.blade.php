@@ -155,6 +155,7 @@
                                         <div class="modal-body">
 
                                             <p class="calendar-m-msg" id="model-message"></p>
+                                            <input type="hidden" name="booking_id" id="booking_id">
                                             <input type="hidden" name="property_id" id="propertyId" value="">
                                             <input type="hidden" name="user_id" id="userId" value="">
 
@@ -208,8 +209,8 @@
                                                         <option value="{{ old('number_of_guests') }}" selected>
                                                             {{ old('number_of_guests') }}</option>
                                                     </select>
-                                                    <span
-                                                        class="text-danger" id="error-number_of_guests">{{ $errors->first('number_of_guests') }}</span>
+                                                    <span class="text-danger"
+                                                        id="error-number_of_guests">{{ $errors->first('number_of_guests') }}</span>
                                                 </div>
                                             </div>
                                             <div class="form-group row mt-3 renewal_type">
@@ -392,6 +393,8 @@
             let calendar;
             let propertyDates = {};
             let isSelectingStartDate = true;
+
+            // Initialize Select2 for property_id
             $('#property_id').select2({
                 ajax: {
                     url: '{{ route('admin.bookings.form_property_search') }}',
@@ -404,9 +407,7 @@
                         };
                     },
                     processResults: function(data, params) {
-
                         params.page = params.page || 1;
-
                         return {
                             results: data.results,
                             pagination: {
@@ -418,8 +419,13 @@
                 },
                 placeholder: 'Select a Property',
                 minimumInputLength: 0,
+            }).on('select2:select', function(e) {
+                $('#propertyId').val(e.params.data.id);
+                updateNumberOfGuests(e.params.data.id);
+                getPropertyDates(e.params.data.id);
             });
 
+            // Initialize Select2 for host_id
             $('#host_id').select2({
                 ajax: {
                     url: '{{ route('admin.bookings.form_customer_search') }}',
@@ -432,9 +438,7 @@
                         };
                     },
                     processResults: function(data, params) {
-
                         params.page = params.page || 1;
-
                         return {
                             results: data.results,
                             pagination: {
@@ -446,15 +450,17 @@
                 },
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
+            }).on('select2:select', function(e) {
+                $('#userId').val(e.params.data.id);
+                checkSelections();
             });
-            $('#property_id').on('change', function() {
-                let property_id = $(this).val();
 
+            function updateNumberOfGuests(propertyId) {
                 $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
 
-                if (property_id) {
+                if (propertyId) {
                     $.ajax({
-                        url: 'get-number-of-guests/' + property_id,
+                        url: 'get-number-of-guests/' + propertyId,
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
@@ -469,21 +475,23 @@
                         }
                     });
                 }
+            }
+
+            function getPropertyDates(propertyId) {
                 $.ajax({
-                    url: 'get-property-dates/' +
-                        property_id, // You'll need to create this route
+                    url: 'get-property-dates/' + propertyId,
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
                         propertyDates = response;
-                        checkSelections(); // Refresh calendar with new data
+                        checkSelections();
                     }
                 });
-            });
+            }
 
             function checkSelections() {
-                const propertyId = $('#property_id').val();
-                const hostId = $('#host_id').val();
+                const propertyId = $('#propertyId').val();
+                const hostId = $('#userId').val();
                 if (propertyId && hostId) {
                     $('.calendar-container').show();
                     renderCalendars();
@@ -491,8 +499,6 @@
                     $('.calendar-container').hide();
                 }
             }
-
-            $('#host_id').on('change', checkSelections);
 
             function renderCalendars() {
                 const calendarGrid = $('#calendarGrid');
@@ -607,99 +613,67 @@
                 updateCalendarSelection();
             }
 
-            // Add event listeners for manual input on start and end date fields
             $('#start_date, #end_date').on('change', function() {
                 updateCalendarSelection();
             });
         });
-        $('#booking_form').on('submit', function(e) {
-            e.preventDefault();
-            if (validateForm()) {
-                this.submit();
+        $('#booking_form').validate({
+            rules: {
+                start_date: {
+                    required: true,
+                    date: true,
+                    dateNotInPast: true // Custom rule for date not in the past
+                },
+                end_date: {
+                    required: true,
+                    date: true,
+                    dateGreaterThan: '#start_date' // Ensures end date is after start date
+                },
+                number_of_guests: {
+                    required: true
+                },
+                renewal_type: {
+                    required: true
+                },
+                property_date_status: {
+                    required: true
+                }
+            },
+            messages: {
+                start_date: {
+                    required: "Please select a start date",
+                    dateNotInPast: "Start date cannot be in the past"
+                },
+                end_date: {
+                    required: "Please select an end date",
+                    dateGreaterThan: "End date must be after the start date"
+                },
+                number_of_guests: {
+                    required: "Please select number of guests"
+                },
+                renewal_type: {
+                    required: "Please select a renewal type"
+                },
+                property_date_status: {
+                    required: "Please select a Property Status"
+                }
+            },
+            errorPlacement: function(error, element) {
+                error.appendTo(element.closest('.col-sm-6'));
             }
         });
 
-        function validateForm() {
-            let isValid = true;
+        // Custom validation method to ensure date is not in the past
+        $.validator.addMethod("dateNotInPast", function(value, element) {
+            var today = new Date();
+            var inputDate = new Date(value);
+            return this.optional(element) || inputDate >= today;
+        }, "Start date cannot be in the past");
 
-            // Validate property_id
-            if (!$('#propertyId').val()) {
-                showError('propertyId', 'Property is required.');
-                isValid = false;
-            } else {
-                clearError('propertyId');
-            }
-
-            // Validate user_id
-            if (!$('#userId').val()) {
-                showError('userId', 'User is required.');
-                isValid = false;
-            } else {
-                clearError('userId');
-            }
-
-            // Validate start_date
-            const startDate = new Date($('#start_date').val());
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            if (!$('#start_date').val()) {
-                showError('start_date', 'Start date is required.');
-                isValid = false;
-            } else if (startDate < today) {
-                showError('start_date', 'Start date must be today or later.');
-                isValid = false;
-            } else {
-                clearError('start_date');
-            }
-
-            // Validate end_date
-            const endDate = new Date($('#end_date').val());
-            if (!$('#end_date').val()) {
-                showError('end_date', 'End date is required.');
-                isValid = false;
-            } else if (endDate <= startDate) {
-                showError('end_date', 'End date must be after start date.');
-                isValid = false;
-            } else {
-                clearError('end_date');
-            }
-
-            // Validate number_of_guests
-            if (!$('#number_of_guests').val()) {
-                showError('number_of_guests', 'Number of guests is required.');
-                isValid = false;
-            } else {
-                clearError('number_of_guests');
-            }
-
-            // Validate renewal_type
-            if (!$('#renewal_type').val()) {
-                showError('renewal_type', 'Renewal type is required.');
-                isValid = false;
-            } else {
-                clearError('renewal_type');
-            }
-
-            // Validate property_date_status
-            if (!$('#property_date_status').val()) {
-                showError('property_date_status', 'Status is required.');
-                isValid = false;
-            } else {
-                clearError('property_date_status');
-            }
-
-            return isValid;
-        }
-
-        function showError(fieldId, errorMessage) {
-            $(`#${fieldId}`).addClass('is-invalid');
-            $(`#error-${fieldId}`).text(errorMessage).show();
-        }
-
-        function clearError(fieldId) {
-            $(`#${fieldId}`).removeClass('is-invalid');
-            $(`#error-${fieldId}`).text('').hide();
-        }
+        // Custom validation method to ensure end date is greater than start date
+        $.validator.addMethod("dateGreaterThan", function(value, element, param) {
+            var startDate = $(param).val();
+            return this.optional(element) || new Date(value) > new Date(startDate);
+        }, "End date must be after the start date");
     </script>
 @endsection

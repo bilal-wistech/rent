@@ -159,6 +159,23 @@ class BookingsController extends Controller
             'numberofguests' => $propety->accommodates ?? 0
         ]);
     }
+    public function getBookingDetails($date)
+    {
+        $booking = Bookings::where('start_date', '<=', $date)
+            ->where('end_date', '>=', $date)
+            ->with('properties', 'users')
+            ->first();
+
+        if ($booking) {
+            return response()->json([
+                'booking' => $booking,
+                'property' => $booking->properties,
+                'customer' => $booking->users
+            ]);
+        }
+
+        return response()->json(null);
+    }
     public function calander(Request $request, CalendarController $calendar)
     {
         $bookingCalander = $calendar->generate($request->property_id);
