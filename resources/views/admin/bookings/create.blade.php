@@ -173,7 +173,7 @@
                                                     <input type="date" class="form-control f-14" name="start_date"
                                                         id="start_date" placeholder="Start Date" autocomplete="off"
                                                         value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->start_date)->format('d-m-Y') : old('start_date') }}">
-                                                    <span class="text-danger" id="error_start_date">
+                                                    <span class="text-danger" id="error-start_date">
                                                         {{ $errors->first('start_date') }}
                                                     </span>
                                                 </div>
@@ -189,7 +189,7 @@
                                                     <input type="date" class="form-control f-14" name="end_date"
                                                         id="end_date" placeholder="End Date" autocomplete="off"
                                                         value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->end_date)->format('d-m-Y') : old('end_date') }}">
-                                                    <span class="text-danger" id="error_end_date">
+                                                    <span class="text-danger" id="error-end_date">
                                                         {{ $errors->first('end_date') }}
                                                     </span>
                                                 </div>
@@ -209,7 +209,7 @@
                                                             {{ old('number_of_guests') }}</option>
                                                     </select>
                                                     <span
-                                                        class="text-danger">{{ $errors->first('number_of_guests') }}</span>
+                                                        class="text-danger" id="error-number_of_guests">{{ $errors->first('number_of_guests') }}</span>
                                                 </div>
                                             </div>
                                             <div class="form-group row mt-3 renewal_type">
@@ -391,6 +391,7 @@
         $(document).ready(function() {
             let calendar;
             let propertyDates = {};
+            let isSelectingStartDate = true;
             $('#property_id').select2({
                 ajax: {
                     url: '{{ route('admin.bookings.form_property_search') }}',
@@ -557,7 +558,9 @@
                         dayDiv.css('pointer-events', 'none');
                     } else {
                         dayDiv.click(function() {
-                            handleDateClick($('#property_id').val(), $('#host_id').val(), dateString);
+                            const propertyId = $('#property_id').val();
+                            const hostId = $('#host_id').val();
+                            handleDateClick(propertyId, hostId, dateString);
                         });
                     }
 
@@ -568,11 +571,135 @@
                 return monthDiv;
             }
 
-            function handleDateClick(propertyId, userId, date) {
-                $('#propertyId').val(propertyId);
-                $('#userId').val(userId);
-                $('#booking_form_modal').modal('show');
+            function handleDateClick(propertyId, hostId, date) {
+                if (isSelectingStartDate) {
+                    $('#start_date').val(date);
+                    isSelectingStartDate = false;
+                    $('.calendar-container').addClass('selecting-end-date');
+                } else {
+                    $('#end_date').val(date);
+                    $('#booking_form_modal').modal('show');
+                    isSelectingStartDate = true;
+                    $('.calendar-container').removeClass('selecting-end-date');
+                }
+
+                updateCalendarSelection();
+            }
+
+            function updateCalendarSelection() {
+                $('.calendar-day').removeClass('selected in-range');
+                const startDate = moment($('#start_date').val());
+                const endDate = moment($('#end_date').val());
+
+                $('.calendar-day').each(function() {
+                    const date = moment($(this).data('date'));
+                    if (date.isSame(startDate, 'day') || date.isSame(endDate, 'day')) {
+                        $(this).addClass('selected');
+                    } else if (date.isBetween(startDate, endDate)) {
+                        $(this).addClass('in-range');
+                    }
+                });
+            }
+
+            function resetDateSelection() {
+                $('#start_date, #end_date').val('');
+                isSelectingStartDate = true;
+                updateCalendarSelection();
+            }
+
+            // Add event listeners for manual input on start and end date fields
+            $('#start_date, #end_date').on('change', function() {
+                updateCalendarSelection();
+            });
+        });
+        $('#booking_form').on('submit', function(e) {
+            e.preventDefault();
+            if (validateForm()) {
+                this.submit();
             }
         });
+
+        function validateForm() {
+            let isValid = true;
+
+            // Validate property_id
+            if (!$('#propertyId').val()) {
+                showError('propertyId', 'Property is required.');
+                isValid = false;
+            } else {
+                clearError('propertyId');
+            }
+
+            // Validate user_id
+            if (!$('#userId').val()) {
+                showError('userId', 'User is required.');
+                isValid = false;
+            } else {
+                clearError('userId');
+            }
+
+            // Validate start_date
+            const startDate = new Date($('#start_date').val());
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (!$('#start_date').val()) {
+                showError('start_date', 'Start date is required.');
+                isValid = false;
+            } else if (startDate < today) {
+                showError('start_date', 'Start date must be today or later.');
+                isValid = false;
+            } else {
+                clearError('start_date');
+            }
+
+            // Validate end_date
+            const endDate = new Date($('#end_date').val());
+            if (!$('#end_date').val()) {
+                showError('end_date', 'End date is required.');
+                isValid = false;
+            } else if (endDate <= startDate) {
+                showError('end_date', 'End date must be after start date.');
+                isValid = false;
+            } else {
+                clearError('end_date');
+            }
+
+            // Validate number_of_guests
+            if (!$('#number_of_guests').val()) {
+                showError('number_of_guests', 'Number of guests is required.');
+                isValid = false;
+            } else {
+                clearError('number_of_guests');
+            }
+
+            // Validate renewal_type
+            if (!$('#renewal_type').val()) {
+                showError('renewal_type', 'Renewal type is required.');
+                isValid = false;
+            } else {
+                clearError('renewal_type');
+            }
+
+            // Validate property_date_status
+            if (!$('#property_date_status').val()) {
+                showError('property_date_status', 'Status is required.');
+                isValid = false;
+            } else {
+                clearError('property_date_status');
+            }
+
+            return isValid;
+        }
+
+        function showError(fieldId, errorMessage) {
+            $(`#${fieldId}`).addClass('is-invalid');
+            $(`#error-${fieldId}`).text(errorMessage).show();
+        }
+
+        function clearError(fieldId) {
+            $(`#${fieldId}`).removeClass('is-invalid');
+            $(`#error-${fieldId}`).text('').hide();
+        }
     </script>
 @endsection
