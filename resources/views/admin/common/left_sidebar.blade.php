@@ -18,6 +18,7 @@
 			<li class="{{ (Route::current()->uri() == 'admin/payouts') || (Route::current()->uri() == 'admin/payouts/details/{id}') || (Route::current()->uri() == 'admin/payouts/edit/{id}') ? 'active' : ''  }}"><a href="{{ url('admin/payouts') }}"><i class="fa fa-paypal"></i><span>Payouts</span></a></li>
 		@endif
 
+
 		@if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_amenities'))
 			<li class="{{ (Route::current()->uri() == 'admin/amenities') || (Route::current()->uri() == 'admin/add-amenities') || (Route::current()->uri() == 'admin/edit-amenities/{id}') ? 'active' : ''  }}"><a href="{{ url('admin/amenities') }}"><i class="fa fa-bullseye"></i><span>Amenities</span></a></li>
 		@endif

@@ -32,7 +32,6 @@ class EmergencyContactController extends Controller
 
     public function store(Request $request)
     {
-
         $request->validate([
             'emergency_contact_name' => 'required|string|max:255',
             'emergency_contact_relation' => 'required|string|max:255',
