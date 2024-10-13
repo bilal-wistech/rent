@@ -230,17 +230,21 @@ class BookingsController extends Controller
             $start_date = date('Y-m-d', strtotime($request->start_date));
             $end_date = date('Y-m-d', strtotime($request->end_date));
 
-            $start_date = strtotime($start_date);
-            $end_date = strtotime($end_date);
+            // Convert the start and end dates to timestamps
+            $start_date_timestamp = strtotime($start_date);
+            $end_date_timestamp = strtotime($end_date);
 
-            for ($i = $start_date; $i <= $end_date; $i += 86400) {
+            // Calculate the difference in days
+            $min_days = ($end_date_timestamp - $start_date_timestamp) / 86400;
+
+            for ($i = $start_date_timestamp; $i <= $end_date_timestamp; $i += 86400) {
                 $date = date("Y-m-d", $i);
 
                 $data = [
                     'property_id' => $request->property_id,
                     'price' => ($request->price) ? $request->price : '0',
                     'status' => $request->property_date_status,
-                    'min_day' => ($request->min_stay) ? $request->min_stay : '0',
+                    'min_day' => $min_days,
                     'min_stay' => ($request->min_stay) ? '1' : '0',
                 ];
 

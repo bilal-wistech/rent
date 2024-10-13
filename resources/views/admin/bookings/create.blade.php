@@ -158,7 +158,7 @@
                                             <input type="hidden" name="booking_id" id="booking_id">
                                             <input type="hidden" name="property_id" id="propertyId" value="">
                                             <input type="hidden" name="user_id" id="userId" value="">
-
+                                            <input type="hidden" name="min_stay" value="1">
                                             <input type="hidden" name="booking_added_by" id="booking_added_by"
                                                 value="{{ Auth::guard('admin')->id() }}">
                                             <input type="hidden" name="booking_type" value="instant" id="booking_type">
@@ -666,14 +666,27 @@
         // Custom validation method to ensure date is not in the past
         $.validator.addMethod("dateNotInPast", function(value, element) {
             var today = new Date();
+            // Normalize today's date to remove the time component
+            today.setHours(0, 0, 0, 0);
+
             var inputDate = new Date(value);
+            // Normalize the input date to remove the time component
+            inputDate.setHours(0, 0, 0, 0);
+
             return this.optional(element) || inputDate >= today;
         }, "Start date cannot be in the past");
 
         // Custom validation method to ensure end date is greater than start date
         $.validator.addMethod("dateGreaterThan", function(value, element, param) {
-            var startDate = $(param).val();
-            return this.optional(element) || new Date(value) > new Date(startDate);
+            var startDate = new Date($(param).val());
+            // Normalize the start date to remove the time component
+            startDate.setHours(0, 0, 0, 0);
+
+            var endDate = new Date(value);
+            // Normalize the end date to remove the time component
+            endDate.setHours(0, 0, 0, 0);
+
+            return this.optional(element) || endDate > startDate;
         }, "End date must be after the start date");
     </script>
 @endsection
