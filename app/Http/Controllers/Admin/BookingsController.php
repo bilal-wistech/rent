@@ -242,7 +242,7 @@ class BookingsController extends Controller
 
                 $data = [
                     'property_id' => $request->property_id,
-                    'price' => ($request->price) ? $request->price : '0',
+                    'price' => ($priceData->property_price) ? $priceData->property_price : '0',
                     'status' => $request->property_date_status,
                     'min_day' => $min_days,
                     'min_stay' => ($request->min_stay) ? '1' : '0',
