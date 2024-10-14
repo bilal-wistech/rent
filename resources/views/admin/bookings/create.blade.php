@@ -145,7 +145,7 @@
                                 <!-- Modal content-->
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h4 class="modal-title f-18">
+                                        <h4 class="modal-title booking-modal f-18">
                                             Add Booking</h4>
                                         <a type="button" class="close cls-reload f-18" data-bs-dismiss="modal">×</a>
                                     </div>
@@ -621,6 +621,7 @@
                                 $('#renewal_type').val(response.booking.renewal_type);
                                 $('#property_date_status').val(response.property_dates[0].status);
                                 $('#min_stay').val(response.property_dates[0].min_stay);
+                                $('.booking-modal').text('Edit Booking');
 
                             } else {
                                 $('#booking_id').val('');
