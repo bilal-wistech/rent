@@ -162,7 +162,7 @@
                                             <input type="hidden" name="booking_added_by" id="booking_added_by"
                                                 value="{{ Auth::guard('admin')->id() }}">
                                             <input type="hidden" name="booking_type" value="instant" id="booking_type">
-                                            <input type="hidden" name="status" value="pending" id="status">
+                                            <input type="hidden" name="status" value="pending" id="booking_status">
 
                                             <div class="form-group row mt-3">
                                                 <label for="input_dob"
@@ -584,7 +584,63 @@
                     $('.calendar-container').addClass('selecting-end-date');
                 } else {
                     $('#end_date').val(date);
-                    $('#booking_form_modal').modal('show');
+
+                    // Make the AJAX call here
+                    const startDate = $('#start_date').val();
+                    const endDate = $('#end_date').val();
+                    const no_of_guests = $('#no_of_guests').val();
+                    const renewal_type = $('#renewal_type').val();
+                    const property_date_status = $('#property_date_status').val();
+                    const propertyId = $('#propertyId').val();
+                    const userId = $('#userId').val();
+                    const booking_type = $('#booking_type').val();
+                    const booking_status = $('#booking_status').val();
+
+                    $.ajax({
+                        url: '{{ route('admin.bookings.check-booking-exists') }}', // Your route to the
+                        type: 'POST',
+                        data: {
+                            property_id: propertyId,
+                            start_date: startDate,
+                            end_date: endDate,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            $('#booking_form_modal').modal('show');
+                            if (response.exists) {
+                                console.log(response.booking);
+                                console.log('dates: ', response.property_dates);
+                                $('#propertyId').val(response.booking.id);
+                                $('#userId').val(response.booking.id);
+                                $('#booking_type').val(response.booking.booking_type);
+                                $('#booking_status').val(response.booking.status);
+                                $('#booking_id').val(response.booking.id);
+                                $('#start_date').val(response.booking.start_date);
+                                $('#end_date').val(response.booking.end_date);
+                                $('#number_of_guests').val(response.booking.guest);
+                                $('#renewal_type').val(response.booking.renewal_type);
+                                $('#property_date_status').val(response.property_dates[0].status);
+                                $('#min_stay').val(response.property_dates[0].min_stay);
+
+                            } else {
+                                $('#booking_id').val('');
+                                $('#start_date').val(startDate);
+                                $('#end_date').val(endDate);
+                                $('#number_of_guests').val(no_of_guests);
+                                $('#renewal_type').val(renewal_type);
+                                $('#property_date_status').val(property_date_status);
+                                $('#propertyId').val(propertyId);
+                                $('#userId').val(userId);
+                                $('#booking_type').val(booking_type);
+                                $('#booking_status').val(booking_status);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                            // alert('There was an error checking the booking. Please try again.');
+                        }
+                    });
+
                     isSelectingStartDate = true;
                     $('.calendar-container').removeClass('selecting-end-date');
                 }
