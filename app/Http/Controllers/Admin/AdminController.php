@@ -18,7 +18,7 @@ use App\Models\{
     Properties
 };
 use App\DataTables\{
-    AdminuserDataTable, 
+    AdminuserDataTable,
     MessagesDataTable
 };
 use App\Rules\GoogleReCaptcha;
@@ -32,7 +32,7 @@ class AdminController extends Controller
     {
         $this->email = $email;
     }
-    
+
     public function index(AdminuserDataTable $dataTable)
     {
         return $dataTable->render('admin.admin.view');
@@ -214,9 +214,9 @@ class AdminController extends Controller
     {
         $preferenceData = Settings::getAll()->where('type','preferences')->where('name', 'recaptcha_preference')->value('value');
         $data['reCaptchaEnable'] = false;
-        
+
         if (str_contains($preferenceData,'admin_login')) {
-           
+
             $data['reCaptchaEnable'] = true;
         }
 
@@ -225,12 +225,14 @@ class AdminController extends Controller
 
    public function authenticate(Request $request)
     {
+
+
         $data['preferenceData'] = Settings::getAll()->where('type','preferences')->where('name', 'recaptcha_preference')->value('value');
 
         $rules = array(
             'email'    => 'required|email|max:200',
             'password' => 'required',
-            
+
         );
 
         $fieldNames = array(
@@ -246,11 +248,11 @@ class AdminController extends Controller
 
                 $rules = array_merge($rules, $captchaRule);
                 $fieldNames = array_merge($fieldNames, $captchaFieldname);
-            
+
             }
         }
 
-        
+
         $validator = Validator::make($request->all(), $rules);
         $validator->setAttributeNames($fieldNames);
 
@@ -266,10 +268,10 @@ class AdminController extends Controller
 
                 if (Auth::guard('admin')->attempt(['email' => trim($request['email']), 'password' => trim($request['password'])])) {
 
-                    if (n_as_k_c()) {
-                        Session::flush();
-                        return view('vendor.installer.errors.admin');
-                    }
+                    // if (n_as_k_c()) {
+                    //     Session::flush();
+                    //     return view('vendor.installer.errors.admin');
+                    // }
 
                     $pref   = Settings::getAll()->where('type', 'preferences');
                     $prefer = [];
@@ -365,7 +367,7 @@ class AdminController extends Controller
                 return redirect('admin/login');
             }
         } else {
-           
+
             $rules = array(
                 'password'              => 'required|min:6|max:30',
                 'password_confirmation' => 'required|same:password',
@@ -549,7 +551,7 @@ class AdminController extends Controller
     public function sendEmail(Request $request)
     {
         $message = Messages::find($request->id);
-        
+
         if (! $request->isMethod('POST')) {
             $data['messages'] = $message;
             return view('admin.bookings.adminmessagesend', $data);
