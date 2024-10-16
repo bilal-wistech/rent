@@ -26,6 +26,7 @@ use App\Http\Controllers\Controller;
 use App\DataTables\PayoutsDataTable;
 use App\Exports\PayoutsExport;
 use App\Http\Controllers\EmailController;
+use Illuminate\Support\Facades\Validator;
 use App\Models\{
     Payouts,
     Withdrawal,
@@ -37,6 +38,8 @@ use App\Models\{
     PaymentMethods,
     PayoutSetting,
     Bookings,
+    Invoice,
+    admin,
 
 };
 
@@ -132,10 +135,15 @@ class PayoutsController extends Controller
     {
         // user , payment method , currency,  amount ,
         // $bookings = Bookings::orderBy('id', 'desc')->where('payout_payment', '0')->get();
-        $bookings =  Bookings::where('status' , 'pending')->get();
+        $bookings = Bookings::where('status', 'pending')->get();
+        $invoice = Invoice::latest()->first();
+        $lastInvoice = Invoice::latest('id')->first(); // Get the last invoice based on the 'id'
+        $invNumber = ($lastInvoice ? $lastInvoice->invoice_no : 0) + 1; // Increment the id by 1
         $currency = Currency::all();
+        $admin = admin::all();
         $pMethods = PaymentMethods::all();
-        return view('admin.payouts.create', compact('bookings', 'currency' , 'pMethods'));
+        $users = User::all();
+        return view('admin.payouts.create', compact('bookings', 'admin', 'currency', 'pMethods', 'invNumber', 'users'));
     }
 
 
@@ -149,9 +157,19 @@ class PayoutsController extends Controller
 
         if (!$request->isMethod('post')) {
 
-            $data['withDrawal'] = Withdrawal::where('id', $request->id)->first();
-
-            return view('admin.payouts.edit', $data);
+            $withDrawal = Withdrawal::where('id', $request->id)->first();
+            $currency = Currency::all();
+            $admin = admin::all();
+            $users = User::all();
+            $pMethods = PaymentMethods::all();
+            $invoice = Invoice::where('reference_no', $withDrawal->invoice_id)->first();
+            $property = Properties::where('id', $invoice->id)->first();
+            $propertyName = $property->name;
+            $bookings = Bookings::where('status', 'pending')->get();
+            $invoice = Invoice::latest()->first();
+            $lastInvoice = Invoice::latest('id')->first(); // Get the last invoice based on the 'id'
+            $invNumber = ($lastInvoice ? $lastInvoice->invoice_no : 0) + 1; // Increment the id by 1
+            return view('admin.payouts.edit', compact('withDrawal', 'bookings', 'admin', 'currency', 'pMethods', 'invNumber', 'users', 'propertyName'));
         } else {
 
             if ($request->status == 'Success') {
@@ -202,9 +220,9 @@ class PayoutsController extends Controller
         $model = Withdrawal::find($id);
         if ($model) {
             $model->delete();
-            return redirect()->route('payouts')->with('paydelsuccess', 'Withdrawal deleted successfully.');
+            return redirect()->back()->with('paydelsuccess', 'Withdrawal deleted successfully.');
         } else {
-            return redirect()->route('payouts')->with('paydelerror', 'Withdrawal not found.');
+            return redirect()->back()->with('paydelerror', 'Withdrawal not found.');
         }
     }
 
@@ -282,8 +300,6 @@ class PayoutsController extends Controller
         return $allPayouts;
     }
 
-
-
     public function getAllPayoutsCSV()
     {
         $allPayouts = Payouts::join('properties', function ($join) {
@@ -301,72 +317,107 @@ class PayoutsController extends Controller
         return $allPayouts;
     }
 
-
-
     // payout creat
 
     public function asuccess(Request $request)
     {
-        dd($request->all());
-        $userId = $request->user_id;
-        $userdata = User::find($userId);
-        $currencyID = $request->currency_id;
-        $paymentSettingID = $request->payment_method_id;
-        $requestedAmount = $request->amount;
-        // $walletMoney       = Wallet::where('user_id', $userId)->where('currency_id', $currencyID)->first();
 
-        // if ($walletMoney == null) {
-        //     Common::one_time_message('error', __("Sorry! this user don't have request currency Wallet."));
-        //     return redirect()->route('payouts.create')->withInput();
-        // }
+        $invoices = $request->invoices;
+        foreach ($invoices as $invoiceData) {
 
-        // if ($walletMoney->balance_indefault < $requestedAmount) {
-        //     Common::one_time_message('error', __("Sorry! this user don't have sufficient balance."));
-        //     return redirect()->route('payouts.create')->withInput();
-        // }
+            if ($invoiceData['payment'] <= 0) {
+                return response()->json([
+                    'message' => 'error'
+                ]);
+            }
+            // Fetch a single invoice using `first()` instead of `get()`
+            $invoice = Invoice::where('id', $invoiceData['invoice_id'])->first();
+            $invoice->payment_status = 'paid';  
+            $invoice->save();
 
-        $payoutSetting = PayoutSetting::find($paymentSettingID);
-        $withdrawal = new Withdrawal;
-        $withdrawal->user_id = $userId;
-        $withdrawal->currency_id = $currencyID;
-        $withdrawal->payout_id = $paymentSettingID;
-        $withdrawal->payment_method_id = '4';
-        $withdrawal->uuid = uniqid();
-        $withdrawal->subtotal = $requestedAmount;
-        $withdrawal->email = $userdata->email;
-        $withdrawal->status = "Success";
+            // Check if the invoice exists before accessing the reference number
+            if ($invoice) {
+                $rfNo = $invoice->reference_no;
+            } else {
+                $rfNo = '0'; // Set reference number to '0' if invoice not found or if it is null
+            }
 
-        $withdrawal->account_number = $payoutSetting->account_number;
-        $withdrawal->bank_name = $payoutSetting->bank_name;
-        $withdrawal->swift_code = $payoutSetting->swift_code;
-        $withdrawal->amount = $requestedAmount;
-        $withdrawal->save();
+            // Fetch the user
+            $user = User::where('id', $request->user_id)->first();
 
+            // Check if user is found before trying to access their email
+            if ($user) {
+                $userEmail = $user->email;
+            } else {
+                return response()->json(['error' => 'User not found'], 404);
+            }
 
-        $bookingId = $request->booking_id;
-        $booking = Bookings::find($bookingId);
-        if ($booking) {
-            $booking->payout_payment = '1';
-            $booking->save();
+            // Create a new withdrawal record
+            $withdrawal = new Withdrawal();
+            $withdrawal->user_id = $request['user_id'];
+            $withdrawal->currency_id = $request['currency_id'];
+            $withdrawal->payment_method_id = $request['payment_method_id'];
+            $withdrawal->uuid = uniqid();
+            $withdrawal->email = $userEmail;
+            $withdrawal->amount = $invoiceData['grand_total'];
+            $withdrawal->amount_due = $invoiceData['grand_total'] - $invoiceData['payment'];
+            $withdrawal->payment = $invoiceData['payment'];
+            $withdrawal->payto = $request->owner;
+            $withdrawal->invoice_id = $rfNo; // Set the reference number as invoice_id
+            $withdrawal->status = 'success';
+            $withdrawal->save();
         }
 
-
-
-        // $walletMoney->balance               -=  $requestedAmount;
-        // $walletMoney->save();
-
-        try {
-
-            $email_controller = new EmailController;
-            $email_controller->notifyAdminOfPayoutRequest($withdrawal->id);
-
-
-        } catch (\Exception $e) {
-            Common::one_time_message('danger', __('Email was not sent due to :x', ['x' => __($e->getMessage())]));
-            return redirect()->route('payouts');
-        }
-
-        Common::one_time_message('success', __('Payout has been created successfully.'));
-        return redirect()->route('payouts');
+        return response()->json([
+            'inserted' => 'success'
+        ]);
     }
+
+
+    public function updatePayout(Request $req, $id)
+    {
+        $validator = Validator::make($req->all(), [
+            'payment' => 'required',   // Must be a valid number and non-negative
+        ]);
+
+
+        if ($req->payment <= 0) {
+            return redirect()->to('admin/payouts/edit/' . $req->id)->with('success', 'Min Payout Value is 1.');
+        }
+
+        // Check if validation fails
+        if ($validator->fails()) {
+            return redirect()->to('admin/payouts/edit/' . $req->id)->withErrors($validator);
+        }
+
+        // Find the existing withdrawal record
+        $withdrawal = Withdrawal::find($id);
+        if (!$withdrawal) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Withdrawal record not found',
+            ], 404); // Send 404 Not Found status code
+        }
+
+        // Add the new payment to the existing payment
+        $newPayment = $req->payment;
+        $withdrawal->payment += $newPayment;
+
+        // Calculate the new amount_due
+        $withdrawal->amount_due -= $newPayment; // Subtract the new payment from the amount_due
+
+        // Update other details
+        $withdrawal->payto = $req->admin_id;
+        $withdrawal->created_at = $req->date;
+        $withdrawal->currency_id = $req->currency_id;
+
+        // Save the updated withdrawal record
+        if ($withdrawal->save()) {
+            return redirect()->to('admin/payouts')->with('success', 'Payout Updated Successfully!');
+        } else {
+            return redirect()->to('admin/payouts')->with('error', 'Payout Update Failed!');
+        }
+    }
+
+
 }

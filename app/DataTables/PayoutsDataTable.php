@@ -5,6 +5,7 @@ use App\Models\Withdrawal;
 use Yajra\DataTables\Services\DataTable;
 use Request;
 
+
 class PayoutsDataTable extends DataTable
 {
     public function ajax()
@@ -25,7 +26,6 @@ class PayoutsDataTable extends DataTable
                 return dateFormat($payout->created_at);
             })
 
-
             ->addColumn('subtotal', function ($payout) {
                 return $payout->status == 'Success' ? $payout->amount : $payout->subtotal;
             })
@@ -34,13 +34,19 @@ class PayoutsDataTable extends DataTable
                 return $payout->currency?->code;
             })
 
+            ->addColumn('payto', function ($payout) {
+                $admin = \App\Models\Admin::find($payout->payto); // Fetch admin using the value from the 'payto' column
+                return $admin ? $admin->username : 'N/A'; // Return admin's username, or 'N/A' if no admin found
+            })
+
+
             ->addColumn('action', function ($withDrawal) {
-
-                [$url, $title, $icon] = ($withDrawal->status == "Pending") ? ['edit/', 'Edit payout', 'edit'] : ['details/', 'Details', 'tasks'];
-
                 return '
-                <a href="' . url('admin/payouts/' . $url . $withDrawal->id) . '" class="btn btn-xs btn-primary" title="' . $title . '">
-                    <i class="fa fa-' . $icon . '"></i>
+                <a href="' . url('admin/payouts/edit/'.$withDrawal->id) . '" class="btn btn-xs text-white btn-warning" title="Details">
+                    <i class="fa fa-pencil"></i>
+                </a>&nbsp;
+                <a href="' . url('admin/payouts/details/'.$withDrawal->id) . '" class="btn btn-xs btn-primary" title="Edit">
+                    <i class="fa fa-tasks"></i>
                 </a>&nbsp;
                 <button class="btn btn-xs btn-danger" onclick="confirmDelete(' . $withDrawal->id . ')" data-id="' . $withDrawal->id . '" title="Delete">
                     <i class="fa fa-trash"></i>
@@ -51,7 +57,6 @@ class PayoutsDataTable extends DataTable
             ->make(true);
     }
 
-
     public function query()
     {
         $status = isset(request()->status) ? request()->status : null;
@@ -60,7 +65,7 @@ class PayoutsDataTable extends DataTable
 
         $user_id = Request::segment(4);
 
-        $query = Withdrawal::with('user', 'currency', 'payment_methods');
+        $query = Withdrawal::with('user', 'currency', 'payment_methods', 'admin');
 
         if (isset($user_id)) {
             $query->where('withdrawals.user_id', '=', $user_id);
@@ -88,25 +93,21 @@ class PayoutsDataTable extends DataTable
             ->addColumn(['data' => 'user_id', 'name' => 'user.first_name', 'user.last_name', 'title' => 'User Name'])
             ->addColumn(['data' => 'currency_id', 'name' => 'currency.code', 'title' => 'Currency'])
             ->addColumn(['data' => 'p_method', 'name' => 'payment_methods.name', 'title' => 'Payment Method'])
-            ->addColumn(['data' => 'account_number', 'name' => 'account_number', 'title' => 'Account Number'])
+            // ->addColumn(['data' => 'account_number', 'name' => 'account_number', 'title' => 'Account Number'])
             ->addColumn(['data' => 'email', 'name' => 'user.email', 'title' => 'Email'])
-            ->addColumn(['data' => 'subtotal', 'name' => 'amount', 'title' => 'Amount'])
+            ->addColumn(['data' => 'amount', 'name' => 'amount', 'title' => 'Amount'])
+            ->addColumn(['data' => 'amount_due', 'name' => 'amount_due', 'title' => 'amount_due'])
+            ->addColumn(['data' => 'payment', 'name' => 'payment', 'title' => 'payment'])
             ->addColumn(['data' => 'status', 'name' => 'status', 'title' => 'Status'])
+            ->addColumn(['data' => 'payto', 'name' => 'admin.username', 'title' => 'Pay To'])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
 
             ->parameters(dataTableOptions());
     }
 
-
-    /**
-     * Get filename for export.
-     *
-     * @return string
-     */
     protected function filename()
     {
         return 'payoutsdatatables_' . time();
-
     }
 }
