@@ -242,10 +242,10 @@
 
                         $('.pay-payment').on('input', function () {
                             let payment = parseFloat($(this).val());
-                            let amountToPay = parseFloat($(this).closest('tr').find('.amount-to-pay').val());
+                            let amountToPay = parseFloat($(this).closest('tr').find('.grand-total').val());
 
                             if (payment > amountToPay) {
-                                alert('The payment amount cannot exceed the Amount Due.');
+                                alert('The payment amount cannot exceed the Payable amount.');
                                 $(this).val(amountToPay); // Reset to the maximum allowable amount
                                 payment = amountToPay; // Adjust payment to the maximum allowable amount
                             }

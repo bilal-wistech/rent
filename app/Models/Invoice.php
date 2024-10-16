@@ -55,4 +55,9 @@ class Invoice extends Model
     {
         return $this->belongsTo(Bookings::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'customer_id'); // Adjust if your foreign key is different
+    }
 }

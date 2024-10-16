@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\EmergencyContactController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Admin\LedgerController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -137,7 +138,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('invoices/show/{id}', 'InvoiceController@show')->middleware(['permission:manage_invoices'])->name('admin.invoices.show');
     Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts'])->name('admin.payouts');
     Route::post('invoices/invoice/{id}', 'InvoiceController@getInvoiceByUserId');
-    
+    // customer ledgers amount routes
+    Route::get('balance' , 'ledgersController@index');
+    Route::get('balance/details/{id}' , 'ledgersController@details');
     //Admin Payout routes
     Route::get('payouts/create', 'PayoutsController@create')->name('payouts.create');
     Route::post('payouts/create/success', 'PayoutsController@asuccess')->name('payouts.asuccess');

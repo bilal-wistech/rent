@@ -36,6 +36,11 @@
                 </li>
             @endif
 
+                <li
+                    class="{{ Route::current()->uri() == 'admin/balance' || Route::current()->uri() == 'admin/balance/details/{id}' || Route::current()->uri() == 'admin/balance/edit/{id}' ? 'active' : '' }}">
+                    <a href="{{ url('admin/balance') }}"><i class="fa fa-paypal"></i><span>Ledgers</span></a>
+                </li>
+
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_amenities'))
                 <li
                     class="{{ Route::current()->uri() == 'admin/amenities' || Route::current()->uri() == 'admin/add-amenities' || Route::current()->uri() == 'admin/edit-amenities/{id}' ? 'active' : '' }}">
