@@ -4,28 +4,26 @@
 
 <div class="content-wrapper">
     <section class="content">
-        <div class="card mx-auto border-0" style="">
+        <div class="card mx-auto border-0">
             <div class="card-body p-4">
-                <select name="" id="" class="form-control mb-5" style="width : 20%">
+
+                <!-- Month Selector -->
+                <select name="" id="" class="form-control mb-5" style="width: 20%;">
                     <option value="">This Month</option>
                 </select>
-                <table class="table table-stripped table-bordered ">
-                    <tr>
-                        <th>
-                            Date
-                        </th>
-                        <th>Invoice Number</th>
-                        <th>
-                            Description
-                        </th>
-                        <th>Total Amount</th>
-                        <th>
-                            Payments
-                        </th>
-                        <th>
-                            Balance
-                        </th>
-                    </tr>
+
+                <!-- Invoice Table -->
+                <table class="table table-stripped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Invoice Number</th>
+                            <th>Description</th>
+                            <th>Total Amount</th>
+                            <th>Payments</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         @php
                             $totalAmountDue = 0; // Initialize the total amount due
@@ -57,21 +55,20 @@
 
                         <!-- Final Amount Due Row -->
                         <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td colspan="3"></td>
                             <td><strong>Amount Due</strong></td>
                             <td></td>
                             <td><strong>{{ number_format($totalAmountDue, 2) }}</strong></td>
                             <!-- Format total amount due -->
                         </tr>
                     </tbody>
-
-
                 </table>
             </div>
         </div>
-        <!-- <div class="row">
+
+        <!-- Optional Summary Section -->
+        <!--
+        <div class="row">
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-body">
@@ -96,7 +93,9 @@
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
+        -->
+
     </section>
 </div>
 

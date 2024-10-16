@@ -125,7 +125,6 @@ class LedgersController extends Controller
         isset(request()->property) ? $data['allproperties'] = request()->property : $data['allproperties'] = '';
         isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
         isset(request()->types) ? $data['alltypes'] = request()->types : $data['alltypes'] = '';
-
         return $dataTable->render('admin.ledger.view', $data);
     }
 
