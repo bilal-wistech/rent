@@ -444,30 +444,6 @@ class BookingsController extends Controller
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
-    // get booking by id
-    public function getbookingbyid($id)
-    {
-        // Find the booking by ID
-        $booking = Bookings::find($id);
-
-        // Check if the booking exists
-        if (!$booking) {
-            return response()->json(['message' => 'Booking not found'], 404);
-        }
-
-        // Get the user associated with the booking
-        $user = User::find($booking->user_id);
-        $currency = Currency::where('code', $booking->currency_code)->get();
-        $properties = Properties::where('id', $booking->property_id)->get();
-
-        // Return both booking and user data as JSON
-        return response()->json([
-            'booking' => $booking,
-            'user' => $user,
-            'currency' => $currency,
-            'properties' => $properties
-        ]);
-    }
 
     /**
      * Get Distinct currency total with symbol

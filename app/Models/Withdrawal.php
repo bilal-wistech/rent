@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 class Withdrawal extends Model
 {
   use SoftDeletes;
-  protected $table   = 'withdrawals';
+  protected $table = 'withdrawals';
 
   public function user()
   {
@@ -27,5 +27,16 @@ class Withdrawal extends Model
   {
     return $this->belongsTo('App\Models\PayoutSetting', 'payout_id', 'id');
   }
+
+
+  public function admin()
+  {
+    return $this->belongsTo(Admin::class, 'payto', 'id');
+  }
+
+  // public function property()
+  // {
+  //   return $this->belongsTo(Properties::class, 'property_id', 'id');
+  // }
 }
 
