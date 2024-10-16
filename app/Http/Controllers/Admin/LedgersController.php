@@ -150,10 +150,24 @@ class LedgersController extends Controller
 
     public function details($id)
     {
-        $invoices =  Invoice::where('customer_id' , $id)->get();
-        $payment =  Withdrawal::where('user_id' , $id)->get();
-        return view('admin.ledger.details', compact('invoices'));
+        // Fetch invoices with their reference numbers and grand totals.
+        $invoices = Invoice::where('customer_id', $id)
+            ->select('reference_no', 'created_at', 'description', 'grand_total')
+            ->get();
+
+        // Collect all reference numbers to match with payments.
+        $invoiceReferences = $invoices->pluck('reference_no');
+
+        // Fetch payments related to the collected reference numbers.
+        $payments = Withdrawal::whereIn('invoice_id', $invoiceReferences)->get();
+
+        // Group payments by `invoice_id` for easy access in the view.
+        $groupedPayments = $payments->groupBy('invoice_id');
+
+        return view('admin.ledger.details', compact('invoices', 'groupedPayments'));
     }
+
+
 
 
     // public function delete($id)

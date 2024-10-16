@@ -36,10 +36,11 @@
                 </li>
             @endif
 
-                <li
-                    class="{{ Route::current()->uri() == 'admin/balance' || Route::current()->uri() == 'admin/balance/details/{id}' || Route::current()->uri() == 'admin/balance/edit/{id}' ? 'active' : '' }}">
-                    <a href="{{ url('admin/balance') }}"><i class="fa fa-paypal"></i><span>Ledgers</span></a>
-                </li>
+            <li
+                class="{{ Route::current()->uri() == 'admin/balance' || Route::current()->uri() == 'admin/balance/details/{id}' || Route::current()->uri() == 'admin/balance/edit/{id}' ? 'active' : '' }}">
+                <a href="{{ url('admin/balance') }}"><i class="fa fa-clipboard"></i><span>Ledgers</span></a>
+            </li>
+
 
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_amenities'))
                 <li
@@ -70,8 +71,7 @@
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_testimonial'))
                 <li
                     class="{{ Route::current()->uri() == 'admin/testimonials' || Route::current()->uri() == 'admin/edit-testimonials/{id}' || Route::current()->uri() == 'admin/add-testimonials' ? 'active' : '' }}">
-                    <a href="{{ url('admin/testimonials') }}"><i
-                            class="fa fa-quote-left"></i><span>Testimonials</span></a>
+                    <a href="{{ url('admin/testimonials') }}"><i class="fa fa-quote-left"></i><span>Testimonials</span></a>
                 </li>
             @endif
 
@@ -97,8 +97,7 @@
                 <li
                     class="treeview {{ Route::current()->uri() == 'admin/sales-report' || Route::current()->uri() == 'admin/sales-analysis' || Route::current()->uri() == 'admin/overview-stats' ? 'active' : '' }}">
                     <a href="#">
-                        <i class="fa fa-bar-chart-o"></i> <span>Reports</span><i
-                            class="fa fa-angle-left pull-right"></i>
+                        <i class="fa fa-bar-chart-o"></i> <span>Reports</span><i class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
                         <li class="{{ Route::current()->uri() == 'admin/overview-stats' ? 'active' : '' }}"><a
@@ -123,8 +122,8 @@
             </li>
 
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'general_setting'))
-                <li class="{{ Request::segment(2) == 'settings' ? 'active' : '' }}"><a
-                        href="{{ url('admin/settings') }}"><i class="fa fa-gears"></i><span>Settings</span></a></li>
+                <li class="{{ Request::segment(2) == 'settings' ? 'active' : '' }}"><a href="{{ url('admin/settings') }}"><i
+                            class="fa fa-gears"></i><span>Settings</span></a></li>
             @endif
         </ul>
     </section>

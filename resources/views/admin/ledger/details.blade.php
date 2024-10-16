@@ -14,12 +14,11 @@
                         <th>
                             Date
                         </th>
+                        <th>Invoice Number</th>
                         <th>
                             Description
                         </th>
-                        <th>
-                            Amount
-                        </th>
+                        <th>Total Amount</th>
                         <th>
                             Payments
                         </th>
@@ -28,21 +27,47 @@
                         </th>
                     </tr>
                     <tbody>
+                        @php
+                            $totalAmountDue = 0; // Initialize the total amount due
+                        @endphp
+
                         @foreach ($invoices as $invoice)
-                            <tr>
-                                <td>{{ $invoice->created_at->format('y-m-d')}}</td>
-                                <td>{{ $invoice->description}}</td>
-                                <td>{{ $invoice->grand_total}}</td>
-                            </tr>
+                                                @php
+                                                    // Calculate total payment for the current invoice
+                                                    $totalPaymentForInvoice = $groupedPayments->has($invoice->reference_no)
+                                                        ? $groupedPayments[$invoice->reference_no]->sum('payment')
+                                                        : 0;
+
+                                                    // Calculate the balance for this invoice
+                                                    $balance = $invoice->grand_total - $totalPaymentForInvoice;
+
+                                                    // Accumulate the balance into the total amount due
+                                                    $totalAmountDue += $balance;
+                                                @endphp
+
+                                                <tr>
+                                                    <td>{{ $invoice->created_at->format('y-m-d') }}</td>
+                                                    <td>{{ $invoice->reference_no }}</td>
+                                                    <td>{{ $invoice->description }}</td>
+                                                    <td>{{ number_format($invoice->grand_total, 2) }}</td> <!-- Format grand total -->
+                                                    <td>{{ number_format($totalPaymentForInvoice, 2) }}</td> <!-- Format payments -->
+                                                    <td>{{ number_format($balance, 2) }}</td> <!-- Format balance -->
+                                                </tr>
                         @endforeach
+
+                        <!-- Final Amount Due Row -->
                         <tr>
                             <td></td>
                             <td></td>
-                            <td>Amount Due</td>
                             <td></td>
-                            <td>AED 12000</td>
+                            <td><strong>Amount Due</strong></td>
+                            <td></td>
+                            <td><strong>{{ number_format($totalAmountDue, 2) }}</strong></td>
+                            <!-- Format total amount due -->
                         </tr>
                     </tbody>
+
+
                 </table>
             </div>
         </div>

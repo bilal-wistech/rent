@@ -26,9 +26,6 @@ class LedgerDatatable extends DataTable
             ->addColumn('balance', function ($invoice) {
                 return number_format($invoice->balance, 2); // Format the balance
             })
-            ->addColumn('created_at', function ($invoice) {
-                return $invoice->created_at ? $invoice->created_at->format('Y-m-d') : 'N/A';
-            })
             ->addColumn('action', function ($invoice) {
                 return '
                 <a href="' . url('admin/balance/details/' . $invoice->customer_id) . '" class="btn btn-xs btn-primary" title="View">
@@ -62,7 +59,6 @@ class LedgerDatatable extends DataTable
             ->addColumn(['data' => 'grand_total', 'name' => 'grand_total', 'title' => 'Invoices Amount'])
             ->addColumn(['data' => 'total_payments', 'name' => 'total_payments', 'title' => 'Total Payments']) // Add this line
             ->addColumn(['data' => 'balance', 'name' => 'balance', 'title' => 'Balance']) // Add the balance column
-            ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
             ->parameters(dataTableOptions());
     }
