@@ -58,7 +58,7 @@
             <div class="col-6 col-sm-3 mt-5">
                 <div class="row mt-5">
                     <div class="col-md-12 text-center">
-                        <a href="{{ url('/') }}">{!! getLogo('img-130x32') !!}</a>
+                        <a href="{{ url('/') }}">{{-- {!! getLogo('img-130x32') !!} --}} Ahomes</a>
                     </div>
                 </div>
 
