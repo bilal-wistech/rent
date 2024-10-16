@@ -105,6 +105,23 @@
                     </ul>
                 </li>
             @endif
+            {{-- @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'view_reports')) --}}
+                <li
+                    class="treeview {{ Route::current()->uri() == 'admin/sales-report' || Route::current()->uri() == 'admin/sales-analysis' || Route::current()->uri() == 'admin/overview-stats' ? 'active' : '' }}">
+                    <a href="#">
+                        <i class="fa fa-bar-chart-o"></i> <span>Alerts</span><i
+                            class="fa fa-angle-left pull-right"></i>
+                    </a>
+                    <ul class="treeview-menu">
+                        {{-- <li class="{{ Route::current()->uri() == 'admin/overview-stats' ? 'active' : '' }}"><a
+                                href="{{ url('admin/overview-stats') }}"><span>All Alerts</span></a></li> --}}
+                        <li class="{{ Route::current()->uri() == 'admin/sales-report' ? 'active' : '' }}"><a
+                                href="{{ url('admin/sales-report') }}"><span>Alerts Type</span></a></li>
+                        {{-- <li class="{{ Route::current()->uri() == 'admin/sales-analysis' ? 'active' : '' }}"><a
+                                href="{{ url('admin/sales-analysis') }}"><span>Templates</span></a></li> --}}
+                    </ul>
+                </li>
+            {{-- @endif --}}
 
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_email_template'))
                 <li class="{{ Route::current()->uri() == 'admin/email-template/{id}' ? 'active' : '' }}"><a
