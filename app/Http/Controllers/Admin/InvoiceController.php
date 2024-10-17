@@ -57,10 +57,10 @@ class InvoiceController extends Controller
             $to = null;
         }
 
-        if (n_as_k_c()) {
-            Session::flush();
-            return view('vendor.installer.errors.admin');
-        }
+        // if (n_as_k_c()) {
+        //     Session::flush();
+        //     return view('vendor.installer.errors.admin');
+        // }
 
 
         if (isset(request()->reset_btn)) {

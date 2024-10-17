@@ -150,10 +150,10 @@ class PayoutsController extends Controller
 
     public function edit(Request $request)
     {
-        if (n_as_k_c()) {
-            Session::flush();
-            return view('vendor.installer.errors.admin');
-        }
+        // if (n_as_k_c()) {
+        //     Session::flush();
+        //     return view('vendor.installer.errors.admin');
+        // }
 
         if (!$request->isMethod('post')) {
 
@@ -332,7 +332,7 @@ class PayoutsController extends Controller
             }
             // Fetch a single invoice using `first()` instead of `get()`
             $invoice = Invoice::where('id', $invoiceData['invoice_id'])->first();
-            $invoice->payment_status = 'paid';  
+            $invoice->payment_status = 'paid';
             $invoice->save();
 
             // Check if the invoice exists before accessing the reference number
