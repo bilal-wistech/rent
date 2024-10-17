@@ -117,8 +117,8 @@
                                 href="{{ url('admin/overview-stats') }}"><span>All Alerts</span></a></li> --}}
                         <li class="{{ Route::current()->uri() == 'admin/alert-types' ? 'active' : '' }}"><a
                                 href="{{ url('admin/alert-types') }}"><span>Alerts Type</span></a></li>
-                        {{-- <li class="{{ Route::current()->uri() == 'admin/sales-analysis' ? 'active' : '' }}"><a
-                                href="{{ url('admin/sales-analysis') }}"><span>Templates</span></a></li> --}}
+                        <li class="{{ Route::current()->uri() == 'admin/templates' ? 'active' : '' }}"><a
+                                href="{{ url('admin/templates') }}"><span>Templates</span></a></li>
                     </ul>
                 </li>
             @endif

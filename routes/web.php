@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\TemplateController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\AddonController;
@@ -252,6 +253,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         });
         Route::group(['middleware' => 'permission:manage_alert_types'], function () {
             Route::resource('alert-types', AlertTypeController::class)->except('show');
+        });
+        Route::group(['middleware' => 'permission:manage_templates'], function () {
+            Route::resource('templates', TemplateController::class)->except('show');
         });
 
         Route::match(array('GET', 'POST'), 'settings/email', 'SettingsController@email')->middleware(['permission:email_settings']);
