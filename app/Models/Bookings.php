@@ -187,7 +187,7 @@ class Bookings extends Model
         $rate = Currency::getAll()->where('code', $this->attributes['currency_code'] ?? $default_currency)->first()->rate;
 
 
-        $base_amount = $this->attributes[$field] / $rate;
+        $base_amount = @$this->attributes[$field] / $rate;
 
 
         $session_rate = Currency::getAll()->where('code', $default_currency)->first()->rate;
