@@ -25,11 +25,11 @@ use Validator, Mail, Session, Cache, Common, DB, Artisan;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\{
-    Country, 
-    Settings, 
-    Language, 
-    Currency, 
-    PropertyFees, 
+    Country,
+    Settings,
+    Language,
+    Currency,
+    PropertyFees,
     Admin
 };
 
@@ -113,16 +113,16 @@ class SettingsController extends Controller
             }
         }
     }
-    public function getreCaptchaCredential() 
+    public function getreCaptchaCredential()
     {
-        
+
         $reCaptchaKey = config("vrent.reCaptcha_key");
         $reCaptchaSecret = config("vrent.reCaptcha_secret");
         $getreCaptchaKey = (!empty($reCaptchaKey) || is_null($reCaptchaKey)) ? $reCaptchaKey : Settings::where('type', 'google_reCaptcha')->where('name', 'reCaptcha_key')->value('value');
         $getreCaptchaSecret = (!empty($reCaptchaSecret) || is_null($reCaptchaSecret)) ? $reCaptchaSecret : Settings::where('type', 'google_reCaptcha')->where('name', 'reCaptcha_secret')->value('value');
 
         $response['status'] = 'success';
-        
+
         if (empty($getreCaptchaKey) || is_null($getreCaptchaKey) || empty($getreCaptchaSecret) || is_null($getreCaptchaSecret)) {
             $response['status']  = 'error';
             $response['message'] = __('The credentails of Google reCaptcha is missing, setup reCaptcha credentials in  ');
@@ -155,8 +155,8 @@ class SettingsController extends Controller
                     'min_search_price'               => 'Search Price (Min)',
                     'max_search_price'               => 'Search Price (Max)',
                  );
-            
-            
+
+
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
@@ -167,7 +167,7 @@ class SettingsController extends Controller
             } else {
                 if (env('APP_MODE', '') != 'test') {
                     unset($request['_token']);
-                    
+
                     if ($request['date_format'] == 0) {
                         $request['date_format_type']       = 'yyyy' . $request['date_separator'] . 'mm' . $request['date_separator'] . 'dd';
                         $request['front_date_format_type'] = 'yy' . $request['date_separator'] . 'mm' . $request['date_separator'] . 'dd';
@@ -192,7 +192,7 @@ class SettingsController extends Controller
 
 
                     $request['recaptcha_preference'] = ($request->recaptcha_preference == 'disable' ? 'disable' : implode(',', $request->recaptcha_preference));
-                    
+
                     foreach ($request->all() as $key => $value) {
                         $matches            = ['name' => $key, 'type'=>'preferences'];
                         $preferences        = Settings::firstOrNew($matches);
@@ -381,10 +381,10 @@ class SettingsController extends Controller
              $data['paypal'] = Common::key_value('name', 'value', $paypal);
              $data['stripe'] = Common::key_value('name', 'value', $stripe);
              $data['countries'] = Country::getAll()->pluck('name','id');
-             if (n_as_k_c()) {
-                Session::flush();
-                return view('vendor.installer.errors.admin');
-            }
+            //  if (n_as_k_c()) {
+            //     Session::flush();
+            //     return view('vendor.installer.errors.admin');
+            // }
 
              return $dataTable->render('admin.settings.payment', $data);
         } elseif ($request['gateway'] == 'paypal') {
@@ -624,7 +624,7 @@ class SettingsController extends Controller
 
     public function googleRecaptchaInformation(Request $request)
     {
-        
+
         if (! $request->isMethod('post')) {
               return view('admin.settings.google_reCaptcha');
 
@@ -651,7 +651,7 @@ class SettingsController extends Controller
                     Settings::updateOrCreate(
                             ['name' => 'recaptcha_key', 'type' => 'google_reCaptcha'],
                             ['name' => 'recaptcha_key', 'type' => 'google_reCaptcha', 'value' => $request->google_recaptcha_key],
-                            
+
                         )->updateOrCreate(
                             ['name' => 'recaptcha_secret', 'type' => 'google_reCaptcha'],
                             ['name' => 'recaptcha_secret', 'value' => $request->google_recaptcha_secret, 'type' => 'google_reCaptcha'],

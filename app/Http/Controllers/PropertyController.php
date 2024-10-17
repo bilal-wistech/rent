@@ -138,8 +138,8 @@ class PropertyController extends Controller
 
                 $email_controller = new EmailController;
                 $email_controller->notifyAdminForPropertyApproval($data['result']);
-    
-    
+
+
             } catch (\Exception $e) {
                 Common::one_time_message('danger', __('Email was not sent due to :x', ['x' => __($e->getMessage())]));
                 return redirect('properties');
@@ -169,10 +169,10 @@ class PropertyController extends Controller
             $data['property_type']  = PropertyType::getAll()->where('status', 'Active')->pluck('name', 'id');
             $data['space_type']     = SpaceType::getAll()->pluck('name', 'id');
 
-            if (n_as_k_c()) {
-                Session::flush();
-                return view('vendor.installer.errors.user');
-            }
+            // if (n_as_k_c()) {
+            //     Session::flush();
+            //     return view('vendor.installer.errors.user');
+            // }
         } elseif ($step == 'description') {
             if ($request->isMethod('post')) {
 
@@ -423,7 +423,7 @@ class PropertyController extends Controller
             $data['calendar'] = $calendar->generate($request->id);
         }
 
-        
+
         return view("listing.$step", $data);
     }
 
@@ -457,7 +457,7 @@ class PropertyController extends Controller
         $data['property_slug'] = $request->slug;
 
         $data['result'] = $result = Properties::where('slug', $request->slug)->first();
-        
+
         $userActive = $result->Users()->where('id', $result->host_id)->first();
 
         if ($userActive->status == 'Inactive' ) {
@@ -632,7 +632,7 @@ class PropertyController extends Controller
         ]);
     }
 
-    public function unauthenticationFavourite($id) 
+    public function unauthenticationFavourite($id)
     {
         Session::put('favourite_property', $id);
 

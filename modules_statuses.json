@@ -1,6 +1,6 @@
 {
     "Gateway": true,
-    "Addons": true,
+    "Addons": false,
     "Paystack": true,
     "Flutterwave": true,
     "Paypal": true,
