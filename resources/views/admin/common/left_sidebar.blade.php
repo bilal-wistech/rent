@@ -105,9 +105,9 @@
                     </ul>
                 </li>
             @endif
-            {{-- @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'view_reports')) --}}
+            @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_alert_types'))
                 <li
-                    class="treeview {{ Route::current()->uri() == 'admin/sales-report' || Route::current()->uri() == 'admin/sales-analysis' || Route::current()->uri() == 'admin/overview-stats' ? 'active' : '' }}">
+                    class="treeview {{ Route::current()->uri() == 'admin/alert-types' || Route::current()->uri() == 'admin/sales-analysis' || Route::current()->uri() == 'admin/overview-stats' ? 'active' : '' }}">
                     <a href="#">
                         <i class="fa fa-bar-chart-o"></i> <span>Alerts</span><i
                             class="fa fa-angle-left pull-right"></i>
@@ -115,13 +115,13 @@
                     <ul class="treeview-menu">
                         {{-- <li class="{{ Route::current()->uri() == 'admin/overview-stats' ? 'active' : '' }}"><a
                                 href="{{ url('admin/overview-stats') }}"><span>All Alerts</span></a></li> --}}
-                        <li class="{{ Route::current()->uri() == 'admin/sales-report' ? 'active' : '' }}"><a
-                                href="{{ url('admin/sales-report') }}"><span>Alerts Type</span></a></li>
+                        <li class="{{ Route::current()->uri() == 'admin/alert-types' ? 'active' : '' }}"><a
+                                href="{{ url('admin/alert-types') }}"><span>Alerts Type</span></a></li>
                         {{-- <li class="{{ Route::current()->uri() == 'admin/sales-analysis' ? 'active' : '' }}"><a
                                 href="{{ url('admin/sales-analysis') }}"><span>Templates</span></a></li> --}}
                     </ul>
                 </li>
-            {{-- @endif --}}
+            @endif
 
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_email_template'))
                 <li class="{{ Route::current()->uri() == 'admin/email-template/{id}' ? 'active' : '' }}"><a

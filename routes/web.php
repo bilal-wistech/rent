@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\AddonController;
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\AlertTypeController;
 use App\Http\Controllers\Admin\EmergencyContactController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Session;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -249,6 +250,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
             Route::match(array('GET', 'POST'), 'settings/edit-amenities-type/{id}', 'AmenitiesTypeController@update');
             Route::get('settings/delete-amenities-type/{id}', 'AmenitiesTypeController@delete');
         });
+        Route::group(['middleware' => 'permission:manage_alert_types'], function () {
+            Route::resource('alert-types', AlertTypeController::class)->except('show');
+        });
 
         Route::match(array('GET', 'POST'), 'settings/email', 'SettingsController@email')->middleware(['permission:email_settings']);
 
@@ -317,7 +321,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('bookings/details/{date}', 'BookingsController@getBookingDetails')->middleware(['permission:manage_bookings'])->name('admin.bookings.details');
 
 
-    Route::match(['post', 'put'],'bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
+    Route::match(['post', 'put'], 'bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
     Route::get('bookings/edit/{id}', 'BookingsController@edit')->middleware(['permission:manage_bookings'])->name('admin.bookings.edit');
 
     Route::put('bookings/update/{id}', 'BookingsController@update')->middleware(['permission:manage_bookings'])->name('admin.bookings.update');
