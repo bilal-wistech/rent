@@ -107,14 +107,14 @@
             @endif
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_alert_types'))
                 <li
-                    class="treeview {{ Route::current()->uri() == 'admin/alert-types' || Route::current()->uri() == 'admin/sales-analysis' || Route::current()->uri() == 'admin/overview-stats' ? 'active' : '' }}">
+                    class="treeview {{ Route::current()->uri() == 'admin/alert-types' || Route::current()->uri() == 'admin/templates' || Route::current()->uri() == 'admin/alerts' ? 'active' : '' }}">
                     <a href="#">
                         <i class="fa fa-bar-chart-o"></i> <span>Alerts</span><i
                             class="fa fa-angle-left pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
-                        {{-- <li class="{{ Route::current()->uri() == 'admin/overview-stats' ? 'active' : '' }}"><a
-                                href="{{ url('admin/overview-stats') }}"><span>All Alerts</span></a></li> --}}
+                        <li class="{{ Route::current()->uri() == 'admin/alerts' ? 'active' : '' }}"><a
+                                href="{{ url('admin/alerts') }}"><span>All Alerts</span></a></li>
                         <li class="{{ Route::current()->uri() == 'admin/alert-types' ? 'active' : '' }}"><a
                                 href="{{ url('admin/alert-types') }}"><span>Alerts Type</span></a></li>
                         <li class="{{ Route::current()->uri() == 'admin/templates' ? 'active' : '' }}"><a
