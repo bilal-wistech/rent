@@ -155,7 +155,7 @@ class Bookings extends Model
         $rate = Currency::getAll()->where('code', $this->attributes['currency_code'] ??  $default_currency)->first()->rate;
 
 
-        $base_amount = $this->attributes[$field] / $rate;
+        $base_amount = @$this->attributes[$field] / $rate;
 
 
         $session_rate = Currency::getAll()->where('code',$default_currency)->first()->rate;
@@ -528,7 +528,7 @@ class Bookings extends Model
         if ($attachment != '[') {
             $this->attributes['attachment'] = '["'. $this->attributes['attachment'] .'"]';
         }
-        
+
         foreach (json_decode($this->attributes['attachment']) as $value) {
             $url[] = url('/public/uploads/booking/'. $value);
         }
