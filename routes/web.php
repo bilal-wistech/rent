@@ -140,7 +140,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::post('invoices/invoice/{id}', 'InvoiceController@getInvoiceByUserId');
     // customer ledgers amount routes
     Route::get('balance' , 'ledgersController@index');
-    Route::get('balance/details/{id}' , 'ledgersController@details');
+    Route::post('balance/details/{id}' , 'ledgersController@details');
     //Admin Payout routes
     Route::get('payouts/create', 'PayoutsController@create')->name('payouts.create');
     Route::post('payouts/create/success', 'PayoutsController@asuccess')->name('payouts.asuccess');

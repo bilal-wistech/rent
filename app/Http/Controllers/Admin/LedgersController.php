@@ -48,84 +48,10 @@ use App\Models\{
 
 class LedgersController extends Controller
 {
-    public function index(LedgerDatatable $dataTable)
+    public function index()
     {
-        $data['from'] = isset(request()->from) ? request()->from : null;
-        $data['to'] = isset(request()->to) ? request()->to : null;
-        if (isset(request()->property)) {
-            $data['properties'] = Properties::where('properties.id', request()->property)->select('id', 'name')->get();
-        } else {
-            $data['properties'] = null;
-        }
-
-        if (isset(request()->btn)) {
-            $status = request()->status;
-            $from = request()->from;
-            $to = request()->to;
-            if (isset(request()->property)) {
-                $property = request()->property;
-            } else {
-                $property = null;
-            }
-        } else {
-            $status = null;
-            $types = null;
-            $property = null;
-            $from = null;
-            $to = null;
-        }
-
-        $total_payouts_initial = $this->getAllPayouts();
-        $total_payouts = $this->getAllPayouts();
-        $data['total_payouts'] = $total_payouts->get()->count();
-
-        $different_currency_total_initial = $total_payouts_initial->select('payouts.currency_code as currency_code', DB::raw('SUM(payouts.amount) AS total_amount'))->groupBy('currency_code');
-        $different_currency_total = $different_currency_total_initial->get();
-        $data['different_total_amounts'] = $this->getDistinctCurrencyTotalWithSymbol($different_currency_total);
-        $data['totalPayouts'] = Withdrawal::where('status', '=', 'Success')->count();
-        $data['totalPayoutsAmount'] = Withdrawal::sum('amount');
-
-
-        if (isset(request()->reset_btn)) {
-            $data['from'] = null;
-            $data['to'] = null;
-            $data['allstatus'] = '';
-            $data['alltypes'] = '';
-            $data['allproperties'] = '';
-            return $dataTable->render('admin.payouts.view', $data);
-        }
-
-        if ($from) {
-            $total_payouts = $total_payouts->whereDate('payouts.created_at', '>=', $from);
-            $different_currency_total_initial = $different_currency_total_initial->whereDate('payouts.created_at', '>=', $from);
-        }
-        if ($to) {
-            $total_payouts = $total_payouts->whereDate('payouts.created_at', '<=', $to);
-            $different_currency_total_initial = $different_currency_total_initial->whereDate('payouts.created_at', '<=', $to);
-        }
-        if ($property) {
-            $total_payouts = $total_payouts->where('payouts.property_id', '=', $property);
-            $different_currency_total_initial = $different_currency_total_initial->where('payouts.property_id', '=', $property);
-        }
-        if ($status) {
-            $total_payouts = $total_payouts->where('payouts.status', '=', $status);
-            $different_currency_total_initial = $different_currency_total_initial->where('payouts.status', '=', $status);
-        }
-
-
-        $data['total_payouts'] = $total_payouts->get()->count();
-        $different_currency_total_initial = $different_currency_total_initial->get();
-
-        if (count($different_currency_total_initial)) {
-            $data['different_total_amounts'] = $this->getDistinctCurrencyTotalWithSymbol($different_currency_total_initial);
-        } else {
-            $data['different_total_amounts'] = null;
-        }
-
-        isset(request()->property) ? $data['allproperties'] = request()->property : $data['allproperties'] = '';
-        isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
-        isset(request()->types) ? $data['alltypes'] = request()->types : $data['alltypes'] = '';
-        return $dataTable->render('admin.ledger.view', $data);
+        $users = User::all();
+        return view('admin.ledger.view', compact('users'));
     }
 
 
@@ -149,10 +75,17 @@ class LedgersController extends Controller
 
     public function details($id)
     {
-        // Fetch invoices with their reference numbers and grand totals.
+        // Fetch invoices with their reference numbers and grand totals for the specified customer.
         $invoices = Invoice::where('customer_id', $id)
             ->select('reference_no', 'created_at', 'description', 'grand_total')
             ->get();
+
+        // Check if any invoices were found
+        if ($invoices->isEmpty()) {
+            return response()->json([
+                'error' => 'No Invoices Found!'
+            ]);
+        }
 
         // Collect all reference numbers to match with payments.
         $invoiceReferences = $invoices->pluck('reference_no');
@@ -163,7 +96,11 @@ class LedgersController extends Controller
         // Group payments by `invoice_id` for easy access in the view.
         $groupedPayments = $payments->groupBy('invoice_id');
 
-        return view('admin.ledger.details', compact('invoices', 'groupedPayments'));
+        // Return the invoices and grouped payments as JSON response
+        return response()->json([
+            'invoices' => $invoices,
+            'payments' => $groupedPayments
+        ]);
     }
 
 

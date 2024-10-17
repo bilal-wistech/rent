@@ -28,20 +28,23 @@ class User extends Authenticatable
     use Notifiable, SoftDeletes;
 
     protected $fillable = [
-        'name', 'email', 'password',
+        'name',
+        'email',
+        'password',
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
     public function document()
     {
         return $this->hasOne(Document::class);
     }
     public function emergencyContacts()
-{
-    return $this->hasMany(EmergencyContact::class);
-}
+    {
+        return $this->hasMany(EmergencyContact::class);
+    }
 
     protected $appends = ['profile_src'];
 
@@ -106,7 +109,7 @@ class User extends Authenticatable
         if ($this->attributes['profile_image'] == '') {
             $src = asset('images/default-profile.png');
         } else {
-            $src = url('images/profile/'.$this->attributes['id'].'/'.$this->attributes['profile_image']);
+            $src = url('images/profile/' . $this->attributes['id'] . '/' . $this->attributes['profile_image']);
         }
 
         return $src;
@@ -126,7 +129,11 @@ class User extends Authenticatable
 
     public function getFullNameAttribute()
     {
-        $full_name = ucfirst($this->attributes['first_name']).' '.ucfirst($this->attributes['last_name']);
+        $full_name = ucfirst($this->attributes['first_name']) . ' ' . ucfirst($this->attributes['last_name']);
         return $full_name;
+    }
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'customer_id');
     }
 }
