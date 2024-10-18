@@ -78,6 +78,14 @@
             /* Light green */
             color: #388e3c;
         }
+
+        .select2-dropdown {
+            z-index: 9999;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
     </style>
 @endpush
 @section('main')
@@ -117,24 +125,7 @@
                                     <span class="text-danger">{{ $errors->first('property_id') }}</span>
                                 </div>
                             </div>
-                            <div class="form-group row mt-3 host_id">
-                                <label for="host_id" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                    Customer <span class="text-danger">*</span>
-                                </label>
 
-                                <div class="col-sm-6">
-                                    <select class="form-control select2" name="user_id" id="host_id">
-                                        <option value="">Select a Customer</option>
-                                        <option value="{{ old('user_id') }}" selected>{{ old('user_name') }}
-                                        </option>
-                                    </select>
-                                    <span class="text-danger">{{ $errors->first('user_id') }}</span>
-                                </div>
-                                <div class="col-sm-1">
-                                    <a href="#" data-bs-toggle="modal" data-bs-target="#customerModal"
-                                        class=" btn btn-primary btn-sm customer-modal"><span class="fa fa-user"></span></a>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="calendar-container">
@@ -157,13 +148,32 @@
                                             <p class="calendar-m-msg" id="model-message"></p>
                                             <input type="hidden" name="booking_id" id="booking_id">
                                             <input type="hidden" name="property_id" id="propertyId" value="">
-                                            <input type="hidden" name="user_id" id="userId" value="">
+                                            {{-- <input type="hidden" name="user_id" id="userId" value=""> --}}
                                             <input type="hidden" name="min_stay" value="1">
                                             <input type="hidden" name="booking_added_by" id="booking_added_by"
                                                 value="{{ Auth::guard('admin')->id() }}">
                                             <input type="hidden" name="booking_type" value="instant" id="booking_type">
                                             <input type="hidden" name="status" value="pending" id="booking_status">
+                                            <div class="form-group row mt-3 host_id">
+                                                <label for="host_id"
+                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                    Customer <span class="text-danger">*</span>
+                                                </label>
 
+                                                <div class="col-sm-6">
+                                                    <select class="form-control select2" name="user_id" id="host_id">
+                                                        <option value="">Select a Customer</option>
+                                                        <option value="{{ old('user_id') }}" selected>{{ old('user_name') }}
+                                                        </option>
+                                                    </select>
+                                                    <span class="text-danger">{{ $errors->first('user_id') }}</span>
+                                                </div>
+                                                {{-- <div class="col-sm-1">
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#customerModal"
+                                                        class=" btn btn-primary btn-sm customer-modal"><span
+                                                            class="fa fa-user"></span></a>
+                                                </div> --}}
+                                            </div>
                                             <div class="form-group row mt-3">
                                                 <label for="input_dob"
                                                     class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
@@ -450,10 +460,10 @@
                 },
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
-            }).on('select2:select', function(e) {
+            })/* .on('select2:select', function(e) {
                 $('#userId').val(e.params.data.id);
                 checkSelections();
-            });
+            }); */
 
             function updateNumberOfGuests(propertyId) {
                 $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
@@ -491,8 +501,8 @@
 
             function checkSelections() {
                 const propertyId = $('#propertyId').val();
-                const hostId = $('#userId').val();
-                if (propertyId && hostId) {
+                //const hostId = $('#userId').val();
+                if (propertyId) {
                     $('.calendar-container').show();
                     renderCalendars();
                 } else {
