@@ -154,14 +154,14 @@
                                                 value="{{ Auth::guard('admin')->id() }}">
                                             <input type="hidden" name="booking_type" value="instant" id="booking_type">
                                             <input type="hidden" name="status" value="pending" id="booking_status">
-                                            <div class="form-group row mt-3 host_id">
-                                                <label for="host_id"
+                                            <div class="form-group row mt-3 user_id">
+                                                <label for="user_id"
                                                     class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
                                                     Customer <span class="text-danger">*</span>
                                                 </label>
 
                                                 <div class="col-sm-6">
-                                                    <select class="form-control select2" name="user_id" id="host_id">
+                                                    <select class="form-control select2" name="user_id" id="user_id">
                                                         <option value="">Select a Customer</option>
                                                         <option value="{{ old('user_id') }}" selected>{{ old('user_name') }}
                                                         </option>
@@ -436,7 +436,7 @@
             });
 
             // Initialize Select2 for host_id
-            $('#host_id').select2({
+            $('#user_id').select2({
                 ajax: {
                     url: '{{ route('admin.bookings.form_customer_search') }}',
                     dataType: 'json',
@@ -460,10 +460,7 @@
                 },
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
-            })/* .on('select2:select', function(e) {
-                $('#userId').val(e.params.data.id);
-                checkSelections();
-            }); */
+            });
 
             function updateNumberOfGuests(propertyId) {
                 $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
@@ -575,8 +572,8 @@
                     } else {
                         dayDiv.click(function() {
                             const propertyId = $('#property_id').val();
-                            const hostId = $('#host_id').val();
-                            handleDateClick(propertyId, hostId, dateString);
+                            const userId = $('#user_id').val();
+                            handleDateClick(propertyId, userId, dateString);
                         });
                     }
 
@@ -587,7 +584,7 @@
                 return monthDiv;
             }
 
-            function handleDateClick(propertyId, hostId, date) {
+            function handleDateClick(propertyId, userId, date) {
                 if (isSelectingStartDate) {
                     $('#start_date').val(date);
                     isSelectingStartDate = false;
@@ -601,8 +598,8 @@
                     const no_of_guests = $('#no_of_guests').val();
                     const renewal_type = $('#renewal_type').val();
                     const property_date_status = $('#property_date_status').val();
-                    const propertyId = $('#propertyId').val();
-                    const userId = $('#userId').val();
+                    // const propertyId = $('#propertyId').val();
+                    // const userId = $('#user_id').val();
                     const booking_type = $('#booking_type').val();
                     const booking_status = $('#booking_status').val();
 
@@ -621,7 +618,7 @@
                                 console.log(response.booking);
                                 console.log('dates: ', response.property_dates);
                                 $('#propertyId').val(response.booking.id);
-                                $('#userId').val(response.booking.id);
+                                // $('#host_id').val(response.booking.user_id);
                                 $('#booking_type').val(response.booking.booking_type);
                                 $('#booking_status').val(response.booking.status);
                                 $('#booking_id').val(response.booking.id);
@@ -631,6 +628,17 @@
                                 $('#renewal_type').val(response.booking.renewal_type);
                                 $('#property_date_status').val(response.property_dates[0].status);
                                 $('#min_stay').val(response.property_dates[0].min_stay);
+                                if (response.user) {
+                                    // Create a new option
+                                    var newOption = new Option(response.user.user_name, response.user
+                                        .user_id, true, true);
+
+                                    // Clear and update the select2
+                                    $('#user_id').empty()
+                                        .append('<option value="">Select a Customer</option>')
+                                        .append(newOption)
+                                        .trigger('change');
+                                }
                                 $('.booking-modal').text('Edit Booking');
 
                             } else {
@@ -641,9 +649,10 @@
                                 $('#renewal_type').val(renewal_type);
                                 $('#property_date_status').val(property_date_status);
                                 $('#propertyId').val(propertyId);
-                                $('#userId').val(userId);
+                                $('#user_id').val(userId);
                                 $('#booking_type').val(booking_type);
                                 $('#booking_status').val(booking_status);
+                                $('#user_id').val('').trigger('change');
                             }
                         },
                         error: function(xhr, status, error) {

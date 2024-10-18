@@ -197,7 +197,8 @@ class BookingsController extends Controller
         $booking = Bookings::with([
             'properties.property_dates' => function ($query) use ($validated) {
                 $query->whereBetween('date', [$validated['start_date'], $validated['end_date']]);
-            }
+            },
+            'users'
         ])
             ->where('property_id', $validated['property_id'])
             ->where(function ($query) use ($validated) {
@@ -214,6 +215,10 @@ class BookingsController extends Controller
                 'booking_id' => $booking->id,
                 'booking' => $booking,
                 'property_dates' => $property_dates,
+                'user' => [
+                    'user_id' => $booking->users->id,
+                    'user_name' =>  $booking->users->first_name . " " . $booking->users->last_name,
+                ]
             ]);
         }
 
@@ -344,7 +349,6 @@ class BookingsController extends Controller
             DB::commit();
             Common::one_time_message('success', 'Booking ' . ($bookingId ? 'Updated' : 'Added') . ' Successfully');
             return redirect('admin/bookings');
-
         } catch (\Exception $e) {
             DB::rollBack();
             Common::one_time_message('error', 'Failed to ' . ($bookingId ? 'update booking' : 'add booking') . '. Please try again. ' . $e->getMessage());
@@ -824,6 +828,4 @@ class BookingsController extends Controller
             ],
         ]);
     }
-
-
 }
