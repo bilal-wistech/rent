@@ -92,6 +92,37 @@
         .select2-container {
             width: 100% !important;
         }
+
+        /* Loading state */
+        .loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 @endpush
 @section('main')
@@ -407,6 +438,7 @@
         let duplicateNumberCheckURL = "{{ url('duplicate-phone-number-check') }}";
     </script>
     <script src="{{ asset('backend/js/add_customer_for_properties.min.js') }}" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
             let calendar;
@@ -744,6 +776,119 @@
 
                 return this.optional(element) || endDate > startDate;
             }, "End date must be after the start date");
+            $('#booking_form').on('submit', function(e) {
+                e.preventDefault();
+
+                if (!$(this).valid()) {
+                    return false;
+                }
+
+                const form = $(this);
+                const submitBtn = form.find('button[type="submit"]');
+                const formData = new FormData(this);
+
+                // Disable submit button to prevent double submission
+                submitBtn.prop('disabled', true);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success message
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+
+                            // Close the modal
+                            $('#booking_form_modal').modal('hide');
+
+                            // Reset form
+                            form[0].reset();
+
+                            // Update calendar with new booking data
+                            const propertyId = $('#propertyId').val();
+                            getPropertyDates(propertyId);
+
+                            // Reset date selection
+                            resetDateSelection();
+                        } else {
+                            // Show error message
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: response.message || 'Something went wrong!',
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        // Handle validation errors
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            let errorMessage = '<ul>';
+
+                            Object.keys(errors).forEach(key => {
+                                errorMessage += `<li>${errors[key][0]}</li>`;
+                                $(`#error-${key}`).text(errors[key][0]);
+                            });
+
+                            errorMessage += '</ul>';
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Validation Error',
+                                html: errorMessage
+                            });
+                        } else {
+                            // Handle other errors
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Something went wrong! Please try again.',
+                            });
+                        }
+                    },
+                    complete: function() {
+                        // Re-enable submit button
+                        submitBtn.prop('disabled', false);
+                    }
+                });
+            });
+
+            // Function to update calendar with new booking data
+            function updateCalendarWithNewBooking(propertyId, startDate, endDate, status) {
+                const start = moment(startDate);
+                const end = moment(endDate);
+
+                $('.calendar-day').each(function() {
+                    const date = moment($(this).data('date'));
+
+                    if (date.isBetween(start, end, 'day', '[]')) {
+                        // Remove existing status classes
+                        $(this).removeClass('booked-not-paid booked-paid maintainence');
+
+                        // Add new status class
+                        switch (status) {
+                            case 'booked not paid':
+                                $(this).addClass('booked-not-paid');
+                                break;
+                            case 'booked paid':
+                                $(this).addClass('booked-paid');
+                                break;
+                            case 'maintainence':
+                                $(this).addClass('maintainence');
+                                break;
+                        }
+                    }
+                });
+            }
         });
     </script>
 @endsection
