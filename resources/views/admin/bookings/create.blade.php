@@ -67,16 +67,22 @@
             /* Color for disabled dates */
         }
 
-        .calendar-day.not-available {
+        .calendar-day.booked-paid {
             background-color: #ffebee;
             /* Light red */
             color: #d32f2f;
         }
 
-        .calendar-day.available {
+        .calendar-day.booked-not-paid {
             background-color: #e8f5e9;
             /* Light green */
             color: #388e3c;
+        }
+
+        .calendar-day.maintainence {
+            background-color: #e8f5e9;
+            /* orange */
+            color: #FFA500;
         }
 
         .select2-dropdown {
@@ -260,12 +266,15 @@
                                                     <select class="form-control f-14" name="property_date_status"
                                                         id="property_date_status">
                                                         <option value="">--Please Select--</option>
-                                                        <option value="Available"
-                                                            {{ isset($status) && $status == 'Available' ? 'selected' : '' }}>
-                                                            Available</option>
-                                                        <option value="Not available"
-                                                            {{ isset($status) && $status == 'Not available' ? 'selected' : '' }}>
-                                                            Not Available</option>
+                                                        <option value="booked not paid"
+                                                            {{ isset($status) && $status == 'booked not paid' ? 'selected' : '' }}>
+                                                            Booked Not Paid</option>
+                                                        <option value="booked paid"
+                                                            {{ isset($status) && $status == 'booked paid' ? 'selected' : '' }}>
+                                                            Booked Paid</option>
+                                                        <option value="maintainence"
+                                                            {{ isset($status) && $status == 'maintainence' ? 'selected' : '' }}>
+                                                            Maintainence</option>
                                                     </select>
                                                     <span class="text-danger" id="error-property_date_status">
                                                         {{ $errors->first('property_date_status') }}
@@ -555,10 +564,12 @@
 
                     // Apply color based on property date status
                     if (propertyDates[dateString]) {
-                        if (propertyDates[dateString].status === 'Not available') {
-                            dayDiv.addClass('not-available'); // Add CSS for red background
-                        } else {
-                            dayDiv.addClass('available'); // Add CSS for green background
+                        if (propertyDates[dateString].status === 'booked not paid') {
+                            dayDiv.addClass('booked-not-paid'); // Add CSS for green background
+                        } else if (propertyDates[dateString].status === 'booked paid') {
+                            dayDiv.addClass('booked-paid'); // Add CSS for red background
+                        } else if (propertyDates[dateString].status === 'maintainence') {
+                            dayDiv.addClass('maintainence'); // Add CSS for orange background
                         }
                     }
 
