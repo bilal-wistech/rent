@@ -22,36 +22,42 @@
           </div>
           <div class="col-4">
             <select name="" id="invoiceStatus" class="form-control">
-              <option value="">All</option>
-              <!-- Add more options as needed -->
+              <option value="all">All</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="thismonth">This Month</option>
+              <option value="lastmonth">Last Month</option>
+              <option value="thisyear">This Year</option>
+              <option value="lastyear">Last Year</option>
+              <option value="period">Period</option>
             </select>
           </div>
         </div>
 
-        <div class="row mt-4">
-          <div class="col-3">
-            <label for="" class="mb-2 fw-bold">Start Date</label>
-            <input type="date" class="form-control" id="startDate">
+        <form action="" class="d-none" id="filterForm">
+          <div class="row mt-4">
+            <div class="col-md-4">
+              <label for="startDate" class="mb-2 fw-bold">Start Date</label>
+              <input type="date" class="form-control" id="startDate">
+            </div>
+            <div class="col-md-4">
+              <label for="endDate" class="mb-2 fw-bold">End Date</label>
+              <input type="date" class="form-control" id="endDate">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button class="btn btn-info w-30 text-white">Submit</button>
+            </div>
           </div>
-          <div class="col-3">
-            <label for="" class="mb-2 fw-bold">End Date</label>
-            <input type="date" class="form-control" id="endDate">
-          </div>
-        </div>
+        </form>
       </div>
     </div>
 
     <div class="card mx-auto border-0">
       <div class="card-body p-4">
-        <!-- Month Selector -->
-        <select name="" id="" class="form-control mb-5" style="width: 20%;">
-          <option value="">This Month</option>
-        </select>
-
         <!-- Invoice Table -->
         <table class="table table-striped table-bordered" id="invoiceTable">
           <thead>
-            <tr>
+            <tr>  
               <th>Date</th>
               <th>Invoice Number</th>
               <th>Description</th>
@@ -61,7 +67,6 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Dynamic content will be injected here -->
           </tbody>
         </table>
 
@@ -85,16 +90,15 @@
     $('#UserID').on('change', function () {
       let userId = $(this).val();
 
-      if (userId) { // Only proceed if a user is selected
+      if (userId) { 
         $.post({
           url: url + '/' + userId,
           data: {
             _token: csrfToken
           },
           success: function (response) {
-            console.log(response); // Inspect the full response
+            console.log(response); 
 
-            // Clear the current table body
             $('#invoiceTable tbody').empty();
             let totalAmountDue = 0;
 
@@ -145,13 +149,32 @@
         $('#dueAmount').text('0.00'); // Reset due amount
       }
     });
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear(); // Get full year
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+      const day = String(date.getDate()).padStart(2, '0'); // Pad day with zero if necessary
+      return `${year}-${month}-${day}`; // Return formatted date
+    }
+
+
+
+    $('#invoiceStatus').on('change', function () {
+      if ($(this).val() === "period") {
+        // $("#startDate").removeClass('d-none');
+        // $("#endDate").removeClass('d-none');
+        // $("#suBbtn").removeClass('d-none');
+         $('#filterForm').removeClass('d-none');
+      } else {
+        $('#filterForm').addClass('d-none');
+        // $("#startDate").addClass('d-none');
+        // $("#endDate").addClass('d-none');
+        // $("#suBbtn").addClass('d-none');
+      }
+    });
   });
 
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    const year = date.getFullYear(); // Get full year
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const day = String(date.getDate()).padStart(2, '0'); // Pad day with zero if necessary
-    return `${year}-${month}-${day}`; // Return formatted date
-  }
+
+
 </script>
