@@ -67,16 +67,61 @@
             /* Color for disabled dates */
         }
 
-        .calendar-day.not-available {
-            background-color: #ffebee;
+        .calendar-day.booked-paid {
+            background-color: #d32f2f;
             /* Light red */
-            color: #d32f2f;
+            color: #e8f5e9;
         }
 
-        .calendar-day.available {
-            background-color: #e8f5e9;
+        .calendar-day.booked-not-paid {
+            background-color: #388e3c;
             /* Light green */
-            color: #388e3c;
+            color: #e8f5e9;
+        }
+
+        .calendar-day.maintainence {
+            background-color: #FFA500;
+            /* orange */
+            color: #e8f5e9;
+        }
+
+        .select2-dropdown {
+            z-index: 9999;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+
+        /* Loading state */
+        .loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 @endpush
@@ -117,24 +162,7 @@
                                     <span class="text-danger">{{ $errors->first('property_id') }}</span>
                                 </div>
                             </div>
-                            <div class="form-group row mt-3 host_id">
-                                <label for="host_id" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                    Customer <span class="text-danger">*</span>
-                                </label>
 
-                                <div class="col-sm-6">
-                                    <select class="form-control select2" name="user_id" id="host_id">
-                                        <option value="">Select a Customer</option>
-                                        <option value="{{ old('user_id') }}" selected>{{ old('user_name') }}
-                                        </option>
-                                    </select>
-                                    <span class="text-danger">{{ $errors->first('user_id') }}</span>
-                                </div>
-                                <div class="col-sm-1">
-                                    <a href="#" data-bs-toggle="modal" data-bs-target="#customerModal"
-                                        class=" btn btn-primary btn-sm customer-modal"><span class="fa fa-user"></span></a>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="calendar-container">
@@ -157,13 +185,32 @@
                                             <p class="calendar-m-msg" id="model-message"></p>
                                             <input type="hidden" name="booking_id" id="booking_id">
                                             <input type="hidden" name="property_id" id="propertyId" value="">
-                                            <input type="hidden" name="user_id" id="userId" value="">
+                                            {{-- <input type="hidden" name="user_id" id="userId" value=""> --}}
                                             <input type="hidden" name="min_stay" value="1">
                                             <input type="hidden" name="booking_added_by" id="booking_added_by"
                                                 value="{{ Auth::guard('admin')->id() }}">
                                             <input type="hidden" name="booking_type" value="instant" id="booking_type">
                                             <input type="hidden" name="status" value="pending" id="booking_status">
+                                            <div class="form-group row mt-3 user_id">
+                                                <label for="user_id"
+                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                    Customer <span class="text-danger">*</span>
+                                                </label>
 
+                                                <div class="col-sm-6">
+                                                    <select class="form-control select2" name="user_id" id="user_id">
+                                                        <option value="">Select a Customer</option>
+                                                        <option value="{{ old('user_id') }}" selected>{{ old('user_name') }}
+                                                        </option>
+                                                    </select>
+                                                    <span class="text-danger">{{ $errors->first('user_id') }}</span>
+                                                </div>
+                                                {{-- <div class="col-sm-1">
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#customerModal"
+                                                        class=" btn btn-primary btn-sm customer-modal"><span
+                                                            class="fa fa-user"></span></a>
+                                                </div> --}}
+                                            </div>
                                             <div class="form-group row mt-3">
                                                 <label for="input_dob"
                                                     class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
@@ -250,12 +297,15 @@
                                                     <select class="form-control f-14" name="property_date_status"
                                                         id="property_date_status">
                                                         <option value="">--Please Select--</option>
-                                                        <option value="Available"
-                                                            {{ isset($status) && $status == 'Available' ? 'selected' : '' }}>
-                                                            Available</option>
-                                                        <option value="Not available"
-                                                            {{ isset($status) && $status == 'Not available' ? 'selected' : '' }}>
-                                                            Not Available</option>
+                                                        <option value="booked not paid"
+                                                            {{ isset($status) && $status == 'booked not paid' ? 'selected' : '' }}>
+                                                            Booked Not Paid</option>
+                                                        <option value="booked paid"
+                                                            {{ isset($status) && $status == 'booked paid' ? 'selected' : '' }}>
+                                                            Booked Paid</option>
+                                                        <option value="maintainence"
+                                                            {{ isset($status) && $status == 'maintainence' ? 'selected' : '' }}>
+                                                            Maintainence</option>
                                                     </select>
                                                     <span class="text-danger" id="error-property_date_status">
                                                         {{ $errors->first('property_date_status') }}
@@ -388,6 +438,7 @@
         let duplicateNumberCheckURL = "{{ url('duplicate-phone-number-check') }}";
     </script>
     <script src="{{ asset('backend/js/add_customer_for_properties.min.js') }}" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
             let calendar;
@@ -426,7 +477,7 @@
             });
 
             // Initialize Select2 for host_id
-            $('#host_id').select2({
+            $('#user_id').select2({
                 ajax: {
                     url: '{{ route('admin.bookings.form_customer_search') }}',
                     dataType: 'json',
@@ -450,9 +501,6 @@
                 },
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
-            }).on('select2:select', function(e) {
-                $('#userId').val(e.params.data.id);
-                checkSelections();
             });
 
             function updateNumberOfGuests(propertyId) {
@@ -491,8 +539,7 @@
 
             function checkSelections() {
                 const propertyId = $('#propertyId').val();
-                const hostId = $('#userId').val();
-                if (propertyId && hostId) {
+                if (propertyId) {
                     $('.calendar-container').show();
                     renderCalendars();
                 } else {
@@ -515,11 +562,8 @@
 
             function createMonthCalendar(month) {
                 const monthDiv = $('<div>').addClass('month-calendar');
-
-                // Month header remains the same
                 monthDiv.append($('<div>').addClass('month-header').text(month.format('MMMM YYYY')));
 
-                // Weekday header remains the same
                 const weekdayHeader = $('<div>').addClass('weekday-header');
                 moment.weekdaysShort().forEach(day => {
                     weekdayHeader.append($('<div>').text(day));
@@ -548,10 +592,12 @@
 
                     // Apply color based on property date status
                     if (propertyDates[dateString]) {
-                        if (propertyDates[dateString].status === 'Not available') {
-                            dayDiv.addClass('not-available'); // Add CSS for red background
-                        } else {
-                            dayDiv.addClass('available'); // Add CSS for green background
+                        if (propertyDates[dateString].status === 'booked not paid') {
+                            dayDiv.addClass('booked-not-paid');
+                        } else if (propertyDates[dateString].status === 'booked paid') {
+                            dayDiv.addClass('booked-paid');
+                        } else if (propertyDates[dateString].status === 'maintainence') {
+                            dayDiv.addClass('maintainence');
                         }
                     }
 
@@ -559,16 +605,12 @@
                         dayDiv.addClass('current-date');
                     }
 
-                    if (currentDate.isBefore(today, 'day')) {
-                        dayDiv.addClass('disabled');
-                        dayDiv.css('pointer-events', 'none');
-                    } else {
-                        dayDiv.click(function() {
-                            const propertyId = $('#property_id').val();
-                            const hostId = $('#host_id').val();
-                            handleDateClick(propertyId, hostId, dateString);
-                        });
-                    }
+                    // All dates are clickable
+                    dayDiv.click(function() {
+                        const propertyId = $('#property_id').val();
+                        const userId = $('#user_id').val();
+                        handleDateClick(propertyId, userId, dateString);
+                    });
 
                     daysGrid.append(dayDiv);
                 }
@@ -577,7 +619,7 @@
                 return monthDiv;
             }
 
-            function handleDateClick(propertyId, hostId, date) {
+            function handleDateClick(propertyId, userId, date) {
                 if (isSelectingStartDate) {
                     $('#start_date').val(date);
                     isSelectingStartDate = false;
@@ -585,19 +627,17 @@
                 } else {
                     $('#end_date').val(date);
 
-                    // Make the AJAX call here
+                    // Make the AJAX call
                     const startDate = $('#start_date').val();
                     const endDate = $('#end_date').val();
                     const no_of_guests = $('#no_of_guests').val();
                     const renewal_type = $('#renewal_type').val();
                     const property_date_status = $('#property_date_status').val();
-                    const propertyId = $('#propertyId').val();
-                    const userId = $('#userId').val();
                     const booking_type = $('#booking_type').val();
                     const booking_status = $('#booking_status').val();
 
                     $.ajax({
-                        url: '{{ route('admin.bookings.check-booking-exists') }}', // Your route to the
+                        url: '{{ route('admin.bookings.check-booking-exists') }}',
                         type: 'POST',
                         data: {
                             property_id: propertyId,
@@ -611,7 +651,6 @@
                                 console.log(response.booking);
                                 console.log('dates: ', response.property_dates);
                                 $('#propertyId').val(response.booking.id);
-                                $('#userId').val(response.booking.id);
                                 $('#booking_type').val(response.booking.booking_type);
                                 $('#booking_status').val(response.booking.status);
                                 $('#booking_id').val(response.booking.id);
@@ -621,8 +660,16 @@
                                 $('#renewal_type').val(response.booking.renewal_type);
                                 $('#property_date_status').val(response.property_dates[0].status);
                                 $('#min_stay').val(response.property_dates[0].min_stay);
-                                $('.booking-modal').text('Edit Booking');
 
+                                if (response.user) {
+                                    var newOption = new Option(response.user.user_name, response.user
+                                        .user_id, true, true);
+                                    $('#user_id').empty()
+                                        .append('<option value="">Select a Customer</option>')
+                                        .append(newOption)
+                                        .trigger('change');
+                                }
+                                $('.booking-modal').text('Edit Booking');
                             } else {
                                 $('#booking_id').val('');
                                 $('#start_date').val(startDate);
@@ -631,14 +678,14 @@
                                 $('#renewal_type').val(renewal_type);
                                 $('#property_date_status').val(property_date_status);
                                 $('#propertyId').val(propertyId);
-                                $('#userId').val(userId);
+                                $('#user_id').val(userId);
                                 $('#booking_type').val(booking_type);
                                 $('#booking_status').val(booking_status);
+                                $('#user_id').val('').trigger('change');
                             }
                         },
                         error: function(xhr, status, error) {
                             console.log(error);
-                            // alert('There was an error checking the booking. Please try again.');
                         }
                     });
 
@@ -673,77 +720,175 @@
             $('#start_date, #end_date').on('change', function() {
                 updateCalendarSelection();
             });
-        });
-        $('#booking_form').validate({
-            rules: {
-                start_date: {
-                    required: true,
-                    date: true,
-                    dateNotInPast: true // Custom rule for date not in the past
+
+            // Form validation
+            $('#booking_form').validate({
+                rules: {
+                    start_date: {
+                        required: true,
+                        date: true
+                    },
+                    end_date: {
+                        required: true,
+                        date: true,
+                        dateGreaterThan: '#start_date'
+                    },
+                    number_of_guests: {
+                        required: true
+                    },
+                    renewal_type: {
+                        required: true
+                    },
+                    property_date_status: {
+                        required: true
+                    }
                 },
-                end_date: {
-                    required: true,
-                    date: true,
-                    dateGreaterThan: '#start_date' // Ensures end date is after start date
+                messages: {
+                    start_date: {
+                        required: "Please select a start date"
+                    },
+                    end_date: {
+                        required: "Please select an end date",
+                        dateGreaterThan: "End date must be after the start date"
+                    },
+                    number_of_guests: {
+                        required: "Please select number of guests"
+                    },
+                    renewal_type: {
+                        required: "Please select a renewal type"
+                    },
+                    property_date_status: {
+                        required: "Please select a Property Status"
+                    }
                 },
-                number_of_guests: {
-                    required: true
-                },
-                renewal_type: {
-                    required: true
-                },
-                property_date_status: {
-                    required: true
+                errorPlacement: function(error, element) {
+                    error.appendTo(element.closest('.col-sm-6'));
                 }
-            },
-            messages: {
-                start_date: {
-                    required: "Please select a start date",
-                    dateNotInPast: "Start date cannot be in the past"
-                },
-                end_date: {
-                    required: "Please select an end date",
-                    dateGreaterThan: "End date must be after the start date"
-                },
-                number_of_guests: {
-                    required: "Please select number of guests"
-                },
-                renewal_type: {
-                    required: "Please select a renewal type"
-                },
-                property_date_status: {
-                    required: "Please select a Property Status"
+            });
+
+            // Custom validation method for end date
+            $.validator.addMethod("dateGreaterThan", function(value, element, param) {
+                var startDate = new Date($(param).val());
+                startDate.setHours(0, 0, 0, 0);
+
+                var endDate = new Date(value);
+                endDate.setHours(0, 0, 0, 0);
+
+                return this.optional(element) || endDate > startDate;
+            }, "End date must be after the start date");
+            $('#booking_form').on('submit', function(e) {
+                e.preventDefault();
+
+                if (!$(this).valid()) {
+                    return false;
                 }
-            },
-            errorPlacement: function(error, element) {
-                error.appendTo(element.closest('.col-sm-6'));
+
+                const form = $(this);
+                const submitBtn = form.find('button[type="submit"]');
+                const formData = new FormData(this);
+
+                // Disable submit button to prevent double submission
+                submitBtn.prop('disabled', true);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success message
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+
+                            // Close the modal
+                            $('#booking_form_modal').modal('hide');
+
+                            // Reset form
+                            form[0].reset();
+
+                            // Update calendar with new booking data
+                            const propertyId = $('#propertyId').val();
+                            getPropertyDates(propertyId);
+
+                            // Reset date selection
+                            resetDateSelection();
+                        } else {
+                            // Show error message
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: response.message || 'Something went wrong!',
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        // Handle validation errors
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            let errorMessage = '<ul>';
+
+                            Object.keys(errors).forEach(key => {
+                                errorMessage += `<li>${errors[key][0]}</li>`;
+                                $(`#error-${key}`).text(errors[key][0]);
+                            });
+
+                            errorMessage += '</ul>';
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Validation Error',
+                                html: errorMessage
+                            });
+                        } else {
+                            // Handle other errors
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Something went wrong! Please try again.',
+                            });
+                        }
+                    },
+                    complete: function() {
+                        // Re-enable submit button
+                        submitBtn.prop('disabled', false);
+                    }
+                });
+            });
+
+            // Function to update calendar with new booking data
+            function updateCalendarWithNewBooking(propertyId, startDate, endDate, status) {
+                const start = moment(startDate);
+                const end = moment(endDate);
+
+                $('.calendar-day').each(function() {
+                    const date = moment($(this).data('date'));
+
+                    if (date.isBetween(start, end, 'day', '[]')) {
+                        // Remove existing status classes
+                        $(this).removeClass('booked-not-paid booked-paid maintainence');
+
+                        // Add new status class
+                        switch (status) {
+                            case 'booked not paid':
+                                $(this).addClass('booked-not-paid');
+                                break;
+                            case 'booked paid':
+                                $(this).addClass('booked-paid');
+                                break;
+                            case 'maintainence':
+                                $(this).addClass('maintainence');
+                                break;
+                        }
+                    }
+                });
             }
         });
-
-        // Custom validation method to ensure date is not in the past
-        $.validator.addMethod("dateNotInPast", function(value, element) {
-            var today = new Date();
-            // Normalize today's date to remove the time component
-            today.setHours(0, 0, 0, 0);
-
-            var inputDate = new Date(value);
-            // Normalize the input date to remove the time component
-            inputDate.setHours(0, 0, 0, 0);
-
-            return this.optional(element) || inputDate >= today;
-        }, "Start date cannot be in the past");
-
-        // Custom validation method to ensure end date is greater than start date
-        $.validator.addMethod("dateGreaterThan", function(value, element, param) {
-            var startDate = new Date($(param).val());
-            // Normalize the start date to remove the time component
-            startDate.setHours(0, 0, 0, 0);
-
-            var endDate = new Date(value);
-            // Normalize the end date to remove the time component
-            endDate.setHours(0, 0, 0, 0);
-
-            return this.optional(element) || endDate > startDate;
-        }, "End date must be after the start date");
     </script>
 @endsection

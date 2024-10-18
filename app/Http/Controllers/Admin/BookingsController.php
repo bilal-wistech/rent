@@ -197,7 +197,8 @@ class BookingsController extends Controller
         $booking = Bookings::with([
             'properties.property_dates' => function ($query) use ($validated) {
                 $query->whereBetween('date', [$validated['start_date'], $validated['end_date']]);
-            }
+            },
+            'users'
         ])
             ->where('property_id', $validated['property_id'])
             ->where(function ($query) use ($validated) {
@@ -214,6 +215,10 @@ class BookingsController extends Controller
                 'booking_id' => $booking->id,
                 'booking' => $booking,
                 'property_dates' => $property_dates,
+                'user' => [
+                    'user_id' => $booking->users->id,
+                    'user_name' =>  $booking->users->first_name . " " . $booking->users->last_name,
+                ]
             ]);
         }
 
@@ -342,11 +347,29 @@ class BookingsController extends Controller
             );
 
             DB::commit();
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Booking ' . ($request->booking_id ? 'updated' : 'created') . ' successfully',
+                    'booking' => [
+                        'id' => $booking->id,
+                        'start_date' => $booking->start_date,
+                        'end_date' => $booking->end_date,
+                        'status' => $request->property_date_status,
+                        'property_id' => $booking->property_id
+                    ]
+                ]);
+            }
             Common::one_time_message('success', 'Booking ' . ($bookingId ? 'Updated' : 'Added') . ' Successfully');
             return redirect('admin/bookings');
-
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to ' . ($request->booking_id ? 'update' : 'create') . ' booking: ' . $e->getMessage()
+                ], 500);
+            }
             Common::one_time_message('error', 'Failed to ' . ($bookingId ? 'update booking' : 'add booking') . '. Please try again. ' . $e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -824,6 +847,4 @@ class BookingsController extends Controller
             ],
         ]);
     }
-
-
 }
