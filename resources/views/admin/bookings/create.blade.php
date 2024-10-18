@@ -68,21 +68,21 @@
         }
 
         .calendar-day.booked-paid {
-            background-color: #ffebee;
+            background-color: #d32f2f;
             /* Light red */
-            color: #d32f2f;
+            color: #e8f5e9;
         }
 
         .calendar-day.booked-not-paid {
-            background-color: #e8f5e9;
+            background-color: #388e3c;
             /* Light green */
-            color: #388e3c;
+            color: #e8f5e9;
         }
 
         .calendar-day.maintainence {
-            background-color: #e8f5e9;
+            background-color: #FFA500;
             /* orange */
-            color: #FFA500;
+            color: #e8f5e9;
         }
 
         .select2-dropdown {
@@ -507,7 +507,6 @@
 
             function checkSelections() {
                 const propertyId = $('#propertyId').val();
-                //const hostId = $('#userId').val();
                 if (propertyId) {
                     $('.calendar-container').show();
                     renderCalendars();
@@ -531,11 +530,8 @@
 
             function createMonthCalendar(month) {
                 const monthDiv = $('<div>').addClass('month-calendar');
-
-                // Month header remains the same
                 monthDiv.append($('<div>').addClass('month-header').text(month.format('MMMM YYYY')));
 
-                // Weekday header remains the same
                 const weekdayHeader = $('<div>').addClass('weekday-header');
                 moment.weekdaysShort().forEach(day => {
                     weekdayHeader.append($('<div>').text(day));
@@ -565,11 +561,11 @@
                     // Apply color based on property date status
                     if (propertyDates[dateString]) {
                         if (propertyDates[dateString].status === 'booked not paid') {
-                            dayDiv.addClass('booked-not-paid'); // Add CSS for green background
+                            dayDiv.addClass('booked-not-paid');
                         } else if (propertyDates[dateString].status === 'booked paid') {
-                            dayDiv.addClass('booked-paid'); // Add CSS for red background
+                            dayDiv.addClass('booked-paid');
                         } else if (propertyDates[dateString].status === 'maintainence') {
-                            dayDiv.addClass('maintainence'); // Add CSS for orange background
+                            dayDiv.addClass('maintainence');
                         }
                     }
 
@@ -577,16 +573,12 @@
                         dayDiv.addClass('current-date');
                     }
 
-                    if (currentDate.isBefore(today, 'day')) {
-                        dayDiv.addClass('disabled');
-                        dayDiv.css('pointer-events', 'none');
-                    } else {
-                        dayDiv.click(function() {
-                            const propertyId = $('#property_id').val();
-                            const userId = $('#user_id').val();
-                            handleDateClick(propertyId, userId, dateString);
-                        });
-                    }
+                    // All dates are clickable
+                    dayDiv.click(function() {
+                        const propertyId = $('#property_id').val();
+                        const userId = $('#user_id').val();
+                        handleDateClick(propertyId, userId, dateString);
+                    });
 
                     daysGrid.append(dayDiv);
                 }
@@ -603,19 +595,17 @@
                 } else {
                     $('#end_date').val(date);
 
-                    // Make the AJAX call here
+                    // Make the AJAX call
                     const startDate = $('#start_date').val();
                     const endDate = $('#end_date').val();
                     const no_of_guests = $('#no_of_guests').val();
                     const renewal_type = $('#renewal_type').val();
                     const property_date_status = $('#property_date_status').val();
-                    // const propertyId = $('#propertyId').val();
-                    // const userId = $('#user_id').val();
                     const booking_type = $('#booking_type').val();
                     const booking_status = $('#booking_status').val();
 
                     $.ajax({
-                        url: '{{ route('admin.bookings.check-booking-exists') }}', // Your route to the
+                        url: '{{ route('admin.bookings.check-booking-exists') }}',
                         type: 'POST',
                         data: {
                             property_id: propertyId,
@@ -629,7 +619,6 @@
                                 console.log(response.booking);
                                 console.log('dates: ', response.property_dates);
                                 $('#propertyId').val(response.booking.id);
-                                // $('#host_id').val(response.booking.user_id);
                                 $('#booking_type').val(response.booking.booking_type);
                                 $('#booking_status').val(response.booking.status);
                                 $('#booking_id').val(response.booking.id);
@@ -639,19 +628,16 @@
                                 $('#renewal_type').val(response.booking.renewal_type);
                                 $('#property_date_status').val(response.property_dates[0].status);
                                 $('#min_stay').val(response.property_dates[0].min_stay);
+
                                 if (response.user) {
-                                    // Create a new option
                                     var newOption = new Option(response.user.user_name, response.user
                                         .user_id, true, true);
-
-                                    // Clear and update the select2
                                     $('#user_id').empty()
                                         .append('<option value="">Select a Customer</option>')
                                         .append(newOption)
                                         .trigger('change');
                                 }
                                 $('.booking-modal').text('Edit Booking');
-
                             } else {
                                 $('#booking_id').val('');
                                 $('#start_date').val(startDate);
@@ -668,7 +654,6 @@
                         },
                         error: function(xhr, status, error) {
                             console.log(error);
-                            // alert('There was an error checking the booking. Please try again.');
                         }
                     });
 
@@ -703,77 +688,62 @@
             $('#start_date, #end_date').on('change', function() {
                 updateCalendarSelection();
             });
-        });
-        $('#booking_form').validate({
-            rules: {
-                start_date: {
-                    required: true,
-                    date: true,
-                    dateNotInPast: true // Custom rule for date not in the past
+
+            // Form validation
+            $('#booking_form').validate({
+                rules: {
+                    start_date: {
+                        required: true,
+                        date: true
+                    },
+                    end_date: {
+                        required: true,
+                        date: true,
+                        dateGreaterThan: '#start_date'
+                    },
+                    number_of_guests: {
+                        required: true
+                    },
+                    renewal_type: {
+                        required: true
+                    },
+                    property_date_status: {
+                        required: true
+                    }
                 },
-                end_date: {
-                    required: true,
-                    date: true,
-                    dateGreaterThan: '#start_date' // Ensures end date is after start date
+                messages: {
+                    start_date: {
+                        required: "Please select a start date"
+                    },
+                    end_date: {
+                        required: "Please select an end date",
+                        dateGreaterThan: "End date must be after the start date"
+                    },
+                    number_of_guests: {
+                        required: "Please select number of guests"
+                    },
+                    renewal_type: {
+                        required: "Please select a renewal type"
+                    },
+                    property_date_status: {
+                        required: "Please select a Property Status"
+                    }
                 },
-                number_of_guests: {
-                    required: true
-                },
-                renewal_type: {
-                    required: true
-                },
-                property_date_status: {
-                    required: true
+                errorPlacement: function(error, element) {
+                    error.appendTo(element.closest('.col-sm-6'));
                 }
-            },
-            messages: {
-                start_date: {
-                    required: "Please select a start date",
-                    dateNotInPast: "Start date cannot be in the past"
-                },
-                end_date: {
-                    required: "Please select an end date",
-                    dateGreaterThan: "End date must be after the start date"
-                },
-                number_of_guests: {
-                    required: "Please select number of guests"
-                },
-                renewal_type: {
-                    required: "Please select a renewal type"
-                },
-                property_date_status: {
-                    required: "Please select a Property Status"
-                }
-            },
-            errorPlacement: function(error, element) {
-                error.appendTo(element.closest('.col-sm-6'));
-            }
+            });
+
+            // Custom validation method for end date
+            $.validator.addMethod("dateGreaterThan", function(value, element, param) {
+                var startDate = new Date($(param).val());
+                startDate.setHours(0, 0, 0, 0);
+
+                var endDate = new Date(value);
+                endDate.setHours(0, 0, 0, 0);
+
+                return this.optional(element) || endDate > startDate;
+            }, "End date must be after the start date");
         });
-
-        // Custom validation method to ensure date is not in the past
-        $.validator.addMethod("dateNotInPast", function(value, element) {
-            var today = new Date();
-            // Normalize today's date to remove the time component
-            today.setHours(0, 0, 0, 0);
-
-            var inputDate = new Date(value);
-            // Normalize the input date to remove the time component
-            inputDate.setHours(0, 0, 0, 0);
-
-            return this.optional(element) || inputDate >= today;
-        }, "Start date cannot be in the past");
-
-        // Custom validation method to ensure end date is greater than start date
-        $.validator.addMethod("dateGreaterThan", function(value, element, param) {
-            var startDate = new Date($(param).val());
-            // Normalize the start date to remove the time component
-            startDate.setHours(0, 0, 0, 0);
-
-            var endDate = new Date(value);
-            // Normalize the end date to remove the time component
-            endDate.setHours(0, 0, 0, 0);
-
-            return this.optional(element) || endDate > startDate;
-        }, "End date must be after the start date");
     </script>
 @endsection
