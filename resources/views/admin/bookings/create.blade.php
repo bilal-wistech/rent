@@ -211,6 +211,28 @@
                                                             class="fa fa-user"></span></a>
                                                 </div> --}}
                                             </div>
+                                            <div class="form-group row mt-3 renewal_type">
+                                                <label for="time_period_id"
+                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                    Time Period <span class="text-danger">*</span>
+                                                </label>
+
+                                                <div class="col-sm-6">
+                                                    <select class="form-control select2" name="time_period_id"
+                                                        id="time_period_id">
+                                                        <option value="">Select Time Period</option>
+                                                        @foreach ($time_periods as $time_period)
+                                                            <option value="{{ $time_period->id }}"
+                                                                {{ old('time_period_id') == $time_period->id ? 'selected' : '' }}>
+                                                                {{ $time_period->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <span class="text-danger" id="error-time_period_id">
+                                                        {{ $errors->first('time_period_id') }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <div class="form-group row mt-3">
                                                 <label for="input_dob"
                                                     class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
@@ -263,25 +285,22 @@
                                             <div class="form-group row mt-3 renewal_type">
                                                 <label for="renewal_type"
                                                     class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Renewal Type <span class="text-danger">*</span>
+                                                    Renewal<span class="text-danger">*</span>
                                                 </label>
 
                                                 <div class="col-sm-6">
                                                     <select class="form-control select2" name="renewal_type"
                                                         id="renewal_type">
-                                                        <option value="">Select a Renewal Type</option>
-                                                        <option value="none"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'none') || old('renewal_type') == 'none' ? 'selected' : '' }}>
-                                                            None
+                                                        <option value="">Is Renewal Needed</option>
+                                                        <option value="no"
+                                                            {{ (isset($booking) && $booking->renewal_type == 'no') || old('renewal_type') == 'no' ? 'selected' : '' }}>
+                                                            No
                                                         </option>
-                                                        <option value="weekly"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'weekly') || old('renewal_type') == 'weekly' ? 'selected' : '' }}>
-                                                            Weekly
+                                                        <option value="yes"
+                                                            {{ (isset($booking) && $booking->renewal_type == 'yes') || old('renewal_type') == 'yes' ? 'selected' : '' }}>
+                                                            Yes
                                                         </option>
-                                                        <option value="monthly"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'monthly') || old('renewal_type') == 'monthly' ? 'selected' : '' }}>
-                                                            Monthly
-                                                        </option>
+
                                                     </select>
                                                     <span class="text-danger" id="error-renewal_type">
                                                         {{ $errors->first('renewal_type') }}
@@ -310,6 +329,15 @@
                                                     <span class="text-danger" id="error-property_date_status">
                                                         {{ $errors->first('property_date_status') }}
                                                     </span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mt-3">
+                                                <label for="exampleInputPassword1"
+                                                    class="control-label col-sm-3 mt-2 fw-bold">Buffer Days<span
+                                                        class="text-danger">*</span></label>
+                                                <div class="col-sm-6">
+                                                    <input type="number" class="form-control f-14" name="buffer_days"
+                                                        id="buffer_days" placeholder="">
                                                 </div>
                                             </div>
                                         </div>
@@ -648,8 +676,9 @@
                         success: function(response) {
                             $('#booking_form_modal').modal('show');
                             if (response.exists) {
-                                console.log(response.booking);
-                                console.log('dates: ', response.property_dates);
+                                // console.log(response.booking);
+                                // console.log('dates: ', response.property_dates);
+                                // console.log('time period: ', response.time_period);
                                 $('#propertyId').val(response.booking.id);
                                 $('#booking_type').val(response.booking.booking_type);
                                 $('#booking_status').val(response.booking.status);
@@ -660,12 +689,20 @@
                                 $('#renewal_type').val(response.booking.renewal_type);
                                 $('#property_date_status').val(response.property_dates[0].status);
                                 $('#min_stay').val(response.property_dates[0].min_stay);
-
+                                $('#buffer_days').val(response.booking.buffer_days);
                                 if (response.user) {
-                                    var newOption = new Option(response.user.user_name, response.user
+                                    let newOption = new Option(response.user.user_name, response.user
                                         .user_id, true, true);
                                     $('#user_id').empty()
                                         .append('<option value="">Select a Customer</option>')
+                                        .append(newOption)
+                                        .trigger('change');
+                                }
+                                if (response.time_period) {
+                                    let newOption = new Option(response.time_period.time_period_name,
+                                        response.time_period.time_period_id, true, true);
+                                    $('#time_period_id').empty()
+                                        .append('<option value="">Select a Time Period</option>')
                                         .append(newOption)
                                         .trigger('change');
                                 }
@@ -682,6 +719,8 @@
                                 $('#booking_type').val(booking_type);
                                 $('#booking_status').val(booking_status);
                                 $('#user_id').val('').trigger('change');
+                                $('#time_period_id').val('').trigger('change');
+                                $('#buffer_days').val('');
                             }
                         },
                         error: function(xhr, status, error) {
@@ -724,6 +763,12 @@
             // Form validation
             $('#booking_form').validate({
                 rules: {
+                    user_id: {
+                        required: true
+                    },
+                    time_period_id: {
+                        required: true
+                    },
                     start_date: {
                         required: true,
                         date: true
@@ -744,6 +789,12 @@
                     }
                 },
                 messages: {
+                    user_id: {
+                        required: "Please select a Customer"
+                    },
+                    time_period_id: {
+                        required: "Please select a Time Period"
+                    },
                     start_date: {
                         required: "Please select a start date"
                     },

@@ -24,7 +24,8 @@ use App\Models\{
     Payouts,
     Settings,
     PayoutSetting,
-    Wallet
+    Wallet,
+    TimePeriod
 };
 use Modules\DirectBankTransfer\Entities\DirectBankTransfer;
 use App\Models\PaymentMethods;
@@ -150,7 +151,8 @@ class BookingsController extends Controller
     {
         $properties = Properties::all('id', 'name');
         $customers = User::where('status', 'Active')->get();
-        return view('admin.bookings.create', compact('properties', 'customers'));
+        $time_periods = TimePeriod::all();
+        return view('admin.bookings.create', compact('properties', 'customers','time_periods'));
     }
     public function getNumberofGuests($property_id)
     {
@@ -176,16 +178,6 @@ class BookingsController extends Controller
 
         return response()->json(null);
     }
-    public function calander(Request $request, CalendarController $calendar)
-    {
-        $bookingCalander = $calendar->generate($request->property_id);
-        $property_id = $request->property_id;
-        $propertyName = Properties::findOrFail($property_id)->name;
-        $customer_id = $request->user_id;
-        $customerName = User::findOrFail($customer_id)->first_name . ' ' . User::findOrFail($customer_id)->last_name;
-        $numberOfGuests = Properties::findOrFail($property_id)->accommodates ?? 0;
-        return view('admin.bookings.calander', compact('bookingCalander', 'property_id', 'propertyName', 'customer_id', 'customerName', 'numberOfGuests'));
-    }
     public function checkExistingPropertyBooking(Request $request)
     {
         $validated = $request->validate([
@@ -198,7 +190,7 @@ class BookingsController extends Controller
             'properties.property_dates' => function ($query) use ($validated) {
                 $query->whereBetween('date', [$validated['start_date'], $validated['end_date']]);
             },
-            'users'
+            'users','time_period'
         ])
             ->where('property_id', $validated['property_id'])
             ->where(function ($query) use ($validated) {
@@ -218,6 +210,10 @@ class BookingsController extends Controller
                 'user' => [
                     'user_id' => $booking->users->id,
                     'user_name' =>  $booking->users->first_name . " " . $booking->users->last_name,
+                ],
+                'time_period' => [
+                    'time_period_id' => $booking->time_period->id,
+                    'time_period_name' =>  $booking->time_period->name,
                 ]
             ]);
         }
@@ -268,6 +264,8 @@ class BookingsController extends Controller
                 'date_with_price' => json_encode($allData),
                 'transaction_id' => '',
                 'payment_method_id' => '',
+                'time_period_id' => $request->time_period_id,
+                'buffer_days' => $request->buffer_days ?? 0
             ];
 
             if ($bookingId) {

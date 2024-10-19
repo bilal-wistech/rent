@@ -123,7 +123,10 @@ class Bookings extends Model
     {
         return $this->belongsTo('App\Models\Bank');
     }
-
+    public function time_period()
+    {
+        return $this->belongsTo('App\Models\TimePeriod', 'time_period_id', 'id');
+    }
 
     public function getHostPenaltyAmountAttribute()
     {
