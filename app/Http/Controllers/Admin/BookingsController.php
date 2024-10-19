@@ -214,6 +214,7 @@ class BookingsController extends Controller
                 'time_period' => [
                     'time_period_id' => $booking->time_period->id,
                     'time_period_name' =>  $booking->time_period->name,
+                    'time_period_days' => $booking->time_period->days
                 ]
             ]);
         }

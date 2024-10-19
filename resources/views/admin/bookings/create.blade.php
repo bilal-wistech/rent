@@ -293,15 +293,14 @@
                                                     <select class="form-control select2" name="renewal_type"
                                                         id="renewal_type">
                                                         <option value="">Is Renewal Needed</option>
-                                                        <option value="no"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'no') || old('renewal_type') == 'no' ? 'selected' : '' }}>
-                                                            No
-                                                        </option>
                                                         <option value="yes"
                                                             {{ (isset($booking) && $booking->renewal_type == 'yes') || old('renewal_type') == 'yes' ? 'selected' : '' }}>
                                                             Yes
                                                         </option>
-
+                                                        <option value="no"
+                                                            {{ (isset($booking) && $booking->renewal_type == 'no') || old('renewal_type') == 'no' ? 'selected' : '' }}>
+                                                            No
+                                                        </option>
                                                     </select>
                                                     <span class="text-danger" id="error-renewal_type">
                                                         {{ $errors->first('renewal_type') }}
@@ -332,7 +331,7 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div class="form-group row mt-3">
+                                            <div class="form-group row mt-3 buffer-days-group">
                                                 <label for="exampleInputPassword1"
                                                     class="control-label col-sm-3 mt-2 fw-bold">Buffer Days<span
                                                         class="text-danger">*</span></label>
@@ -956,6 +955,22 @@
                     }
                 });
             }
+
+            function toggleBufferDays() {
+                if ($('#renewal_type').val() === 'yes') {
+                    $('.buffer-days-group').show();
+                } else {
+                    $('.buffer-days-group').hide();
+                }
+            }
+
+            // Call the function on page load
+            toggleBufferDays();
+
+            // Add event listener for renewal_type change
+            $('#renewal_type').on('change', function() {
+                toggleBufferDays();
+            });
         });
     </script>
 @endsection
