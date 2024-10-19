@@ -16,12 +16,12 @@ class DashboardController extends Controller
     {
 
 
-        $bookedPropertyIds = DB::table('bookings')->pluck('property_id');
-        $unbookedPropertyIds = DB::table('properties')
-            ->whereNotIn('id', $bookedPropertyIds)
-            ->pluck('id');
+        // $bookedPropertyIds = DB::table('bookings')->pluck('property_id');
+        // $unbookedPropertyIds = DB::table('properties')
+        //     ->whereNotIn('id', $bookedPropertyIds)
+        //     ->pluck('id');
 
-        dd($unbookedPropertyIds);
+        // dd($unbookedPropertyIds);
 
         $data['total_users_count'] = User::count();
         $data['total_property_count'] = Properties::count();
