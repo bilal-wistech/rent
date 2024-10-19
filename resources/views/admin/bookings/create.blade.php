@@ -223,6 +223,7 @@
                                                         <option value="">Select Time Period</option>
                                                         @foreach ($time_periods as $time_period)
                                                             <option value="{{ $time_period->id }}"
+                                                                data-days="{{ $time_period->days }}"
                                                                 {{ old('time_period_id') == $time_period->id ? 'selected' : '' }}>
                                                                 {{ $time_period->name }}
                                                             </option>
@@ -530,6 +531,24 @@
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
             });
+            $('#time_period_id').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                const daysToAdd = parseInt(selectedOption.data('days'));
+                const startDateValue = $('#start_date').val();
+
+                if (startDateValue) {
+                    const startDate = moment(startDateValue);
+
+                    if (daysToAdd && daysToAdd > 0) {
+
+                        const endDate = startDate.add(daysToAdd, 'days').format('YYYY-MM-DD');
+                        $('#end_date').val(endDate);
+                    } else {
+                        $('#end_date').val(startDate.format('YYYY-MM-DD'));
+                    }
+                }
+            });
+
 
             function updateNumberOfGuests(propertyId) {
                 $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
@@ -679,12 +698,10 @@
                                 // console.log(response.booking);
                                 // console.log('dates: ', response.property_dates);
                                 // console.log('time period: ', response.time_period);
-                                $('#propertyId').val(response.booking.id);
+                                $('#propertyId').val(response.booking.property_id);
                                 $('#booking_type').val(response.booking.booking_type);
                                 $('#booking_status').val(response.booking.status);
                                 $('#booking_id').val(response.booking.id);
-                                $('#start_date').val(response.booking.start_date);
-                                $('#end_date').val(response.booking.end_date);
                                 $('#number_of_guests').val(response.booking.guest);
                                 $('#renewal_type').val(response.booking.renewal_type);
                                 $('#property_date_status').val(response.property_dates[0].status);
@@ -699,13 +716,12 @@
                                         .trigger('change');
                                 }
                                 if (response.time_period) {
-                                    let newOption = new Option(response.time_period.time_period_name,
-                                        response.time_period.time_period_id, true, true);
-                                    $('#time_period_id').empty()
-                                        .append('<option value="">Select a Time Period</option>')
-                                        .append(newOption)
+                                    // Just set the value and trigger change, keeping existing options
+                                    $('#time_period_id').val(response.time_period.time_period_id)
                                         .trigger('change');
                                 }
+                                $('#start_date').val(response.booking.start_date);
+                                $('#end_date').val(response.booking.end_date);
                                 $('.booking-modal').text('Edit Booking');
                             } else {
                                 $('#booking_id').val('');

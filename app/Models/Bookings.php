@@ -63,6 +63,8 @@ class Bookings extends Model
         'date_with_price',
         'transaction_id',
         'payment_method_id',
+        'buffer_days',
+        'time_period_id'
     ];
 
     protected $table = 'bookings';

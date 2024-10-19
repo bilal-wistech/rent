@@ -223,9 +223,9 @@ class BookingsController extends Controller
     public function store(AddAdminBookingRequest $request)
     {
         $currencyDefault = Currency::getAll()->where('default', 1)->first();
-        $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
-        $priceData = json_decode($priceDetails);
         $property = Properties::findOrFail($request->property_id);
+        $priceDetails = Common::getPrice($property->id, $request->checkin, $request->checkout, $request->number_of_guests);
+        $priceData = json_decode($priceDetails);
         foreach ($priceData->date_with_price as $key => $value) {
             $allData[$key]['price'] = Common::convert_currency('', $currencyDefault->code, $value->original_price);
             $allData[$key]['date'] = setDateForDb($value->date);

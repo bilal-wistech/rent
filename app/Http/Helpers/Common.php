@@ -142,7 +142,7 @@ class Common {
                     for ($j=0; $j < $num_fields; $j++) {
                         $row[$j] = addslashes($row[$j]);
                         $row[$j] = preg_replace("/\n/","\\n",$row[$j]);
-                        if (isset($row[$j])) { $return.= '"'.$row[$j].'"' ; } 
+                        if (isset($row[$j])) { $return.= '"'.$row[$j].'"' ; }
                         else { $return.= '""'; }
                         if ($j < ($num_fields-1)) { $return.= ','; }
                     }
@@ -546,7 +546,7 @@ class Common {
         }
     }
 
-    
+
     public static function uploadMultipleImage($request, $path = 'public/uploads/')
     {
         if ($request->hasFile('attachment')) {
@@ -556,7 +556,7 @@ class Common {
                     $destinationPath  = $path;
                     $filename         = time().'_'.$image->getClientOriginalName();
                     $image->move($destinationPath, $filename);
-                    array_push($names, $filename);          
+                    array_push($names, $filename);
 
                 }
                 return json_encode($names);
@@ -564,9 +564,9 @@ class Common {
                 self::one_time_message('error', __('Upload failed'));
                 return redirect()->back();
             }
-            
+
         }
     }
-    
+
 
 }
