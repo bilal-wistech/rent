@@ -16,7 +16,7 @@
 	<meta property="og:url" content="https://keenthemes.com/metronic" />
 	<meta property="og:site_name" content="Metronic by Keenthemes" />
 	<link rel="canonical" href="http://preview.keenthemes.comindex.html" />
-	<link rel="shortcut icon" href="{{asset('backend/assets/media/logos/favicon.ico')}} "/>
+	<link rel="shortcut icon" href="{{asset('backend/assets/media/logos/zurent-logo-new.jpg')}} "/>
 	<!--begin::Fonts(mandatory for all pages)-->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
 	<!--end::Fonts-->
@@ -30,5 +30,6 @@
 	<link href="{{ asset('backend/assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
 	<link href="{{asset('backend/assets/css/style.bundle.css')}}" rel="stylesheet" type="text/css" />
 	<!--end::Global Stylesheets Bundle-->
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 	<script>// Frame-busting to prevent site from being loaded within a frame without permission (click-jacking) if (window.top != window.self) { window.top.location.replace(window.self.location.href); }</script>
 </head>
