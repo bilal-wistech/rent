@@ -2334,15 +2334,15 @@
                       </thead>
                       <tbody>
                         @php
-              $number = 1 + (($unbookedProperties->currentPage() - 1) * $unbookedProperties->perPage());
-            @endphp
-                        @foreach ($unbookedProperties as $item)
-              <tr>
-                <td>{{ $item->name }}</td>
-                <td>{{ \Carbon\Carbon::parse($item->created_at)->format('Y-m-d') }}
-                </td>
-              </tr>
-            @endforeach
+                          $number = 1 + (($unbookedProperties->currentPage() - 1) * $unbookedProperties->perPage());
+                        @endphp
+                                    @foreach ($unbookedProperties as $item)
+                          <tr>
+                            <td>{{ $item->name }}</td>
+                            <td>{{ \Carbon\Carbon::parse($item->created_at)->format('Y-m-d') }}
+                            </td>
+                          </tr>
+                        @endforeach
                       </tbody>
                     </table>
 

@@ -37,17 +37,10 @@ class PropertyDataTable extends DataTable
                 return dateFormat($properties->created_at);
             })
             ->addColumn('recomended', function ($properties) {
-
-                if ($properties->recomended == 1) {
-                    return 'Yes';
-                }
-                return 'No';
-
+                return $properties->recomended == 1 ? 'Yes' : 'No';
             })
             ->addColumn('verified', function ($properties) {
-
                 return ($properties->is_verified == 'Approved' || $properties->is_verified == '') ? 'Approved' : 'Pending';
-
             })
             ->rawColumns(['host_name', 'name', 'action'])
             ->make(true);
@@ -55,23 +48,23 @@ class PropertyDataTable extends DataTable
 
     public function query()
     {
-        $user_id    = Request::segment(4);
-        $status     = isset(request()->status) ? request()->status : null;
-        $from = isset(request()->from) ? setDateForDb(request()->from) : null;
-        $to = isset(request()->to) ? setDateForDb(request()->to) : null;
-        $space_type = isset(request()->space_type) ? request()->space_type : null;
+        $user_id = Request::segment(4);
+        $status = request()->input('status', null);
+        $from = request()->input('from') ? setDateForDb(request()->input('from')) : null;
+        $to = request()->input('to') ? setDateForDb(request()->input('to')) : null;
+        $space_type = request()->input('space_type', null);
 
         $query = Properties::with(['users:id,first_name,profile_image']);
-        if (isset($user_id)) {
+
+        if ($user_id) {
             $query->where('host_id', '=', $user_id);
         }
 
-
         if ($from) {
-             $query->whereDate('created_at', '>=', $from);
+            $query->whereDate('created_at', '>=', $from);
         }
         if ($to) {
-             $query->whereDate('created_at', '<=', $to);
+            $query->whereDate('created_at', '<=', $to);
         }
         if ($status) {
             $query->where('status', '=', $status);
@@ -79,8 +72,10 @@ class PropertyDataTable extends DataTable
         if ($space_type) {
             $query->where('space_type', '=', $space_type);
         }
+
         return $this->applyScopes($query);
     }
+
 
     public function html()
     {
@@ -94,8 +89,29 @@ class PropertyDataTable extends DataTable
             ->addColumn(['data' => 'verified', 'name' => 'verified', 'title' => 'Verified'])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Date'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters([
+                'dom' => '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' .
+                    '<"row"<"col-sm-12"tr>>' .
+                    '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                'responsive' => true,
+                'lengthChange' => true,
+                'pagingType' => 'full_numbers',
+                'language' => [
+                    'paginate' => [
+                        'first' => '<button class="btn btn-primary btn-sm mx-1" data-dt-idx="0" tabindex="0"><i class="fas fa-angle-double-left"></i></button>',
+                        'last' => '<button class="btn btn-primary btn-sm mx-1" data-dt-idx="7" tabindex="0"><i class="fas fa-angle-double-right"></i></button>',
+                        'next' => '<button class="btn btn-primary btn-sm mx-1" data-dt-idx="6" tabindex="0"><i class="fas fa-angle-right"></i></button>',
+                        'previous' => '<button class="btn btn-primary btn-sm mx-1" data-dt-idx="5" tabindex="0"><i class="fas fa-angle-left"></i></button>',
+                    ],
+                    'info' => '<div class="text-muted">Showing <strong>_START_</strong> to <strong>_END_</strong> of <strong>_TOTAL_</strong> entries</div>',
+                    'infoEmpty' => 'No entries available',
+                    'lengthMenu' => 'Show _MENU_ entries',
+                ],
+            ]);
     }
+
+
+
 
 
     protected function filename()
