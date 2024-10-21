@@ -3,9 +3,9 @@
 		<head>
 			<meta charset="utf-8">
 			<meta http-equiv="X-UA-Compatible" content="IE=edge">
-			
+
 			<title> {{ siteName() }} | Dashboard </title>
-			
+
 			<meta name="csrf-token" content="{{ csrf_token() }}">
 
 			<!-- Tell the browser to be responsive to screen width -->
@@ -18,6 +18,7 @@
 			<link rel="stylesheet" href="{{ asset('backend/dist/css/AdminLTE.min.css') }}">
 			<!-- Custom css -->
 			<link rel="stylesheet" href="{{ asset('backend/dist/css/custom.min.css') }}">
+
 
 			<!-- AdminLTE Skins. Choose a skin from the css/skins
 				folder instead of downloading all of them to reduce the load. -->

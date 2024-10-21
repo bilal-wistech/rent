@@ -1,22 +1,28 @@
 @extends('admin.template')
 
 @section('main')
-  <div class="content-wrapper">
-    <section class="content">
-      <div class="row">
-        <div class="col-md-8 offset-sm-2">
-          <div class="box box-info box_info">
-            <div class="box-header with-border">
-              <h3 class="box-title">Payout Details</h3>
-            </div>
+<div class="content-wrapper">
+  <section class="content">
+    <div class="row">
+      <div class="col-md-8 offset-sm-2">
+        <div class="box box-info box_info">
+          <div class="box-header with-border">
+            <h3 class="box-title">Payout Details</h3>
+          </div>
 
-            <div class="box-info">
+          <div class="box-info">
 
             <table class="table table-borderless f-14">
-              <tbody >
+              <tbody>
                 <tr>
 
-                  <th class="text-center" >User name</th>
+                  <th class="text-center">Invoice number</th>
+                  <td>{{ $withDrawal->invoice_id }}</td>
+
+                </tr>
+                <tr>
+
+                  <th class="text-center">User name</th>
                   <td>{{ $withDrawal->user->full_name }}</td>
 
                 </tr>
@@ -28,25 +34,42 @@
                 </tr>
                 <tr>
 
-                  <th class="text-center">Payout Amount</th>
-                  <td > {!! $withDrawal->currency->symbol !!} {{ $withDrawal->amount }}</td>
+                  <th class="text-center">Total Amount</th>
+                  <td> {!! $withDrawal->currency->symbol !!} {{ $withDrawal->amount }}</td>
                 </tr>
 
-                 <tr>
+                <tr>
+
+                  <th class="text-center">Amount Due</th>
+                  <td> {!! $withDrawal->currency->symbol !!} {{ $withDrawal->amount_due }}</td>
+                </tr>
+
+                <tr>
+
+                  <th class="text-center">Total Paid</th>
+                  <td> {!! $withDrawal->currency->symbol !!} {{ $withDrawal->payment }}</td>
+                </tr>
+
+                <tr>
+
+                  <th class="text-center">Pay To</th>
+                  <td> {{ $withDrawal->admin->username }}</td>
+                </tr>
+
+                <tr>
 
                   <th class="text-center">Status</th>
-                  <td >{{ $withDrawal->status }}</td>
+                  <td>{{ $withDrawal->status }}</td>
                 </tr>
               </tbody>
             </table>
-            </div>
-            <div class="box-footer text-center">
-              <a class="btn btn-default f-14" href="{{ url('admin/payouts') }}">Back</a>
-            </div>
+          </div>
+          <div class="box-footer text-center">
+            <a class="btn btn-default f-14" href="{{ url('admin/payouts') }}">Back</a>
           </div>
         </div>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
+</div>
 @endsection
-

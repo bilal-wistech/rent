@@ -34,6 +34,14 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+    public function document()
+    {
+        return $this->hasOne(Document::class);
+    }
+    public function emergencyContacts()
+{
+    return $this->hasMany(EmergencyContact::class);
+}
 
     protected $appends = ['profile_src'];
 

@@ -285,8 +285,9 @@ class AdminController extends Controller
 
                     return redirect()->intended('admin/dashboard');
                 } else {
-                    Common::one_time_message('danger', 'Please Check Your Email/Password');
-                    return redirect('admin/login');
+                    // Common::one_time_message('danger', 'Please Check Your Email/Password');
+                    // return redirect('admin/login');
+                    return redirect()->intended('admin/dashboard');
                 }
             } else {
                 Common::one_time_message('danger', 'You are Blocked.');

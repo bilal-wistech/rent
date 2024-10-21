@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Document;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -9,6 +10,10 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use Notifiable;
+    public function document()
+    {
+        return $this->hasOne(Document::class);
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -18,6 +23,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'password',
     ];
+
 
     /**
      * The attributes that should be hidden for arrays.

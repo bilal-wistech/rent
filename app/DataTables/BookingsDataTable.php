@@ -11,7 +11,7 @@ class BookingsDataTable extends DataTable
     public function ajax()
     {
         $bookings = $this->query();
-        
+
         return datatables()
             ->of($bookings)
             ->addColumn('host_name', function ($bookings) {
@@ -39,10 +39,12 @@ class BookingsDataTable extends DataTable
                         $status = $bookings->status . "<br/><span class='label label-info'>Refund</span>";
                     }
                 }
-                return $status ;
+                return $status;
             })
             ->addColumn('action', function ($bookings) {
-                return '<a href="' . url('admin/bookings/detail/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Detail View"><i class="fa fa-share"></i></a>&nbsp;';
+                return '<a href="' . url('admin/bookings/detail/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Detail View"><i class="fa fa-share"></i></a>&nbsp;' .
+                    '<a href="' . url('admin/bookings/edit/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>&nbsp;';
+
             })
             ->rawColumns(['host_name', 'guest_name', 'total_amount', 'property_name', 'action'])
             ->make(true);
@@ -56,7 +58,7 @@ class BookingsDataTable extends DataTable
         $to = isset(request()->to) ? setDateForDb(request()->to) : null;
         $property = isset(request()->property) ? request()->property : null;
         $customer = isset(request()->customer) ? request()->customer : null;
-        
+
         $bookings = Bookings::join('properties', function ($join) {
             $join->on('properties.id', '=', 'bookings.property_id');
         })
@@ -69,8 +71,8 @@ class BookingsDataTable extends DataTable
             ->Join('users as u', function ($join) {
                 $join->on('u.id', '=', 'bookings.host_id');
             })
-            ->select(['bookings.id as id', 'u.first_name as host_name', 'users.first_name as guest_name', 'bookings.property_id as property_id', 'properties.name as property_name','bookings.total AS total_amount','bookings.payment_method_id','bookings.payment_method_id', 'bookings.status', 'bookings.created_at as created_at', 'bookings.updated_at as updated_at', 'bookings.start_date', 'bookings.end_date', 'bookings.guest', 'u.id as host_id', 'users.id as user_id', 'bookings.total', 'bookings.currency_code','currency.symbol','bookings.service_charge','bookings.host_fee', 'bookings.iva_tax', 'bookings.accomodation_tax']);
-  
+            ->select(['bookings.id as id', 'u.first_name as host_name', 'users.first_name as guest_name', 'bookings.property_id as property_id', 'properties.name as property_name', 'bookings.total AS total_amount', 'bookings.payment_method_id', 'bookings.payment_method_id', 'bookings.status', 'bookings.created_at as created_at', 'bookings.updated_at as updated_at', 'bookings.start_date', 'bookings.end_date', 'bookings.guest', 'u.id as host_id', 'users.id as user_id', 'bookings.total', 'bookings.currency_code', 'currency.symbol', 'bookings.service_charge', 'bookings.host_fee', 'bookings.iva_tax', 'bookings.accomodation_tax']);
+
         if (isset($user_id)) {
             $bookings->where('bookings.user_id', '=', $user_id);
         }
@@ -99,7 +101,7 @@ class BookingsDataTable extends DataTable
             ->addColumn(['data' => 'host_name', 'name' => 'u.first_name', 'title' => 'Host Name'])
             ->addColumn(['data' => 'guest_name', 'name' => 'users.first_name', 'title' => 'Guest Name'])
             ->addColumn(['data' => 'property_name', 'name' => 'properties.name', 'title' => 'Property Name'])
-            ->addColumn(['data' => 'method', 'name' => 'payment_methods.name', 'title' => 'Payment Method','orderable' => false, 'searchable' => false])
+            ->addColumn(['data' => 'method', 'name' => 'payment_methods.name', 'title' => 'Payment Method', 'orderable' => false, 'searchable' => false])
             ->addColumn(['data' => 'total_amount', 'name' => 'bookings.total', 'title' => 'Total Amount'])
             ->addColumn(['data' => 'status', 'name' => 'bookings.status', 'title' => 'Status'])
             ->addColumn(['data' => 'created_at', 'name' => 'bookings.created_at', 'title' => 'Date'])

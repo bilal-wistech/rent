@@ -20,9 +20,16 @@
 				<li class="{{ isset($wallet) ? $wallet : '' }}">
 					<a href='{{ url("admin/customer/wallet/" . $user?->id) }}' >Wallet</a>
 				</li>
+                <li class="{{ isset($documentActive) ? $documentActive : '' }}">
+                    <a href="{{ route('document.show', $user?->id) }}">Document</a>
+                </li>
+                <li class="{{ isset($emergencyActive) ? $emergencyActive : '' }}">
+                    <a href="{{ route('emergencycontacts.show', $user?->id) }}">Emergency Contacts</a>
+                </li>
+
 			</ul>
 			<div class="clearfix"></div>
 		</div>
 	</div>
 </div>
-<h4>{{ $user?->first_name . " " . $user?->last_name }}</h4>
+

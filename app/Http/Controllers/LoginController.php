@@ -17,9 +17,9 @@ class LoginController extends Controller
     {
         $preferenceData = Settings::getAll()->where('type','preferences')->where('name', 'recaptcha_preference')->value('value');
         $data['reCaptchaEnable'] = false;
-        
+
         if (str_contains($preferenceData,'user_login')) {
-           
+
             $data['reCaptchaEnable'] = true;
         }
 
@@ -34,7 +34,7 @@ class LoginController extends Controller
         $rules = array(
             'email'    => 'required|email|max:200',
             'password' => 'required',
-            
+
         );
 
         $fieldNames = array(
@@ -50,10 +50,10 @@ class LoginController extends Controller
 
                 $rules = array_merge($rules, $captchaRule);
                 $fieldNames = array_merge($fieldNames, $captchaFieldname);
-            
+
             }
         }
-        
+
 
         $remember = ($request->remember_me) ? true : false;
 
@@ -63,10 +63,10 @@ class LoginController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         } else {
-            if (n_as_k_c()) {
-                Session::flush();
-                return view('vendor.installer.errors.user');
-            }
+            // if (n_as_k_c()) {
+            //     Session::flush();
+            //     return view('vendor.installer.errors.user');
+            // }
             $users = User::where('email', $request->email)->first();
 
             if (!empty($users)) {
@@ -94,7 +94,7 @@ class LoginController extends Controller
 
         }
     }
-    
+
     public function addFavourite()
     {
         if (Session::has('favourite_property')) {
@@ -124,9 +124,9 @@ class LoginController extends Controller
     {
         $preferenceData = Settings::getAll()->where('type','preferences')->where('name', 'recaptcha_preference')->value('value');
         $data['reCaptchaEnable'] = false;
-        
+
         if (str_contains($preferenceData,'user_reg')) {
-           
+
             $data['reCaptchaEnable'] = true;
         }
         $data['social'] = Settings::getAll()->where('type','social')->pluck('value','name');

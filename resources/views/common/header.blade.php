@@ -7,7 +7,7 @@
     <div class="main_menu">
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container-fluid container-fluid-90">
-                <a class="navbar-brand logo_h" aria-label="logo" href="{{ url('/') }}">{!! getLogo('img-130x32') !!}</a>
+                <a class="navbar-brand logo_h" aria-label="logo" href="{{ url('/') }}">{{-- {!! getLogo('img-130x32') !!} --}}Ahomes</a>
 				<!-- Trigger Button -->
 				<a href="#" aria-label="navbar" class="navbar-toggler" data-toggle="modal" data-target="#left_modal">
 					<span class="icon-bar"></span>

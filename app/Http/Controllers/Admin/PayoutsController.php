@@ -26,6 +26,7 @@ use App\Http\Controllers\Controller;
 use App\DataTables\PayoutsDataTable;
 use App\Exports\PayoutsExport;
 use App\Http\Controllers\EmailController;
+use Illuminate\Support\Facades\Validator;
 use App\Models\{
     Payouts,
     Withdrawal,
@@ -33,6 +34,13 @@ use App\Models\{
     Properties,
     Currency,
     Wallet,
+    User,
+    PaymentMethods,
+    PayoutSetting,
+    Bookings,
+    Invoice,
+    admin,
+
 };
 
 
@@ -42,7 +50,7 @@ class PayoutsController extends Controller
     public function index(PayoutsDataTable $dataTable)
     {
         $data['from'] = isset(request()->from) ? request()->from : null;
-        $data['to']   = isset(request()->to) ? request()->to : null;
+        $data['to'] = isset(request()->to) ? request()->to : null;
         if (isset(request()->property)) {
             $data['properties'] = Properties::where('properties.id', request()->property)->select('id', 'name')->get();
         } else {
@@ -50,39 +58,39 @@ class PayoutsController extends Controller
         }
 
         if (isset(request()->btn)) {
-            $status     = request()->status;
-            $from       = request()->from;
-            $to         = request()->to;
+            $status = request()->status;
+            $from = request()->from;
+            $to = request()->to;
             if (isset(request()->property)) {
-                $property    = request()->property;
+                $property = request()->property;
             } else {
-                $property    = null;
+                $property = null;
             }
         } else {
-            $status     = null;
-            $types      = null;
-            $property   = null;
-            $from       = null;
-            $to         = null;
+            $status = null;
+            $types = null;
+            $property = null;
+            $from = null;
+            $to = null;
         }
 
         $total_payouts_initial = $this->getAllPayouts();
-        $total_payouts         = $this->getAllPayouts();
+        $total_payouts = $this->getAllPayouts();
         $data['total_payouts'] = $total_payouts->get()->count();
 
-        $different_currency_total_initial  = $total_payouts_initial->select('payouts.currency_code as currency_code', DB::raw('SUM(payouts.amount) AS total_amount'))->groupBy('currency_code');
-        $different_currency_total          = $different_currency_total_initial->get();
-        $data['different_total_amounts']   = $this->getDistinctCurrencyTotalWithSymbol($different_currency_total);
-        $data['totalPayouts']       = Withdrawal::where('status','=','Success')->count();
+        $different_currency_total_initial = $total_payouts_initial->select('payouts.currency_code as currency_code', DB::raw('SUM(payouts.amount) AS total_amount'))->groupBy('currency_code');
+        $different_currency_total = $different_currency_total_initial->get();
+        $data['different_total_amounts'] = $this->getDistinctCurrencyTotalWithSymbol($different_currency_total);
+        $data['totalPayouts'] = Withdrawal::where('status', '=', 'Success')->count();
         $data['totalPayoutsAmount'] = Withdrawal::sum('amount');
 
 
         if (isset(request()->reset_btn)) {
-            $data['from']        = null;
-            $data['to']          = null;
-            $data['allstatus']   = '';
-            $data['alltypes']   = '';
-            $data['allproperties']   = '';
+            $data['from'] = null;
+            $data['to'] = null;
+            $data['allstatus'] = '';
+            $data['alltypes'] = '';
+            $data['allproperties'] = '';
             return $dataTable->render('admin.payouts.view', $data);
         }
 
@@ -104,7 +112,7 @@ class PayoutsController extends Controller
         }
 
 
-        $data['total_payouts']            = $total_payouts->get()->count();
+        $data['total_payouts'] = $total_payouts->get()->count();
         $different_currency_total_initial = $different_currency_total_initial->get();
 
         if (count($different_currency_total_initial)) {
@@ -113,25 +121,56 @@ class PayoutsController extends Controller
             $data['different_total_amounts'] = null;
         }
 
-
         isset(request()->property) ? $data['allproperties'] = request()->property : $data['allproperties'] = '';
         isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
-        isset(request()->types) ? $data['alltypes']   = request()->types : $data['alltypes'] = '';
+        isset(request()->types) ? $data['alltypes'] = request()->types : $data['alltypes'] = '';
 
         return $dataTable->render('admin.payouts.view', $data);
     }
-    public function edit(Request $request) {
-        if (n_as_k_c()) {
-            Session::flush();
-            return view('vendor.installer.errors.admin');
-        }
 
-       if (! $request->isMethod('post')) {
 
-            $data['withDrawal'] = Withdrawal::where('id',$request->id)->first();
 
-            return view('admin.payouts.edit',$data);
-       } else {
+
+    public function create()
+    {
+        // user , payment method , currency,  amount ,
+        // $bookings = Bookings::orderBy('id', 'desc')->where('payout_payment', '0')->get();
+        $bookings = Bookings::where('status', 'pending')->get();
+        $invoice = Invoice::latest()->first();
+        $lastInvoice = Invoice::latest('id')->first(); // Get the last invoice based on the 'id'
+        $invNumber = ($lastInvoice ? $lastInvoice->invoice_no : 0) + 1; // Increment the id by 1
+        $currency = Currency::all();
+        $admin = admin::all();
+        $pMethods = PaymentMethods::all();
+        $users = User::all();
+        return view('admin.payouts.create', compact('bookings', 'admin', 'currency', 'pMethods', 'invNumber', 'users'));
+    }
+
+
+
+    public function edit(Request $request)
+    {
+        // if (n_as_k_c()) {
+        //     Session::flush();
+        //     return view('vendor.installer.errors.admin');
+        // }
+
+        if (!$request->isMethod('post')) {
+
+            $withDrawal = Withdrawal::where('id', $request->id)->first();
+            $currency = Currency::all();
+            $admin = admin::all();
+            $users = User::all();
+            $pMethods = PaymentMethods::all();
+            $invoice = Invoice::where('reference_no', $withDrawal->invoice_id)->first();
+            $property = Properties::where('id', $invoice->id)->first();
+            $propertyName = $property->name;
+            $bookings = Bookings::where('status', 'pending')->get();
+            $invoice = Invoice::latest()->first();
+            $lastInvoice = Invoice::latest('id')->first(); // Get the last invoice based on the 'id'
+            $invNumber = ($lastInvoice ? $lastInvoice->invoice_no : 0) + 1; // Increment the id by 1
+            return view('admin.payouts.edit', compact('withDrawal', 'bookings', 'admin', 'currency', 'pMethods', 'invNumber', 'users', 'propertyName'));
+        } else {
 
             if ($request->status == 'Success') {
 
@@ -145,22 +184,21 @@ class PayoutsController extends Controller
 
                 if ($wallet->balance >= $subTotal) {
                     $withDrawal->currency_id = $wallet->currency_id;
-                    $withDrawal->status   = $request->status;
-                    $withDrawal->amount   = $subTotal;
+                    $withDrawal->status = $request->status;
+                    $withDrawal->amount = $subTotal;
                     $withDrawal->subtotal = 0;
                     $withDrawal->save();
 
-                    $balance =  ($wallet->balance - $subTotal);
-                    Wallet::where(['user_id' =>$withDrawal->user_id])->update(['balance' => $balance]);
+                    $balance = ($wallet->balance - $subTotal);
+                    Wallet::where(['user_id' => $withDrawal->user_id])->update(['balance' => $balance]);
 
                     try {
 
                         $email_controller = new EmailController;
                         $email_controller->notifyUserOfPayoutProcessed($withDrawal->id);
-            
-            
+
                     } catch (\Exception $e) {
-                        
+
                         Common::one_time_message('danger', __('Email was not sent due to :x', ['x' => __($e->getMessage())]));
                         return redirect('admin/payouts');
                     }
@@ -168,13 +206,24 @@ class PayoutsController extends Controller
                     Common::one_time_message('error', "User doesn't have sufficient balance");
                     return redirect('admin/payouts');
                 }
-
             }
 
             Common::one_time_message('success', "Successfully updated");
             return redirect('admin/payouts');
         }
+    }
 
+
+    public function delete($id)
+    {
+
+        $model = Withdrawal::find($id);
+        if ($model) {
+            $model->delete();
+            return redirect()->back()->with('paydelsuccess', 'Withdrawal deleted successfully.');
+        } else {
+            return redirect()->back()->with('paydelerror', 'Withdrawal not found.');
+        }
     }
 
     public function details(Request $request)
@@ -196,10 +245,10 @@ class PayoutsController extends Controller
 
     public function payoutsPdf($id = null)
     {
-        $to                 = setDateForDb(request()->to);
-        $from               = setDateForDb(request()->from);
-        $status             = isset(request()->status) ? request()->status : null;
-        $id                 = isset(request()->user_id) ? request()->user_id : null;
+        $to = setDateForDb(request()->to);
+        $from = setDateForDb(request()->from);
+        $status = isset(request()->status) ? request()->status : null;
+        $id = isset(request()->user_id) ? request()->user_id : null;
 
         $query = Withdrawal::orderBy('id', 'desc')->select();
 
@@ -224,14 +273,15 @@ class PayoutsController extends Controller
 
         $data['payoutList'] = $query->get();
         $pdf = PDF::loadView('admin.payouts.list_pdf', $data, [], [
-            'format' => 'A3', [750, 1060]
-          ]);
+            'format' => 'A3',
+            [750, 1060]
+        ]);
         return $pdf->download('payouts_list_' . time() . '.pdf', array("Attachment" => 0));
     }
 
     public function payoutsCsv($id = null)
     {
-        return Excel::download(new PayoutsExport, 'payouts_sheet' . time() .'.xls');
+        return Excel::download(new PayoutsExport, 'payouts_sheet' . time() . '.xls');
     }
 
     public function getAllPayouts()
@@ -239,33 +289,135 @@ class PayoutsController extends Controller
         $allPayouts = Payouts::join('properties', function ($join) {
             $join->on('properties.id', '=', 'payouts.property_id');
         })
-        ->join('users', function ($join) {
+            ->join('users', function ($join) {
                 $join->on('users.id', '=', 'payouts.user_id');
-        })
-        ->join('currency', function ($join) {
+            })
+            ->join('currency', function ($join) {
                 $join->on('currency.code', '=', 'payouts.currency_code');
-        })
-        ->select(['properties.name as property_name', 'users.first_name AS user', DB::raw('CONCAT(currency.symbol, payouts.amount) AS payouts_amount'), DB::raw('CONCAT(currency.symbol, payouts.penalty_amount) AS penalty'), 'payouts.account as payouts_account', 'payouts.created_at as payouts_date', 'payouts.*']);
+            })
+            ->select(['properties.name as property_name', 'users.first_name AS user', DB::raw('CONCAT(currency.symbol, payouts.amount) AS payouts_amount'), DB::raw('CONCAT(currency.symbol, payouts.penalty_amount) AS penalty'), 'payouts.account as payouts_account', 'payouts.created_at as payouts_date', 'payouts.*']);
 
         return $allPayouts;
     }
-
-    
 
     public function getAllPayoutsCSV()
     {
         $allPayouts = Payouts::join('properties', function ($join) {
             $join->on('properties.id', '=', 'payouts.property_id');
         })
-        ->join('users', function ($join) {
+            ->join('users', function ($join) {
                 $join->on('users.id', '=', 'payouts.user_id');
-        })
-        ->join('currency', function ($join) {
+            })
+            ->join('currency', function ($join) {
                 $join->on('currency.code', '=', 'payouts.currency_code');
-        })
-        ->select(['properties.name as property_name', 'users.first_name AS user', DB::raw('payouts.amount AS payouts_amount'), DB::raw('payouts.penalty_amount AS penalty'), 'payouts.account as payouts_account', 'payouts.created_at as payouts_date', 'payouts.*'])
-        ->orderBy('payouts.id', 'desc');
+            })
+            ->select(['properties.name as property_name', 'users.first_name AS user', DB::raw('payouts.amount AS payouts_amount'), DB::raw('payouts.penalty_amount AS penalty'), 'payouts.account as payouts_account', 'payouts.created_at as payouts_date', 'payouts.*'])
+            ->orderBy('payouts.id', 'desc');
 
         return $allPayouts;
     }
+
+    // payout creat
+
+    public function asuccess(Request $request)
+    {
+
+        $invoices = $request->invoices;
+        foreach ($invoices as $invoiceData) {
+
+            if ($invoiceData['payment'] <= 0) {
+                return response()->json([
+                    'message' => 'error'
+                ]);
+            }
+            // Fetch a single invoice using `first()` instead of `get()`
+            $invoice = Invoice::where('id', $invoiceData['invoice_id'])->first();
+            $invoice->payment_status = 'paid';
+            $invoice->save();
+
+            // Check if the invoice exists before accessing the reference number
+            if ($invoice) {
+                $rfNo = $invoice->reference_no;
+            } else {
+                $rfNo = '0'; // Set reference number to '0' if invoice not found or if it is null
+            }
+
+            // Fetch the user
+            $user = User::where('id', $request->user_id)->first();
+
+            // Check if user is found before trying to access their email
+            if ($user) {
+                $userEmail = $user->email;
+            } else {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+
+            // Create a new withdrawal record
+            $withdrawal = new Withdrawal();
+            $withdrawal->user_id = $request['user_id'];
+            $withdrawal->currency_id = $request['currency_id'];
+            $withdrawal->payment_method_id = $request['payment_method_id'];
+            $withdrawal->uuid = uniqid();
+            $withdrawal->email = $userEmail;
+            $withdrawal->amount = $invoiceData['grand_total'];
+            $withdrawal->amount_due = $invoiceData['grand_total'] - $invoiceData['payment'];
+            $withdrawal->payment = $invoiceData['payment'];
+            $withdrawal->payto = $request->owner;
+            $withdrawal->invoice_id = $rfNo; // Set the reference number as invoice_id
+            $withdrawal->status = 'success';
+            $withdrawal->save();
+        }
+
+        return response()->json([
+            'inserted' => 'success'
+        ]);
+    }
+
+
+    public function updatePayout(Request $req, $id)
+    {
+        $validator = Validator::make($req->all(), [
+            'payment' => 'required',   // Must be a valid number and non-negative
+        ]);
+
+
+        if ($req->payment <= 0) {
+            return redirect()->to('admin/payouts/edit/' . $req->id)->with('success', 'Min Payout Value is 1.');
+        }
+
+        // Check if validation fails
+        if ($validator->fails()) {
+            return redirect()->to('admin/payouts/edit/' . $req->id)->withErrors($validator);
+        }
+
+        // Find the existing withdrawal record
+        $withdrawal = Withdrawal::find($id);
+        if (!$withdrawal) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Withdrawal record not found',
+            ], 404); // Send 404 Not Found status code
+        }
+
+        // Add the new payment to the existing payment
+        $newPayment = $req->payment;
+        $withdrawal->payment += $newPayment;
+
+        // Calculate the new amount_due
+        $withdrawal->amount_due -= $newPayment; // Subtract the new payment from the amount_due
+
+        // Update other details
+        $withdrawal->payto = $req->admin_id;
+        $withdrawal->created_at = $req->date;
+        $withdrawal->currency_id = $req->currency_id;
+
+        // Save the updated withdrawal record
+        if ($withdrawal->save()) {
+            return redirect()->to('admin/payouts')->with('success', 'Payout Updated Successfully!');
+        } else {
+            return redirect()->to('admin/payouts')->with('error', 'Payout Update Failed!');
+        }
+    }
+
+
 }
