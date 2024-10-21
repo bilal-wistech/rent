@@ -205,11 +205,11 @@
                                                     </select>
                                                     <span class="text-danger">{{ $errors->first('user_id') }}</span>
                                                 </div>
-                                                {{-- <div class="col-sm-1">
+                                                <div class="col-sm-1">
                                                     <a href="#" data-bs-toggle="modal" data-bs-target="#customerModal"
                                                         class=" btn btn-primary btn-sm customer-modal"><span
                                                             class="fa fa-user"></span></a>
-                                                </div> --}}
+                                                </div>
                                             </div>
                                             <div class="form-group row mt-3 renewal_type">
                                                 <label for="time_period_id"
