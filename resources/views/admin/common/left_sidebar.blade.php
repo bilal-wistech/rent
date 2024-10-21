@@ -10,7 +10,7 @@
         <!--begin::Logo image-->
         <a href="index.html">
             <img alt="Logo" src="{{asset('backend/assets/media/logos/zurent-logo-new.jpg')}}"
-                class="h-25px app-sidebar-logo-default" style="width:100%;"  />
+                class="h-25px app-sidebar-logo-default" style="width:100%;" />
             <img alt="Logo" src="{{asset('backend/assets/media/logos/zurent-logo-new.jpg')}}"
                 class="h-20px app-sidebar-logo-minimize" style="width:100%;" />
         </a>
@@ -69,7 +69,6 @@
                         </div>
                     </div> -->
 
-
                     <div class="menu-item {{ request()->is('admin/dashboard') ? 'active' : '' }}">
                         <!--begin:Menu link-->
                         <a class="menu-link" href="{{ url('admin/dashboard') }}">
@@ -83,13 +82,9 @@
                         </a>
                         <!--end:Menu link-->
                     </div>
-
-
-
-
                     <!--begin:Menu item-->
                     <div data-kt-menu-trigger="click" class="menu-item menu-accordion">
-                        <div class="menu-item pt-5">
+                        <div class="menu-item">
                             <!--begin:Menu content-->
                             <div class="menu-content">
                                 <span class="menu-heading fw-bold text-uppercase fs-7">OPERATIONS</span>
@@ -131,10 +126,6 @@
                                 <!--end:Menu link-->
                             </div>
                         @endif
-
-
-
-
 
                         @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_bookings'))
                             <div class="menu-item {{ request()->is('admin/bookings') ? 'active' : '' }}">
@@ -288,8 +279,8 @@
 
                         @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'view_reports'))
                             <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ 
-                                                            in_array(Route::current()->uri(), ['admin/sales-report', 'admin/sales-analysis', 'admin/overview-stats']) ? 'here show' : '' 
-                                                        }}">
+                                                                            in_array(Route::current()->uri(), ['admin/sales-report', 'admin/sales-analysis', 'admin/overview-stats']) ? 'here show' : '' 
+                                                                        }}">
                                 <!--begin:Menu link-->
                                 <span class="menu-link">
                                     <span class="menu-icon">

@@ -2188,41 +2188,6 @@
 				<div class="app-main flex-column flex-row-fluid" id="kt_app_main">
 					<!--begin::Content wrapper-->
 					<div class="d-flex flex-column flex-column-fluid">
-						<!--begin::Toolbar-->
-						<div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
-							<!--begin::Toolbar container-->
-							<div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
-								<!--begin::Page title-->
-								<div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
-									<!--begin::Title-->
-									<h1
-										class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-										Dashboard</h1>
-									<!--end::Title-->
-									<!--begin::Breadcrumb-->
-									<ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
-										<!--begin::Item-->
-										<li class="breadcrumb-item text-muted">
-											<a href="index.html" class="text-muted text-hover-primary">Home</a>
-										</li>
-										<!--end::Item-->
-										<!--begin::Item-->
-										<li class="breadcrumb-item">
-											<span class="bullet bg-gray-500 w-5px h-2px"></span>
-										</li>
-										<!--end::Item-->
-										<!--begin::Item-->
-										<li class="breadcrumb-item text-muted">Dashboard</li>
-										<!--end::Item-->
-									</ul>
-									<!--end::Breadcrumb-->
-								</div>
-								<!--end::Page title-->
-							</div>
-							<!--end::Toolbar container-->
-						</div>
-						<!--end::Toolbar-->
-						<!--begin::Content-->
 						<div id="kt_app_content" class="app-content flex-column-fluid">
 							<!--begin::Content container-->
 							<div id="kt_app_content_container" class="app-container container-fluid">
@@ -4805,22 +4770,19 @@
 									</div>
 									<!--end::Col-->
 									<!--begin::Col-->
+
 									<div class="col-xl-8">
-										<!--begin::Table widget 14-->
 										<div class="card card-flush h-md-100">
-											<!--begin::Header-->
 											<div class="card-header pt-7">
 												<h3>Vacant Properties</h3>
 											</div>
-											<!--end::Header-->
-											<!--begin::Body-->
 											<div class="card-body pt-6">
-												<div class="table-responsive">
+												<div class="table-responsive" id="property-content">
 													<table class="table table-striped table-bordered">
 														<thead>
 															<tr class="fs-7 fw-bold text-gray-500 border-bottom-0">
-																<th class="min-w-175px text-start">ID</th>
-																<th class="min-w-175px text-start">Name</th>
+																<th class="min-w-175px text-start">Property</th>
+																<th class="min-w-175px text-start">Vacant Since</th>
 															</tr>
 														</thead>
 														<tbody>
@@ -4829,27 +4791,22 @@
 															@endphp
 															@foreach ($unbookedProperties as $item)
 																<tr>
-																	<td>
-																		{{$number++}}
-																	</td>
-																	<td>
-																		{{$item->name}}
+																	<td>{{ $item->name }}</td>
+																	<td>{{ \Carbon\Carbon::parse($item->created_at)->format('Y-m-d') }}
 																	</td>
 																</tr>
 															@endforeach
 														</tbody>
 													</table>
-												</div>
 
-												<!-- Pagination Links -->
-												<div class="d-flex justify-content-end mt-4">
-													{{ $unbookedProperties->links('vendor.pagination.bootstrap-4') }}
+													<div class="d-flex justify-content-end mt-4">
+														{{ $unbookedProperties->links('vendor.pagination.bootstrap-4') }}
+													</div>
 												</div>
 											</div>
-											<!--end: Card Body-->
 										</div>
-										<!--end::Table widget 14-->
 									</div>
+
 
 
 									<!--end::Col-->
@@ -10013,3 +9970,35 @@
 </body>
 
 </html>
+
+<!-- Include jQuery from CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+<script>
+	$(document).on('click', '.pagination a', function (event) {
+		event.preventDefault();
+		let page = $(this).attr('href').split('page=')[1];
+
+		fetchProperties(page);
+	});
+
+	function fetchProperties(page) {
+		$.ajax({
+			url: "?page=" + page,
+			type: "GET",
+			beforeSend: function () {
+				$('#property-content').html('<p>Loading...</p>'); // Optional loading indicator
+			},
+			success: function (data) {
+				$('#property-content').html($(data).find('#property-content').html());
+			},
+			error: function (xhr) {
+				console.error('Error fetching properties:', xhr);
+			}
+		});
+	}
+
+
+</script>

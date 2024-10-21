@@ -27,6 +27,10 @@ class Properties extends Model
 {
     protected $table = 'properties';
     use SoftDeletes;
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     protected $appends = ['steps_completed','space_type_name','property_type_name','property_photo','host_name','book_mark', 'reviews_count', 'overall_rating', 'cover_photo','avg_rating'];
 
