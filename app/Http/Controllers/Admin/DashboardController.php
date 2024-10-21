@@ -14,13 +14,20 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        
-        $data['total_users_count']        = User::count();
-        $data['total_property_count']     = Properties::count();
+
+        $bookedPropertyIds = DB::table('bookings')->pluck('property_id');
+
+        // Get all properties that are not booked in one query
+        $unbookedProperties = DB::table('properties')
+            ->whereNotIn('id', $bookedPropertyIds)
+            ->paginate(10);
+
+        $data['total_users_count'] = User::count();
+        $data['total_property_count'] = Properties::count();
         $data['total_reservations_count'] = Bookings::count();
 
-        $data['today_users_count']        = User::whereDate('created_at', DB::raw('CURDATE()'))->count();
-        $data['today_property_count']     = Properties::whereDate('created_at', DB::raw('CURDATE()'))->count();
+        $data['today_users_count'] = User::whereDate('created_at', DB::raw('CURDATE()'))->count();
+        $data['today_property_count'] = Properties::whereDate('created_at', DB::raw('CURDATE()'))->count();
         $data['today_reservations_count'] = Bookings::whereDate('created_at', DB::raw('CURDATE()'))->count();
 
         $properties = new Properties;
@@ -28,6 +35,7 @@ class DashboardController extends Controller
 
         $bookings = new Bookings;
         $data['bookingList'] = $bookings->getBookingLists();
+        $data['unbookedProperties'] = $unbookedProperties;
         return view('admin.dashboard', $data);
     }
 }
