@@ -88,32 +88,9 @@ class PropertyDataTable extends DataTable
             ->addColumn(['data' => 'recomended', 'name' => 'recomended', 'title' => 'Recomended'])
             ->addColumn(['data' => 'verified', 'name' => 'verified', 'title' => 'Verified'])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Date'])
-            ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters([
-                'dom' => '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' .
-                    '<"row"<"col-sm-12"tr>>' .
-                    '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-                'responsive' => true,
-                'lengthChange' => true,
-                'pagingType' => 'full_numbers',
-                'language' => [
-                    'paginate' => [
-                        'first' => '<button class="btn btn-primary btn-sm mx-1" data-dt-idx="0" tabindex="0"><i class="fas fa-angle-double-left"></i></button>',
-                        'last' => '<button class="btn btn-primary btn-sm mx-1" data-dt-idx="7" tabindex="0"><i class="fas fa-angle-double-right"></i></button>',
-                        'next' => '<button class="btn btn-primary btn-sm mx-1" data-dt-idx="6" tabindex="0"><i class="fas fa-angle-right"></i></button>',
-                        'previous' => '<button class="btn btn-primary btn-sm mx-1" data-dt-idx="5" tabindex="0"><i class="fas fa-angle-left"></i></button>',
-                    ],
-                    'info' => '<div class="text-muted">Showing <strong>_START_</strong> to <strong>_END_</strong> of <strong>_TOTAL_</strong> entries</div>',
-                    'infoEmpty' => 'No entries available',
-                    'lengthMenu' => 'Show _MENU_ entries',
-                ],
-            ]);
+            ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false]);
     }
-
-
-
-
-
+    
     protected function filename()
     {
         return 'propertydatatables_' . time();
