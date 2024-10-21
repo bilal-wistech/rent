@@ -109,13 +109,12 @@
     <div class="row">
 
       <div class="col-md-12">
-        <!-- LINE CHART -->
         <div class="box box-info">
           <div class="box-header with-border">
             <h3 class="box-title">Vacant Properties</h3>
           </div>
           <div class="box-body">
-            <div class="table-responsive f-14">
+            <div class="table-responsive f-14" id="property-content">
               <table class="table table-bordered">
                 <thead>
                   <tr>
@@ -127,7 +126,7 @@
                   @if (!empty($unbookedProperties) && $unbookedProperties->count())
                     @php
             $number = 1 + (($unbookedProperties->currentPage() - 1) * $unbookedProperties->perPage());
-          @endphp
+            @endphp
                     @foreach ($unbookedProperties as $item)
             <tr>
             <td>{{ $item->name }}</td>
@@ -144,12 +143,9 @@
               <div class="d-flex justify-content-end mt-4">
                 {{ $unbookedProperties->links('vendor.pagination.bootstrap-4') }}
               </div>
-
             </div>
           </div>
-          <!-- /.box-body -->
         </div>
-        <!-- /.box -->
       </div>
 
 
