@@ -37,17 +37,10 @@ class PropertyDataTable extends DataTable
                 return dateFormat($properties->created_at);
             })
             ->addColumn('recomended', function ($properties) {
-
-                if ($properties->recomended == 1) {
-                    return 'Yes';
-                }
-                return 'No';
-
+                return $properties->recomended == 1 ? 'Yes' : 'No';
             })
             ->addColumn('verified', function ($properties) {
-
                 return ($properties->is_verified == 'Approved' || $properties->is_verified == '') ? 'Approved' : 'Pending';
-
             })
             ->rawColumns(['host_name', 'name', 'action'])
             ->make(true);
@@ -55,23 +48,23 @@ class PropertyDataTable extends DataTable
 
     public function query()
     {
-        $user_id    = Request::segment(4);
-        $status     = isset(request()->status) ? request()->status : null;
-        $from = isset(request()->from) ? setDateForDb(request()->from) : null;
-        $to = isset(request()->to) ? setDateForDb(request()->to) : null;
-        $space_type = isset(request()->space_type) ? request()->space_type : null;
+        $user_id = Request::segment(4);
+        $status = request()->input('status', null);
+        $from = request()->input('from') ? setDateForDb(request()->input('from')) : null;
+        $to = request()->input('to') ? setDateForDb(request()->input('to')) : null;
+        $space_type = request()->input('space_type', null);
 
         $query = Properties::with(['users:id,first_name,profile_image']);
-        if (isset($user_id)) {
+
+        if ($user_id) {
             $query->where('host_id', '=', $user_id);
         }
 
-
         if ($from) {
-             $query->whereDate('created_at', '>=', $from);
+            $query->whereDate('created_at', '>=', $from);
         }
         if ($to) {
-             $query->whereDate('created_at', '<=', $to);
+            $query->whereDate('created_at', '<=', $to);
         }
         if ($status) {
             $query->where('status', '=', $status);
@@ -79,8 +72,10 @@ class PropertyDataTable extends DataTable
         if ($space_type) {
             $query->where('space_type', '=', $space_type);
         }
+
         return $this->applyScopes($query);
     }
+
 
     public function html()
     {
@@ -93,11 +88,9 @@ class PropertyDataTable extends DataTable
             ->addColumn(['data' => 'recomended', 'name' => 'recomended', 'title' => 'Recomended'])
             ->addColumn(['data' => 'verified', 'name' => 'verified', 'title' => 'Verified'])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Date'])
-            ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false]);
     }
-
-
+    
     protected function filename()
     {
         return 'propertydatatables_' . time();
