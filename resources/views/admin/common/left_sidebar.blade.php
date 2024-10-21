@@ -8,12 +8,12 @@
     <!--begin::Logo-->
     <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
         <!--begin::Logo image-->
-        <a href="index.html">
-            <img alt="Logo" src="{{asset('backend/assets/media/logos/zurent-logo-new.jpg')}}"
-                class="h-25px app-sidebar-logo-default" style="width:100%;" />
-            <img alt="Logo" src="{{asset('backend/assets/media/logos/zurent-logo-new.jpg')}}"
-                class="h-20px app-sidebar-logo-minimize" style="width:100%;" />
-        </a>
+       <a href="index.html">
+    <img alt="Logo" src="{{ asset('backend/assets/media/logos/zurent-logo-new.jpg') }}"
+        class="app-sidebar-logo-default logo" />
+    <img alt="Logo" src="{{ asset('backend/assets/media/logos/zurent-logo-new.jpg') }}"
+        class="app-sidebar-logo-minimize logo" />
+</a>
         <!--end::Logo image-->
         <!--begin::Sidebar toggle-->
         <div id="kt_app_sidebar_toggle"
@@ -278,8 +278,8 @@
                         @endif
 
                         @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'view_reports'))
-                            <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ 
-                                                                            in_array(Route::current()->uri(), ['admin/sales-report', 'admin/sales-analysis', 'admin/overview-stats']) ? 'here show' : '' 
+                            <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{
+                                                                            in_array(Route::current()->uri(), ['admin/sales-report', 'admin/sales-analysis', 'admin/overview-stats']) ? 'here show' : ''
                                                                         }}">
                                 <!--begin:Menu link-->
                                 <span class="menu-link">
@@ -388,3 +388,4 @@
     </div>
     <!--end::sidebar menu-->
 </div>
+
