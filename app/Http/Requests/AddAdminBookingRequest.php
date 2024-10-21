@@ -33,7 +33,7 @@ class AddAdminBookingRequest extends FormRequest
             'end_date' => [
                 'required',
                 'date',
-                'after_or_equal:checkin',
+                'after:start_date',
             ],
             'user_id' => 'required',
             'number_of_guests' => 'required',

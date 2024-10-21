@@ -100,15 +100,15 @@ class PropertyPrice extends Model
         return $this->currency_convert('weekend_price');
     }
     public function getPropertydates($date)
-    
+
     {
         $this->dateResult = PropertyDates::where('property_id',$this->attributes['property_id'])->where('date',$date)->first();
-        
+
     }
 
     public function price()
     {
-        
+
         if ($this->dateResult->count()) {
             return $this->dateResult->price;
         } else {

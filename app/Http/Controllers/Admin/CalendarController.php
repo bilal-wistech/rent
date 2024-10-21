@@ -27,7 +27,7 @@ class CalendarController extends Controller
     public function generate($property_id = '', $year = '', $month = '')
     {
         if ($year == '') {
-            $year  = date('Y');
+            $year = date('Y');
         }
 
         if ($month == '') {
@@ -39,28 +39,28 @@ class CalendarController extends Controller
         $totalDays = cal_days_in_month(CAL_GREGORIAN, $month, $year);
 
         $startDays = array('sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3, 'thursday' => 4, 'friday' => 5, 'saturday' => 6);
-        $startDay  = ( ! isset($startDays[$this->startDay])) ? 0 : $startDays[$this->startDay];
+        $startDay = (!isset($startDays[$this->startDay])) ? 0 : $startDays[$this->startDay];
 
-        $localDate  = mktime(12, 0, 0, $month, 1, $year);
+        $localDate = mktime(12, 0, 0, $month, 1, $year);
 
-        $date       = getdate($localDate);
-        $day        = $startDay + 1 - $date["wday"];
+        $date = getdate($localDate);
+        $day = $startDay + 1 - $date["wday"];
 
-        $prvTime  = mktime(12, 0, 0, $month-1, 1, $year);
-        $nxtTime  = mktime(12, 0, 0, $month+1, 1, $year);
+        $prvTime = mktime(12, 0, 0, $month - 1, 1, $year);
+        $nxtTime = mktime(12, 0, 0, $month + 1, 1, $year);
 
 
         $prvMonth = date('m', $prvTime);
         $nxtMonth = date('m', $nxtTime);
 
-        $prvYear  = date('Y', $prvTime);
-        $nxtYear  = date('Y', $nxtTime);
+        $prvYear = date('Y', $prvTime);
+        $nxtYear = date('Y', $nxtTime);
 
 
-        $curDay    = date('j');
-        $curYear   = date('Y');
-        $curMonth  = date('m');
-        $currentDate =  new \DateTime($curDay."-".$curMonth."-".$curYear);
+        $curDay = date('j');
+        $curYear = date('Y');
+        $curMonth = date('m');
+        $currentDate = new \DateTime($curDay . "-" . $curMonth . "-" . $curYear);
         $prevTotalDays = date('t', $prvTime);
 
         while ($day > 1) {
@@ -68,10 +68,10 @@ class CalendarController extends Controller
         }
 
         $monthSelect = '<select name="year_month" id="calendar_dropdown">';
-        $yearMonth   = $this->year_month();
+        $yearMonth = $this->year_month();
         foreach ($yearMonth as $key => $value) {
-            $selected = date('Y-m', $localDate) == $key?'selected':'';
-            $monthSelect .= '<option value="'.$key.'" '.$selected.'>'.$value.'</option>';
+            $selected = date('Y-m', $localDate) == $key ? 'selected' : '';
+            $monthSelect .= '<option value="' . $key . '" ' . $selected . '>' . $value . '</option>';
         }
         $monthSelect .= '</select>';
 
@@ -80,13 +80,13 @@ class CalendarController extends Controller
                     <div class="calendar-month">';
 
         $out .= '<div class="row-space-2 deselect-on-click">
-                    <a href="'.url('admin/manage-listing/'.$property_id.'/calendar').'" class="month-nav month-nav-previous panel text-center" data-year="'.$prvYear.'" data-month="'.$prvMonth.'"> <i class="fa fa-chevron-left fa-lg calendar-icon-style"></i> </a>
-                    <a href="'.url('admin/manage-listing/'.$property_id.'/calendar').'" class="month-nav month-nav-next panel text-center" data-year="'.$nxtYear.'" data-month="'.$nxtMonth.'"> <i class="fa fa-chevron-right fa-lg calendar-icon-style"></i> </a>
-                    <div class="current-month-selection"> <h2> <span>'.date('F Y', $localDate).'</span> <span> &nbsp;</span> <span class="current-month-arrow">▾</span> </h2>'.$monthSelect.'<div class="spinner-next-to-month-nav">Just a moment...</div></div>
+                    <a href="' . url('admin/manage-listing/' . $property_id . '/calendar') . '" class="month-nav month-nav-previous panel text-center" data-year="' . $prvYear . '" data-month="' . $prvMonth . '"> <i class="fa fa-chevron-left fa-lg calendar-icon-style"></i> </a>
+                    <a href="' . url('admin/manage-listing/' . $property_id . '/calendar') . '" class="month-nav month-nav-next panel text-center" data-year="' . $nxtYear . '" data-month="' . $nxtMonth . '"> <i class="fa fa-chevron-right fa-lg calendar-icon-style"></i> </a>
+                    <div class="current-month-selection"> <h2> <span>' . date('F Y', $localDate) . '</span> <span> &nbsp;</span> <span class="current-month-arrow">▾</span> </h2>' . $monthSelect . '<div class="spinner-next-to-month-nav">Just a moment...</div></div>
                  </div>';
 
         $out .= '<div class="col-md-12 col-sm-12 col-xs-12"><div class="calenBox">';
-        $out .='<div class="margin-top10">
+        $out .= '<div class="margin-top10">
                     <div class="col-md-02"><div class="wkText">Mon</div></div>
                     <div class="col-md-02"><div class="wkText">Tue</div></div>
                     <div class="col-md-02"><div class="wkText">Wed</div></div>
@@ -118,82 +118,90 @@ class CalendarController extends Controller
 
 
                 if ($day > 0 && $day <= $totalDays) {
-                    $date      = $year.'-'.$month.'-'.$this->zeroDigit($day);
+                    $date = $year . '-' . $month . '-' . $this->zeroDigit($day);
                     $finalDay = $day;
                 } else {
                     if ($day <= 0) {
-                        $dayPrev  = $prevTotalDays + $day;
+                        $dayPrev = $prevTotalDays + $day;
 
-                        $date      = $prvYear.'-'.$prvMonth.'-'.$this->zeroDigit($dayPrev);
+                        $date = $prvYear . '-' . $prvMonth . '-' . $this->zeroDigit($dayPrev);
 
                         $finalDay = $dayPrev;
                     } elseif ($day > $totalDays) {
-                        $dayNext  = $day - $totalDays;
+                        $dayNext = $day - $totalDays;
 
-                        $date      = $nxtYear.'-'.$nxtMonth.'-'.$this->zeroDigit($dayNext);
+                        $date = $nxtYear . '-' . $nxtMonth . '-' . $this->zeroDigit($dayNext);
 
                         $finalDay = $dayNext;
                     }
                 }
                 $property_price->getPropertyDates($date);
 
-                $dateGreaterThanToday = (new \DateTime($date)) > $currentDate;
+                $dateGreaterThanToday = (new \DateTime($date)) >= $currentDate;
+
                 //Price Type CALENDAR
-                if ( $dateGreaterThanToday && ($property_price->available()=='Not available') && ($property_price->type()=='calendar') && (($property_price->color())!=null)) {
+                if ($dateGreaterThanToday && ($property_price->available() == 'Not available') && ($property_price->type() == 'calendar') && (($property_price->color()) != null)) {
                     $class = 'dt-available-with-events';
 
                     $out .= '<div class="col-md-02">
-                                <div class="calender_box date-package-modal-admin"  style="background-color:'.$property_price->color().' !important " id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'">
-                                    <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
-                                    <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
+                                <div class="calender_box date-package-modal-admin"  style="background-color:' . $property_price->color() . ' !important " id="' . $date . '" data-day="' . $day . '" data-month="' . $month . '" data-year="' . $year . '" data-price="' . $property_price->original_price() . '"data-status="' . $property_price->available() . '"data-minday="' . $property_price->min_day() . '">
+                                    <div class="wkText final_day">' . $finalDay . ' ' . $today . '</div>
+                                    <div class="dTfont wkText">' . $property_price->currency->org_symbol . $property_price->original_price() . '</div>
                                 </div>
                             </div>';
-                } elseif (($year >= $curYear && $month >= $curMonth) && ($property_price->available()=='Not available') && ($property_price->type()=='calendar') && (($property_price->color())!=null)) {
-                    if (! $dateGreaterThanToday) {
+                } elseif (($year >= $curYear && $month >= $curMonth) && ($property_price->available() == 'Not available') && ($property_price->type() == 'calendar') && (($property_price->color()) != null)) {
+                    if (!$dateGreaterThanToday) {
                         $class = 'dt-not-available';
                         $out .= '<div class="col-md-02">
-                                    <div class="calender_box date-package-modal-admin '.$class.'" id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'">
-                                        <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
-                                        <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
+                                    <div class="calender_box date-package-modal-admin ' . $class . '" id="' . $date . '" data-day="' . $day . '" data-month="' . $month . '" data-year="' . $year . '" data-price="' . $property_price->original_price() . '"data-status="' . $property_price->available() . '"data-minday="' . $property_price->min_day() . '">
+                                        <div class="wkText final_day">' . $finalDay . ' ' . $today . '</div>
+                                        <div class="dTfont wkText">' . $property_price->currency->org_symbol . $property_price->original_price() . '</div>
                                     </div>
                                 </div>';
                     } else {
                         $out .= '<div class="col-md-02">
-                                    <div class="calender_box date-package-modal-admin '.$class.'"  style="background-color:'.$property_price->color().' !important " id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'">
-                                        <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
-                                        <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
+                                    <div class="calender_box date-package-modal-admin ' . $class . '"  style="background-color:' . $property_price->color() . ' !important " id="' . $date . '" data-day="' . $day . '" data-month="' . $month . '" data-year="' . $year . '" data-price="' . $property_price->original_price() . '"data-status="' . $property_price->available() . '"data-minday="' . $property_price->min_day() . '">
+                                        <div class="wkText final_day">' . $finalDay . ' ' . $today . '</div>
+                                        <div class="dTfont wkText">' . $property_price->currency->org_symbol . $property_price->original_price() . '</div>
                                     </div>
                                 </div>';
                     }
                 }
 
                 //Price type NORMAL
-                elseif ($dateGreaterThanToday && ($property_price->available()=='Not available') && ($property_price->type()=='normal')) {
+                elseif ($dateGreaterThanToday && ($property_price->available() === 'Not available') && ($property_price->type() === 'normal')) {
+                    // dd($property_price->type());
                     $class = 'dt-available-with-events';
                     $out .= '<div class="col-md-02">
-                                    <div class="calender_box date-package-modal-admin '.$class.'" id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'">
-                                        <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
-                                        <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
+                                    <div class="calender_box date-package-modal-admin ' . $class . '" id="' . $date . '" data-day="' . $day . '" data-month="' . $month . '" data-year="' . $year . '" data-price="' . $property_price->original_price() . '"data-status="' . $property_price->available() . '"data-minday="' . $property_price->min_day() . '">
+                                        <div class="wkText final_day">' . $finalDay . ' ' . $today . '</div>
+                                        <div class="dTfont wkText">' . $property_price->currency->org_symbol . $property_price->original_price() . '</div>
                                     </div>
                                 </div>';
-                } elseif ($dateGreaterThanToday && ($property_price->available()=='Not available') && ($property_price->type()=='normal')) {
-                    if (! $dateGreaterThanToday) {
+                    $out .= '<div class="col-md-02">
+                        <div class="calender_box date-package-modal-admin '.$class.'" id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'"
+                        data-bs-toggle="modal" data-bs-target="#hotel_date_package_admin">
+                            <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
+                            <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
+                        </div>
+                    </div>';
+                } elseif ($dateGreaterThanToday && ($property_price->available() === 'Not available') && ($property_price->type() === 'normal')) {
+                    if (!$dateGreaterThanToday) {
                         $class = 'dt-not-available';
                     } else {
-                         $class = 'dt-available-with-events';
+                        $class = 'dt-available-with-events';
                     }
-
                     $out .= '<div class="col-md-02">
-                                    <div class="calender_box date-package-modal-admin '.$class.'" id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'" data-bs-toggle="modal" data-bs-target="#hotel_date_package_admin">
-                                        <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
-                                        <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
+                                    <div class="calender_box date-package-modal-admin ' . $class . '" id="' . $date . '" data-day="' . $day . '" data-month="' . $month . '" data-year="' . $year . '" data-price="' . $property_price->original_price() . '"data-status="' . $property_price->available() . '"data-minday="' . $property_price->min_day() . '" data-bs-toggle="modal" data-bs-target="#hotel_date_package_admin">
+                                        <div class="wkText final_day">' . $finalDay . ' ' . $today . '</div>
+                                        <div class="dTfont wkText">' . $property_price->currency->org_symbol . $property_price->original_price() . '</div>
                                     </div>
                                 </div>';
                 } else {
                     $out .= '<div class="col-md-02" style="cursor:pointer">
-                                <div class="calender_box date-package-modal-admin '.$class.'" id="'.$date.'" data-day="'.$day.'" data-month="'.$month.'" data-year="'.$year.'" data-price="'.$property_price->original_price().'"data-status="'.$property_price->available().'"data-minday="'.$property_price->min_day().'" data-bs-toggle="modal" data-bs-target="#hotel_date_package_admin">
-                                    <div class="wkText final_day">'.$finalDay.' '.$today.'</div>
-                                    <div class="dTfont wkText">'.$property_price->currency->org_symbol.$property_price->original_price().'</div>
+                                <div class="calender_box date-package-modal-admin ' . $class . '" id="' . $date . '" data-day="' . $day . '" data-month="' . $month . '" data-year="' . $year . '" data-price="' . $property_price->original_price() . '"data-status="' . $property_price->available() . '"data-minday="' . $property_price->min_day() . '" data-bs-toggle="modal" data-bs-target="#hotel_date_package_admin">
+                                    <div class="wkText final_day">' . $finalDay . ' ' . $today . '</div>
+                                    <div class="dTfont wkText">' . $property_price->currency->org_symbol . $property_price->original_price() . '</div>
                                 </div>
                             </div>';
                 }
@@ -213,14 +221,14 @@ class CalendarController extends Controller
      *
      * @param array $request    Input values
      * @return iCal file
-    */
+     */
     public function icalendarExport(Request $request)
     {
 
         $explode_id = explode('.', $request->id);
         // 1. Create new calendar
-        $vCalendar  = new \Eluceo\iCal\Component\Calendar($this->url->to('/'));
-        $result     = PropertyDates::where('property_id', $explode_id[0])->get();
+        $vCalendar = new \Eluceo\iCal\Component\Calendar($this->url->to('/'));
+        $result = PropertyDates::where('property_id', $explode_id[0])->get();
         foreach ($result as $row) {
             // 2. Create an event
             $vEvent = new \Eluceo\iCal\Component\Event();
@@ -235,7 +243,7 @@ class CalendarController extends Controller
         }
         // 4. Set headers
         header('Content-Type: text/calendar; charset=utf-8');
-        header('Content-Disposition: attachment; filename="'.$explode_id[0].'.ics"');
+        header('Content-Disposition: attachment; filename="' . $explode_id[0] . '.ics"');
         // 5. Output
         echo $vCalendar->render();
     }
@@ -245,73 +253,73 @@ class CalendarController extends Controller
      *
      * @param array $request    Input values
      * @return redirect to Edit Calendar
-    */
+     */
     public function icalendarImport(Request $request)
     {
         // Validation for iCalendar import fields
-        if ($request->color=='custom') {
+        if ($request->color == 'custom') {
             $rules = array(
-                    'url'  => 'required|url',
-                    'name' => 'required',
-                    'customcolor' => 'required'
-                    );
+                'url' => 'required|url',
+                'name' => 'required',
+                'customcolor' => 'required'
+            );
 
             $fieldNames = array(
-                        'url'  => 'URL',
-                        'name' => 'Name',
-                        'customcolor' => 'Custom Color'
-                        );
-            $color = (strpos($request->customcolor, '#')!==false)?trim($request->customcolor):'#'.trim($request->customcolor);
+                'url' => 'URL',
+                'name' => 'Name',
+                'customcolor' => 'Custom Color'
+            );
+            $color = (strpos($request->customcolor, '#') !== false) ? trim($request->customcolor) : '#' . trim($request->customcolor);
         } else {
-                   $rules = array(
-                        'url'  => 'required|url',
-                        'name' => 'required',
-                        );
+            $rules = array(
+                'url' => 'required|url',
+                'name' => 'required',
+            );
 
-                   $fieldNames = array(
-                            'url'  => 'URL',
-                            'name' => 'Name',
-                            );
-                   if ($request->customcolor == 'none') {
-                       $color = trim($request->color);
-                   }
+            $fieldNames = array(
+                'url' => 'URL',
+                'name' => 'Name',
+            );
+            if ($request->customcolor == 'none') {
+                $color = trim($request->color);
+            }
         }
 
         $validator = Validator::make($request->all(), $rules);
         $validator->setAttributeNames($fieldNames);
 
         if ($validator->fails()) {
-            $error            = $validator->errors();
-            $data['error']    = $error;
-            return  $data;
+            $error = $validator->errors();
+            $data['error'] = $error;
+            return $data;
         } else {
             $icalendarData = [
-                    'property_id'         => $request->property_id,
-                    'icalendar_url'       => $request->url,
-                    'icalendar_name'      => $request->name,
-                    'icalendar_last_sync' => date('Y-m-d H:i:s'),
+                'property_id' => $request->property_id,
+                'icalendar_url' => $request->url,
+                'icalendar_name' => $request->name,
+                'icalendar_last_sync' => date('Y-m-d H:i:s'),
 
-                    ];
+            ];
 
             PropertyIcalimport::updateOrCreate(['property_id' => $request->property_id, 'icalendar_url' => $request->url], $icalendarData);
 
             // Create a new instance of IcalendarController
-            $ical   = new IcalendarController($request->url);
+            $ical = new IcalendarController($request->url);
             $events = $ical->events();
-            for ($i=0; $i<$ical->event_count; $i++) {
+            for ($i = 0; $i < $ical->event_count; $i++) {
                 $start_date = $ical->iCalDateToUnixTimestamp($events[$i]['DTSTART']);
-                $end_date   = $ical->iCalDateToUnixTimestamp($events[$i]['DTEND']);
-                $days       = $this->get_days($start_date, $end_date);
+                $end_date = $ical->iCalDateToUnixTimestamp($events[$i]['DTEND']);
+                $days = $this->get_days($start_date, $end_date);
 
-                $cnts        = count($days);
-                for ($j=0; $j<($cnts-1); $j++) {
+                $cnts = count($days);
+                for ($j = 0; $j < ($cnts - 1); $j++) {
                     $calendarData = [
-                                'property_id' => $request->property_id,
-                                'date'    => $days[$j],
-                                'status'  => 'Not available',
-                                'color'  => $color,
-                                'type'  => 'calendar'
-                                ];
+                        'property_id' => $request->property_id,
+                        'date' => $days[$j],
+                        'status' => 'Not available',
+                        'color' => $color,
+                        'type' => 'calendar'
+                    ];
 
                     PropertyDates::updateOrCreate(['property_id' => $request->property_id, 'date' => $days[$j]], $calendarData);
                 }
@@ -336,35 +344,35 @@ class CalendarController extends Controller
         $result = PropertyIcalimport::where('property_id', $request->id)->get();
         foreach ($result as $row) {
             // Create a new instance of IcalController
-            $ical   = new IcalendarController($row->icalendar_url);
+            $ical = new IcalendarController($row->icalendar_url);
             $events = $ical->events();
 
             // Get events from IcalController
-            for ($i=0; $i<$ical->event_count; $i++) {
+            for ($i = 0; $i < $ical->event_count; $i++) {
                 $start_date = $ical->iCalDateToUnixTimestamp($events[$i]['DTSTART']);
-                $end_date   = $ical->iCalDateToUnixTimestamp($events[$i]['DTEND']);
-                $days       = $this->get_days($start_date, $end_date);
+                $end_date = $ical->iCalDateToUnixTimestamp($events[$i]['DTEND']);
+                $days = $this->get_days($start_date, $end_date);
 
-                $cnts        = count($days);
-                for ($j=0; $j<count($days)-1; $j++) {
+                $cnts = count($days);
+                for ($j = 0; $j < count($days) - 1; $j++) {
                     $calendarDatas = [
-                                'property_id' => $request->id,
-                                'date'    => $days[$j],
-                                'status'  => 'Not available'
-                                ];
+                        'property_id' => $request->id,
+                        'date' => $days[$j],
+                        'status' => 'Not available'
+                    ];
 
                     PropertyDates::updateOrCreate(['property_id' => $request->id, 'date' => $days[$j]], $calendarDatas);
                 }
             }
 
             // Update last synchronization DateTime
-            $importedIcalendar                      = PropertyIcalimport::find($row->id);
+            $importedIcalendar = PropertyIcalimport::find($row->id);
             $importedIcalendar->icalendar_last_sync = date('Y-m-d H:i:s');
             $importedIcalendar->save();
         }
         clearCache('.calc.property_price');
         Common::one_time_message('success', __('Synchronization successfully completed!'));
-        return redirect('admin/listing/'.$request->id.'/calender');
+        return redirect('admin/listing/' . $request->id . '/calender');
     }
 
     /**
@@ -373,20 +381,20 @@ class CalendarController extends Controller
      * @param date $sStartDate  Start Date
      * @param date $sEndDate    End Date
      * @return array $days      Between two dates
-    */
+     */
     public function get_days($sStartDate, $sEndDate)
     {
-        $sStartDate   = gmdate("Y-m-d", $sStartDate);
-        $sEndDate     = gmdate("Y-m-d", $sEndDate);
+        $sStartDate = gmdate("Y-m-d", $sStartDate);
+        $sEndDate = gmdate("Y-m-d", $sEndDate);
 
-        $aDays[]      = $sStartDate;
+        $aDays[] = $sStartDate;
 
         $sCurrentDate = $sStartDate;
 
         while ($sCurrentDate < $sEndDate) {
             $sCurrentDate = gmdate("Y-m-d", strtotime("+1 day", strtotime($sCurrentDate)));
 
-            $aDays[]      = $sCurrentDate;
+            $aDays[] = $sCurrentDate;
         }
 
         return $aDays;
@@ -394,30 +402,31 @@ class CalendarController extends Controller
 
     public function calenderJson(Request $request, CalendarController $calendar)
     {
-        $year              = $request->year;
-        $month             = $request->month;
+        $year = $request->year;
+        $month = $request->month;
         $data['room_step'] = 'edit_calendar';
-        $data['calendar']  = $this->generate($request->id, $year, $month);
+        $data['calendar'] = $this->generate($request->id, $year, $month);
         return json_encode($data);
     }
 
     public function calenderPriceSet(Request $request, CalendarController $calendar)
     {
         $start_date = date('Y-m-d', strtotime($request->start_date));
-        $end_date   = date('Y-m-d', strtotime($request->end_date));
+        $end_date = date('Y-m-d', strtotime($request->end_date));
 
         $start_date = strtotime($start_date);
-        $end_date   = strtotime($end_date);
+        $end_date = strtotime($end_date);
 
-        for ($i=$start_date; $i<=$end_date; $i+=86400) {
+        for ($i = $start_date; $i <= $end_date; $i += 86400) {
             $date = date("Y-m-d", $i);
 
-            $data = [ 'property_id' => $request->id,
-                      'price'   => ($request->price) ? $request->price : '0',
-                      'status'  => $request->status,
-                      'min_day' => ($request->min_stay) ? $request->min_stay : '0',
-                      'min_stay' => ($request->min_stay) ? '1' : '0',
-                    ];
+            $data = [
+                'property_id' => $request->id,
+                'price' => ($request->price) ? $request->price : '0',
+                'status' => $request->status,
+                'min_day' => ($request->min_stay) ? $request->min_stay : '0',
+                'min_stay' => ($request->min_stay) ? '1' : '0',
+            ];
 
             PropertyDates::updateOrCreate(['property_id' => $request->id, 'date' => $date], $data);
         }
@@ -430,11 +439,11 @@ class CalendarController extends Controller
     {
         $res = array();
 
-        for ($i=-2; $i<30; $i++) {
-            $date               = strtotime("+$i months");
-            $value              = date('Y-m', $date);
-            $label              = date('F Y', $date);
-            $res[$value]        = $label;
+        for ($i = -2; $i < 30; $i++) {
+            $date = strtotime("+$i months");
+            $value = date('Y-m', $date);
+            $label = date('F Y', $date);
+            $res[$value] = $label;
         }
         return $res;
     }
@@ -446,7 +455,7 @@ class CalendarController extends Controller
      */
     public function zeroDigit($digit)
     {
-        if ($digit <10 && $digit > 0) {
+        if ($digit < 10 && $digit > 0) {
             return '0' . $digit;
         }
         return $digit;

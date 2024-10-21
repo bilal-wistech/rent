@@ -133,7 +133,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('bookings', 'BookingsController@index')->middleware(['permission:manage_bookings']);
     Route::get('bookings/property_search', 'BookingsController@searchProperty')->middleware(['permission:manage_bookings']);
     Route::get('bookings/customer_search', 'BookingsController@searchCustomer')->middleware(['permission:manage_bookings']);
-    Route::post('bookings/booking/{id}', 'BookingsController@getbookingbyid');
     //booking details
     Route::get('bookings/detail/{id}', 'BookingsController@details')->middleware(['permission:manage_bookings']);
     Route::get('bookings/edit/{req}/{id}', 'BookingsController@updateBookingStatus')->middleware(['permission:manage_bookings']);
@@ -143,10 +142,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('booking/booking_list_pdf', 'BookingsController@bookingPdf');
     Route::get('invoices', 'InvoiceController@index')->middleware(['permission:manage_invoices'])->name('admin.invoices.index');
     Route::get('invoices/show/{id}', 'InvoiceController@show')->middleware(['permission:manage_invoices'])->name('admin.invoices.show');
-    Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts'])->name('payouts');
+    Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts'])->name('admin.payouts');
+    Route::post('invoices/invoice/{id}', 'InvoiceController@getInvoiceByUserId');
+    
     //Admin Payout routes
     Route::get('payouts/create', 'PayoutsController@create')->name('payouts.create');
     Route::post('payouts/create/success', 'PayoutsController@asuccess')->name('payouts.asuccess');
+    Route::post('payouts/update/{id}', 'PayoutsController@updatePayout')->name('payouts.update');
     Route::match(array('GET', 'POST'), 'payouts/edit/{id}', 'PayoutsController@edit');
     Route::match(array('GET', 'POST'), 'payouts/delete/{id}', 'PayoutsController@delete');
     Route::get('payouts/details/{id}', 'PayoutsController@details');
@@ -319,8 +321,12 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('bookings/calander', 'BookingsController@calander')->middleware(['permission:manage_bookings'])->name('admin.bookings.calander');
     Route::get('bookings/get-number-of-guests/{property_id}', 'BookingsController@getNumberofGuests')->middleware(['permission:manage_bookings'])->name('admin.bookings.get-number-of-guests');
     Route::post('bookings/check-booking-exists', 'BookingsController@checkExistingPropertyBooking')->middleware(['permission:manage_bookings'])->name('admin.bookings.check-booking-exists');
-    Route::post('bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
+    Route::get('bookings/get-property-dates/{property_id}', 'BookingsController@getPropertyDates')->middleware(['permission:manage_bookings'])->name('admin.bookings.get-property-dates');
 
+    Route::get('bookings/details/{date}', 'BookingsController@getBookingDetails')->middleware(['permission:manage_bookings'])->name('admin.bookings.details');
+
+
+    Route::match(['post', 'put'],'bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
     Route::get('bookings/edit/{id}', 'BookingsController@edit')->middleware(['permission:manage_bookings'])->name('admin.bookings.edit');
 
     Route::put('bookings/update/{id}', 'BookingsController@update')->middleware(['permission:manage_bookings'])->name('admin.bookings.update');
