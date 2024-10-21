@@ -63,6 +63,8 @@ class Bookings extends Model
         'date_with_price',
         'transaction_id',
         'payment_method_id',
+        'buffer_days',
+        'time_period_id'
     ];
 
     protected $table = 'bookings';
@@ -123,7 +125,10 @@ class Bookings extends Model
     {
         return $this->belongsTo('App\Models\Bank');
     }
-
+    public function time_period()
+    {
+        return $this->belongsTo('App\Models\TimePeriod', 'time_period_id', 'id');
+    }
 
     public function getHostPenaltyAmountAttribute()
     {
