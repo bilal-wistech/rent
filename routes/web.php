@@ -1,11 +1,13 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Admin\AreaController;
 use App\Http\Controllers\AddonController;
+use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\EmergencyContactController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Session;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -62,6 +64,11 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
 
     Route::resource('document', DocumentController::class);
     Route::resource('emergencycontacts', EmergencyContactController::class);
+    Route::resource('city', CityController::class);
+    Route::resource('area', AreaController::class);
+    Route::get('city/add/{countryId}', [CityController::class, 'add'])->name('city.add');
+    Route::get('area/add/{cityId}', [AreaController::class, 'add'])->name('area.add');
+
 
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
     Route::post('add-ajax-customer', 'CustomerController@ajaxCustomerAdd')->middleware(['permission:add_customer']);

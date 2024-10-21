@@ -7,14 +7,15 @@ use Yajra\DataTables\Services\DataTable;
 
 class CountryDataTable extends DataTable
 {
+
     public function ajax()
     {
         return datatables()
             ->eloquent($this->query())
             ->addColumn('action', function ($country) {
-                $view = '<a href="' . url('admin/settings/view-country/' . $country->id) . '" class="btn btn-xs btn-info"><i class="fa fa-home" style="color: white;"></i></a>';
+                $view = '<a href="' . route('city.show',  $country->id) . '" class="btn btn-xs btn-info"><i class="fa fa-home" style="color: white;"></i></a>';
                 $edit = '<a href="' . url('admin/settings/edit-country/' . $country->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
-                $delete = '<a href="' . url('admin/settings/delete-country/' . $country->id) . '" class="btn btn-xs btn-danger delete-warning"><i class="fa fa-trash"></i></a>';
+                $delete = '<a href="' . url(path: 'admin/settings/delete-country/' . $country->id) . '" class="btn btn-xs btn-danger delete-warning"><i class="fa fa-trash"></i></a>';
 
                 return $view .' '. $edit . ' ' . $delete;
             })
