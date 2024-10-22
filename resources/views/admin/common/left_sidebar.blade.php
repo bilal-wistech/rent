@@ -6,9 +6,9 @@
     data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle">
 
     <!--begin::Logo-->
-    <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
+    <div class="app-sidebar-logo px-3 mt-1" id="kt_app_sidebar_logo">
         <!--begin::Logo image-->
-       <a href="index.html">
+       <a href="{{ url('admin/dashboard') }}">
     <img alt="Logo" src="{{ asset('backend/assets/media/logos/zurent-logo-new.jpg') }}"
         class="app-sidebar-logo-default logo" />
     <img alt="Logo" src="{{ asset('backend/assets/media/logos/zurent-logo-new.jpg') }}"

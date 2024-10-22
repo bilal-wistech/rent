@@ -649,10 +649,13 @@ progress {
     height: auto;
 }
 .logo {
-    width: 100px;
-    height: 100px;
-    
+    width: 74px;
+    height: 74px;
     object-fit: cover;
+}
+.app-sidebar-logo-minimize.logo{
+    width: 40px;
+    height: 40px;
 }
 .figure {
     display: inline-block;
@@ -1029,6 +1032,7 @@ progress {
         flex: 0 0 auto;
         width: 91.66666667%;
     }
+
     .col-sm-12 {
         flex: 0 0 auto;
         width: 100%;
