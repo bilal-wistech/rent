@@ -225,6 +225,8 @@ class AdminController extends Controller
 
    public function authenticate(Request $request)
     {
+
+
         $data['preferenceData'] = Settings::getAll()->where('type','preferences')->where('name', 'recaptcha_preference')->value('value');
 
         $rules = array(
