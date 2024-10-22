@@ -92,6 +92,26 @@ class AreaController extends Controller
             ]);
 
     }
+    public function addAjax(Request $request)
+{
+
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'city' => 'required',
+    ]);
+    $city = City::where('name', $request->input('city'))->first();
+  $area = Area::create([
+        'name' => $request->input('name'),
+        'city_id' => $city->id,
+        'country_id' => $city->country_id,
+    ]);
+    return response()->json([
+        'status' => 'success',
+        'city' => $city
+    ]);
+
+
+}
     public function destroy($id)
     {
         try {

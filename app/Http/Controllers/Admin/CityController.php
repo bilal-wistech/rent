@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\City;
+use App\Models\Country;
 use Illuminate\Http\Request;
 use App\DataTables\CityDataTAble;
 use App\Http\Controllers\Controller;
@@ -18,6 +19,27 @@ class CityController extends Controller
     {
 
     }
+    public function addAjax(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'country' => 'required', // Ensure country exists by ID
+    ]);
+    $country = Country::where('short_name', $request->input('country'))->first();
+  $city = City::create([
+        'name' => $request->input('name'),
+        'country_id' => $country->id,  // Use country_id for the city
+    ]);
+
+    // Return a success response
+    return response()->json([
+        'status' => 'success',
+        'city' => $city
+    ]);
+
+
+}
+
 
 
     public function store(Request $request)

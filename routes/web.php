@@ -68,7 +68,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::resource('area', AreaController::class);
     Route::get('city/add/{countryId}', [CityController::class, 'add'])->name('city.add');
     Route::get('area/add/{cityId}', [AreaController::class, 'add'])->name('area.add');
-
+    Route::post('admin/add-ajax-city', [CityController::class, 'addAjax'])->name('city.addAjax');
+    Route::post('admin/add-ajax-area', [AreaController::class, 'addAjax'])->name('area.addAjax');
 
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
     Route::post('add-ajax-customer', 'CustomerController@ajaxCustomerAdd')->middleware(['permission:add_customer']);
@@ -144,7 +145,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('invoices/show/{id}', 'InvoiceController@show')->middleware(['permission:manage_invoices'])->name('admin.invoices.show');
     Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts'])->name('admin.payouts');
     Route::post('invoices/invoice/{id}', 'InvoiceController@getInvoiceByUserId');
-    
+
     //Admin Payout routes
     Route::get('payouts/create', 'PayoutsController@create')->name('payouts.create');
     Route::post('payouts/create/success', 'PayoutsController@asuccess')->name('payouts.asuccess');
