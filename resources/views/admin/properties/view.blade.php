@@ -38,11 +38,14 @@
                         <div class="col-md-3 col-sm-3 col-xs-12">
                           <label>Date Range</label>
                           <div class="input-group col-xs-12">
-                            <input type="date" id="startDate" class="form-control" placeholder="Start Date" />
-                            <input type="date" id="endDate" class="form-control" placeholder="End Date" />
+                            <button type="button" class="form-control" id="daterange-btn">
+                              <span class="pull-left">
+                                <i class="fa fa-calendar"></i> Pick a date range
+                              </span>
+                              <i class="fa fa-caret-down pull-right"></i>
+                            </button>
                           </div>
                         </div>
-
                         <div class="col-md-3 col-sm-3 col-xs-12">
                           <label>Status</label>
                           <select class="form-control" name="status" id="status">
@@ -108,17 +111,14 @@
 </div>
 @endsection
 
+
 @section('validate_script')
 
-
 <!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-  crossorigin="anonymous"></script>
-
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 
 <!-- Updated DataTables CSS and JS links -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
@@ -126,22 +126,27 @@
 
 {!! $dataTable->scripts() !!}
 
-
-
 <script>
   $(document).ready(function () {
-    // Handle button click to show the selected date range
-    $('#daterange-btn').on('change', function () {
-      alert('hello');
-      const startDate = $('#startDate').val();
-      const endDate = $('#endDate').val();
+    // Initialize Date Range Picker
+    $('#daterange-btn').daterangepicker({
+      locale: { format: 'YYYY-MM-DD' },
+      autoUpdateInput: false,
+    }, function (start, end) {
+      // Set the values to the hidden input fields
+      $('#startDate').val(start.format('YYYY-MM-DD'));
+      $('#endDate').val(end.format('YYYY-MM-DD'));
 
-      if (startDate && endDate) {
-        alert('Selected Start Date: ' + startDate +
-          '\nSelected End Date: ' + endDate);
-      } else {
-        alert('Please select both start and end dates.');
-      }
+      // Show an alert with the selected date range
+      alert('Selected date range: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+    });
+
+    // Handle reset button
+    $('#reset_btn').on('click', function () {
+      $('#startDate, #endDate').val(''); // Clear date fields
+      $('#status, #space_type').val(''); // Reset other fields if needed
+      // Optionally redirect to the properties page to reset filters
+      window.location.href = '{{ url("admin/properties") }}';
     });
   });
 </script>
@@ -155,3 +160,4 @@
 <script src="{{ asset('backend/js/reset-btn.min.js') }}"></script>
 <script src="{{ asset('backend/js/admin-date-range-picker.min.js') }}"></script>
 @endsection
+
