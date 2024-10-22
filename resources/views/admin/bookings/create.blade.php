@@ -177,6 +177,84 @@
                                             Add Booking</h4>
                                         <a type="button" class="close cls-reload f-18" data-bs-dismiss="modal">×</a>
                                     </div>
+                                    <div id="addCustomerForm" style="display: none;">
+                                        <form class="form-horizontal" id="customer_form" method="post" name="customer_form"
+                                            action="{{ url('admin/add-ajax-customer') }}" accept-charset='UTF-8'>
+                                            {{ csrf_field() }}
+
+                                            <h4 class="text-info text-center ml-40">Customer Information</h4>
+                                            <input type="hidden" name="default_country" id="default_country"
+                                                class="form-control">
+                                            <input type="hidden" name="carrier_code" id="carrier_code"
+                                                class="form-control">
+                                            <input type="hidden" name="formatted_phone" id="formatted_phone"
+                                                class="form-control">
+
+                                            <div class="form-group row mt-3">
+                                                <label for="exampleInputPassword1"
+                                                    class="control-label col-sm-3 mt-2 fw-bold">First
+                                                    Name<span class="text-danger">*</span></label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control f-14" name="first_name"
+                                                        id="first_name" placeholder="">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mt-3">
+                                                <label for="exampleInputPassword1"
+                                                    class="control-label col-sm-3 mt-2 fw-bold">Last
+                                                    Name<span class="text-danger">*</span></label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control f-14" name="last_name"
+                                                        id="last_name" placeholder="">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mt-3">
+                                                <label for="exampleInputPassword1"
+                                                    class="control-label col-sm-3 mt-2 fw-bold">Email<span
+                                                        class="text-danger">*</span></label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control error f-14" name="email"
+                                                        id="email" placeholder="">
+                                                    <div id="emailError"></div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mt-3">
+                                                <label for="exampleInputPassword1"
+                                                    class="control-label col-sm-3 mt-2 fw-bold">Phone</label>
+                                                <div class="col-sm-8">
+                                                    <input type="tel" class="form-control f-14" id="phone"
+                                                        name="phone">
+                                                    <span id="phone-error" class="text-danger"></span>
+                                                    <span id="tel-error" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mt-3">
+                                                <label for="Password"
+                                                    class="control-label col-sm-3 mt-2 fw-bold">Password<span
+                                                        class="text-danger">*</span></label>
+                                                <div class="col-sm-8">
+                                                    <input type="password" class="form-control f-14" name="password"
+                                                        id="password" placeholder="">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mt-3">
+                                                <label for="exampleInputPassword1"
+                                                    class="control-label col-sm-3 mt-2 fw-bold">Status</label>
+                                                <div class="col-sm-8">
+                                                    <select class="form-control f-14" name="status" id="status">
+                                                        <option value="Active">Active</option>
+                                                        <option value="Inactive">Inactive</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer mt-2">
+                                                <button type="submit" id="customerModalBtn"
+                                                    class="btn btn-success pull-left f-14">Submit</button>
+                                                    <button type="submit" id="customerModalBtnClose"
+                                                    class="btn btn-info pull-left f-14">Close</button>
+                                            </div>
+                                        </form>
+                                    </div>
                                     <form method="post" action="{{ route('admin.bookings.store') }}"
                                         class='form-horizontal' id='booking_form'>
                                         {{ csrf_field() }}
@@ -200,16 +278,19 @@
                                                 <div class="col-sm-6">
                                                     <select class="form-control select2" name="user_id" id="user_id">
                                                         <option value="">Select a Customer</option>
-                                                        <option value="{{ old('user_id') }}" selected>{{ old('user_name') }}
+                                                        <option value="{{ old('user_id') }}" selected>
+                                                            {{ old('user_name') }}
                                                         </option>
                                                     </select>
                                                     <span class="text-danger">{{ $errors->first('user_id') }}</span>
                                                 </div>
-                                                {{-- <div class="col-sm-1">
-                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#customerModal"
-                                                        class=" btn btn-primary btn-sm customer-modal"><span
-                                                            class="fa fa-user"></span></a>
-                                                </div> --}}
+                                                <div class="col-sm-1">
+                                                    <button type="button" class="btn btn-primary btn-sm"
+                                                        id="addCustomerButton">
+                                                        <span class="fa fa-user"></span>
+                                                    </button>
+
+                                                </div>
                                             </div>
                                             <div class="form-group row mt-3 renewal_type">
                                                 <label for="time_period_id"
@@ -352,97 +433,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="modal" id="customerModal" tabindex="-1" role="dialog">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content ">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="theModalLabel"></h5>
-                                        <button type="button" class="close" data-bs-dismiss="modal"
-                                            aria-label="Close">
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form class="form-horizontal" id="signup_form" method="post" name="signup_form"
-                                            action="{{ url('admin/add-ajax-customer') }}" accept-charset='UTF-8'>
-                                            {{ csrf_field() }}
-
-                                            <h4 class="text-info text-center ml-40">Customer Information</h4>
-                                            <input type="hidden" name="default_country" id="default_country"
-                                                class="form-control">
-                                            <input type="hidden" name="carrier_code" id="carrier_code"
-                                                class="form-control">
-                                            <input type="hidden" name="formatted_phone" id="formatted_phone"
-                                                class="form-control">
-
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">First
-                                                    Name<span class="text-danger">*</span></label>
-                                                <div class="col-sm-8">
-                                                    <input type="text" class="form-control f-14" name="first_name"
-                                                        id="first_name" placeholder="">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Last
-                                                    Name<span class="text-danger">*</span></label>
-                                                <div class="col-sm-8">
-                                                    <input type="text" class="form-control f-14" name="last_name"
-                                                        id="last_name" placeholder="">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Email<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="col-sm-8">
-                                                    <input type="text" class="form-control error f-14" name="email"
-                                                        id="email" placeholder="">
-                                                    <div id="emailError"></div>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Phone</label>
-                                                <div class="col-sm-8">
-                                                    <input type="tel" class="form-control f-14" id="phone"
-                                                        name="phone">
-                                                    <span id="phone-error" class="text-danger"></span>
-                                                    <span id="tel-error" class="text-danger"></span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="Password"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Password<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="col-sm-8">
-                                                    <input type="password" class="form-control f-14" name="password"
-                                                        id="password" placeholder="">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Status</label>
-                                                <div class="col-sm-8">
-                                                    <select class="form-control f-14" name="status" id="status">
-                                                        <option value="Active">Active</option>
-                                                        <option value="Inactive">Inactive</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer mt-2">
-                                                <button type="submit" id="customerModalBtn"
-                                                    class="btn btn-info pull-left f-14">Submit</button>
-                                                <button class="btn btn-danger pull-left f-14"
-                                                    data-bs-dismiss="modal">Close</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
         </section>
@@ -465,7 +455,7 @@
         let baseURL = "{{ url('/') }}";
         let duplicateNumberCheckURL = "{{ url('duplicate-phone-number-check') }}";
     </script>
-    <script src="{{ asset('backend/js/add_customer_for_properties.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('backend/js/add_customer_for_properties.js') }}" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
