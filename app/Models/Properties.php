@@ -469,4 +469,9 @@ class Properties extends Model
         }
         return true;
     }
+
+    public function property()
+    {
+        return $this->belongsTo(Properties::class, 'property_id');
+    }
 }
