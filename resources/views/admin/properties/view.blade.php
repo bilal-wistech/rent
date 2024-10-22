@@ -6,11 +6,13 @@
   <div class="app-main flex-column flex-row-fluid" id="kt_app_main">
     <div class="d-flex flex-column flex-column-fluid">
       <section class="content-header">
-        <h1 class="mb-4 ml-3">
+        <h3 class="mb-4 ml-4">
           Properties
           <small>Control panel</small>
-        </h1>
+        </h3>
+        <div class="ml-4 mr-4">
         @include('admin.common.breadcrumb')
+        </div>
       </section>
 
       <div id="kt_app_content" class="app-content flex-column-fluid">
@@ -115,6 +117,7 @@
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"></script>
 
 {!! $dataTable->scripts() !!}
 
