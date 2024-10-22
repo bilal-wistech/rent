@@ -2334,12 +2334,12 @@
                       </thead>
                       <tbody>
                         @php
-              $number = 1 + (($unbookedProperties->currentPage() - 1) * $unbookedProperties->perPage());
+              $number = 1 + (($vacantProperties->currentPage() - 1) * $vacantProperties->perPage());
             @endphp
-                        @foreach ($unbookedProperties as $item)
+                        @foreach ($vacantProperties as $item)
               <tr>
-                <td>{{ $item->name }}</td>
-                <td>{{ \Carbon\Carbon::parse($item->created_at)->format('Y-m-d') }}
+                <td>{{ $item['propertiesName'] }}</td>
+                <td>{{ $item['vacant_since'] }}</td>
                 </td>
               </tr>
             @endforeach
@@ -2347,7 +2347,7 @@
                     </table>
 
                     <div class="d-flex justify-content-end mt-4">
-                      {{ $unbookedProperties->links('vendor.pagination.bootstrap-4') }}
+                      {{ $vacantProperties->links('vendor.pagination.bootstrap-4') }}
                     </div>
                   </div>
                 </div>
