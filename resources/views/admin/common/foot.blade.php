@@ -142,10 +142,17 @@
       url: "?page=" + page,
       type: "GET",
       beforeSend: function () {
-        $('#property-content').html('<p>Loading...</p>'); // Optional loading indicator
+        $('#property-content').html(`
+          <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+        `);
       },
       success: function (data) {
-        $('#property-content').html($(data).find('#property-content').html());
+        let newContent = $(data).find('#property-content').html();
+        $('#property-content').html(newContent);
       },
       error: function (xhr) {
         console.error('Error fetching properties:', xhr);
