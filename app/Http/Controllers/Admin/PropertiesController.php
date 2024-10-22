@@ -55,7 +55,6 @@ class PropertiesController extends Controller
         $data['to'] = isset(request()->to) ? request()->to : null;
         $data['space_type_all'] = SpaceType::getAll();
 
-
         if (isset(request()->reset_btn)) {
             $data['from'] = null;
             $data['to'] = null;
