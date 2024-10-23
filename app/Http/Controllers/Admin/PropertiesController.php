@@ -39,6 +39,7 @@ use App\Models\{
     Country,
     Amenities,
     AmenityType,
+    Area,
     User,
     Settings,
     Bookings,
@@ -170,6 +171,13 @@ class PropertiesController extends Controller
         $cities = City::where('country_id', $country->id)->get();
         return response()->json(['cities' => $cities]);
     }
+    public function getAreas($country, $city)
+    {
+        $country = Country::where('short_name', $country)->first();
+        $areas = Area::where('city_id', $city)
+            ->where('country_id', $country->id)->get();
+        return response()->json(['areas' => $areas]);
+    }
     public function listing(Request $request, CalendarController $calendar)
     {
 
@@ -280,12 +288,13 @@ class PropertiesController extends Controller
                 if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
                 } else {
+                    $city = City::findOrFail($request->city);
                     $property_address = PropertyAddress::where('property_id', $property_id)->first();
                     $property_address->address_line_1 = $request->address_line_1;
                     $property_address->address_line_2 = $request->address_line_2;
                     $property_address->latitude = $request->latitude;
                     $property_address->longitude = $request->longitude;
-                    $property_address->city = $request->city;
+                    $property_address->city = $city->name;
                     $property_address->state = $request->state;
                     $property_address->country = $request->country;
                     $property_address->postal_code = $request->postal_code;
@@ -324,7 +333,6 @@ class PropertiesController extends Controller
                     Common::one_time_message('error', __('Choose at least one item from the Common Amenities'));
                     return redirect('admin/listing/' . $property_id . '/amenities');
                 }
-
             } elseif ($request->isMethod('post') && empty($request->amenities)) {
                 Common::one_time_message('error', __('Choose at least one item from the Common Amenities'));
                 return redirect('admin/listing/' . $property_id . '/amenities');
@@ -333,7 +341,6 @@ class PropertiesController extends Controller
                 $data['amenities'] = Amenities::where('status', 'Active')->get();
                 $data['amenities_type'] = AmenityType::get();
             }
-
         } elseif ($step == 'photos') {
             if ($request->isMethod('post')) {
                 if ($request->crop == 'crop' && $request->photos) {
@@ -407,7 +414,6 @@ class PropertiesController extends Controller
                 }
 
                 return redirect('admin/listing/' . $property_id . '/photos')->with('success', 'File Uploaded Successfully!');
-
             }
 
             $data['photos'] = PropertyPhotos::where('property_id', $property_id)
