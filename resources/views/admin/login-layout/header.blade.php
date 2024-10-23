@@ -8,8 +8,11 @@
             </div>
         @endif
     </div>
-    <div class="login-box">
-        <div class="login-logo">
+    <div class="bg-custom">
+
+    <div class="login-box bg-body d-flex flex-column align-items-stretch flex-center rounded-4 w-md-600px p-20">
+        {{-- <div class="login-logo">
             <a href="{{ url('/') }}" class="text-decoration-none fw-bolder"><strong>{{ siteName() }}</strong></a>
-        </div>
+        </div> --}}
         <div class="login-box-body">
+</div>
