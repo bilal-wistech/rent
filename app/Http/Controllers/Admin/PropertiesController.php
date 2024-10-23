@@ -170,6 +170,7 @@ class PropertiesController extends Controller
         $cities = City::where('country_id', $country->id)->get();
         return response()->json(['cities' => $cities]);
     }
+    public function getAreasByCityAndCountry($country, $city) {}
     public function listing(Request $request, CalendarController $calendar)
     {
 
@@ -324,7 +325,6 @@ class PropertiesController extends Controller
                     Common::one_time_message('error', __('Choose at least one item from the Common Amenities'));
                     return redirect('admin/listing/' . $property_id . '/amenities');
                 }
-
             } elseif ($request->isMethod('post') && empty($request->amenities)) {
                 Common::one_time_message('error', __('Choose at least one item from the Common Amenities'));
                 return redirect('admin/listing/' . $property_id . '/amenities');
@@ -333,7 +333,6 @@ class PropertiesController extends Controller
                 $data['amenities'] = Amenities::where('status', 'Active')->get();
                 $data['amenities_type'] = AmenityType::get();
             }
-
         } elseif ($step == 'photos') {
             if ($request->isMethod('post')) {
                 if ($request->crop == 'crop' && $request->photos) {
@@ -407,7 +406,6 @@ class PropertiesController extends Controller
                 }
 
                 return redirect('admin/listing/' . $property_id . '/photos')->with('success', 'File Uploaded Successfully!');
-
             }
 
             $data['photos'] = PropertyPhotos::where('property_id', $property_id)
