@@ -114,11 +114,13 @@
                                                 <option value="{{ $key }}">{{ $value }}</option>
                                             @endforeach
                                         </select>
+                                        <p id="errorCountry" />
                                         @if ($errors->has('country'))
-                                            <p class="error-tag">{{ $errors->first('country') }}</p>
+                                            <p class="error-tag text-danger">{{ $errors->first('country') }}</p>
                                         @endif
                                     </div>
                                 </div>
+
 
                                 <!-- City -->
                                 <div class="form-group row mt-2">
@@ -128,6 +130,7 @@
                                         <select class="form-control select2" name="city" id="city">
                                             <option value="">Select a City</option>
                                         </select>
+                                        <p id="errorCity" />
                                         @if ($errors->has('city'))
                                             <p class="error-tag">{{ $errors->first('city') }}</p>
                                         @endif
@@ -249,7 +252,7 @@
 
                             </div>
                             <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary" >Add Area</button>
+                                <button type="submit" class="btn btn-primary">Add Area</button>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </div>
                         </form>
@@ -430,30 +433,38 @@
 
             $('#cityIcon').on('click', function(event) {
                 event.preventDefault();
-                $('#modal_country').val(selectedCountry);
+                $('#errorCountry').text('').removeClass('text-danger');
 
                 var selectedCountry = $('#country').val();
                 if (!selectedCountry) {
-                    alert('Please select a country first.');
+
+                    $('#errorCountry').text('Please select a country first.').addClass('text-danger');
                     return;
                 }
-                $('#modal_country').val(selectedCountry);
 
+                $('#modal_country').val(selectedCountry);
                 $('#cityModal').modal('show');
             });
+
+
 
             $('#areaIcon').on('click', function(event) {
                 event.preventDefault();
 
-                var selectedCountry = $('#country').val(); // Get selected country
-                var selectedCity = $('#city').val(); // Get selected city
+                $('#errorCountry').text('').removeClass('text-danger');
 
+                var selectedCountry = $('#country').val();
                 if (!selectedCountry) {
-                    alert('Please select a country first.');
+
+                    $('#errorCountry').text('Please select a country first.').addClass('text-danger');
                     return;
                 }
+                $('#errorCity').text('').removeClass('text-danger');
+
+                var selectedCity = $('#city').val();
                 if (!selectedCity) {
-                    alert('Please select a city first.');
+
+                    $('#errorCity').text('Please select a city first.').addClass('text-danger');
                     return;
                 }
 
