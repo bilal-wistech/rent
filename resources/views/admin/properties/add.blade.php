@@ -146,16 +146,17 @@
                                     <label class="control-label col-sm-3 fw-bold">Area <span
                                             class="text-danger">*</span></label>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control f-14" id="area" name="area"
-                                            required>
+                                        <select class="form-control select2" name="area" id="area">
+                                            <option value="">Select a Area</option>
+                                        </select>
                                         @if ($errors->has('area'))
                                             <p class="error-tag">{{ $errors->first('area') }}</p>
                                         @endif
                                     </div>
-                                    {{-- <div class="col-sm-2">
+                                    <div class="col-sm-2">
                                         <a href="#" id="areaIcon" class="btn btn-primary btn-sm"><span
                                                 class="fa fa-home"></span></a>
-                                    </div> --}}
+                                    </div>
                                 </div>
 
                                 <!-- Optional Building -->
@@ -417,7 +418,7 @@
                                 $('#city').empty();
                                 $('#city').append('<option value="">Select a City</option>');
                                 $.each(response.cities, function(key, city) {
-                                    $('#city').append('<option value="' + city.name +
+                                    $('#city').append('<option value="' + city.id +
                                         '">' + city.name + '</option>');
                                 });
                             }
@@ -430,6 +431,35 @@
                     $('#city').empty().append('<option value="">Select a City</option>');
                 }
             });
+            //Area
+            $('#city').on('change', function() {
+                var selectedCountry = $('#country').val();
+                var selectedCity = $('#city').val();
+
+                if (selectedCountry && selectedCity) {
+                    $.ajax({
+                        url: '/admin/properties/get-areas/' + selectedCountry + '/' + selectedCity,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.areas) {
+                                $('#area').empty();
+                                $('#area').append('<option value="">Select a Area</option>');
+                                $.each(response.areas, function(key, area) {
+                                    $('#area').append('<option value="' + area.name +
+                                        '">' + area.name + '</option>');
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Error: ', error);
+                        }
+                    });
+                } else {
+                    $('#area').empty().append('<option value="">Select a Area</option>');
+                }
+            });
+
 
             $('#cityIcon').on('click', function(event) {
                 event.preventDefault();
