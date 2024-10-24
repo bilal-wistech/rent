@@ -173,11 +173,21 @@ class PropertiesController extends Controller
     }
     public function getAreas($country, $city)
     {
+
         $country = Country::where('short_name', $country)->first();
-        $areas = Area::where('city_id', $city)
-            ->where('country_id', $country->id)->get();
+        if (!$country) {
+            return response()->json(['error' => 'Country not found'], 404);
+        }
+        $city = City::where('name', $city)->orWhere('id', $city)->first();
+        if (!$city) {
+            return response()->json(['error' => 'City not found'], 404);
+        }
+        $areas = Area::where('city_id', $city->id)
+            ->where('country_id', $country->id)
+            ->get();
         return response()->json(['areas' => $areas]);
     }
+
     public function listing(Request $request, CalendarController $calendar)
     {
 
@@ -462,7 +472,7 @@ class PropertiesController extends Controller
         } elseif ($step == 'booking') {
             if ($request->isMethod('post')) {
 
-                $property_steps          = PropertySteps::where('property_id', $property_id)->first();
+                $property_steps = PropertySteps::where('property_id', $property_id)->first();
                 $property_steps->booking = 1;
                 $property_steps->save();
 
