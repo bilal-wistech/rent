@@ -323,4 +323,3 @@ $('#signup_form').on('submit', function(e) {
         $('#signup_form').submit();
     }
 });
-

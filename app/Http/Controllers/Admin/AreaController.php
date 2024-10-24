@@ -99,7 +99,7 @@ class AreaController extends Controller
             'city' => 'required',
         ]);
 
-        $city = City::where('name', $request->input('city'))->first();
+        $city = City::findOrFail($request->city);
 
         if (!$city) {
             return response()->json([
