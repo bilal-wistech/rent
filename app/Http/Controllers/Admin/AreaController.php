@@ -93,33 +93,25 @@ class AreaController extends Controller
 
     }
     public function addAjax(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'city' => 'required',
-        ]);
+{
 
-        $city = City::findOrFail($request->city);
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'city' => 'required',
+    ]);
+    $city = City::where('name', $request->input('city'))->first();
+  $area = Area::create([
+        'name' => $request->input('name'),
+        'city_id' => $city->id,
+        'country_id' => $city->country_id,
+    ]);
+    return response()->json([
+        'status' => 'success',
+        'city' => $city
+    ]);
 
-        if (!$city) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'City not found'
-            ], 404);
-        }
 
-        $area = Area::create([
-            'name' => $request->input('name'),
-            'city_id' => $city->id,
-            'country_id' => $city->country_id,
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'area' => $area,
-        ]);
-    }
-
+}
     public function destroy($id)
     {
         try {
