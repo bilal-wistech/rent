@@ -214,9 +214,9 @@ a:hover {
 .main-header .navbar-right {
     float: right;
 }
-@media (max-width: 991px) {
-    .main-header .navbar-custom-menu a,
-    .main-header .navbar-right a {
+@media (max-widr .navbar-custom-menu a,
+    .main-headth: 991px) {
+    .main-headeer .navbar-right a {
         color: inherit;
         background: 0 0;
     }
@@ -232,6 +232,9 @@ a:hover {
         color: inherit;
         border: 0;
     }
+    .logo-bg{
+        display:none !important
+       }
 }
 .main-header .sidebar-toggle {
     float: left;
@@ -3197,11 +3200,17 @@ table.text-center th {
 .login-box,
 .register-box {
     position:absolute;
-    width: 600px;
+    width: 500px;
+    height:400px;
     padding:0 100px 30px 100px;
-    margin-top:60px;
+    margin-top:95px;
     right: 2% ;
-    background-color:white ;
+    background-color:#04384c !important;
+    color:white;
+}
+.btn-custom{
+    background-color: #FF5733 !important;
+    border: #FF5733 !important
 }
 .login-box-body, .register-box-body {
     background: #fff;
@@ -3209,9 +3218,28 @@ table.text-center th {
     border-top: 0;
     color: #666;
 
+
+}
+
+.logo-bg{
+    flex-direction: column;
+    gap:1.5rem;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    margin-left: 140px;
+}
+.logo-login{
+    height:125px;
+    width:150px
+
+}
+.text-right{
+    text-align:right
 }
 .bg-custom {
-    background-image: url('https://i.pinimg.com/564x/0f/9c/fe/0f9cfe55a2bd24eee10b05e37bd9258d.jpg'); /* Adjust the path accordingly */
+    background-color:white; /* Adjust the path accordingly */
     background-size: cover; /* Makes the image cover the entire area */
     background-position: center; /* Centers the image */
     height: 100vh; /* Full height of the viewport */
