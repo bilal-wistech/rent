@@ -354,3 +354,24 @@ $("#add_area_form").on("submit", function (e) {
         },
     });
 });
+
+// Function to reset the form and validation
+function resetForm(formSelector) {
+    $(formSelector).trigger("reset");
+    $(formSelector).validate().resetForm(); // If using jQuery validation plugin
+    $(formSelector).find(".error").removeClass("error"); // Remove error class
+    $(formSelector).find("#emailError").hide(); // Hide any custom error messages
+    $(formSelector).find("#phone-error").hide(); // Hide phone error messages
+    $(formSelector).find("#tel-error").hide(); // Hide tel error messages
+}
+
+// Reset the form on closing or sliding up
+$("#addCustomerForm").on("slideUp", function () {
+    resetForm("#customer_form");
+});
+
+// Optional: If there's a close button, reset the form on click
+$("#customerModalBtnClose").click(function () {
+    resetForm("#customer_form");
+    $("#addCustomerForm").slideUp();
+});
