@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AlertType;
+use App\Models\Template;
 use Illuminate\Http\Request;
 
 class TemplateController extends Controller
@@ -14,7 +16,9 @@ class TemplateController extends Controller
      */
     public function index()
     {
-        //
+        $query = new Template();
+        $templates = $query->paginate(10);
+        return view('admin.templates.index',compact('templates'));
     }
 
     /**
@@ -24,7 +28,8 @@ class TemplateController extends Controller
      */
     public function create()
     {
-        //
+        $alertTypes = AlertType::where('status','active')->get();
+        return view('admin.templates.create',compact('alertTypes'));
     }
 
     /**

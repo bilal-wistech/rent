@@ -251,7 +251,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
             Route::match(array('GET', 'POST'), 'settings/edit-amenities-type/{id}', 'AmenitiesTypeController@update');
             Route::get('settings/delete-amenities-type/{id}', 'AmenitiesTypeController@delete');
         });
-        Route::group(['middleware' => 'permission:manage_alert_types'], function () {
+        Route::group(['middleware' => 'permission:manage_alerts'], function () {
             Route::resource('alert-types', AlertTypeController::class)->except('show');
         });
         Route::group(['middleware' => 'permission:manage_templates'], function () {

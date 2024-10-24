@@ -105,7 +105,7 @@
                     </ul>
                 </li>
             @endif
-            @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_alert_types'))
+            @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_alerts'))
                 <li
                     class="treeview {{ Route::current()->uri() == 'admin/alert-types' || Route::current()->uri() == 'admin/templates' || Route::current()->uri() == 'admin/alerts' ? 'active' : '' }}">
                     <a href="#">
