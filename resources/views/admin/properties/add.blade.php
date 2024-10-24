@@ -418,7 +418,7 @@
                                 $('#city').empty();
                                 $('#city').append('<option value="">Select a City</option>');
                                 $.each(response.cities, function(key, city) {
-                                    $('#city').append('<option value="' + city.name +
+                                    $('#city').append('<option value="' + city.id +
                                         '">' + city.name + '</option>');
                                 });
                             }
@@ -433,31 +433,32 @@
             });
             //Area
             $('#city').on('change', function() {
-    var selectedCountry = $('#country').val();
-    var selectedCity = $('#city').val();
+                var selectedCountry = $('#country').val();
+                var selectedCity = $('#city').val();
 
-    if (selectedCountry && selectedCity) {
-        $.ajax({
-            url: '/admin/properties/get-areas/' + selectedCountry + '/' + selectedCity,
-            type: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.areas) {
-                    $('#area').empty();
-                    $('#area').append('<option value="">Select a Area</option>');
-                    $.each(response.areas, function(key, area) {
-                        $('#area').append('<option value="' + area.name + '">' + area.name + '</option>');
+                if (selectedCountry && selectedCity) {
+                    $.ajax({
+                        url: '/admin/properties/get-areas/' + selectedCountry + '/' + selectedCity,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.areas) {
+                                $('#area').empty();
+                                $('#area').append('<option value="">Select a Area</option>');
+                                $.each(response.areas, function(key, area) {
+                                    $('#area').append('<option value="' + area.name +
+                                        '">' + area.name + '</option>');
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Error: ', error);
+                        }
                     });
+                } else {
+                    $('#area').empty().append('<option value="">Select a Area</option>');
                 }
-            },
-            error: function(xhr, status, error) {
-                console.log('Error: ', error);
-            }
-        });
-    } else {
-        $('#area').empty().append('<option value="">Select a Area</option>');
-    }
-});
+            });
 
 
             $('#cityIcon').on('click', function(event) {

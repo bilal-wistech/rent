@@ -106,7 +106,10 @@ class PropertiesController extends Controller
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput();
             } else {
-                $addressParts = [$request->area];
+                $country = Country::where('short_name', $request->country)->first();
+                $city = City::findOrFail($request->city);
+                $area = Area::findOrFail($request->area);
+                $addressParts = [$area->name];
 
                 if (!empty($request->building)) {
                     $addressParts[] = $request->building;
@@ -131,13 +134,13 @@ class PropertiesController extends Controller
                 $property_address = new PropertyAddress;
                 $property_address->property_id = $property->id;
                 $property_address->address_line_1 = $request->route;
-                $property_address->city = $request->city;
-                $property_address->state = $request->state;
-                $property_address->country = $request->country;
+                $property_address->city = $city->name;
+                $property_address->state = $country->short_name;
+                $property_address->country = $country->short_name;
                 $property_address->postal_code = $request->postal_code;
                 $property_address->latitude = $request->latitude;
                 $property_address->longitude = $request->longitude;
-                $property_address->area = $request->area;
+                $property_address->area = $area->name;
                 $property_address->building = $request->building;
                 $property_address->flat_no = $request->flat_no;
                 $property_address->save();
@@ -173,17 +176,17 @@ class PropertiesController extends Controller
     }
     public function getAreas($country, $city)
     {
-
+        // dd($country,$city);
         $country = Country::where('short_name', $country)->first();
         if (!$country) {
             return response()->json(['error' => 'Country not found'], 404);
         }
-        $city = City::where('name', $city)->orWhere('id', $city)->first();
+        $city = City::findOrFail($city);
         if (!$city) {
             return response()->json(['error' => 'City not found'], 404);
         }
-        $areas = Area::where('city_id', $city->id)
-            ->where('country_id', $country->id)
+        $areas = Area::where('country_id', $country->id)
+            ->where('city_id', $city->id)
             ->get();
         return response()->json(['areas' => $areas]);
     }
