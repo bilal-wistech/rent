@@ -108,8 +108,8 @@ class PropertiesController extends Controller
             } else {
                 $country = Country::where('short_name', $request->country)->first();
                 $city = City::findOrFail($request->city);
-                $area = Area::findOrFail($request->area);
-                $addressParts = [$area->name];
+                // $area = Area::findOrFail($request->area);
+                $addressParts = [$request->area];
 
                 if (!empty($request->building)) {
                     $addressParts[] = $request->building;
@@ -130,7 +130,7 @@ class PropertiesController extends Controller
                 $property->slug = Common::pretty_url($property->name);
                 $property->is_verified = 'Approved';
                 $property->save();
-
+                // dd($property);
                 $property_address = new PropertyAddress;
                 $property_address->property_id = $property->id;
                 $property_address->address_line_1 = $request->route;
@@ -140,7 +140,7 @@ class PropertiesController extends Controller
                 $property_address->postal_code = $request->postal_code;
                 $property_address->latitude = $request->latitude;
                 $property_address->longitude = $request->longitude;
-                $property_address->area = $area->name;
+                $property_address->area = $request->area;
                 $property_address->building = $request->building;
                 $property_address->flat_no = $request->flat_no;
                 $property_address->save();
@@ -193,7 +193,6 @@ class PropertiesController extends Controller
 
     public function listing(Request $request, CalendarController $calendar)
     {
-
         $step = $request->step;
         $property_id = $request->id;
 
@@ -301,13 +300,12 @@ class PropertiesController extends Controller
                 if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
                 } else {
-                    $city = City::findOrFail($request->city);
                     $property_address = PropertyAddress::where('property_id', $property_id)->first();
                     $property_address->address_line_1 = $request->address_line_1;
                     $property_address->address_line_2 = $request->address_line_2;
                     $property_address->latitude = $request->latitude;
                     $property_address->longitude = $request->longitude;
-                    $property_address->city = $city->name;
+                    $property_address->city = $request->city;
                     $property_address->state = $request->state;
                     $property_address->country = $request->country;
                     $property_address->postal_code = $request->postal_code;
@@ -346,6 +344,7 @@ class PropertiesController extends Controller
                     Common::one_time_message('error', __('Choose at least one item from the Common Amenities'));
                     return redirect('admin/listing/' . $property_id . '/amenities');
                 }
+
             } elseif ($request->isMethod('post') && empty($request->amenities)) {
                 Common::one_time_message('error', __('Choose at least one item from the Common Amenities'));
                 return redirect('admin/listing/' . $property_id . '/amenities');
@@ -354,6 +353,7 @@ class PropertiesController extends Controller
                 $data['amenities'] = Amenities::where('status', 'Active')->get();
                 $data['amenities_type'] = AmenityType::get();
             }
+
         } elseif ($step == 'photos') {
             if ($request->isMethod('post')) {
                 if ($request->crop == 'crop' && $request->photos) {
@@ -393,7 +393,7 @@ class PropertiesController extends Controller
                         $name = str_replace(' ', '_', $_FILES["file"]["name"]);
                         $ext = pathinfo($name, PATHINFO_EXTENSION);
                         $image = time() . '_' . $name;
-                        $path = 'public/images/property/' . $property_id;
+                        $path = 'images/property/' . $property_id;
                         if ($ext == 'png' || $ext == 'jpg' || $ext == 'jpeg' || $ext == 'gif' || $ext == 'JPG') {
                             $uploaded = move_uploaded_file($tmp_name, $path . "/" . $image);
                         }
@@ -427,6 +427,7 @@ class PropertiesController extends Controller
                 }
 
                 return redirect('admin/listing/' . $property_id . '/photos')->with('success', 'File Uploaded Successfully!');
+
             }
 
             $data['photos'] = PropertyPhotos::where('property_id', $property_id)

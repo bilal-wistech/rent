@@ -475,3 +475,4 @@ class Properties extends Model
         return $this->belongsTo(Properties::class, 'property_id');
     }
 }
+
