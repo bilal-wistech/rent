@@ -48,14 +48,14 @@ class Properties extends Model
 
     public function getHostNameAttribute()
     {
-        $result = User::where('id', $this->attributes['host_id'])->first();
-        return $result->first_name;
+        $result = User::where('id', @$this->attributes['host_id'])->first();
+        return $result->first_name ?? '';
     }
 
     public function getHostImageAttribute()
     {
-        $result = User::where('id', $this->attributes['host_id'])->first();
-        return $result->profile_image;
+        $result = User::where('id', @$this->attributes['host_id'])->first();
+        return $result->profile_image ?? '';
     }
 
     public function space() {
@@ -70,19 +70,19 @@ class Properties extends Model
 
     public function getPropertyTypeNameAttribute()
     {
-        return PropertyType::getAll()->where('id', $this->attributes['property_type'])->first()->name;
+        return PropertyType::getAll()->where('id', @$this->attributes['property_type'])->first()->name ?? '';
     }
 
     public function getSpaceTypeNameAttribute()
     {
-        return SpaceType::getAll()->where('id', $this->attributes['space_type'])->first()->name;
+        return SpaceType::getAll()->where('id', @$this->attributes['space_type'])->first()->name ?? '';
     }
 
     public function getStepsCompletedAttribute()
     {
         $result = PropertySteps::where('property_id', $this->attributes['id'])->first();
 
-        if ($this->attributes['amenities'] == NULL) {
+        if (@$this->attributes['amenities'] == NULL) {
             $amenities = 0;
         } else {
             $amenities = 1;
@@ -469,4 +469,10 @@ class Properties extends Model
         }
         return true;
     }
+
+    public function property()
+    {
+        return $this->belongsTo(Properties::class, 'property_id');
+    }
 }
+

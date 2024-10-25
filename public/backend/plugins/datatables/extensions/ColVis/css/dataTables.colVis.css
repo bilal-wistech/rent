@@ -7,8 +7,13 @@ div.ColVis {
 	margin-bottom: 1em;
 }
 table td, table th {
-    border: none; }
+    border: none;
 
+}
+table td{
+    display:flex;
+    gap:0.5rem;
+}
 button.ColVis_Button,
 ul.ColVis_collection li {
 	position: relative;
@@ -17,7 +22,7 @@ ul.ColVis_collection li {
 	padding: 5px 8px;
 	border: 1px solid #999;
 	cursor: pointer;
-	*cursor: hand;
+	cursor: hand;
 	font-size: 0.88em;
 	color: black !important;
 	white-space: nowrap;

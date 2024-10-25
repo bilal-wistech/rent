@@ -1,11 +1,13 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Admin\AreaController;
 use App\Http\Controllers\AddonController;
+use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\EmergencyContactController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Session;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -62,6 +64,12 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
 
     Route::resource('document', DocumentController::class);
     Route::resource('emergencycontacts', EmergencyContactController::class);
+    Route::resource('city', CityController::class);
+    Route::resource('area', AreaController::class);
+    Route::get('city/add/{countryId}', [CityController::class, 'add'])->name('city.add');
+    Route::get('area/add/{cityId}', [AreaController::class, 'add'])->name('area.add');
+    Route::post('admin/add-ajax-city', [CityController::class, 'addAjax'])->name('city.addAjax');
+    Route::post('admin/add-ajax-area', [AreaController::class, 'addAjax'])->name('area.addAjax');
 
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
     Route::post('add-ajax-customer', 'CustomerController@ajaxCustomerAdd')->middleware(['permission:add_customer']);
@@ -103,6 +111,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('properties', 'PropertiesController@index')->middleware(['permission:properties']);
     Route::match(array('GET', 'POST'), 'add-properties', 'PropertiesController@add')->middleware(['permission:add_properties']);
     Route::get('properties/cities-by-country/{country}', 'PropertiesController@getCitiesByCountry')->name('cities-by-country');
+    Route::get('properties/get-areas/{country}/{city}', 'PropertiesController@getAreas')->name('get-areas');
     Route::get('properties/property_list_csv', 'PropertiesController@propertyCsv');
     Route::get('properties/property_list_pdf', 'PropertiesController@propertyPdf');
 
@@ -137,7 +146,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('invoices/show/{id}', 'InvoiceController@show')->middleware(['permission:manage_invoices'])->name('admin.invoices.show');
     Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts'])->name('admin.payouts');
     Route::post('invoices/invoice/{id}', 'InvoiceController@getInvoiceByUserId');
-    
+
     //Admin Payout routes
     Route::get('payouts/create', 'PayoutsController@create')->name('payouts.create');
     Route::post('payouts/create/success', 'PayoutsController@asuccess')->name('payouts.asuccess');
