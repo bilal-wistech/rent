@@ -356,6 +356,7 @@ class PropertiesController extends Controller
 
         } elseif ($step == 'photos') {
             if ($request->isMethod('post')) {
+
                 if ($request->crop == 'crop' && $request->photos) {
                     $baseText = explode(";base64,", $request->photos);
                     $name = explode(".", $request->img_name);
@@ -427,14 +428,16 @@ class PropertiesController extends Controller
                 }
 
                 return redirect('admin/listing/' . $property_id . '/photos')->with('success', 'File Uploaded Successfully!');
-
             }
 
             $data['photos'] = PropertyPhotos::where('property_id', $property_id)
                 ->orderBy('serial', 'asc')
                 ->get();
         } elseif ($step == 'pricing') {
+
             if ($request->isMethod('post')) {
+                
+
                 $bookings = Bookings::where('property_id', $property_id)->where('currency_code', '!=', $request->currency_code)->first();
                 if ($bookings) {
                     Common::one_time_message('error', __('Booking has been made using the current currency. It cannot be changed now'));
@@ -473,6 +476,9 @@ class PropertiesController extends Controller
                     return redirect('admin/listing/' . $property_id . '/booking');
                 }
             }
+
+
+
         } elseif ($step == 'booking') {
             if ($request->isMethod('post')) {
 
