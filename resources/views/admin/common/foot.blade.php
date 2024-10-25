@@ -1,81 +1,131 @@
-<!-- Add the sidebar's background. This div must be placed immediately after the control sidebar -->
-  <div class="control-sidebar-bg"></div>
-</div>
-<!-- ./wrapper -->
+<!-- Add the sidebar's background -->
+<div class="control-sidebar-bg"></div>
+</div> <!-- ./wrapper -->
+
 <script type="text/javascript">
-  var APP_URL = "{{ (url('/')) }}";
+  var APP_URL = "{{ url('/') }}";
 </script>
-<!-- jQuery 2.2.4 -->
-<script type="text/javascript" src="{{ asset('backend/plugins/jQuery/jquery-3.6.3.min.js') }}"></script>
-<!-- popper -->
-<script type="text/javascript" href="{{ asset('backend/bootstrap/js/popper.min.js') }}"></script>
-<!-- slim -->
-<script type="text/javascript" src="{{ asset('backend/bootstrap/js/slim.min.js') }}"></script>
-<!-- jQuery UI 1.11.4 -->
-<!-- jQuery validation -->
-<script type="text/javascript" src="{{ asset('backend/plugins/jQuery/jquery.validate.min.js') }}"></script>
-<!-- jQuery validation -->
-<script type="text/javascript" src="{{ asset('backend/plugins/jQueryUI/jquery-ui.min.js') }}"></script>
-<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
-<script type="text/javascript">
+
+<!-- jQuery 3.6.3 -->
+<script src="{{ asset('backend/plugins/jQuery/jquery-3.6.3.min.js') }}"></script>
+
+<!-- Popper -->
+<script src="{{ asset('backend/bootstrap/js/popper.min.js') }}"></script>
+
+<!-- Slim -->
+<script src="{{ asset('backend/bootstrap/js/slim.min.js') }}"></script>
+
+<!-- jQuery Validation -->
+<script src="{{ asset('backend/plugins/jQuery/jquery.validate.min.js') }}"></script>
+
+<!-- jQuery UI -->
+<script src="{{ asset('backend/plugins/jQueryUI/jquery-ui.min.js') }}"></script>
+
+<script>
   $.widget.bridge('uibutton', $.ui.button);
-  var sessionDate      = '{!! Session::get('date_format_type') !!}';
+  var sessionDate = '{!! Session::get('date_format_type') !!}';
 </script>
-<!-- Bootstrap 3.3.6 -->
-<script type="text/javascript" src="{{ asset('backend/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-  <script type="text/javascript" src='https://maps.google.com/maps/api/js?key={{ config("vrent.google_map_key") }}&libraries=places'></script>
-  <script type="text/javascript" src="{{ asset('backend/js/locationpicker.jquery.min.js') }}"></script>
-  <script type="text/javascript" src="{{ asset('backend/js/bootbox.min.js') }}"></script>
-<!-- admin js -->
-<script type="text/javascript" src="{{ asset('backend/dist/js/admin.min.js') }}"></script>
-<!-- backend js -->
-<script type="text/javascript" src="{{ asset('backend/js/backend.min.js') }}"></script>
-<!-- CK Editor -->
-<!-- Morris.js charts -->
-@if (Route::current()->uri() == 'admin/dashboard')
-@endif
+
+<!-- Bootstrap Bundle -->
+<script src="{{ asset('backend/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+<!-- Google Maps -->
+<script src="https://maps.google.com/maps/api/js?key={{ config('vrent.google_map_key') }}&libraries=places"></script>
+
+<!-- Location Picker -->
+<script src="{{ asset('backend/js/locationpicker.jquery.min.js') }}"></script>
+
+<!-- Bootbox -->
+<script src="{{ asset('backend/js/bootbox.min.js') }}"></script>
+
+<!-- Admin JS -->
+<script src="{{ asset('backend/dist/js/admin.min.js') }}"></script>
+
+<!-- Backend JS -->
+<script src="{{ asset('backend/js/backend.min.js') }}"></script>
+
 <!-- Sparkline -->
-<script type="text/javascript" src="{{ asset('backend/plugins/sparkline/jquery.sparkline.min.js') }}"></script>
-<!-- jvectormap -->
-<script type="text/javascript" src="{{ asset('backend/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js') }}"></script>
-<script type="text/javascript" src="{{ asset('backend/plugins/jvectormap/jquery-jvectormap-world-mill-en.js') }}"></script>
-<!-- jQuery Knob Chart -->
-<script type="text/javascript" src="{{ asset('backend/plugins/knob/jquery.knob.js') }}"></script>
-<!-- daterangepicker -->
+<script src="{{ asset('backend/plugins/sparkline/jquery.sparkline.min.js') }}"></script>
 
-<script type="text/javascript">
+<!-- jVectorMap -->
+<script src="{{ asset('backend/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js') }}"></script>
+<script src="{{ asset('backend/plugins/jvectormap/jquery-jvectormap-world-mill-en.js') }}"></script>
 
-    var separator  = '{{ settings("date_separator") }}';
-    var dateFormat = '{{ strtoupper(settings("date_format_type")); }}';
-    var splitDate  = dateFormat.split(separator);
+<!-- jQuery Knob -->
+<script src="{{ asset('backend/plugins/knob/jquery.knob.js') }}"></script>
 
-    if (splitDate[1] === 'M') {
-        dateFormat  = dateFormat.replace('M', 'MMM');
-    }
+<!-- Moment JS -->
+<script src="{{ asset('backend/js/moment.min.js') }}"></script>
 
-</script>
-<script type="text/javascript" src="{{ asset('backend/js/moment.min.js') }}"></script>
-<script type="text/javascript" src="{{ asset('backend/plugins/daterangepicker/daterangepicker.js') }}"></script>
-<script type="text/javascript" src="{{ asset('backend/plugins/datepicker/bootstrap-datepicker.js') }}"></script>
-<!-- Bootstrap WYSIHTML5 -->
-<script type="text/javascript" src="{{ asset('backend/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js') }}"></script>
-<!-- Slimscroll -->
-<script type="text/javascript" src="{{ asset('backend/plugins/slimScroll/jquery.slimscroll.min.js') }}"></script>
+<!-- Date Range Picker -->
+<script src="{{ asset('backend/plugins/daterangepicker/daterangepicker.js') }}"></script>
+
+<!-- Datepicker -->
+<script src="{{ asset('backend/plugins/datepicker/bootstrap-datepicker.js') }}"></script>
+
+<!-- WYSIWYG Editor -->
+<script src="{{ asset('backend/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js') }}"></script>
+
+<!-- SlimScroll -->
+<script src="{{ asset('backend/plugins/slimScroll/jquery.slimscroll.min.js') }}"></script>
+
 <!-- FastClick -->
-<script type="text/javascript" src="{{ asset('backend/plugins/fastclick/fastclick.js') }}"></script>
-<!-- AdminLTE App -->
-<script type="text/javascript" src="{{ asset('backend/dist/js/app.min.js') }}"></script>
-<!--Select2-->
-<script type="text/javascript" src="{{ asset('backend/plugins/select2/select2.full.min.js') }}"></script>
+<script src="{{ asset('backend/plugins/fastclick/fastclick.js') }}"></script>
 
-<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-@if (Route::current()->uri() == 'admin/dashboard')
-@endif
-<!-- AdminLTE for demo purposes -->
-<script type="text/javascript" src="{{ asset('backend/dist/js/demo.js') }}"></script>
-<script type="text/javascript" src="{{ asset('backend/dist/js/custom.js') }}"></script>
-<script type="text/javascript" src="{{ asset('backend/js/daterangecustom.js') }}"></script>
-</body>
+<!-- AdminLTE -->
+<script src="{{ asset('backend/dist/js/app.min.js') }}"></script>
+
+<!-- Select2 -->
+<script src="{{ asset('backend/plugins/select2/select2.full.min.js') }}"></script>
+
+<!-- AdminLTE Demo -->
+<script src="{{ asset('backend/dist/js/demo.js') }}"></script>
+
+<!-- Custom JS -->
+<script src="{{ asset('backend/dist/js/custom.js') }}"></script>
+<script src="{{ asset('backend/js/daterangecustom.js') }}"></script>
+
+<script>
+  var separator = '{{ settings("date_separator") }}';
+  var dateFormat = '{{ strtoupper(settings("date_format_type")) }}';
+  var splitDate = dateFormat.split(separator);
+
+  if (splitDate[1] === 'M') {
+    dateFormat = dateFormat.replace('M', 'MMM');
+  }
+</script>
 
 @stack('scripts')
+
+<script>
+  $(document).on('click', '.pagination a', function (event) {
+    event.preventDefault();
+    let page = $(this).attr('href').split('page=')[1];
+    fetchProperties(page);
+  });
+
+  function fetchProperties(page) {
+    $.ajax({
+      url: "?page=" + page,
+      type: "GET",
+      beforeSend: function () {
+        $('#property-content').html(`
+          <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+        `);
+      },
+      success: function (data) {
+        let newContent = $(data).find('#property-content').html();
+        $('#property-content').html(newContent);
+      },
+      error: function (xhr) {
+        console.error('Error fetching properties:', xhr);
+      }
+    });
+  }
+</script>
+</body>
 </html>

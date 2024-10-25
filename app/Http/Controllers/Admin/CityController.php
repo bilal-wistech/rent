@@ -20,25 +20,28 @@ class CityController extends Controller
 
     }
     public function addAjax(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'country' => 'required', // Ensure country exists by ID
-    ]);
-    $country = Country::where('short_name', $request->input('country'))->first();
-  $city = City::create([
-        'name' => $request->input('name'),
-        'country_id' => $country->id,  // Use country_id for the city
-    ]);
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'country' => 'required',
+        ]);
 
-    // Return a success response
-    return response()->json([
-        'status' => 'success',
-        'city' => $city
-    ]);
+        $country = Country::where('short_name', $request->input('country'))->first();
+      if (!$country) {
+            return response()->json(['status' => 'error', 'message' => 'Country not found.'], 404);
+        }
 
+        $city = City::create([
+            'name' => $request->input('name'),
+            'country_id' => $country->id,
+        ]);
 
-}
+        return response()->json([
+            'status' => 'success',
+            'city' => $city
+        ]);
+    }
+
 
 
 
