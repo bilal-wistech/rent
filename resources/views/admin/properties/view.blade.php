@@ -23,37 +23,31 @@
               <div class="col-xs-12">
                 <div class="box">
                   <div class="box-body">
-                    <form class="form-horizontal" enctype='multipart/form-data' action="{{ url('admin/properties') }}"
-                      method="GET" accept-charset="UTF-8">
+                    <form class="form-horizontal" action="{{ url('admin/properties') }}" method="GET"
+                      accept-charset="UTF-8">
                       {{ csrf_field() }}
-
-                      <div class="d-none">
-                        <input class="form-control" type="text" id="startDate" name="from"
-                          value="{{ isset($from) ? $from : '' }}" hidden>
-                        <input class="form-control" type="text" id="endDate" name="to"
-                          value="{{ isset($to) ? $to : '' }}" hidden>
-                      </div>
 
                       <div class="row align-items-center date-parent">
                         <div class="col-md-3 col-sm-3 col-xs-12">
                           <label>Date Range</label>
-                          <div class="input-group col-xs-12">
-                            <button type="button" class="form-control" id="daterange-btn">
-                              <span class="pull-left">
-                                <i class="fa fa-calendar"></i> Pick a date range
-                              </span>
-                              <i class="fa fa-caret-down pull-right"></i>
-                            </button>
+                          <div class="input-group">
+                            <input type="text" class="form-control" id="dateRange" name="date_range"
+                              placeholder="Select date range" value="{{ isset($date_range) ? $date_range : '' }}">
+                            <div class="input-group-append">
+                              <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                            </div>
                           </div>
+                          <input class="form-control d-none" type="text" id="startDate" name="from"
+                            value="{{ isset($from) ? $from : '' }}">
+                          <input class="form-control d-none" type="text" id="endDate" name="to"
+                            value="{{ isset($to) ? $to : '' }}">
                         </div>
                         <div class="col-md-3 col-sm-3 col-xs-12">
                           <label>Status</label>
                           <select class="form-control" name="status" id="status">
                             <option value="">All</option>
-                            <option value="Listed" {{ $allstatus == "Listed" ? ' selected' : '' }}>Listed
-                            </option>
-                            <option value="Unlisted" {{ $allstatus == "Unlisted" ? ' selected' : '' }}>Unlisted
-                            </option>
+                            <option value="Listed" {{ $allstatus == "Listed" ? ' selected' : '' }}>Listed</option>
+                            <option value="Unlisted" {{ $allstatus == "Unlisted" ? ' selected' : '' }}>Unlisted</option>
                           </select>
                         </div>
                         <div class="col-md-3 col-sm-3 col-xs-12">
@@ -75,7 +69,6 @@
                             class="btn btn-primary btn-flat f-14 rounded">Reset</button>
                         </div>
                       </div>
-
                     </form>
                   </div>
                 </div>
@@ -94,7 +87,6 @@
             </div>
           @endif
                   </div>
-                  <!-- /.card-header -->
                   <div class="card-body">
                     <div class="table-responsive">
                       {!! $dataTable->table(['class' => 'table table-striped table-hover dt-responsive', 'width' => '100%', 'cellspacing' => '0']) !!}
@@ -111,45 +103,45 @@
 </div>
 @endsection
 
-
 @section('validate_script')
 
 <!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+  crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-<!-- Updated DataTables CSS and JS links -->
+<!-- DataTables CSS and JS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"></script>
-
-{!! $dataTable->scripts() !!}
 
 <script>
   $(document).ready(function () {
-    // Initialize Date Range Picker
-    $('#daterange-btn').daterangepicker({
-      locale: { format: 'YYYY-MM-DD' },
-      autoUpdateInput: false,
-    }, function (start, end) {
-      // Set the values to the hidden input fields
-      $('#startDate').val(start.format('YYYY-MM-DD'));
-      $('#endDate').val(end.format('YYYY-MM-DD'));
-
-      // Show an alert with the selected date range
-      alert('Selected date range: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+    // Initialize Flatpickr for date range
+    flatpickr("#dateRange", {
+      mode: "range",
+      dateFormat: "Y-m-d",
+      onChange: function (selectedDates) {
+        if (selectedDates.length === 2) {
+          $('#startDate').val(selectedDates[0].toISOString().split('T')[0]);
+          $('#endDate').val(selectedDates[1].toISOString().split('T')[0]);
+        }
+      }
     });
 
     // Handle reset button
     $('#reset_btn').on('click', function () {
       $('#startDate, #endDate').val(''); // Clear date fields
-      $('#status, #space_type').val(''); // Reset other fields if needed
-      // Optionally redirect to the properties page to reset filters
-      window.location.href = '{{ url("admin/properties") }}';
+      $('#status, #space_type').val(''); // Reset other fields
+      $('#dateRange').val(''); // Reset date range field
+      window.location.href = '{{ url("admin/properties") }}'; // Redirect to reset filters
     });
   });
 </script>
+
+{!! $dataTable->scripts() !!}
 
 <script>
   var sessionDate = '{{ strtoupper(Session::get('date_format_type')) }}';
@@ -160,4 +152,3 @@
 <script src="{{ asset('backend/js/reset-btn.min.js') }}"></script>
 <script src="{{ asset('backend/js/admin-date-range-picker.min.js') }}"></script>
 @endsection
-
