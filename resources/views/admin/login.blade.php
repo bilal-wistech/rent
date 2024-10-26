@@ -46,7 +46,10 @@
 
             </div>
             <div class="row">
-                <button type="submit" class="btn btn-success btn-custom btn-block btn-flat login rounded-2"><i class="spinner fa fa-spinner fa-spin d-none" ></i> {{ __('Sign In') }}</button>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success btn-custom btn-block btn-flat login rounded-2 w-100"><i class="spinner fa fa-spinner fa-spin d-none" ></i> {{ __('Sign In') }}</button>
+                </div>
+
 
         </div>
         <div class="d-flex justify-content-end">
