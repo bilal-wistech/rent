@@ -25,7 +25,7 @@ class DashboardController extends Controller
         })->pluck('id');
 
         // Step 2: Paginate the vacant properties
-        $perPage = 10; // Change this to the desired number of items per page
+        $perPage = 5; // Change this to the desired number of items per page
         $currentPage = request()->get('page', 1);
         $offset = ($currentPage - 1) * $perPage;
 
