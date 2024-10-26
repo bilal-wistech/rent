@@ -42,7 +42,7 @@
                                                     <input type="hidden" name="crop" id="type" value="crop">
                                                     <p class="text-13">(Width 640px and Height 360px)</p>
                                                     <div id="result" class="hide">
-                                                        <img src="#" alt="">
+                                                        <img src="#" alt="" required>
                                                     </div>
                                                     @if ($errors->any('file'))
                                                         <span
@@ -80,9 +80,9 @@
                                         ?>
 
                                         <div class="col-md-4 margin-top10" id="photo-div-{{ $photo->id }}">
-                                            <div class="room-image-container200"
-                                                 style="background-image:url({{ url('/images/property/' . $photo->property_id. '/' . $photo->photo) }});">
-                                                @if($photo->cover_photo == 0)
+                                            <div class="room-image-container200">
+                                                   <img src="{{ url('/images/property/' . $photo->property_id. '/' . $photo->photo) }}" alt="">
+                                                 @if($photo->cover_photo == 0)
                                                     <a class="photo-delete" href="javascript:void(0)"
                                                        data-rel="{{ $photo->id }}"><p class="photo-delete-icon"><i
                                                                 class="fa fa-trash-o"></i></p></a>
@@ -127,10 +127,13 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <div class="col-md-12">
-                                    <span class="text-danger display-off" id='photo'>This field is required
-                                </div>
+                                    <div class="col-md-12">
+                                        <span class="text-danger display-off" id="photo-error" style="display:none;">
+                                            This field is required.
+                                        </span>
+                                    </div>
                             </div>
+
                             <div class="row">
                                 <br>
 
@@ -141,11 +144,13 @@
                                            class="btn btn-large btn-primary f-14">Back</a>
                                     </div>
                                     <div class="col-md-2 col-sm-6 col-xs-6 float-end text-end">
-                                        <a href="{{ url('admin/listing/' . $result->id . '/pricing') }}"
-                                           class="btn btn-large btn-primary next-section-button f-14">
+                                        <a href="javascript:void(0)" 
+                                        id="next-section-button" 
+                                        class="btn btn-large btn-primary next-section-button f-14">
                                             Next
                                         </a>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
@@ -208,7 +213,25 @@
     <script src="{{ asset('backend/dist/js/validate.min.js') }}"></script>
     <script src="{{ asset('backend/js/listing-photo.min.js') }}"></script>
     @endsection
-    
+
+<!-- javascript for min 1 image required check  -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('next-section-button').addEventListener('click', function () {
+                const photoListDiv = document.getElementById('photo-list-div');
+                const photoCount = photoListDiv.querySelectorAll('.margin-top10').length;
+                const errorMessage = document.getElementById('photo-error');
+
+                if (photoCount === 0) {
+                    errorMessage.style.display = 'block'; // Show error message
+                } else {
+                    errorMessage.style.display = 'none';  // Hide error message
+                    const propertyId = @json($result->id); // Use Blade variable safely in JS
+                    window.location.href = `/admin/listing/${propertyId}/pricing`; // Redirect to next section
+                }
+            });
+        });
+    </script>
 
 
 
