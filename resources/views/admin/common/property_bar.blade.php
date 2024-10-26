@@ -32,10 +32,10 @@
             <li class="{{ ($requestUri == 'booking') ? 'active' : ''  }}">
                 <a href='{{ url("admin/listing/$result->id/booking") }}' data-group="profile">Booking</a>
             </li>
-
+<!-- 
             <li class="{{ ($requestUri == 'calender') ? 'active' : ''  }}">
                 <a href='{{ url("admin/listing/$result->id/calender") }}' data-group="profile">Calendar</a>
-            </li>
+            </li> -->
 
         </ul>
     </div>
