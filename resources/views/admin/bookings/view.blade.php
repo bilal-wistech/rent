@@ -109,24 +109,40 @@
                             <!-- Filter Box End -->
 
                             <!-- Statistics Box Start -->
-                            <div class="col-xs-12 mb-4">
-                                <div class="row">
-                                    <div class="col-xl-2 col-md-4 py-2 py-md-0">
-                                        <div class="card">
-                                            <div class="card-body bg-white border-0">
+                            <div class="row mt-2 mb-4">
+                                <div class="col-3 text-center">
+                                    <div class="card border-0 bg-white">
+                                        <div class="card-body">
+                                            <span class="text-20">{{ $total_bookings }}</span><br>
+                                            <span class="font-weight-bold total-customer">Total Bookings</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 text-center">
+                                    <div class="card border-0 bg-white">
+                                        <div class="card-body">
+                                            <span class="text-20">{{ $total_customers }}</span><br>
+                                            <span class="font-weight-bold total-customer">Total Customers</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 text-center">
+                                    @if ($different_total_amounts)
+                                        @foreach ($different_total_amounts as $total_amount)
+                                            <div class="col-xl-2 col-md-4 py-2 py-md-0">
                                                 <div class="panel panel-primary rounded">
                                                     <div class="panel-body text-center">
-                                                        <span class="text-20">{{ $total_bookings }}</span><br>
-                                                        <span class="font-weight-bold total-book f-14">Total
-                                                            Bookings</span>
+                                                        <span class="text-20">{!! $total_amount['total'] !!}</span><br>
+                                                        Total<span class="font-weight-bold total-amount">
+                                                            {{ $total_amount['currency_code'] }}</span> amount
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <!-- Add more statistics cards as needed -->
+                                        @endforeach
+                                    @endif
                                 </div>
                             </div>
+
                             <!-- Statistics Box End -->
                         </div>
 
