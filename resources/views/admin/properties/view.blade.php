@@ -21,8 +21,11 @@
             <!-- Filtering Box Start -->
             <div class="row">
               <div class="col-xs-12">
-                <div class="box">
-                  <div class="box-body">
+                <div class="card mb-4">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title">Filter Properties</h4>
+                  </div>
+                  <div class="card-body">
                     <form class="form-horizontal" action="{{ url('admin/properties') }}" method="GET"
                       accept-charset="UTF-8">
                       {{ csrf_field() }}
@@ -83,7 +86,7 @@
                     <h3 class="card-title">Properties Management</h3>
                     @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'add_properties'))
             <div>
-              <a class="btn btn-success" href="{{ url('admin/add-properties') }}">Add Properties</a>
+              <a class="btn btn-sm btn-success" href="{{ url('admin/add-properties') }}">Add Properties</a>
             </div>
           @endif
                   </div>
@@ -104,7 +107,6 @@
 @endsection
 
 @section('validate_script')
-
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
   crossorigin="anonymous"></script>
@@ -118,15 +120,17 @@
 <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+
   $(document).ready(function () {
     // Initialize Flatpickr for date range
     flatpickr("#dateRange", {
       mode: "range",
-      dateFormat: "Y-m-d",
+      dateFormat: "m-d-Y", // Change to m-d-Y to match your database format
       onChange: function (selectedDates) {
         if (selectedDates.length === 2) {
-          $('#startDate').val(selectedDates[0].toISOString().split('T')[0]);
-          $('#endDate').val(selectedDates[1].toISOString().split('T')[0]);
+          // Format the dates to m-d-Y
+          $('#startDate').val(flatpickr.formatDate(selectedDates[0], "m-d-Y"));
+          $('#endDate').val(flatpickr.formatDate(selectedDates[1], "m-d-Y"));
         }
       }
     });
@@ -139,6 +143,7 @@
       window.location.href = '{{ url("admin/properties") }}'; // Redirect to reset filters
     });
   });
+
 </script>
 
 {!! $dataTable->scripts() !!}
