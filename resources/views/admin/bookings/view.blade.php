@@ -24,12 +24,6 @@
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h4 class="card-title">Filter Bookings</h4>
-
-                                        <!-- @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'add_bookings')) -->
-                                        <a class="btn btn-success btn-sm" href="{{route('admin.bookings.create') }}">
-                                            Add Booking
-                                        </a>
-                                        <!-- @endif -->
                                     </div>
                                     <div class="card-body">
                                         <form class="form-horizontal" action="{{ url('admin/bookings') }}" method="GET"
@@ -111,7 +105,7 @@
                             <!-- Statistics Box Start -->
                             <div class="row mt-2 mb-4">
                                 <div class="col-3 text-center">
-                                    <div class="card border-0 bg-white">
+                                    <div class="card bg-white">
                                         <div class="card-body">
                                             <span class="text-20">{{ $total_bookings }}</span><br>
                                             <span class="font-weight-bold total-customer">Total Bookings</span>
@@ -119,7 +113,7 @@
                                     </div>
                                 </div>
                                 <div class="col-3 text-center">
-                                    <div class="card border-0 bg-white">
+                                    <div class="card bg-white">
                                         <div class="card-body">
                                             <span class="text-20">{{ $total_customers }}</span><br>
                                             <span class="font-weight-bold total-customer">Total Customers</span>
@@ -127,18 +121,22 @@
                                     </div>
                                 </div>
                                 <div class="col-3 text-center">
+
                                     @if ($different_total_amounts)
-                                        @foreach ($different_total_amounts as $total_amount)
-                                            <div class="col-xl-2 col-md-4 py-2 py-md-0">
-                                                <div class="panel panel-primary rounded">
-                                                    <div class="panel-body text-center">
-                                                        <span class="text-20">{!! $total_amount['total'] !!}</span><br>
-                                                        Total<span class="font-weight-bold total-amount">
-                                                            {{ $total_amount['currency_code'] }}</span> amount
+                                        <div class="card bg-white">
+
+                                            @foreach ($different_total_amounts as $total_amount)
+                                                <div class="col-xl-2 col-md-4 py-2 py-md-0">
+                                                    <div class="panel panel-primary rounded">
+                                                        <div class="panel-body text-center">
+                                                            <span class="text-20">{!! $total_amount['total'] !!}</span><br>
+                                                            Total<span class="font-weight-bold total-amount">
+                                                                {{ $total_amount['currency_code'] }}</span> amount
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        @endforeach
+                                            @endforeach
+                                        </div>
                                     @endif
                                 </div>
                             </div>
@@ -151,6 +149,9 @@
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h3 class="card-title">Bookings Management</h3>
+                                        <a class="btn btn-success btn-sm" href="{{route('admin.bookings.create') }}">
+                                            Add Booking
+                                        </a>
                                     </div>
                                     <div class="card-body">
                                         <div class="table-responsive">
