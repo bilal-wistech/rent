@@ -7,7 +7,7 @@
 		<div class="d-flex flex-column flex-column-fluid">
 			<section class="content-header">
 				<h3 class="mb-4 ml-4">
-					Admin Users 
+					Admin Users
 				</h3>
 				<div class="ml-4 mr-4">
 					@include('admin.common.breadcrumb')
@@ -39,19 +39,21 @@
 				</div>
 			</div>
 		</div>
-		@endsection
+	</div>
+</div>
+@endsection
 
-		@push('scripts')
-			<!-- DataTables CSS and JS -->
-			<script src="https://code.jquery.com/jquery-3.7.1.js"
-				integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-			<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+@push('scripts')
+	<!-- DataTables CSS and JS -->
+	<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+		crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-			<!-- DataTables CSS and JS -->
-			<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
-			<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
-			<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
-			{!! $dataTable->scripts() !!}
-		@endpush
+	<!-- DataTables CSS and JS -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+	<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+	{!! $dataTable->scripts() !!}
+@endpush
