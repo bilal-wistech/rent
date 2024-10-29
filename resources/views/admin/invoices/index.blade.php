@@ -160,7 +160,7 @@
 <script>
     var sessionDate = '{{ strtoupper(Session::get('date_format_type')) }}';
     var user_id = '{{ $user->id ?? '' }}';
-    var page = "invoices"; // Adjust page variable accordingly
+    var page = "booking";
 </script>
 
 <script src="{{ asset('backend/js/reset-btn.min.js') }}"></script>
