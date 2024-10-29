@@ -7,11 +7,11 @@
             </div>
         @endif
     </div>
-    <div class="bg-custom">
-<div class="logo-bg position-absolute">        <img alt="Logo" src="{{ asset('backend/assets/media/logos/login-logo.jpg') }}" class="logo-login" />
+    <div class="bg-custom row">
+<div class="col-6 mx-auto logo-bg position-absolute">        <img alt="Logo" src="{{ asset('backend/assets/media/logos/login-logo.jpg') }}" class="logo-login" />
 
 <p class='color-black-50 text-15'>Log in to find your next rental property or manage your listings with ease</p>
 </div>
 
-        <div class="login-box bg-body d-flex flex-column align-items-stretch flex-center rounded-4 w-md-600px p-20">
+        <div class="col-6 login-box bg-body d-flex flex-column align-items-stretch flex-center rounded-4 w-md-600px p-20">
 

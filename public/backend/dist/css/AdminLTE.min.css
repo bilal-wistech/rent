@@ -232,9 +232,7 @@ a:hover {
         color: inherit;
         border: 0;
     }
-    .logo-bg{
-        display:none !important
-       }
+
 }
 .main-header .sidebar-toggle {
     float: left;
@@ -393,6 +391,10 @@ a:hover {
         top: 0;
         right: 40px;
     }
+    .logo-bg{
+        display:none !important
+       }
+
 }
 .left-side,
 .main-sidebar {
@@ -434,7 +436,7 @@ a:hover {
         transform: translate(-230px, 0);
     }
 }
-@media (max-width: 425px) {
+@media (max-width: 500px) {
    .login-box{
     padding:0 20px 0 20px !important;
    }
@@ -3231,7 +3233,7 @@ table.text-center th {
     justify-content: center;
     align-items: center;
     display: flex;
-    margin-left: 140px;
+    /* margin-left: 140px; */
 }
 .logo-login{
     height:125px;
@@ -3255,6 +3257,7 @@ table.text-center th {
         margin-top: 20px;
     }
 }
+
 .login-box-body,
 .register-box-body {
     background: #fff;
