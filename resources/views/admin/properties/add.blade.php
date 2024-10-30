@@ -9,7 +9,7 @@
                     List Your Space
                     <small>List Your Space</small>
                 </h3>
-                <ol class="breadcrumb ml-4 mr-4">
+                <ol class="breadcrumb mb-4 ml-4">
                     <li><a href="{{ url('admin/dashboard') }}"><i class="fa fa-dashboard"></i> Home</a></li>
                 </ol>
             </section>
@@ -20,18 +20,16 @@
                         <div class="row">
                             <!-- right column -->
                             <div class="col-md-12">
-                                <!-- Horizontal Form -->
-                                <div class="card box-info">
-                                    <div class="card-header with-border">
+                                <!-- Card -->
+                                <div class="card">
+                                    <div class="card-header">
                                         <h3 class="card-title">List Your Space</h3>
                                     </div>
-                                    <!-- /.box-header -->
-                                    <!-- form start -->
-                                    <form id="add_pr" class="form-horizontal" method="post"
-                                        action="{{ url('admin/add-properties') }}" accept-charset='UTF-8'>
-                                        {{ csrf_field() }}
+                                    <div class="card-body">
+                                        <form id="add_pr" class="form-horizontal" method="post"
+                                            action="{{ url('admin/add-properties') }}" accept-charset='UTF-8'>
+                                            {{ csrf_field() }}
 
-                                        <div class="card-body">
                                             <input type="hidden" name='street_number' id='street_number'>
                                             <input type="hidden" name='route' id='route'>
                                             <input type="hidden" name='postal_code' id='postal_code'>
@@ -178,13 +176,13 @@
                                                     @endif
                                                 </div>
                                             </div>
-                                        </div>
+                                    </div>
 
-                                        <div class="card-footer align-items-center float-end">
-                                            <button type="reset" class="btn btn-default btn-sm">Reset</button>
-                                            <button type="submit"
-                                                class="btn btn-info pull-right btn-sm text-white">Continue</button>
-                                        </div>
+                                    <div class="card-footer text-end">
+                                        <button type="reset" class="btn btn-default btn-sm">Reset</button>
+                                        <button type="submit"
+                                            class="btn btn-info pull-right btn-sm text-white">Continue</button>
+                                    </div>
                                     </form>
                                 </div>
                             </div>
@@ -195,93 +193,87 @@
         </div>
     </div>
 </div>
-</div>
-@endsection
 
+<!-- /.content -->
 
-
-<div class="modal fade" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable" role="document">
-        <div class="modal-content" style="height : 300px;">
+<div class="modal" id="customerModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content ">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add Customer</h5>
+                <h5 class="modal-title" id="theModalLabel"></h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">×</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="signup_form" method="post" action="{{ url('admin/add-ajax-customer') }}"
-                    accept-charset="UTF-8">
+                <form class="form-horizontal" id="signup_form" method="post" name="signup_form"
+                    action="{{ url('admin/add-ajax-customer') }}" accept-charset='UTF-8'>
                     {{ csrf_field() }}
 
-                    <h4 class="text-info text-center">Landlord Information</h4>
-                    <input type="hidden" name="default_country" id="default_country">
-                    <input type="hidden" name="carrier_code" id="carrier_code">
-                    <input type="hidden" name="formatted_phone" id="formatted_phone">
+                    <h4 class="text-info text-center ml-40">Landlord Information</h4>
+                    <input type="hidden" name="default_country" id="default_country" class="form-control">
+                    <input type="hidden" name="carrier_code" id="carrier_code" class="form-control">
+                    <input type="hidden" name="formatted_phone" id="formatted_phone" class="form-control">
 
                     <div class="form-group row mt-3">
-                        <label for="first_name" class="control-label col-sm-3 fw-bold">First Name <span
-                                class="text-danger">*</span></label>
+                        <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">First
+                            Name<span class="text-danger">*</span></label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" name="first_name" id="first_name" required
-                                placeholder="Enter first name">
+                            <input type="text" class="form-control f-14" name="first_name" id="first_name"
+                                placeholder="">
                         </div>
                     </div>
                     <div class="form-group row mt-3">
-                        <label for="last_name" class="control-label col-sm-3 fw-bold">Last Name <span
-                                class="text-danger">*</span></label>
+                        <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">Last
+                            Name<span class="text-danger">*</span></label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" name="last_name" id="last_name" required
-                                placeholder="Enter last name">
+                            <input type="text" class="form-control f-14" name="last_name" id="last_name" placeholder="">
                         </div>
                     </div>
                     <div class="form-group row mt-3">
-                        <label for="email" class="control-label col-sm-3 fw-bold">Email <span
+                        <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">Email<span
                                 class="text-danger">*</span></label>
                         <div class="col-sm-8">
-                            <input type="email" class="form-control" name="email" id="email" required
-                                placeholder="Enter email">
-                            <div id="emailError" class="text-danger"></div>
+                            <input type="text" class="form-control error f-14" name="email" id="email" placeholder="">
+                            <div id="emailError"></div>
                         </div>
                     </div>
                     <div class="form-group row mt-3">
-                        <label for="phone" class="control-label col-sm-3 fw-bold">Phone</label>
+                        <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">Phone</label>
                         <div class="col-sm-8">
-                            <input type="tel" class="form-control" id="phone" name="phone"
-                                placeholder="Enter phone number">
+                            <input type="tel" class="form-control f-14" id="phone" name="phone">
                             <span id="phone-error" class="text-danger"></span>
+                            <span id="tel-error" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="form-group row mt-3">
-                        <label for="password" class="control-label col-sm-3 fw-bold">Password <span
+                        <label for="Password" class="control-label col-sm-3 mt-2 fw-bold">Password<span
                                 class="text-danger">*</span></label>
                         <div class="col-sm-8">
-                            <input type="password" class="form-control" name="password" id="password" required
-                                placeholder="Enter password">
+                            <input type="password" class="form-control f-14" name="password" id="password"
+                                placeholder="">
                         </div>
                     </div>
                     <div class="form-group row mt-3">
-                        <label for="status" class="control-label col-sm-3 fw-bold">Status</label>
+                        <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">Status</label>
                         <div class="col-sm-8">
-                            <select class="form-control" name="status" id="status">
+                            <select class="form-control f-14" name="status" id="status">
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
                             </select>
                         </div>
                     </div>
                     <div class="modal-footer mt-2">
-                        <button type="submit" id="customerModalBtn" class="btn btn-primary">Submit</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" id="customerModalBtn" class="btn btn-info pull-left f-14">Submit</button>
+                        <button class="btn btn-danger pull-left f-14" data-bs-dismiss="modal">Close</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
-
-
+</div>
+@endsection
 
 @section('validate_script')
 <script src="{{ asset('backend/js/intl-tel-input-13.0.0/build/js/intlTelInput.js') }}" type="text/javascript"></script>
