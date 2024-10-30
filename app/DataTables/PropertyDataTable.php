@@ -17,10 +17,10 @@ class PropertyDataTable extends DataTable
             ->addColumn('action', function ($properties) {
                 $edit = $delete = '';
                 if (Common::has_permission(\Auth::guard('admin')->user()->id, 'edit_properties')) {
-                    $edit = '<a href="' . url('admin/listing/' . $properties->id) . '/basics" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
+                    $edit = '<a href="' . url('admin/listing/' . $properties->id) . '/basics" class="btn btn-sm btn-primary m-1"><i class="fa fa-edit"></i></a>&nbsp;';
                 }
                 if (Common::has_permission(\Auth::guard('admin')->user()->id, 'delete_property')) {
-                    $delete = '<a href="' . url('admin/delete-property/' . $properties->id) . '" class="btn btn-xs btn-danger delete-warning"><i class="fa fa-trash"></i></a>';
+                    $delete = '<a href="' . url('admin/delete-property/' . $properties->id) . '" class="btn btn-sm btn-danger delete-warning m-1"><i class="fa fa-trash"></i></a>';
                 }
                 return $edit . $delete;
             })
