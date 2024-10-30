@@ -147,13 +147,89 @@ class BookingsController extends Controller
         isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
         return $dataTable->render('admin.bookings.view', $data);
     }
+
     public function create(Request $request)
     {
         $properties = Properties::all('id', 'name');
         $customers = User::where('status', 'Active')->get();
         $time_periods = TimePeriod::all();
-        return view('admin.bookings.create', compact('properties', 'customers','time_periods'));
+        return view('admin.bookings.create', compact('properties', 'customers', 'time_periods'));
     }
+
+    public function calander(Request $request, $property_id = null)
+    {
+        // Get property_id from either route parameter or query parameter
+        $id = $property_id ?? $request->property_id;
+
+        if (!$id) {
+            return redirect()->route('admin.bookings.create')->with('error', 'Property ID is required');
+        }
+
+        $year = $request->input('year', now()->year);
+        $currentYear = now()->year;
+
+        try {
+            $property = Properties::findOrFail($id);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.bookings.create')->with('error', 'Property not found');
+        }
+
+        $calendar = $this->generateCalendar($year);
+        $customers = User::where('status', 'Active')->get();
+        $time_periods = TimePeriod::all();
+        return view('admin.bookings.calander', compact('calendar', 'year', 'currentYear', 'property','customers', 'time_periods'));
+    }
+
+    private function generateCalendar($year)
+    {
+        $calendar = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $date = Carbon::createFromDate($year, $month, 1);
+            $daysInMonth = $date->daysInMonth;
+            $firstDayOfWeek = $date->copy()->firstOfMonth()->dayOfWeek;
+
+            // Adjust for Sunday as first day of week (0)
+            $firstDayOfWeek = $firstDayOfWeek === 0 ? 7 : $firstDayOfWeek;
+
+            $weeks = [];
+            $week = array_fill(1, 7, null);
+            $dayCounter = 1;
+
+            // Fill first week with empty days until first day of month
+            for ($i = $firstDayOfWeek; $i <= 7 && $dayCounter <= $daysInMonth; $i++) {
+                $week[$i] = [
+                    'day' => $dayCounter,
+                    'date' => Carbon::createFromDate($year, $month, $dayCounter)->format('Y-m-d'),
+                    'isToday' => Carbon::createFromDate($year, $month, $dayCounter)->isToday(),
+                ];
+                $dayCounter++;
+            }
+            $weeks[] = $week;
+
+            // Fill remaining weeks
+            while ($dayCounter <= $daysInMonth) {
+                $week = array_fill(1, 7, null);
+                for ($i = 1; $i <= 7 && $dayCounter <= $daysInMonth; $i++) {
+                    $week[$i] = [
+                        'day' => $dayCounter,
+                        'date' => Carbon::createFromDate($year, $month, $dayCounter)->format('Y-m-d'),
+                        'isToday' => Carbon::createFromDate($year, $month, $dayCounter)->isToday(),
+                    ];
+                    $dayCounter++;
+                }
+                $weeks[] = $week;
+            }
+
+            $calendar[$month] = [
+                'name' => $date->format('F'),
+                'weeks' => $weeks,
+            ];
+        }
+
+        return $calendar;
+    }
+
     public function getNumberofGuests($property_id)
     {
         $propety = Properties::findOrFail($property_id);
@@ -161,6 +237,7 @@ class BookingsController extends Controller
             'numberofguests' => $propety->accommodates ?? 0
         ]);
     }
+
     public function getBookingDetails($date)
     {
         $booking = Bookings::where('start_date', '<=', $date)
@@ -178,6 +255,7 @@ class BookingsController extends Controller
 
         return response()->json(null);
     }
+
     public function checkExistingPropertyBooking(Request $request)
     {
         $validated = $request->validate([
@@ -190,7 +268,7 @@ class BookingsController extends Controller
             'properties.property_dates' => function ($query) use ($validated) {
                 $query->whereBetween('date', [$validated['start_date'], $validated['end_date']]);
             },
-            'users','time_period'
+            'users', 'time_period'
         ])
             ->where('property_id', $validated['property_id'])
             ->where(function ($query) use ($validated) {
@@ -209,11 +287,11 @@ class BookingsController extends Controller
                 'property_dates' => $property_dates,
                 'user' => [
                     'user_id' => $booking->users->id,
-                    'user_name' =>  $booking->users->first_name . " " . $booking->users->last_name,
+                    'user_name' => $booking->users->first_name . " " . $booking->users->last_name,
                 ],
                 'time_period' => [
                     'time_period_id' => $booking->time_period->id,
-                    'time_period_name' =>  $booking->time_period->name,
+                    'time_period_name' => $booking->time_period->name,
                     'time_period_days' => $booking->time_period->days
                 ]
             ]);
@@ -221,6 +299,7 @@ class BookingsController extends Controller
 
         return response()->json(['exists' => false]);
     }
+
     public function store(AddAdminBookingRequest $request)
     {
         $currencyDefault = Currency::getAll()->where('default', 1)->first();
@@ -388,89 +467,11 @@ class BookingsController extends Controller
 
         return response()->json($propertyDates);
     }
-    public function edit(Request $request, $id)
-    {
-        $property_id = Bookings::findOrFail($id)->property_id;
-        $customer_id = Bookings::findOrFail($id)->user_id;
-        // $booking = Bookings::findOrFail($id);
-        // $properties = Properties::all('id', 'name');
-        // $customers = User::where('status', 'Active')->get();
-        // $maxGuests = Properties::findOrFail($booking->property_id)->accommodates;
-        // return view('admin.bookings.edit', compact('booking', 'properties', 'customers', 'maxGuests'));
-        $propertyName = Properties::findOrFail($property_id)->name;
-
-        $customerName = User::findOrFail($customer_id)->first_name . ' ' . User::findOrFail($customer_id)->last_name;
-        $numberOfGuests = Properties::findOrFail($property_id)->accommodates ?? 0;
-        $booking = Bookings::findOrFail($id);
-        $propertyDates = PropertyDates::where('property_id', $property_id)
-            ->where(function ($query) use ($booking) {
-                $query->where('date', $booking->start_date)
-                    ->orWhere('date', $booking->end_date);
-            })
-            ->get();
-
-        $status = null;
-        if ($propertyDates->isNotEmpty()) {
-            $status = $propertyDates->first()->status;
-        }
-
-        return view('admin.bookings.create', compact('property_id', 'propertyName', 'customer_id', 'customerName', 'numberOfGuests', 'booking', 'propertyDates', 'status'));
-    }
-    public function update(Request $request, $id)
-    {
-        $currencyDefault = Currency::getAll()->where('default', 1)->first();
-        $booking = Bookings::findOrFail($id);
-        $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
-        $priceData = json_decode($priceDetails);
-        $property = Properties::findOrFail($request->property_id);
-        foreach ($priceData->date_with_price as $key => $value) {
-            $allData[$key]['price'] = Common::convert_currency('', $currencyDefault->code, $value->original_price);
-            $allData[$key]['date'] = setDateForDb($value->date);
-        }
-        DB::beginTransaction();
-        try {
-            $booking->update([
-                'property_id' => $request->property_id,
-                'user_id' => $request->user_id,
-                'host_id' => $property->host_id,
-                'booking_added_by' => $request->booking_added_by ?? 1,
-                'start_date' => setDateForDb($request->checkin),
-                'end_date' => setDateForDb($request->checkout),
-                'guest' => $request->number_of_guests,
-                'total_night' => $priceData->total_nights,
-                'service_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->service_fee),
-                'host_fee' => Common::convert_currency('', $currencyDefault->code, $priceData->host_fee),
-                'iva_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->iva_tax),
-                'accomodation_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->accomodation_tax),
-                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->additional_guest),
-                'security_money' => Common::convert_currency('', $currencyDefault->code, $priceData->security_fee),
-                'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->cleaning_fee),
-                'total' => Common::convert_currency('', $currencyDefault->code, $priceData->total),
-                'base_price' => Common::convert_currency('', $currencyDefault->code, $priceData->subtotal),
-                'currency_code' => $currencyDefault->code,
-                'booking_type' => $request->booking_type,
-                'renewal_type' => $request->renewal_type ?? 'none',
-                'status' => $request->status,
-                'cancellation' => $property->cancellation,
-                'per_night' => Common::convert_currency('', $currencyDefault->code, $priceData->property_price),
-                'date_with_price' => json_encode($allData),
-                'transaction_id' => '',
-                'payment_method_id' => '',
-            ]);
-            DB::commit();
-            Common::one_time_message('success', 'Booking Updated Successfully');
-            return redirect('admin/bookings');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Common::one_time_message('error', 'Failed to update booking. Please try again.');
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
-        }
-    }
 
     /**
      * Get Distinct currency total with symbol
      *
-     * @param array $different_currency_total      Distinct currency total
+     * @param array $different_currency_total Distinct currency total
      * @return array $different_total_amounts      Distinct currency total with symbol
      */
     public function getDistinctCurrencyTotalWithSymbol($different_currency_total)
@@ -800,6 +801,7 @@ class BookingsController extends Controller
             ],
         ]);
     }
+
     public function searchFormCustomer(Request $request)
     {
         $str = $request->term;

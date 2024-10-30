@@ -146,6 +146,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('invoices/show/{id}', 'InvoiceController@show')->middleware(['permission:manage_invoices'])->name('admin.invoices.show');
     Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts'])->name('admin.payouts');
     Route::post('invoices/invoice/{id}', 'InvoiceController@getInvoiceByUserId');
+    Route::get('bookings/calander/{property_id?}', 'BookingsController@calander')->name('admin.bookings.calander');
+
 
     //Admin Payout routes
     Route::get('payouts/create', 'PayoutsController@create')->name('payouts.create');

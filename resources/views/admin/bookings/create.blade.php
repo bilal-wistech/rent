@@ -1,6 +1,6 @@
 @extends('admin.template')
 @push('css')
-    <link href="{{ asset('backend/css/setting.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('backend/css/setting.min.css') }}" rel="stylesheet" type="text/css"/>
     <style>
         .calendar-grid {
             display: grid;
@@ -140,299 +140,303 @@
                                 <div class="alert alert-warning fade in alert-dismissable">
                                     <strong>Warning!</strong> Whoops there was an error. Please verify your below
                                     information. <a class="close" href="#" data-dismiss="alert" aria-label="close"
-                                        title="close">×</a>
+                                                    title="close">×</a>
                                 </div>
                             </div>
                         @endif
                         <div id="bookingMessage" class="mt-3"></div>
 
                         <div class="box-body">
+                            <form action="{{ route('admin.bookings.calander') }}" method="get">
+                                <div class="form-group row mt-3 property_id">
+                                    <label for="property_id"
+                                           class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                        Property <span class="text-danger">*</span>
+                                    </label>
 
-                            <div class="form-group row mt-3 property_id">
-                                <label for="property_id" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                    Property <span class="text-danger">*</span>
-                                </label>
-
-                                <div class="col-sm-6">
-                                    <select class="form-control select2-ajax" name="property_id" id="property_id">
-                                        <option value="">Select a Property</option>
-                                        <option value="{{ old('property_id') }}" selected>{{ old('property_name') }}
-                                        </option>
-                                    </select>
-                                    <span class="text-danger">{{ $errors->first('property_id') }}</span>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="calendar-container">
-                            <div class="calendar-grid" id="calendarGrid"></div>
-                        </div>
-                        <div class="modal fade dis-none z-index-high" id="booking_form_modal" role="dialog">
-                            <div class="modal-dialog">
-                                <!-- Modal content-->
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title booking-modal f-18">
-                                            Add Booking</h4>
-                                        <a type="button" class="close cls-reload f-18" data-bs-dismiss="modal">×</a>
+                                    <div class="col-sm-6">
+                                        <select class="form-control select2-ajax" name="property_id" id="property_id">
+                                            <option value="">Select a Property</option>
+                                            <option value="{{ old('property_id') }}" selected>{{ old('property_name') }}
+                                            </option>
+                                        </select>
+                                        <span class="text-danger">{{ $errors->first('property_id') }}</span>
                                     </div>
-                                    <div id="addCustomerForm" style="display: none;">
-                                        <form class="form-horizontal" id="customer_form" method="post" name="customer_form"
-                                            action="{{ url('admin/add-ajax-customer') }}" accept-charset='UTF-8'>
-                                            {{ csrf_field() }}
-
-                                            <h4 class="text-info text-center ml-40">Customer Information</h4>
-                                            <input type="hidden" name="default_country" id="default_country"
-                                                class="form-control">
-                                            <input type="hidden" name="carrier_code" id="carrier_code"
-                                                class="form-control">
-                                            <input type="hidden" name="formatted_phone" id="formatted_phone"
-                                                class="form-control">
-
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">First
-                                                    Name<span class="text-danger">*</span></label>
-                                                <div class="col-sm-8">
-                                                    <input type="text" class="form-control f-14" name="first_name"
-                                                        id="first_name" placeholder="">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Last
-                                                    Name<span class="text-danger">*</span></label>
-                                                <div class="col-sm-8">
-                                                    <input type="text" class="form-control f-14" name="last_name"
-                                                        id="last_name" placeholder="">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Email<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="col-sm-8">
-                                                    <input type="text" class="form-control error f-14" name="email"
-                                                        id="email" placeholder="">
-                                                    <div id="emailError"></div>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Phone</label>
-                                                <div class="col-sm-8">
-                                                    <input type="tel" class="form-control f-14" id="phone"
-                                                        name="phone">
-                                                    <span id="phone-error" class="text-danger"></span>
-                                                    <span id="tel-error" class="text-danger"></span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="Password"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Password<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="col-sm-8">
-                                                    <input type="password" class="form-control f-14" name="password"
-                                                        id="password" placeholder="">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Status</label>
-                                                <div class="col-sm-8">
-                                                    <select class="form-control f-14" name="status" id="status">
-                                                        <option value="Active">Active</option>
-                                                        <option value="Inactive">Inactive</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer mt-2">
-                                                <button type="submit" id="customerModalBtn"
-                                                    class="btn btn-success pull-left f-14">Submit</button>
-                                                    <button type="submit" id="customerModalBtnClose"
-                                                    class="btn btn-info pull-left f-14">Close</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <form method="post" action="{{ route('admin.bookings.store') }}"
-                                        class='form-horizontal' id='booking_form'>
-                                        {{ csrf_field() }}
-                                        <div class="modal-body">
-
-                                            <p class="calendar-m-msg" id="model-message"></p>
-                                            <input type="hidden" name="booking_id" id="booking_id">
-                                            <input type="hidden" name="property_id" id="propertyId" value="">
-                                            {{-- <input type="hidden" name="user_id" id="userId" value=""> --}}
-                                            <input type="hidden" name="min_stay" value="1">
-                                            <input type="hidden" name="booking_added_by" id="booking_added_by"
-                                                value="{{ Auth::guard('admin')->id() }}">
-                                            <input type="hidden" name="booking_type" value="instant" id="booking_type">
-                                            <input type="hidden" name="status" value="pending" id="booking_status">
-                                            <div class="form-group row mt-3 user_id">
-                                                <label for="user_id"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Customer <span class="text-danger">*</span>
-                                                </label>
-
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="user_id" id="user_id">
-                                                        <option value="">Select a Customer</option>
-                                                        <option value="{{ old('user_id') }}" selected>
-                                                            {{ old('user_name') }}
-                                                        </option>
-                                                    </select>
-                                                    <span class="text-danger">{{ $errors->first('user_id') }}</span>
-                                                </div>
-                                                <div class="col-sm-1">
-                                                    <button type="button" class="btn btn-primary btn-sm"
-                                                        id="addCustomerButton">
-                                                        <span class="fa fa-user"></span>
-                                                    </button>
-
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3 renewal_type">
-                                                <label for="time_period_id"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Time Period <span class="text-danger">*</span>
-                                                </label>
-
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="time_period_id"
-                                                        id="time_period_id">
-                                                        <option value="">Select Time Period</option>
-                                                        @foreach ($time_periods as $time_period)
-                                                            <option value="{{ $time_period->id }}"
-                                                                data-days="{{ $time_period->days }}"
-                                                                {{ old('time_period_id') == $time_period->id ? 'selected' : '' }}>
-                                                                {{ $time_period->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <span class="text-danger" id="error-time_period_id">
-                                                        {{ $errors->first('time_period_id') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="input_dob"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Start Date
-                                                    <em class="text-danger">*</em>
-                                                </label>
-                                                <div class="col-sm-6">
-                                                    <input type="date" class="form-control f-14" name="start_date"
-                                                        id="start_date" placeholder="Start Date" autocomplete="off"
-                                                        value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->start_date)->format('d-m-Y') : old('start_date') }}">
-                                                    <span class="text-danger" id="error-start_date">
-                                                        {{ $errors->first('start_date') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="clear-both"></div>
-                                            <div class="form-group row mt-3">
-                                                <label for="input_dob"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    End Date
-                                                    <em class="text-danger">*</em>
-                                                </label>
-                                                <div class="col-sm-6">
-                                                    <input type="date" class="form-control f-14" name="end_date"
-                                                        id="end_date" placeholder="End Date" autocomplete="off"
-                                                        value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->end_date)->format('d-m-Y') : old('end_date') }}">
-                                                    <span class="text-danger" id="error-end_date">
-                                                        {{ $errors->first('end_date') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="clear-both"></div>
-                                            <div class="form-group row mt-3 number_of_guests">
-                                                <label for="number_of_guests"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Number of Guests <span class="text-danger">*</span>
-                                                </label>
-
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="number_of_guests"
-                                                        id="number_of_guests">
-                                                        <option value="">Select Number of Guests</option>
-                                                        <option value="{{ old('number_of_guests') }}" selected>
-                                                            {{ old('number_of_guests') }}</option>
-                                                    </select>
-                                                    <span class="text-danger"
-                                                        id="error-number_of_guests">{{ $errors->first('number_of_guests') }}</span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3 renewal_type">
-                                                <label for="renewal_type"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Renewal<span class="text-danger">*</span>
-                                                </label>
-
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="renewal_type"
-                                                        id="renewal_type">
-                                                        <option value="">Is Renewal Needed</option>
-                                                        <option value="yes"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'yes') || old('renewal_type') == 'yes' ? 'selected' : '' }}>
-                                                            Yes
-                                                        </option>
-                                                        <option value="no"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'no') || old('renewal_type') == 'no' ? 'selected' : '' }}>
-                                                            No
-                                                        </option>
-                                                    </select>
-                                                    <span class="text-danger" id="error-renewal_type">
-                                                        {{ $errors->first('renewal_type') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="input_dob"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Status <em class="text-danger">*</em>
-                                                </label>
-                                                <div class="col-sm-6">
-                                                    <select class="form-control f-14" name="property_date_status"
-                                                        id="property_date_status">
-                                                        <option value="">--Please Select--</option>
-                                                        <option value="booked not paid"
-                                                            {{ isset($status) && $status == 'booked not paid' ? 'selected' : '' }}>
-                                                            Booked Not Paid</option>
-                                                        <option value="booked paid"
-                                                            {{ isset($status) && $status == 'booked paid' ? 'selected' : '' }}>
-                                                            Booked Paid</option>
-                                                        <option value="maintainence"
-                                                            {{ isset($status) && $status == 'maintainence' ? 'selected' : '' }}>
-                                                            Maintainence</option>
-                                                    </select>
-                                                    <span class="text-danger" id="error-property_date_status">
-                                                        {{ $errors->first('property_date_status') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3 buffer-days-group">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Buffer Days<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="col-sm-6">
-                                                    <input type="number" class="form-control f-14" name="buffer_days"
-                                                        id="buffer_days" placeholder="">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="modal-footer">
-                                            <button class="btn btn-info pull-right text-white f-14" type="submit"
-                                                name="submit">Submit</button>
-                                            <button type="button" class="btn btn-default cls-reload f-14"
-                                                data-bs-dismiss="modal">Close</button>
-                                        </div>
-                                    </form>
                                 </div>
-                            </div>
+                                <button class="btn btn-info pull-right text-white f-14" type="submit"
+                                        name="submit" value="1">Show Calander
+                                </button>
+                            </form>
                         </div>
+
+                        {{--                        <div class="calendar-container">--}}
+                        {{--                            <div class="calendar-grid" id="calendarGrid"></div>--}}
+                        {{--                        </div>--}}
+                        {{--                        <div class="modal fade dis-none z-index-high" id="booking_form_modal" role="dialog">--}}
+                        {{--                            <div class="modal-dialog">--}}
+                        {{--                                <!-- Modal content-->--}}
+                        {{--                                <div class="modal-content">--}}
+                        {{--                                    <div class="modal-header">--}}
+                        {{--                                        <h4 class="modal-title booking-modal f-18">--}}
+                        {{--                                            Add Booking</h4>--}}
+                        {{--                                        <a type="button" class="close cls-reload f-18" data-bs-dismiss="modal">×</a>--}}
+                        {{--                                    </div>--}}
+                        {{--                                    <div id="addCustomerForm" style="display: none;">--}}
+                        {{--                                        <form class="form-horizontal" id="customer_form" method="post" name="customer_form"--}}
+                        {{--                                            action="{{ url('admin/add-ajax-customer') }}" accept-charset='UTF-8'>--}}
+                        {{--                                            {{ csrf_field() }}--}}
+
+                        {{--                                            <h4 class="text-info text-center ml-40">Customer Information</h4>--}}
+                        {{--                                            <input type="hidden" name="default_country" id="default_country"--}}
+                        {{--                                                class="form-control">--}}
+                        {{--                                            <input type="hidden" name="carrier_code" id="carrier_code"--}}
+                        {{--                                                class="form-control">--}}
+                        {{--                                            <input type="hidden" name="formatted_phone" id="formatted_phone"--}}
+                        {{--                                                class="form-control">--}}
+
+                        {{--                                            <div class="form-group row mt-3">--}}
+                        {{--                                                <label for="exampleInputPassword1"--}}
+                        {{--                                                    class="control-label col-sm-3 mt-2 fw-bold">First--}}
+                        {{--                                                    Name<span class="text-danger">*</span></label>--}}
+                        {{--                                                <div class="col-sm-8">--}}
+                        {{--                                                    <input type="text" class="form-control f-14" name="first_name"--}}
+                        {{--                                                        id="first_name" placeholder="">--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3">--}}
+                        {{--                                                <label for="exampleInputPassword1"--}}
+                        {{--                                                    class="control-label col-sm-3 mt-2 fw-bold">Last--}}
+                        {{--                                                    Name<span class="text-danger">*</span></label>--}}
+                        {{--                                                <div class="col-sm-8">--}}
+                        {{--                                                    <input type="text" class="form-control f-14" name="last_name"--}}
+                        {{--                                                        id="last_name" placeholder="">--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3">--}}
+                        {{--                                                <label for="exampleInputPassword1"--}}
+                        {{--                                                    class="control-label col-sm-3 mt-2 fw-bold">Email<span--}}
+                        {{--                                                        class="text-danger">*</span></label>--}}
+                        {{--                                                <div class="col-sm-8">--}}
+                        {{--                                                    <input type="text" class="form-control error f-14" name="email"--}}
+                        {{--                                                        id="email" placeholder="">--}}
+                        {{--                                                    <div id="emailError"></div>--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3">--}}
+                        {{--                                                <label for="exampleInputPassword1"--}}
+                        {{--                                                    class="control-label col-sm-3 mt-2 fw-bold">Phone</label>--}}
+                        {{--                                                <div class="col-sm-8">--}}
+                        {{--                                                    <input type="tel" class="form-control f-14" id="phone"--}}
+                        {{--                                                        name="phone">--}}
+                        {{--                                                    <span id="phone-error" class="text-danger"></span>--}}
+                        {{--                                                    <span id="tel-error" class="text-danger"></span>--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3">--}}
+                        {{--                                                <label for="Password"--}}
+                        {{--                                                    class="control-label col-sm-3 mt-2 fw-bold">Password<span--}}
+                        {{--                                                        class="text-danger">*</span></label>--}}
+                        {{--                                                <div class="col-sm-8">--}}
+                        {{--                                                    <input type="password" class="form-control f-14" name="password"--}}
+                        {{--                                                        id="password" placeholder="">--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3">--}}
+                        {{--                                                <label for="exampleInputPassword1"--}}
+                        {{--                                                    class="control-label col-sm-3 mt-2 fw-bold">Status</label>--}}
+                        {{--                                                <div class="col-sm-8">--}}
+                        {{--                                                    <select class="form-control f-14" name="status" id="status">--}}
+                        {{--                                                        <option value="Active">Active</option>--}}
+                        {{--                                                        <option value="Inactive">Inactive</option>--}}
+                        {{--                                                    </select>--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="modal-footer mt-2">--}}
+                        {{--                                                <button type="submit" id="customerModalBtn"--}}
+                        {{--                                                    class="btn btn-success pull-left f-14">Submit</button>--}}
+                        {{--                                                    <button type="submit" id="customerModalBtnClose"--}}
+                        {{--                                                    class="btn btn-info pull-left f-14">Close</button>--}}
+                        {{--                                            </div>--}}
+                        {{--                                        </form>--}}
+                        {{--                                    </div>--}}
+                        {{--                                    <form method="post" action="{{ route('admin.bookings.store') }}"--}}
+                        {{--                                        class='form-horizontal' id='booking_form'>--}}
+                        {{--                                        {{ csrf_field() }}--}}
+                        {{--                                        <div class="modal-body">--}}
+
+                        {{--                                            <p class="calendar-m-msg" id="model-message"></p>--}}
+                        {{--                                            <input type="hidden" name="booking_id" id="booking_id">--}}
+                        {{--                                            <input type="hidden" name="property_id" id="propertyId" value="">--}}
+                        {{--                                            --}}{{-- <input type="hidden" name="user_id" id="userId" value=""> --}}
+                        {{--                                            <input type="hidden" name="min_stay" value="1">--}}
+                        {{--                                            <input type="hidden" name="booking_added_by" id="booking_added_by"--}}
+                        {{--                                                value="{{ Auth::guard('admin')->id() }}">--}}
+                        {{--                                            <input type="hidden" name="booking_type" value="instant" id="booking_type">--}}
+                        {{--                                            <input type="hidden" name="status" value="pending" id="booking_status">--}}
+                        {{--                                            <div class="form-group row mt-3 user_id">--}}
+                        {{--                                                <label for="user_id"--}}
+                        {{--                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">--}}
+                        {{--                                                    Customer <span class="text-danger">*</span>--}}
+                        {{--                                                </label>--}}
+
+                        {{--                                                <div class="col-sm-6">--}}
+                        {{--                                                    <select class="form-control select2" name="user_id" id="user_id">--}}
+                        {{--                                                        <option value="">Select a Customer</option>--}}
+                        {{--                                                        <option value="{{ old('user_id') }}" selected>--}}
+                        {{--                                                            {{ old('user_name') }}--}}
+                        {{--                                                        </option>--}}
+                        {{--                                                    </select>--}}
+                        {{--                                                    <span class="text-danger">{{ $errors->first('user_id') }}</span>--}}
+                        {{--                                                </div>--}}
+                        {{--                                                <div class="col-sm-1">--}}
+                        {{--                                                    <button type="button" class="btn btn-primary btn-sm"--}}
+                        {{--                                                        id="addCustomerButton">--}}
+                        {{--                                                        <span class="fa fa-user"></span>--}}
+                        {{--                                                    </button>--}}
+
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3 renewal_type">--}}
+                        {{--                                                <label for="time_period_id"--}}
+                        {{--                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">--}}
+                        {{--                                                    Time Period <span class="text-danger">*</span>--}}
+                        {{--                                                </label>--}}
+
+                        {{--                                                <div class="col-sm-6">--}}
+                        {{--                                                    <select class="form-control select2" name="time_period_id"--}}
+                        {{--                                                        id="time_period_id">--}}
+                        {{--                                                        <option value="">Select Time Period</option>--}}
+                        {{--                                                        @foreach ($time_periods as $time_period)--}}
+                        {{--                                                            <option value="{{ $time_period->id }}"--}}
+                        {{--                                                                data-days="{{ $time_period->days }}"--}}
+                        {{--                                                                {{ old('time_period_id') == $time_period->id ? 'selected' : '' }}>--}}
+                        {{--                                                                {{ $time_period->name }}--}}
+                        {{--                                                            </option>--}}
+                        {{--                                                        @endforeach--}}
+                        {{--                                                    </select>--}}
+                        {{--                                                    <span class="text-danger" id="error-time_period_id">--}}
+                        {{--                                                        {{ $errors->first('time_period_id') }}--}}
+                        {{--                                                    </span>--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3">--}}
+                        {{--                                                <label for="input_dob"--}}
+                        {{--                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">--}}
+                        {{--                                                    Start Date--}}
+                        {{--                                                    <em class="text-danger">*</em>--}}
+                        {{--                                                </label>--}}
+                        {{--                                                <div class="col-sm-6">--}}
+                        {{--                                                    <input type="date" class="form-control f-14" name="start_date"--}}
+                        {{--                                                        id="start_date" placeholder="Start Date" autocomplete="off"--}}
+                        {{--                                                        value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->start_date)->format('d-m-Y') : old('start_date') }}">--}}
+                        {{--                                                    <span class="text-danger" id="error-start_date">--}}
+                        {{--                                                        {{ $errors->first('start_date') }}--}}
+                        {{--                                                    </span>--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="clear-both"></div>--}}
+                        {{--                                            <div class="form-group row mt-3">--}}
+                        {{--                                                <label for="input_dob"--}}
+                        {{--                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">--}}
+                        {{--                                                    End Date--}}
+                        {{--                                                    <em class="text-danger">*</em>--}}
+                        {{--                                                </label>--}}
+                        {{--                                                <div class="col-sm-6">--}}
+                        {{--                                                    <input type="date" class="form-control f-14" name="end_date"--}}
+                        {{--                                                        id="end_date" placeholder="End Date" autocomplete="off"--}}
+                        {{--                                                        value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->end_date)->format('d-m-Y') : old('end_date') }}">--}}
+                        {{--                                                    <span class="text-danger" id="error-end_date">--}}
+                        {{--                                                        {{ $errors->first('end_date') }}--}}
+                        {{--                                                    </span>--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="clear-both"></div>--}}
+                        {{--                                            <div class="form-group row mt-3 number_of_guests">--}}
+                        {{--                                                <label for="number_of_guests"--}}
+                        {{--                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">--}}
+                        {{--                                                    Number of Guests <span class="text-danger">*</span>--}}
+                        {{--                                                </label>--}}
+
+                        {{--                                                <div class="col-sm-6">--}}
+                        {{--                                                    <select class="form-control select2" name="number_of_guests"--}}
+                        {{--                                                        id="number_of_guests">--}}
+                        {{--                                                        <option value="">Select Number of Guests</option>--}}
+                        {{--                                                        <option value="{{ old('number_of_guests') }}" selected>--}}
+                        {{--                                                            {{ old('number_of_guests') }}</option>--}}
+                        {{--                                                    </select>--}}
+                        {{--                                                    <span class="text-danger"--}}
+                        {{--                                                        id="error-number_of_guests">{{ $errors->first('number_of_guests') }}</span>--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3 renewal_type">--}}
+                        {{--                                                <label for="renewal_type"--}}
+                        {{--                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">--}}
+                        {{--                                                    Renewal<span class="text-danger">*</span>--}}
+                        {{--                                                </label>--}}
+
+                        {{--                                                <div class="col-sm-6">--}}
+                        {{--                                                    <select class="form-control select2" name="renewal_type"--}}
+                        {{--                                                        id="renewal_type">--}}
+                        {{--                                                        <option value="">Is Renewal Needed</option>--}}
+                        {{--                                                        <option value="yes"--}}
+                        {{--                                                            {{ (isset($booking) && $booking->renewal_type == 'yes') || old('renewal_type') == 'yes' ? 'selected' : '' }}>--}}
+                        {{--                                                            Yes--}}
+                        {{--                                                        </option>--}}
+                        {{--                                                        <option value="no"--}}
+                        {{--                                                            {{ (isset($booking) && $booking->renewal_type == 'no') || old('renewal_type') == 'no' ? 'selected' : '' }}>--}}
+                        {{--                                                            No--}}
+                        {{--                                                        </option>--}}
+                        {{--                                                    </select>--}}
+                        {{--                                                    <span class="text-danger" id="error-renewal_type">--}}
+                        {{--                                                        {{ $errors->first('renewal_type') }}--}}
+                        {{--                                                    </span>--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3">--}}
+                        {{--                                                <label for="input_dob"--}}
+                        {{--                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">--}}
+                        {{--                                                    Status <em class="text-danger">*</em>--}}
+                        {{--                                                </label>--}}
+                        {{--                                                <div class="col-sm-6">--}}
+                        {{--                                                    <select class="form-control f-14" name="property_date_status"--}}
+                        {{--                                                        id="property_date_status">--}}
+                        {{--                                                        <option value="">--Please Select--</option>--}}
+                        {{--                                                        <option value="booked not paid"--}}
+                        {{--                                                            {{ isset($status) && $status == 'booked not paid' ? 'selected' : '' }}>--}}
+                        {{--                                                            Booked Not Paid</option>--}}
+                        {{--                                                        <option value="booked paid"--}}
+                        {{--                                                            {{ isset($status) && $status == 'booked paid' ? 'selected' : '' }}>--}}
+                        {{--                                                            Booked Paid</option>--}}
+                        {{--                                                        <option value="maintainence"--}}
+                        {{--                                                            {{ isset($status) && $status == 'maintainence' ? 'selected' : '' }}>--}}
+                        {{--                                                            Maintainence</option>--}}
+                        {{--                                                    </select>--}}
+                        {{--                                                    <span class="text-danger" id="error-property_date_status">--}}
+                        {{--                                                        {{ $errors->first('property_date_status') }}--}}
+                        {{--                                                    </span>--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                            <div class="form-group row mt-3 buffer-days-group">--}}
+                        {{--                                                <label for="exampleInputPassword1"--}}
+                        {{--                                                    class="control-label col-sm-3 mt-2 fw-bold">Buffer Days<span--}}
+                        {{--                                                        class="text-danger">*</span></label>--}}
+                        {{--                                                <div class="col-sm-6">--}}
+                        {{--                                                    <input type="number" class="form-control f-14" name="buffer_days"--}}
+                        {{--                                                        id="buffer_days" placeholder="">--}}
+                        {{--                                                </div>--}}
+                        {{--                                            </div>--}}
+                        {{--                                        </div>--}}
+
+                        {{--                                        <div class="modal-footer">--}}
+                        {{--                                            <button class="btn btn-info pull-right text-white f-14" type="submit"--}}
+                        {{--                                                name="submit">Submit</button>--}}
+                        {{--                                            <button type="button" class="btn btn-default cls-reload f-14"--}}
+                        {{--                                                data-bs-dismiss="modal">Close</button>--}}
+                        {{--                                        </div>--}}
+                        {{--                                    </form>--}}
+                        {{--                                </div>--}}
+                        {{--                            </div>--}}
+                        {{--                        </div>--}}
                     </div>
                 </div>
         </section>
@@ -442,7 +446,8 @@
 @section('validate_script')
     <script type="text/javascript" src="{{ asset('backend/dist/js/validate.min.js') }}"></script>
     <script src="{{ asset('backend/js/admin-date-range-picker.min.js') }}"></script>
-    <script src="{{ asset('backend/js/intl-tel-input-13.0.0/build/js/intlTelInput.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('backend/js/intl-tel-input-13.0.0/build/js/intlTelInput.js') }}"
+            type="text/javascript"></script>
     <script src="{{ asset('backend/js/isValidPhoneNumber.js') }}" type="text/javascript"></script>
     <script type="text/javascript">
         let validEmailText = "Please enter a valid email address.";
@@ -458,7 +463,7 @@
     <script src="{{ asset('backend/js/add_customer_for_properties.js') }}" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             let calendar;
             let propertyDates = {};
             let isSelectingStartDate = true;
@@ -469,13 +474,13 @@
                     url: '{{ route('admin.bookings.form_property_search') }}',
                     dataType: 'json',
                     delay: 250,
-                    data: function(params) {
+                    data: function (params) {
                         return {
                             term: params.term || null,
                             page: params.page || 1
                         };
                     },
-                    processResults: function(data, params) {
+                    processResults: function (data, params) {
                         params.page = params.page || 1;
                         return {
                             results: data.results,
@@ -488,7 +493,7 @@
                 },
                 placeholder: 'Select a Property',
                 minimumInputLength: 0,
-            }).on('select2:select', function(e) {
+            }).on('select2:select', function (e) {
                 $('#propertyId').val(e.params.data.id);
                 updateNumberOfGuests(e.params.data.id);
                 getPropertyDates(e.params.data.id);
@@ -500,13 +505,13 @@
                     url: '{{ route('admin.bookings.form_customer_search') }}',
                     dataType: 'json',
                     delay: 250,
-                    data: function(params) {
+                    data: function (params) {
                         return {
                             term: params.term || null,
                             page: params.page || 1
                         };
                     },
-                    processResults: function(data, params) {
+                    processResults: function (data, params) {
                         params.page = params.page || 1;
                         return {
                             results: data.results,
@@ -520,7 +525,7 @@
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
             });
-            $('#time_period_id').on('change', function() {
+            $('#time_period_id').on('change', function () {
                 const selectedOption = $(this).find('option:selected');
                 const daysToAdd = parseInt(selectedOption.data('days'));
                 const startDateValue = $('#start_date').val();
@@ -547,14 +552,14 @@
                         url: 'get-number-of-guests/' + propertyId,
                         type: 'GET',
                         dataType: 'json',
-                        success: function(response) {
+                        success: function (response) {
                             let maxGuests = response.numberofguests;
                             for (let i = 1; i <= maxGuests; i++) {
                                 $('#number_of_guests').append('<option value="' + i + '">' + i +
                                     '</option>');
                             }
                         },
-                        error: function(xhr, status, error) {
+                        error: function (xhr, status, error) {
                             console.log(error);
                         }
                     });
@@ -566,7 +571,7 @@
                     url: 'get-property-dates/' + propertyId,
                     type: 'GET',
                     dataType: 'json',
-                    success: function(response) {
+                    success: function (response) {
                         propertyDates = response;
                         checkSelections();
                     }
@@ -642,7 +647,7 @@
                     }
 
                     // All dates are clickable
-                    dayDiv.click(function() {
+                    dayDiv.click(function () {
                         const propertyId = $('#property_id').val();
                         const userId = $('#user_id').val();
                         handleDateClick(propertyId, userId, dateString);
@@ -681,7 +686,7 @@
                             end_date: endDate,
                             _token: '{{ csrf_token() }}'
                         },
-                        success: function(response) {
+                        success: function (response) {
                             $('#booking_form_modal').modal('show');
                             if (response.exists) {
                                 // console.log(response.booking);
@@ -728,7 +733,7 @@
                                 $('#buffer_days').val('');
                             }
                         },
-                        error: function(xhr, status, error) {
+                        error: function (xhr, status, error) {
                             console.log(error);
                         }
                     });
@@ -745,7 +750,7 @@
                 const startDate = moment($('#start_date').val());
                 const endDate = moment($('#end_date').val());
 
-                $('.calendar-day').each(function() {
+                $('.calendar-day').each(function () {
                     const date = moment($(this).data('date'));
                     if (date.isSame(startDate, 'day') || date.isSame(endDate, 'day')) {
                         $(this).addClass('selected');
@@ -761,7 +766,7 @@
                 updateCalendarSelection();
             }
 
-            $('#start_date, #end_date').on('change', function() {
+            $('#start_date, #end_date').on('change', function () {
                 updateCalendarSelection();
             });
 
@@ -817,13 +822,13 @@
                         required: "Please select a Property Status"
                     }
                 },
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.appendTo(element.closest('.col-sm-6'));
                 }
             });
 
             // Custom validation method for end date
-            $.validator.addMethod("dateGreaterThan", function(value, element, param) {
+            $.validator.addMethod("dateGreaterThan", function (value, element, param) {
                 var startDate = new Date($(param).val());
                 startDate.setHours(0, 0, 0, 0);
 
@@ -832,7 +837,7 @@
 
                 return this.optional(element) || endDate > startDate;
             }, "End date must be after the start date");
-            $('#booking_form').on('submit', function(e) {
+            $('#booking_form').on('submit', function (e) {
                 e.preventDefault();
 
                 if (!$(this).valid()) {
@@ -852,7 +857,7 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             // Show success message
                             Swal.fire({
@@ -884,7 +889,7 @@
                             });
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         // Handle validation errors
                         if (xhr.status === 422) {
                             const errors = xhr.responseJSON.errors;
@@ -911,7 +916,7 @@
                             });
                         }
                     },
-                    complete: function() {
+                    complete: function () {
                         // Re-enable submit button
                         submitBtn.prop('disabled', false);
                     }
@@ -923,7 +928,7 @@
                 const start = moment(startDate);
                 const end = moment(endDate);
 
-                $('.calendar-day').each(function() {
+                $('.calendar-day').each(function () {
                     const date = moment($(this).data('date'));
 
                     if (date.isBetween(start, end, 'day', '[]')) {
@@ -958,7 +963,7 @@
             toggleBufferDays();
 
             // Add event listener for renewal_type change
-            $('#renewal_type').on('change', function() {
+            $('#renewal_type').on('change', function () {
                 toggleBufferDays();
             });
         });
