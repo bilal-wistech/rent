@@ -491,10 +491,8 @@ class PropertiesController extends Controller
                 $properties->status = ($properties->steps_completed == 0) ? 'Listed' : 'Unlisted';
                 $properties->save();
 
-                return redirect('admin/listing/' . $property_id . '/calender');
+                return redirect('admin/properties')->with('success' , 'Property has been listed' );
             }
-        } elseif ($step == 'calender') {
-            $data['calendar'] = $calendar->generate($request->id);
         }
 
         return view("admin.listing.$step", $data);
