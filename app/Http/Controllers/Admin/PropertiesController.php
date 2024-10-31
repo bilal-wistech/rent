@@ -44,7 +44,8 @@ use App\Models\{
     Settings,
     Bookings,
     Currency,
-    City
+    City,
+    PricingType,
 };
 
 class PropertiesController extends Controller
@@ -64,6 +65,8 @@ class PropertiesController extends Controller
             $data['allPropertyType'] = '';
             return $dataTable->render('admin.properties.view', $data);
         }
+
+
         isset(request()->status) ? $data['allstatus'] = $allstatus = request()->status : $data['allstatus'] = $allstatus = '';
         isset(request()->property_type) ? $data['allPropertyType'] = request()->property_type : $data['allPropertyType'] = '';
         return $dataTable->render('admin.properties.view', $data);
@@ -144,10 +147,11 @@ class PropertiesController extends Controller
                 $property_address->building = $request->building;
                 $property_address->flat_no = $request->flat_no;
                 $property_address->save();
-
+                
                 $property_price = new PropertyPrice;
                 $property_price->property_id = $property->id;
                 $property_price->currency_code = \Session::get('currency');
+                $property_price->property_type_id = 1;
                 $property_price->save();
 
                 $property_steps = new PropertySteps;
@@ -434,49 +438,78 @@ class PropertiesController extends Controller
                 ->orderBy('serial', 'asc')
                 ->get();
         } elseif ($step == 'pricing') {
-
             if ($request->isMethod('post')) {
+                // Check for existing bookings with a different currency
+                $bookings = Bookings::where('property_id', $property_id)
+                    ->where('currency_code', '!=', $request->currency_code)
+                    ->first();
 
-
-                $bookings = Bookings::where('property_id', $property_id)->where('currency_code', '!=', $request->currency_code)->first();
                 if ($bookings) {
                     Common::one_time_message('error', __('Booking has been made using the current currency. It cannot be changed now'));
                     return redirect()->back();
                 }
-                $rules = array(
-                    'price' => 'required|numeric|min:5',
-                );
 
-                $fieldNames = array(
-                    'price' => 'Price',
-                );
+                $rules = [
+                    'prices' => 'required|array',
+                    'pricing_type' => 'required|array', // Ensure pricing_type is also required
+                ];
 
+                $fieldNames = [
+                    'prices' => 'Price',
+                    'pricing_type' => 'Pricing Type',
+                ];
+
+                // Validate the request
                 $validator = Validator::make($request->all(), $rules);
                 $validator->setAttributeNames($fieldNames);
 
                 if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
                 } else {
-                    $property_price = PropertyPrice::where('property_id', $property_id)->first();
-                    $property_price->price = $request->price;
-                    $property_price->weekly_discount = $request->weekly_discount;
-                    $property_price->monthly_discount = $request->monthly_discount;
-                    $property_price->currency_code = $request->currency_code;
-                    $property_price->cleaning_fee = $request->cleaning_fee;
-                    $property_price->guest_fee = $request->guest_fee;
-                    $property_price->guest_after = $request->guest_after;
-                    $property_price->security_fee = $request->security_fee;
-                    $property_price->weekend_price = $request->weekend_price;
-                    $property_price->save();
+                    // Initialize arrays to avoid null errors
+                    $prices = $request->input('prices', []);
+                    $pricingTypes = $request->input('pricing_type', []);
 
+                    // Ensure both arrays are valid
+                    if (!is_array($prices) || !is_array($pricingTypes)) {
+                        return back()->with('error', __('Invalid data provided.'));
+                    }
+
+                    // Iterate through the price array
+                    foreach ($prices as $index => $price) {
+                        $property_type_id = $pricingTypes[$index]; // Get the corresponding property type ID
+
+                        // Use updateOrCreate to either update an existing record or create a new one
+                        PropertyPrice::updateOrCreate(
+                            [
+                                'property_id' => $property_id,
+                                'property_type_id' => $property_type_id,
+                            ],
+                            [
+                                'price' => $price,
+                                'weekly_discount' => $request->weekly_discount ?? 0, // Default to 0 if null
+                                'monthly_discount' => $request->monthly_discount ?? 0, // Default to 0 if null
+                                'currency_code' => $request->currency_code,
+                                'cleaning_fee' => $request->cleaning_fee ?? 0, // Default to 0 if null
+                                'guest_fee' => $request->guest_fee ?? 0, // Default to 0 if null
+                                'guest_after' => $request->guest_after ?? 0, // Default to 0 if null
+                                'security_fee' => $request->security_fee ?? 0, // Default to 0 if null
+                                'weekend_price' => $request->weekend_price ?? 0, // Default to 0 if null
+                            ]
+                        );
+                    }
+
+                    // Update the PropertySteps model after processing all prices
                     $property_steps = PropertySteps::where('property_id', $property_id)->first();
-                    $property_steps->pricing = 1;
-                    $property_steps->save();
+                    if ($property_steps) {
+                        $property_steps->pricing = 1;
+                        $property_steps->save();
+                    }
 
-                    return redirect('admin/listing/' . $property_id . '/booking');
+                    // Redirect to the booking page
+                    return redirect('admin/listing/' . $property_id . '/booking')->with('success', __('Pricing updated successfully.'));
                 }
             }
-
 
 
         } elseif ($step == 'booking') {
@@ -491,11 +524,14 @@ class PropertiesController extends Controller
                 $properties->status = ($properties->steps_completed == 0) ? 'Listed' : 'Unlisted';
                 $properties->save();
 
-                return redirect('admin/properties')->with('success' , 'Property has been listed' );
+                return redirect('admin/properties')->with('success', 'Property has been listed');
             }
         }
 
-        return view("admin.listing.$step", $data);
+        $pricing_types = PricingType::all();
+        $propertyPricing = PropertyPrice::where('property_id', $property_id)->get();
+        return view("admin.listing.$step", array_merge($data, compact('pricing_types', 'propertyPricing')));
+
     }
 
     public function update(Request $request)
