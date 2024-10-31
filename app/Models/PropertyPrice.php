@@ -21,14 +21,38 @@ namespace App\Models;
 use App\Models\PropertyDates;
 use Illuminate\Database\Eloquent\Model;
 use Session;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PropertyPrice extends Model
 {
-    protected $table   = 'property_price';
-    public $timestamps = false;
-    private $dateResult ;
+    use HasFactory;
+    protected $fillable = [
+        'property_id',           // Allow mass assignment for property_id
+        'property_type_id',     // Other fields
+        'price',
+        'weekly_discount',
+        'monthly_discount',
+        'currency_code',
+        'cleaning_fee',
+        'guest_fee',
+        'guest_after',
+        'security_fee',
+        'weekend_price',
+    ];
 
-    protected $appends = [ 'original_cleaning_fee', 'original_guest_fee', 'original_price', 'original_weekend_price', 'original_security_fee', 'default_code', 'default_symbol'];
+
+
+    protected $table = 'property_price';
+    public $timestamps = false;
+    private $dateResult;
+
+    protected $appends = ['original_cleaning_fee', 'original_guest_fee', 'original_price', 'original_weekend_price', 'original_security_fee', 'default_code', 'default_symbol'];
+
+    public function pricingType()
+    {
+        return $this->belongsTo(PricingType::class, 'property_type_id');
+    }
+
 
     public function properties()
     {
@@ -100,9 +124,8 @@ class PropertyPrice extends Model
         return $this->currency_convert('weekend_price');
     }
     public function getPropertydates($date)
-
     {
-        $this->dateResult = PropertyDates::where('property_id',$this->attributes['property_id'])->where('date',$date)->first();
+        $this->dateResult = PropertyDates::where('property_id', $this->attributes['property_id'])->where('date', $date)->first();
 
     }
 
@@ -138,7 +161,7 @@ class PropertyPrice extends Model
 
     public function currency_convert($field)
     {
-        $rate = Currency::getAll()->firstWhere('code',$this->attributes['currency_code'])->rate;
+        $rate = Currency::getAll()->firstWhere('code', $this->attributes['currency_code'])->rate;
         if ($rate == 0) {
             return 0;
         }
@@ -147,9 +170,9 @@ class PropertyPrice extends Model
 
         $default_currency = Currency::getAll()->firstWhere('default', 1)->code;
 
-        $session_rate = Currency::getAll()->firstWhere('code',(\Session::get('currency')) ? \Session::get('currency') : $default_currency)->rate;
+        $session_rate = Currency::getAll()->firstWhere('code', (\Session::get('currency')) ? \Session::get('currency') : $default_currency)->rate;
 
-        return round($unit * $session_rate,2);
+        return round($unit * $session_rate, 2);
     }
 
     public function getDefaultCodeAttribute()
@@ -164,7 +187,8 @@ class PropertyPrice extends Model
     public function getDefaultSymbolAttribute()
     {
         if (Session::get('currency')) {
-            return Currency::getAll()->firstWhere('code', Session::get('currency'))->symbol;;
+            return Currency::getAll()->firstWhere('code', Session::get('currency'))->symbol;
+            ;
         } else {
             return Currency::getAll()->firstWhere('default', 1)->symbol;
         }
