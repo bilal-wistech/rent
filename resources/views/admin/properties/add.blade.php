@@ -9,8 +9,13 @@
                     List Your Space
                     <small>List Your Space</small>
                 </h3>
-                <ol class="breadcrumb mb-4 ml-4">
-                    <li><a href="{{ url('admin/dashboard') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+                <ol class="breadcrumb float-end mb-4 mr-5"
+                    style="font-size: 1rem; padding: 0.5rem 1rem;  border-radius: 0.25rem; margin: 0 ; background-color : transparent;">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url('admin/dashboard') }}" class="text-dark">
+                            <i class="fa fa-dashboard pr-1"></i> Home
+                        </a>
+                    </li>
                 </ol>
             </section>
 
