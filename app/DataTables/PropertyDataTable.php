@@ -59,7 +59,7 @@ class PropertyDataTable extends DataTable
         $status     = isset(request()->status) ? request()->status : null;
         $from = isset(request()->from) ? setDateForDb(request()->from) : null;
         $to = isset(request()->to) ? setDateForDb(request()->to) : null;
-        $space_type = isset(request()->space_type) ? request()->space_type : null;
+        $property_type = isset(request()->property_type) ? request()->property_type : null;
 
         $query = Properties::with(['users:id,first_name,profile_image']);
         if (isset($user_id)) {
@@ -76,8 +76,8 @@ class PropertyDataTable extends DataTable
         if ($status) {
             $query->where('status', '=', $status);
         }
-        if ($space_type) {
-            $query->where('space_type', '=', $space_type);
+        if ($property_type) {
+            $query->where('property_type', '=', $property_type);
         }
         return $this->applyScopes($query);
     }
@@ -88,7 +88,7 @@ class PropertyDataTable extends DataTable
             ->addColumn(['data' => 'id', 'name' => 'properties.id', 'title' => 'Id'])
             ->addColumn(['data' => 'name', 'name' => 'properties.name', 'title' => 'Name'])
             ->addColumn(['data' => 'host_name', 'name' => 'users.first_name', 'title' => 'Host Name'])
-            ->addColumn(['data' => 'space_type_name', 'name' => 'space_type', 'title' => 'Space Type'])
+            ->addColumn(['data' => 'property_type_name', 'name' => 'property_type', 'title' => 'Property Type'])
             ->addColumn(['data' => 'status', 'name' => 'status', 'title' => 'Status'])
             ->addColumn(['data' => 'recomended', 'name' => 'recomended', 'title' => 'Recomended'])
             ->addColumn(['data' => 'verified', 'name' => 'verified', 'title' => 'Verified'])
