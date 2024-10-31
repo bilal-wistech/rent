@@ -54773,3 +54773,20 @@ body {
         color: #fff !important;
     }
 }
+.custom-nav{
+    
+    display: flex;
+    gap: 2rem;
+}
+.custom-nav li a{
+    font-size:13px;
+    color: black;
+
+}
+.custom-nav li.active{
+border-bottom: 0.2rem solid blue;
+border-top: 0.2rem solid blue;
+}
+.custom-nav li{
+    padding: 12px 0px;
+}

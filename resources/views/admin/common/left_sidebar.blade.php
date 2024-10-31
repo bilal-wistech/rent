@@ -43,31 +43,7 @@
                 <div class="menu menu-column menu-rounded menu-sub-indention fw-semibold fs-6" id="#kt_app_sidebar_menu"
                     data-kt-menu="true" data-kt-menu-expand="false">
 
-                    <!-- <div data-kt-menu-trigger="click" class="menu-item here show menu-accordion">
-                        <span class="menu-link">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-element-11 fs-2">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                    <span class="path3"></span>
-                                    <span class="path4"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">Dashboards</span>
-                            <span class="menu-arrow"></span>
-                        </span>
 
-                        <div class="menu-sub menu-sub-accordion">
-                            <div class="menu-item">
-                                <a class="menu-link active" href="{{ asset('admin/dashboard') }}">
-                                    <span class="menu-bullet">
-                                        <span class="bullet bullet-dot"></span>
-                                    </span>
-                                    <span class="menu-title">Default</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div> -->
 
                     <div class="menu-item {{ request()->is('admin/dashboard') ? 'active' : '' }}">
                         <!--begin:Menu link-->
@@ -95,20 +71,20 @@
 
                         <!--begin:Menu item-->
                         @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'customers'))
-                            <div class="menu-item {{ request()->is('admin/customers') ? 'active' : '' }}">
-                                <!--begin:Menu link-->
-                                <a class="menu-link" href="{{ url('admin/customers') }}">
-                                    <span class="menu-icon">
-                                        <i class="fa-solid fa-users">
-                                            <span class="path1"></span>
-                                            <span class="path2"></span>
-                                        </i>
-                                    </span>
-                                    <span class="menu-title">Customers</span>
-                                </a>
-                                <!--end:Menu link-->
-                            </div>
-                        @endif
+                        <div class="menu-item {{ request()->is('admin/customers') ? 'active' : '' }}">
+                            <!--begin:Menu link-->
+                            <a class="menu-link" href="{{ url('admin/customers') }}">
+                                <span class="menu-icon">
+                                    <i class="fa fa-home">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </span>
+                                <span class="menu-title">Customers</span>
+                            </a>
+                            <!--end:Menu link-->
+                        </div>
+                    @endif
 
 
                         @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'properties'))

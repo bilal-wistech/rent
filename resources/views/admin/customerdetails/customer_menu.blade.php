@@ -1,7 +1,7 @@
 <div class="box">
 	<div class="panel-body">
 		<div class="nav-tabs-custom">
-			<ul class="cus nav nav-tabs f-14" role="tablist">
+			<ul class="custom-nav nav nav-tabs f-20 ml-4" role="tablist">
 				<li  class="{{ isset($customer_edit_tab) ? $customer_edit_tab : '' }}">
 					<a href='{{ url("admin/edit-customer/" . $user?->id) }}' >Edit Customer</a>
 				</li>

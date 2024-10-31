@@ -16,6 +16,7 @@ a {
 .profile-parent .dropdown-toggle::after{
     display: none;
 }
+
 .f-12{
     font-size: 12px;
 }

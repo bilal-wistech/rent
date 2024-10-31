@@ -112,7 +112,7 @@ class CustomerController extends Controller
 
     public function add(Request $request, EmailController $email_controller)
     {
-        //
+
         if (! $request->isMethod('post')) {
             return view('admin.customers.add');
         } elseif ($request->isMethod('post')) {
@@ -150,35 +150,24 @@ class CustomerController extends Controller
                 $user->carrier_code    = isset($request->carrier_code) ? $request->carrier_code : NULL;
                 $user->formatted_phone = isset($request->formatted_phone) ? $request->formatted_phone : NULL;
                 $user->save();
-                // dd($user);
+               // dd($user);
 
                 $user_verification           = new UsersVerification;
                 $user_verification->user_id  =   $user->id;
                 $user_verification->save();
-                //dd($user);
+               // dd($user);
                 $this->wallet($user->id);
 
 
-                // $errorMessage = '';
-                // try {
 
-                //     $email_controller->welcome_email($user);
-
-                // } catch (\Exception $e) {
-
-                //     $errorMessage = ' Email was not sent due to '.$e->getMessage();
-
-                // }
-
-              //  Common::one_time_message('success', 'Added Successfully.'.''./* $errorMessage */);
-            // return $user;
-            //Storing document
                 try {
+
                     $request->validate([
-                        'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Validate image file type and size
+                        'image' => 'required|image|mimes:jpeg,png,jpg', // Validate image file type and size
                         'expire' => 'required|date',
-                        'type' => 'required|string|max:255',
+                        'type' => 'required',
                     ]);
+
                     if ($request->hasFile('image')) {
                         $image = $request->file('image');
                         $filename = time() . '.' . $image->getClientOriginalExtension();
