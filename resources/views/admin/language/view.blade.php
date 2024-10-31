@@ -8,12 +8,11 @@
 				<div id="kt_app_content_container" class="app-container container-fluid">
 					<section class="content">
 						<div class="row">
-							<div class="col-lg-2 col-12 settings_bar_gap">
+							<div class="col-lg-3 col-12 settings_bar_gap">
 								@include('admin.common.settings_bar')
 							</div>
 
 							<div class="col-lg-9 col-12">
-
 								<div class="card">
 									<div class="card-header align-items-center d-flex">
 										<h4 class="card-title type_info_header">Language</h4>

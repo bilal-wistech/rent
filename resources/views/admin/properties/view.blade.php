@@ -58,12 +58,12 @@
                           <select class="form-control" name="space_type" id="space_type">
                             <option value="">All</option>
                             @if ($space_type_all)
-                @foreach($space_type_all as $data)
-          <option value="{{ $data->id }}" {{ $data->id == $allSpaceType ? "selected" : '' }}>
-            {{ $data->name }}
-          </option>
-        @endforeach
-              @endif
+                                @foreach($space_type_all as $data)
+                          <option value="{{ $data->id }}" {{ $data->id == $allSpaceType ? "selected" : '' }}>
+                            {{ $data->name }}
+                          </option>
+                        @endforeach
+                              @endif
                           </select>
                         </div>
                         <div class="col-md-1 col-sm-2 col-xs-4 d-flex gap-2 mt-4">
