@@ -51,10 +51,10 @@
                         <label>Space Type</label>
                         <select class="form-control" name="space_type" id="space_type">
                             <option value="" >All</option>
-                            @if ($space_type_all)
+                            @if ($property_type_all)
 
-                              @foreach($space_type_all as $data)
-                                <option value="{{ $data->id }}" {{ $data->id == $allSpaceType ? "selected" : '' }}>{{ $data->name }}</option>
+                              @foreach($property_type_all as $data)
+                                <option value="{{ $data->id }}" {{ $data->id == $allPropertyType ? "selected" : '' }}>{{ $data->name }}</option>
                               @endforeach
 
                             @endif

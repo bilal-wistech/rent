@@ -55,20 +55,20 @@ class PropertiesController extends Controller
     {
         $data['from'] = isset(request()->from) ? request()->from : null;
         $data['to'] = isset(request()->to) ? request()->to : null;
-        $data['space_type_all'] = SpaceType::getAll();
+        $data['property_type_all'] = PropertyType::getAll();
 
 
         if (isset(request()->reset_btn)) {
             $data['from'] = null;
             $data['to'] = null;
             $data['allstatus'] = '';
-            $data['allSpaceType'] = '';
+            $data['allPropertyType'] = '';
             return $dataTable->render('admin.properties.view', $data);
         }
 
 
         isset(request()->status) ? $data['allstatus'] = $allstatus = request()->status : $data['allstatus'] = $allstatus = '';
-        isset(request()->space_type) ? $data['allSpaceType'] = request()->space_type : $data['allSpaceType'] = '';
+        isset(request()->property_type) ? $data['allPropertyType'] = request()->property_type : $data['allPropertyType'] = '';
         return $dataTable->render('admin.properties.view', $data);
     }
 
