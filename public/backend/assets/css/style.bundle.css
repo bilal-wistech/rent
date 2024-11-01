@@ -54774,9 +54774,12 @@ body {
     }
 }
 .custom-nav{
-    
+
     display: flex;
     gap: 2rem;
+}
+.editCus-sub{
+    background-color: #05384D;
 }
 .custom-nav li a{
     font-size:13px;
@@ -54784,8 +54787,8 @@ body {
 
 }
 .custom-nav li.active{
-border-bottom: 0.2rem solid blue;
-border-top: 0.2rem solid blue;
+border-bottom: 0.2rem solid #05384D;
+border-top: 0.2rem solid #05384D;
 }
 .custom-nav li{
     padding: 12px 0px;

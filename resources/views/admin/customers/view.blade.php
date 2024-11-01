@@ -104,9 +104,10 @@
                                     </div>
                                     <!-- /.card-header -->
                                     <div class="card-body">
-                                      <div class="table-responsive">
-                                        {!! $dataTable->table(['class' => 'table table-striped table-hover dt-responsive', 'width' => '100%', 'cellspacing' => '0']) !!}
-                                      </div>
+                                        <div class="table-responsive">
+                                            {!! $dataTable->table(['class' => 'table table-striped table-hover dt-responsive', 'width' => '100%', 'cellspacing' => '0']) !!}
+                                          </div>
+
                                     </div>
                                   </div>
                                 </div>
