@@ -67,9 +67,8 @@
                                                             @endif
                                                         </select>
                                                     </div>
-
                                                     <!-- Filter and Reset Buttons -->
-                                                    <div class="col-md-3 d-flex gap-2 mt-4">
+                                                    <div class="col-md-3 d-flex gap-2 mt-4 justify-content-end">
                                                         <button type="submit" class="btn btn-primary">Filter</button>
                                                         <button type="button" id="reset_btn"
                                                             class="btn btn-secondary">Reset</button>
@@ -87,7 +86,7 @@
                             <div class="row">
                                 <div class="col-xs-12">
                                     <div class="card">
-                                       
+
                                         <!-- /.card-header -->
                                         <div class="card-body">
                                             <div class="table-responsive">
@@ -116,16 +115,18 @@
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 
 <!-- Updated DataTables CSS and JS links -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
-<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/colreorder/2.0.4/css/colReorder.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/colreorder/2.0.4/js/dataTables.colReorder.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/colreorder/2.0.4/js/colReorder.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"></script>
 {!! $dataTable->scripts() !!}
 @endpush
 
+
 @section('validate_script')
-   
+
     <script type="text/javascript">
         'use strict'
 

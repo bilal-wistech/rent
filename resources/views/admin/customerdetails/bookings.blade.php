@@ -33,7 +33,7 @@
                                                               </button>
                                                             </div>
                                                         </div>
-                    
+
                                                         <div class="col-md-3 col-sm-3 col-xs-12">
                                                             <label>Property</label>
                                                             <select class="form-control select2" name="property" id="property">
@@ -45,7 +45,7 @@
                                                                 @endif
                                                             </select>
                                                         </div>
-                    
+
                                                         <div class="col-md-2 col-sm-2 col-xs-12">
                                                             <label>Status</label>
                                                             <select class="form-control" name="status" id="status">
@@ -57,8 +57,8 @@
                                                                 <option value="Pending"  {{ $allstatus == "Pending"  ? ' selected = "selected"' : '' }}>Pending</option>
                                                             </select>
                                                         </div>
-                    
-                                                        <div class="col-md-1 col-sm-2 col-xs-4 d-flex gap-2 mt-4">
+
+                                                        <div class="col-md-3 col-sm-2 col-xs-4 d-flex gap-2 mt-4 justify-content-end">
                                                             <button type="submit" name="btn" class="btn btn-primary btn-flat f-14 rounded">Filter</button>
                                                             <button type="button" name="reset_btn" id="reset_btn" class="btn btn-primary btn-flat f-14 rounded">Reset</button>
                                                         </div>
@@ -76,7 +76,7 @@
                             <div class="row">
                                 <div class="col-xs-12">
                                     <div class="card">
-                                       
+
                                         <!-- /.card-header -->
                                         <div class="card-body">
                                             <div class="table-responsive">
@@ -103,9 +103,10 @@
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 
 <!-- Updated DataTables CSS and JS links -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
-<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/colreorder/2.0.4/css/colReorder.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/colreorder/2.0.4/js/dataTables.colReorder.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/colreorder/2.0.4/js/colReorder.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"></script>
 {!! $dataTable->scripts() !!}

@@ -54793,3 +54793,46 @@ border-top: 0.2rem solid #05384D;
 .custom-nav li{
     padding: 12px 0px;
 }
+/* Wrapper Styling */
+.my-custom-datatable {
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+/* Table Header */
+.my-custom-datatable table thead {
+    background-color: #e0e0e0; /* Light grey header background */
+    color: #333; /* Dark grey text */
+    font-size: 14px;
+}
+
+.my-custom-datatable table thead th {
+    padding: 6px; /* Reduce padding to decrease row height */
+    border-bottom: 2px solid #bbb;
+}
+
+/* Table Body */
+.my-custom-datatable table tbody td {
+    font-size: 12px; /* Smaller font for table body */
+    padding: 6px; /* Reduce padding to decrease row height */
+    border-top: 1px solid #ddd; /* Light border between rows */
+}
+
+/* Row Colors */
+.my-custom-datatable table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.my-custom-datatable table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.my-custom-datatable table tbody tr:hover {
+    background-color: #f0f8ff;
+}
+
+/* Table Footer */
+.my-custom-datatable table tfoot {
+    background-color: transparent;
+    color: inherit;
+}
