@@ -15,6 +15,7 @@
         <!--begin::Content container-->
         <div id="kt_app_content_container" class="app-container container-fluid">
 
+
           <div class="row mb-5">
             <!-- Total Users -->
             <div class="col-lg-4 col-md-6 mb-4">
@@ -72,7 +73,66 @@
                 </div>
               </div>
             </div>
+
+            <!-- Today Users -->
+            <div class="col-lg-4 col-md-6 mb-4">
+              <div class="card text-white shadow"
+                style="background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); border-radius: 12px;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <div>
+                    <h3 class="mb-0">{{ $today_users_count }}</h3>
+                    <p class="mb-0">Today Users</p>
+                  </div>
+                  <i class="fa fa-user-plus fa-3x"></i>
+                </div>
+                <div class="card-footer text-white" style="background-color: rgba(0, 0, 0, 0.1);">
+                  <a href="{{ url('admin/customers') }}" class="text-white stretched-link">
+                    More info <i class="fa fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Today Properties -->
+            <div class="col-lg-4 col-md-6 mb-4">
+              <div class="card text-white shadow"
+                style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); border-radius: 12px;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <div>
+                    <h3 class="mb-0">{{ $today_property_count }}</h3>
+                    <p class="mb-0">Today Properties</p>
+                  </div>
+                  <i class="fa fa-building fa-3x"></i>
+                </div>
+                <div class="card-footer text-white" style="background-color: rgba(0, 0, 0, 0.1);">
+                  <a href="{{ url('admin/properties') }}" class="text-white stretched-link">
+                    More info <i class="fa fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Today Reservations -->
+            <div class="col-lg-4 col-md-6 mb-4">
+              <div class="card text-white shadow"
+                style="background: linear-gradient(135deg, #96fbc4 0%, #f9f586 100%); border-radius: 12px;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <div>
+                    <h3 class="mb-0">{{ $today_reservations_count }}</h3>
+                    <p class="mb-0">Today Reservations</p>
+                  </div>
+                  <i class="fa fa-plane fa-3x"></i>
+                </div>
+                <div class="card-footer text-white" style="background-color: rgba(0, 0, 0, 0.1);">
+                  <a href="{{ url('admin/bookings') }}" class="text-white stretched-link">
+                    More info <i class="fa fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
+
+
 
           <!-- Properties and Bookings Cards -->
           <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
@@ -94,9 +154,9 @@
                       <tbody>
                         @foreach ($vacantProperties as $item)
               <tr>
-                    <td>{{ $item['propertiesName'] }}</td>
-                    <td>{{ $item['vacant_since'] }}</td>
-                  </tr>
+                <td>{{ $item['propertiesName'] }}</td>
+                <td>{{ $item['vacant_since'] }}</td>
+              </tr>
             @endforeach
                       </tbody>
                     </table>
@@ -129,20 +189,20 @@
                       <tbody>
                         @foreach ($propertiesList as $property)
               <tr>
-                    <td>
-                    <a href="{{ url('admin/listing/' . $property->properties_id . '/basics') }}">
-                      {{ $property->property_name }}
-                    </a>
-                    </td>
-                    <td>
-                    <a href="{{ url('admin/edit-customer/' . $property->host_id) }}">
-                      {{ $property->first_name . ' ' . $property->last_name }}
-                    </a>
-                    </td>
-                    <td>{{ $property->space_type }}</td>
-                    <td>{{ dateFormat($property->property_created_at) }}</td>
-                    <td>{{ $property->property_status }}</td>
-                  </tr>
+                <td>
+                <a href="{{ url('admin/listing/' . $property->properties_id . '/basics') }}">
+                  {{ $property->property_name }}
+                </a>
+                </td>
+                <td>
+                <a href="{{ url('admin/edit-customer/' . $property->host_id) }}">
+                  {{ $property->first_name . ' ' . $property->last_name }}
+                </a>
+                </td>
+                <td>{{ $property->space_type }}</td>
+                <td>{{ dateFormat($property->property_created_at) }}</td>
+                <td>{{ $property->property_status }}</td>
+              </tr>
             @endforeach
                       </tbody>
                     </table>
@@ -175,18 +235,18 @@
                       <tbody>
                         @foreach ($bookingList as $booking)
               <tr>
-                    <td>
-                    <a href="{{ url('admin/bookings/detail/' . $booking->id) }}">{{ $booking->host_name }}</a>
-                    </td>
-                    <td>
-                    <a
-                      href="{{ url('admin/edit-customer/' . $booking->user_id) }}">{{ $booking->guest_name }}</a>
-                    </td>
-                    <td>{{ $booking->property_name }}</td>
-                    <td>{{ $booking->total_amount }}</td>
-                    <td>{{ dateFormat($booking->created_at) }}</td>
-                    <td>{{ $booking->status }}</td>
-                  </tr>
+                <td>
+                <a href="{{ url('admin/bookings/detail/' . $booking->id) }}">{{ $booking->host_name }}</a>
+                </td>
+                <td>
+                <a
+                  href="{{ url('admin/edit-customer/' . $booking->user_id) }}">{{ $booking->guest_name }}</a>
+                </td>
+                <td>{{ $booking->property_name }}</td>
+                <td>{{ $booking->total_amount }}</td>
+                <td>{{ dateFormat($booking->created_at) }}</td>
+                <td>{{ $booking->status }}</td>
+              </tr>
             @endforeach
                       </tbody>
                     </table>
