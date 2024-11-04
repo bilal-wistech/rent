@@ -80,7 +80,7 @@ class InvoicesDataTable extends DataTable
             ->addColumn(['data' => 'check_out', 'name' => 'check_out', 'title' => 'Check Out Date'])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => true, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

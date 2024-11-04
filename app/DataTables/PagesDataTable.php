@@ -31,11 +31,11 @@ class PagesDataTable extends DataTable
     public function html()
     {
         return $this->builder()
-            ->addColumn(['data' => 'name',   'name' => 'pages.name',   'title' => 'Name'])
-            ->addColumn(['data' => 'url',    'name' => 'pages.url',    'title' => 'Url'])
+            ->addColumn(['data' => 'name', 'name' => 'pages.name', 'title' => 'Name'])
+            ->addColumn(['data' => 'url', 'name' => 'pages.url', 'title' => 'Url'])
             ->addColumn(['data' => 'status', 'name' => 'pages.status', 'title' => 'Status'])
-            ->addColumn(['data' => 'action', 'name' => 'action',       'title' => 'Action', 'orderable' => false, 'searchable' => false])
-             ->parameters(dataTableOptions());
+            ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

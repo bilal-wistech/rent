@@ -103,7 +103,7 @@ class PayoutsDataTable extends DataTable
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
 
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
     protected function filename()

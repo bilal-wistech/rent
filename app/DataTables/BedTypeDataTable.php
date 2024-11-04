@@ -39,7 +39,7 @@ class BedTypeDataTable extends DataTable
             ->addColumn(['data' => 'name', 'name' => 'bed_type.name', 'title' => 'Name'])
             ->addColumn(['data' => 'status', 'name' => 'bed_type.status', 'title' => 'Status'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
     protected function getColumns()

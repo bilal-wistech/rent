@@ -36,7 +36,7 @@ class ReportsDataTable extends DataTable
         ->addColumn(['data' => 'message', 'name' => 'message', 'title' => 'Message'])
         ->addColumn(['data' => 'status', 'name' => 'reports.status', 'title' => 'Status'])
         ->addColumn(['data' => 'created_at', 'name' => 'reports.created_at', 'title' => 'Date'])
-        ->parameters(dataTableOptions());
+        ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

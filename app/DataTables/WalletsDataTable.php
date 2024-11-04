@@ -65,7 +65,7 @@ class WalletsDataTable extends DataTable
             ->addColumn(['data' => 'balance', 'name' => 'balance', 'title' => 'Balance'])
             ->addColumn(['data' => 'is_active', 'name' => 'is_active', 'title' => 'Status', 'orderable' => false, 'searchable' => false])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

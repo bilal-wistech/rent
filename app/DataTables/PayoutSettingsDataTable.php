@@ -46,7 +46,7 @@ class PayoutSettingsDataTable extends DataTable
             ->addColumn(['data' => 'type', 'name' => 'type', 'title' => 'Payout Type'])
             ->addColumn(['data' => 'account_name', 'name' => 'account_name', 'title' => 'Account'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
     protected function filename()

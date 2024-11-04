@@ -67,7 +67,7 @@ class PayoutListDataTable extends DataTable
              ->addColumn(['data' => 'amount', 'name' => 'amount', 'title' => __('Amount')])
              ->addColumn(['data' => 'status', 'name' => 'status', 'title' => __('Status')])
              ->addColumn(['data' => 'date', 'name' => 'created_at', 'title' => __('Date')])
-             ->parameters(dataTableOptions());
+             ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

@@ -37,19 +37,19 @@ class AdminuserDataTable extends DataTable
             ->addColumn('username', function ($admin) {
                 return '<a href="' . url('admin/edit-admin/' . $admin->id) . '">' . $admin->username . '</a>';
             })
-            ->rawColumns(['username','action'])
+            ->rawColumns(['username', 'action'])
             ->make(true);
     }
 
     public function query()
     {
         $admin = Admin::join('role_admin', function ($join) {
-                                $join->on('role_admin.admin_id', '=', 'admin.id');
+            $join->on('role_admin.admin_id', '=', 'admin.id');
         })
-                        ->join('roles', function ($join) {
-                                $join->on('roles.id', '=', 'role_admin.role_id');
-                        })
-                        ->select(['admin.id as id', 'username', 'email', 'roles.display_name as role_name', 'status']);
+            ->join('roles', function ($join) {
+                $join->on('roles.id', '=', 'role_admin.role_id');
+            })
+            ->select(['admin.id as id', 'username', 'email', 'roles.display_name as role_name', 'status']);
 
         return $this->applyScopes($admin);
     }
@@ -62,7 +62,7 @@ class AdminuserDataTable extends DataTable
             ->addColumn(['data' => 'role_name', 'name' => 'roles.display_name', 'title' => 'Role Name'])
             ->addColumn(['data' => 'status', 'name' => 'admin.status', 'title' => 'Status'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
     protected function getColumns()

@@ -51,7 +51,7 @@ class AmenityTypeDataTable extends DataTable
             ->addColumn(['data' => 'name', 'name' =>'amenity_type.name', 'title' => 'Name'])
             ->addColumn(['data' => 'description', 'name' =>'amenity_type.description', 'title' => 'Description'])
             ->addColumn(['data' => 'action', 'name' =>'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
     protected function getColumns()

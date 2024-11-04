@@ -37,6 +37,6 @@ class BackupsDataTable extends DataTable
                     ->addColumn(['data' => 'name', 'name' => 'backups.name', 'title' => 'Name'])
                     ->addColumn(['data' => 'created_at', 'name' => 'backups.created_at', 'title' => 'Date'])
                     ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-                    ->parameters(dataTableOptions());
+                    ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 }

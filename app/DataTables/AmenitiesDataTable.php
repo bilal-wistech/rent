@@ -50,13 +50,13 @@ class AmenitiesDataTable extends DataTable
     public function html()
     {
         return $this->builder()
-            ->addColumn(['data' => 'title', 'name' =>'amenities.title', 'title' => 'Name'])
-            ->addColumn(['data' => 'description', 'name' =>'amenities.description', 'title' => 'Description'])
-            ->addColumn(['data' => 'symbol', 'name' =>'amenities.symbol', 'title' => 'Symbol'])
-            ->addColumn(['data' => 'type_id', 'name' =>'amenityType.name', 'title' => 'Type'])
-            ->addColumn(['data' => 'status', 'name' =>'amenities.status', 'title' => 'Status'])
-            ->addColumn(['data' => 'action', 'name' =>'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-             ->parameters(dataTableOptions());
+            ->addColumn(['data' => 'title', 'name' => 'amenities.title', 'title' => 'Name'])
+            ->addColumn(['data' => 'description', 'name' => 'amenities.description', 'title' => 'Description'])
+            ->addColumn(['data' => 'symbol', 'name' => 'amenities.symbol', 'title' => 'Symbol'])
+            ->addColumn(['data' => 'type_id', 'name' => 'amenityType.name', 'title' => 'Type'])
+            ->addColumn(['data' => 'status', 'name' => 'amenities.status', 'title' => 'Status'])
+            ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
     protected function getColumns()

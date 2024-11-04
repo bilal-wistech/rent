@@ -60,7 +60,7 @@ class BankDataTable extends DataTable
             ->addColumn(['data' => 'bank_name', 'name' =>'banks.bank_name', 'title' => 'Bank'])
             ->addColumn(['data' => 'status', 'name' =>'banks.status', 'title' => 'Status'])
             ->addColumn(['data' => 'action', 'name' =>'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

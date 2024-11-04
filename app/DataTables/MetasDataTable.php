@@ -35,7 +35,7 @@ class MetasDataTable extends DataTable
             ->addColumn(['data' => 'description', 'name' => 'seo_metas.description', 'title' => 'Description'])
             ->addColumn(['data' => 'keywords', 'name' => 'seo_metas.keywords', 'title' => 'Keywords'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

@@ -39,7 +39,7 @@ class CountryDataTable extends DataTable
             ->addColumn(['data' => 'number_code', 'name' => 'country.number_code', 'title' => 'Num Code'])
             ->addColumn(['data' => 'phone_code', 'name' => 'country.phone_code', 'title' => 'Phone Code'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

@@ -12,36 +12,36 @@ class MessagesDataTable extends DataTable
         return datatables()
             ->eloquent($this->query())
             ->addColumn('action', function ($message) {
-                $edit   = $delete = '';
-                $edit   = \Helpers::has_permission(Auth::guard('admin')->user()->id, 'edit_messages') ?'<a href="'.url('admin/send-message-email/'.$message->id).'" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;':'';
+                $edit = $delete = '';
+                $edit = \Helpers::has_permission(Auth::guard('admin')->user()->id, 'edit_messages') ? '<a href="' . url('admin/send-message-email/' . $message->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;' : '';
 
 
                 return $edit;
             })
             ->addColumn('sender_id', function ($message) {
-                return ucfirst(optional($message->sender)->first_name). ' ' . ucfirst(optional($message->sender)->last_name);
+                return ucfirst(optional($message->sender)->first_name) . ' ' . ucfirst(optional($message->sender)->last_name);
             })
             ->addColumn('receiver_id', function ($message) {
-                return ucfirst(optional($message->receiver)->first_name). ' ' . ucfirst(optional($message->receiver)->last_name);
+                return ucfirst(optional($message->receiver)->first_name) . ' ' . ucfirst(optional($message->receiver)->last_name);
             })
             ->addColumn('property_id', function ($message) {
                 return ucfirst(optional($message->properties)->name);
             })
 
-          ->addColumn('message', function ($message) {
-                return '<a href="'.url('admin/messaging/host/'.optional($message->bookings)->id).'">'.wordwrap($message->message,25,"<br>\n").'</a>';
+            ->addColumn('message', function ($message) {
+                return '<a href="' . url('admin/messaging/host/' . optional($message->bookings)->id) . '">' . wordwrap($message->message, 25, "<br>\n") . '</a>';
             })
-                ->addColumn('created_at', function ($message) {
+            ->addColumn('created_at', function ($message) {
                 return dateFormat($message->created_at);
             })
-            ->rawColumns(['action','sender_id','receiver_id','property_id','message'])
+            ->rawColumns(['action', 'sender_id', 'receiver_id', 'property_id', 'message'])
             ->make(true);
     }
 
     public function query()
     {
 
-        $query = Messages::with('properties','sender','receiver')->whereRaw('id in (select max(id) from messages group by (booking_id))');
+        $query = Messages::with('properties', 'sender', 'receiver')->whereRaw('id in (select max(id) from messages group by (booking_id))');
 
         return $this->applyScopes($query);
     }
@@ -61,7 +61,7 @@ class MessagesDataTable extends DataTable
             ->addColumn(['data' => 'message', 'name' => 'message', 'title' => 'Messages'])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At', 'orderable' => false,])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-             ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

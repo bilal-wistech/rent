@@ -35,7 +35,7 @@ class SpaceTypeDataTable extends DataTable
             ->addColumn(['data' => 'description', 'name' => 'space_type.description', 'title' => 'Description'])
             ->addColumn(['data' => 'status', 'name' => 'space_type.status', 'title' => 'Status'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
     protected function filename()

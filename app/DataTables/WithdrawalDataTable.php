@@ -53,7 +53,8 @@ class WithdrawalDataTable extends DataTable
             ->addColumn(['data' => 'amount', 'name' => 'withdraws.amount', 'title' => 'Amount'])
             ->addColumn(['data' => 'status', 'name' => 'withdraws.status', 'title' => 'Status'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters($this->getBuilderParameters());
+            ->parameters($this->getBuilderParameters())
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

@@ -36,7 +36,7 @@ class CategoriesDataTable extends DataTable
             ->addColumn(['data' => 'name', 'name' => 'categories.name', 'title' => 'Name'])
             ->addColumn(['data' => 'status', 'name' => 'categories.status', 'title' => 'Status'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

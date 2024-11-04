@@ -55,7 +55,7 @@ class AreaDataTable extends DataTable
                 ->addColumn(['data' => 'id', 'name' => 'areas.id', 'title' => 'ID', 'orderable' => true])
                 ->addColumn(['data' => 'name', 'name' => 'areas.name', 'title' => 'Name', 'orderable' => true])
                 ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-                ->parameters(dataTableOptions());
+                ->parameters(dataTableOptions(['pageLength' => 10]));
         }
 
 

@@ -46,7 +46,7 @@ class CurrencyDataTable extends DataTable
             ->addColumn(['data' => 'rate', 'name' => 'currency.rate', 'title' => 'Rate'])
             ->addColumn(['data' => 'status', 'name' => 'currency.status', 'title' => 'Status'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

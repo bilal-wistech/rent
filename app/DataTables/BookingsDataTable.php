@@ -106,7 +106,7 @@ class BookingsDataTable extends DataTable
             ->addColumn(['data' => 'status', 'name' => 'bookings.status', 'title' => 'Status'])
             ->addColumn(['data' => 'created_at', 'name' => 'bookings.created_at', 'title' => 'Date'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

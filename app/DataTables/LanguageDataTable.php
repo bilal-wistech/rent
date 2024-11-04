@@ -45,6 +45,6 @@ class LanguageDataTable extends DataTable
             'status'
         ])
         ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-        ->parameters(dataTableOptions());
+        ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 }

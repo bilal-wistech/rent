@@ -55,8 +55,8 @@ class PropertyDataTable extends DataTable
 
     public function query()
     {
-        $user_id    = Request::segment(4);
-        $status     = isset(request()->status) ? request()->status : null;
+        $user_id = Request::segment(4);
+        $status = isset(request()->status) ? request()->status : null;
         $from = isset(request()->from) ? setDateForDb(request()->from) : null;
         $to = isset(request()->to) ? setDateForDb(request()->to) : null;
         $property_type = isset(request()->property_type) ? request()->property_type : null;
@@ -68,10 +68,10 @@ class PropertyDataTable extends DataTable
 
 
         if ($from) {
-             $query->whereDate('created_at', '>=', $from);
+            $query->whereDate('created_at', '>=', $from);
         }
         if ($to) {
-             $query->whereDate('created_at', '<=', $to);
+            $query->whereDate('created_at', '<=', $to);
         }
         if ($status) {
             $query->where('status', '=', $status);
@@ -94,8 +94,9 @@ class PropertyDataTable extends DataTable
             ->addColumn(['data' => 'verified', 'name' => 'verified', 'title' => 'Verified'])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Date'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-            ->parameters(dataTableOptions());
+            ->parameters(dataTableOptions(['pageLength' => 10])); // Set initial page length to 10
     }
+
 
 
     protected function filename()

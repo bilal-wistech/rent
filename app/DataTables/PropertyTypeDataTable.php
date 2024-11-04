@@ -35,7 +35,7 @@ class PropertyTypeDataTable extends DataTable
             ->addColumn(['data' => 'description', 'name' => 'property_type.description', 'title' => 'Description'])
             ->addColumn(['data' => 'status', 'name' => 'property_type.status', 'title' => 'Status'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-             ->parameters(dataTableOptions());
+             ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
     protected function filename()

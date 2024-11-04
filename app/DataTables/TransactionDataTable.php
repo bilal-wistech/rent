@@ -108,7 +108,7 @@ class TransactionDataTable extends DataTable
         ->addColumn(['data' => 'p_method', 'name' => 'p_method', 'title' => __('Payment Method'), 'searchable' => true])
         ->addColumn(['data' => 'amount', 'name' => 'amount', 'title' => __('Amount')])
         ->addColumn(['data' => 'date', 'name' => 'date', 'title' => __('Date')])
-        ->parameters(dataTableOptions());
+        ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

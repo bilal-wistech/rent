@@ -80,7 +80,7 @@ class ReviewsDataTable extends DataTable
         ->addColumn(['data' => 'message', 'name' => 'message', 'title' => 'Message'])
         ->addColumn(['data' => 'created_at', 'name' => 'reviews.created_at', 'title' => 'Date'])
         ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-        ->parameters(dataTableOptions());
+        ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 

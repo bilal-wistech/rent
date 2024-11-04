@@ -74,7 +74,7 @@ class CustomerDataTable extends DataTable
             ->addColumn(['data' => 'status', 'name' => 'status', 'title' => 'Status', 'orderable' => false, 'searchable' => false])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-             ->parameters(dataTableOptions());
+             ->parameters(dataTableOptions(['pageLength' => 10]));
     }
 
 
