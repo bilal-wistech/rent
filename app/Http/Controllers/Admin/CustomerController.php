@@ -200,8 +200,8 @@ class CustomerController extends Controller
                     ]);
                 }
 
-                Common::one_time_message('success', 'Customer Created Successfully');
-                    return redirect('admin/customers');
+                return redirect('admin/customers')->with('success', 'Added Successfully');
+
             } catch (\Exception $e) {
                 return "Errorr occur ";
                   }
@@ -403,15 +403,16 @@ class CustomerController extends Controller
 
                 if ($booking > 0 && $user->status == 'Inactive') {
 
-                    Common::one_time_message('danger', "User Can't be Inactive Due to have booking");
-                    return redirect('admin/customers');
+                 //  Common::one_time_message('danger', "User Can't be Inactive Due to have booking");
+                    return redirect('admin/customers')->with('error', 'User Cannot be Inactive Due to have booking');
+
 
                 } else {
 
                     $user->save();
 
-                    Common::one_time_message('success', 'Updated Successfully');
-                    return redirect('admin/customers');
+                    return redirect('admin/customers')->with('success', 'Updated Successfully');
+
                 }
 
             }
@@ -450,7 +451,8 @@ class CustomerController extends Controller
             }
         }
 
-        return redirect('admin/customers');
+        return redirect('admin/customers')->with('success', 'Deleted Successfully');
+
     }
 
     public function customerCsv()

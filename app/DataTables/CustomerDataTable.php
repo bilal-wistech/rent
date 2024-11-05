@@ -14,11 +14,9 @@ class CustomerDataTable extends DataTable
             ->eloquent($this->query())
             ->addColumn('action', function ($users) {
 
-                $edit = \Helpers::has_permission(Auth::guard('admin')->user()->id, 'edit_customer') ?'<a href="' . url('admin/edit-customer/' . $users->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;' : '';
+                $edit = '<a href="' . url('admin/edit-customer/' . $users->id) . '" class="btn btn-sm btn-primary m-1"><i class="fa fa-edit"></i></a>&nbsp;';
 
-                $delete = \Helpers::has_permission(Auth::guard('admin')->user()->id, 'delete_customer') ?'<a href="' . url('admin/delete-customer/' . $users->id) . '" class="btn btn-xs btn-danger delete-warning"><i class="fa fa-trash"></i></a>&nbsp;' : '';
-
-                return $edit . $delete;
+                $delete = '<a href="' . url('admin/delete-customer/' . $users->id) . '" class="btn btn-sm btn-danger m-1 delete-warning"><i class="fa fa-trash"></i></a>&nbsp;';      return $edit . $delete;
             })
                 ->addColumn('first_name', function ($users) {
                 return '<a href="' . url('admin/edit-customer/' . $users->id) . '">' . ucfirst($users->first_name) . '</a>';
