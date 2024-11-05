@@ -51,31 +51,31 @@ class CustomerController extends Controller
     public function index(CustomerDataTable $dataTable)
     {
         $data['from'] = isset(request()->from) ? request()->from : null;
-        $data['to']   = isset(request()->to) ? request()->to : null;
+        $data['to'] = isset(request()->to) ? request()->to : null;
 
 
         if (isset(request()->customer)) {
-            $data['customers'] = User::where('users.id', request()->customer )->select('id', 'first_name', 'last_name')->get();
+            $data['customers'] = User::where('users.id', request()->customer)->select('id', 'first_name', 'last_name')->get();
         } else {
             $data['customers'] = null;
         }
 
         if (isset(request()->reset_btn)) {
-            $data['from']        = null;
-            $data['to']          = null;
-            $data['allstatus']   = '';
-            $data['allcustomers']   = '';
+            $data['from'] = null;
+            $data['to'] = null;
+            $data['allstatus'] = '';
+            $data['allcustomers'] = '';
             return $dataTable->render('admin.customers.view', $data);
         }
         $pref = Settings::getAll()->where('type', 'preferences');
-        if (! empty($pref)) {
+        if (!empty($pref)) {
             foreach ($pref as $value) {
                 $prefer[$value->name] = $value->value;
             }
             Session::put($prefer);
         }
 
-        isset(request()->customer) ? $data['allcustomers'] = request()->customer : $data['allcustomers']    = '';
+        isset(request()->customer) ? $data['allcustomers'] = request()->customer : $data['allcustomers'] = '';
         isset(request()->status) ? $data['allstatus'] = $allstatus = request()->status : $data['allstatus'] = $allstatus = '';
 
         return $dataTable->render('admin.customers.view', $data);
@@ -88,21 +88,21 @@ class CustomerController extends Controller
         if ($str == null) {
             $myresult = User::select('id', 'first_name', 'last_name')->take(5)->get();
         } else {
-            $myresult = User::where('users.first_name', 'LIKE', '%'.$str.'%')->orWhere('users.last_name', 'LIKE', '%'.$str.'%')->select('users.id','users.first_name', 'users.last_name')->get();
+            $myresult = User::where('users.first_name', 'LIKE', '%' . $str . '%')->orWhere('users.last_name', 'LIKE', '%' . $str . '%')->select('users.id', 'users.first_name', 'users.last_name')->get();
         }
 
         if ($myresult->isEmpty()) {
-            $myArr=null;
+            $myArr = null;
         } else {
             $arr2 = array(
-                "id"   => "",
+                "id" => "",
                 "text" => "All"
-              );
-              $myArr[] = ($arr2);
+            );
+            $myArr[] = ($arr2);
             foreach ($myresult as $result) {
                 $arr = array(
-                  "id"   => $result->id,
-                  "text" => $result->first_name." ".$result->last_name
+                    "id" => $result->id,
+                    "text" => $result->first_name . " " . $result->last_name
                 );
                 $myArr[] = ($arr);
             }
@@ -113,22 +113,22 @@ class CustomerController extends Controller
     public function add(Request $request, EmailController $email_controller)
     {
         //
-        if (! $request->isMethod('post')) {
+        if (!$request->isMethod('post')) {
             return view('admin.customers.add');
         } elseif ($request->isMethod('post')) {
             // dd($request);
             $rules = array(
-                'first_name'    => 'required|max:255',
-                'last_name'     => 'required|max:255',
-                'email'         => 'required|max:255|email|unique:users',
-                'password'      => 'required|min:6'
+                'first_name' => 'required|max:255',
+                'last_name' => 'required|max:255',
+                'email' => 'required|max:255|email|unique:users',
+                'password' => 'required|min:6'
             );
 
             $fieldNames = array(
-                'first_name'    => 'First_name',
-                'last_name'     => 'Last_name',
-                'email'         => 'Email',
-                'password'      => 'Password'
+                'first_name' => 'First_name',
+                'last_name' => 'Last_name',
+                'email' => 'Email',
+                'password' => 'Password'
             );
             // dd($fieldNames);
             $validator = Validator::make($request->all(), $rules);
@@ -137,23 +137,23 @@ class CustomerController extends Controller
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput();
             } else {
-                $user                  = new User;
-                $user->first_name      = strip_tags($request->first_name);
-                $user->last_name       = strip_tags($request->last_name);
-                $user->email           = $request->email;
-                $user->password        = \Hash::make($request->password);
-                $user->status          = $request->status;
-                $user->profile_image   = NULL;
-                $formattedPhone        = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
-                $user->phone           = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
+                $user = new User;
+                $user->first_name = strip_tags($request->first_name);
+                $user->last_name = strip_tags($request->last_name);
+                $user->email = $request->email;
+                $user->password = \Hash::make($request->password);
+                $user->status = $request->status;
+                $user->profile_image = NULL;
+                $formattedPhone = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
+                $user->phone = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
                 $user->default_country = isset($request->default_country) ? $request->default_country : NULL;
-                $user->carrier_code    = isset($request->carrier_code) ? $request->carrier_code : NULL;
+                $user->carrier_code = isset($request->carrier_code) ? $request->carrier_code : NULL;
                 $user->formatted_phone = isset($request->formatted_phone) ? $request->formatted_phone : NULL;
                 $user->save();
                 // dd($user);
 
-                $user_verification           = new UsersVerification;
-                $user_verification->user_id  =   $user->id;
+                $user_verification = new UsersVerification;
+                $user_verification->user_id = $user->id;
                 $user_verification->save();
                 //dd($user);
                 $this->wallet($user->id);
@@ -170,9 +170,9 @@ class CustomerController extends Controller
 
                 // }
 
-              //  Common::one_time_message('success', 'Added Successfully.'.''./* $errorMessage */);
-            // return $user;
-            //Storing document
+                //  Common::one_time_message('success', 'Added Successfully.'.''./* $errorMessage */);
+                // return $user;
+                //Storing document
                 try {
                     $request->validate([
                         'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Validate image file type and size
@@ -182,45 +182,46 @@ class CustomerController extends Controller
                     if ($request->hasFile('image')) {
                         $image = $request->file('image');
                         $filename = time() . '.' . $image->getClientOriginalExtension();
-                        $path = $image->storeAs('documents', $filename, 'public');}
+                        $path = $image->storeAs('documents', $filename, 'public');
+                    }
 
 
 
-                $document = Document::create([
-                    'user_id' => $user->id,
-                    'image' => $path,
-                    'expire' => $request->expire,
-                    'type' => $request->type,
-                ]);
-
-            } catch (\Exception $e) {
-                return "Error storing document: " . $e->getMessage();
-            }
-            try {
-                $request->validate([
-                    'emergency_contact_name.*' => 'required|string|max:255',
-                    'emergency_contact_relation.*' => 'required|string|max:255',
-                    'emergency_contact_number.*' => 'required|string|max:30',
-                ]);
-                for ($i = 0; $i < count($request->emergency_contact_name); $i++) {
-                    EmergencyContact::create([
+                    $document = Document::create([
                         'user_id' => $user->id,
-                        'name' => $request->emergency_contact_name[$i],
-                        'relation' => $request->emergency_contact_relation[$i],
-                        'contact_number' => $request->emergency_contact_number[$i],
+                        'image' => $path,
+                        'expire' => $request->expire,
+                        'type' => $request->type,
                     ]);
+
+                } catch (\Exception $e) {
+                    return "Error storing document: " . $e->getMessage();
+                }
+                try {
+                    $request->validate([
+                        'emergency_contact_name.*' => 'required|string|max:255',
+                        'emergency_contact_relation.*' => 'required|string|max:255',
+                        'emergency_contact_number.*' => 'required|string|max:30',
+                    ]);
+                    for ($i = 0; $i < count($request->emergency_contact_name); $i++) {
+                        EmergencyContact::create([
+                            'user_id' => $user->id,
+                            'name' => $request->emergency_contact_name[$i],
+                            'relation' => $request->emergency_contact_relation[$i],
+                            'contact_number' => $request->emergency_contact_number[$i],
+                        ]);
+                    }
+
+                    Common::one_time_message('success', 'Customer Created Successfully');
+                    return redirect('admin/customers');
+                } catch (\Exception $e) {
+                    return "Errorr occur ";
                 }
 
-                Common::one_time_message('success', 'Customer Created Successfully');
-                    return redirect('admin/customers');
-            } catch (\Exception $e) {
-                return "Errorr occur ";
-                  }
-
-      // return redirect('admin/customers');
+                // return redirect('admin/customers');
 
 
-        }
+            }
         }
     }
 
@@ -229,91 +230,72 @@ class CustomerController extends Controller
     {
         $data = [];
         if ($request->isMethod('post')) {
-            $rules = array(
-                'first_name'    => 'required|max:255',
-                'last_name'     => 'required|max:255',
-                'email'         => 'required|max:255|email|unique:users',
-                'password'      => 'required|min:6'
-            );
 
-            $fieldNames = array(
-                'first_name'    => 'First_name',
-                'last_name'     => 'Last_name',
-                'email'         => 'Email',
-                'password'      => 'Password'
-            );
+            $user = new User;
+            $user->first_name = $request->first_name;
+            $user->last_name = $request->last_name;
+            $user->email = $request->email;
+            $user->password = \Hash::make($request->password);
+            $user->status = $request->status;
+            $user->profile_image = NULL;
+            $formattedPhone = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
+            $user->phone = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
+            $user->default_country = isset($request->default_country) ? $request->default_country : NULL;
+            $user->carrier_code = isset($request->carrier_code) ? $request->carrier_code : NULL;
+            $user->formatted_phone = isset($request->formatted_phone) ? $request->formatted_phone : NULL;
+            $user->save();
+            $this->wallet($user->id);
 
-            $validator = Validator::make($request->all(), $rules);
-            $validator->setAttributeNames($fieldNames);
+            $user_verification = new UsersVerification;
+            $user_verification->user_id = $user->id;
+            $user_verification->save();
 
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            } else {
-                $user                  = new User;
-                $user->first_name      = $request->first_name;
-                $user->last_name       = $request->last_name;
-                $user->email           = $request->email;
-                $user->password        = \Hash::make($request->password);
-                $user->status          = $request->status;
-                $user->profile_image   = NULL;
-                $formattedPhone        = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
-                $user->phone           = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
-                $user->default_country = isset($request->default_country) ? $request->default_country : NULL;
-                $user->carrier_code    = isset($request->carrier_code) ? $request->carrier_code : NULL;
-                $user->formatted_phone = isset($request->formatted_phone) ? $request->formatted_phone : NULL;
-                $user->save();
-                $this->wallet( $user->id);
+            $data = ['status' => 1, 'user' => $user];
 
-                $user_verification           = new UsersVerification;
-                $user_verification->user_id  =   $user->id;
-                $user_verification->save();
-
-                $data = ['status' => 1,'user' => $user];
-            }
-        return $data;
-     }
-   }
+            return $data;
+        }
+    }
     public function customerProperties(PropertyDataTable $dataTable, $id)
     {
         $data['properties_tab'] = 'active';
-        $data['user'] = DB::table('users')->where('id',$id)->first();
+        $data['user'] = DB::table('users')->where('id', $id)->first();
 
-        $data['from'] = isset(request()->from) ? request()->from:null;
-        $data['to']   = isset(request()->to) ? request()->to:null;
-        $data['space_type_all'] = SpaceType::all('id','name');
+        $data['from'] = isset(request()->from) ? request()->from : null;
+        $data['to'] = isset(request()->to) ? request()->to : null;
+        $data['space_type_all'] = SpaceType::all('id', 'name');
 
 
         if (isset(request()->reset_btn)) {
-            $data['from']        = null;
-            $data['to']          = null;
-            $data['allstatus']   = '';
-            $data['allSpaceType']   = '';
-            return $dataTable->render('admin.customerdetails.properties',$data);
+            $data['from'] = null;
+            $data['to'] = null;
+            $data['allstatus'] = '';
+            $data['allSpaceType'] = '';
+            return $dataTable->render('admin.customerdetails.properties', $data);
         }
         isset(request()->status) ? $data['allstatus'] = $allstatus = request()->status : $data['allstatus'] = $allstatus = '';
-        isset(request()->space_type) ? $data['allSpaceType'] = request()->space_type : $data['allSpaceType']  = '';
+        isset(request()->space_type) ? $data['allSpaceType'] = request()->space_type : $data['allSpaceType'] = '';
 
-        return $dataTable->render('admin.customerdetails.properties',$data);
+        return $dataTable->render('admin.customerdetails.properties', $data);
 
     }
 
     public function customerBookings(BookingsDataTable $dataTable, $id)
     {
         $data['bookings_tab'] = 'active';
-        $data['user']         = DB::table('users')->where('id',$id)->first();
+        $data['user'] = DB::table('users')->where('id', $id)->first();
 
-        $data['from'] = isset(request()->from)?request()->from:null;
-        $data['to'] = isset(request()->to)?request()->to:null;
+        $data['from'] = isset(request()->from) ? request()->from : null;
+        $data['to'] = isset(request()->to) ? request()->to : null;
         if (isset(request()->property)) {
-            $data['properties'] = Properties::where('properties.id',request()->property )->select('id', 'name')->get();
+            $data['properties'] = Properties::where('properties.id', request()->property)->select('id', 'name')->get();
         } else {
             $data['properties'] = null;
         }
         if (isset(request()->reset_btn)) {
-            $data['from']        = null;
-            $data['to']          = null;
-            $data['allstatus']   = '';
-            $data['allproperties']   = '';
+            $data['from'] = null;
+            $data['to'] = null;
+            $data['allstatus'] = '';
+            $data['allproperties'] = '';
             return $dataTable->render('admin.customerdetails.bookings', $data);
         }
 
@@ -326,22 +308,22 @@ class CustomerController extends Controller
     public function customerPayouts(PayoutsDataTable $dataTable, $id)
     {
         $data['payouts_tab'] = 'active';
-        $data['user'] = DB::table('users')->where('id',$id)->first();
+        $data['user'] = DB::table('users')->where('id', $id)->first();
 
-        $data['from'] = isset(request()->from)?request()->from:null;
-        $data['to'] = isset(request()->to)?request()->to:null;
+        $data['from'] = isset(request()->from) ? request()->from : null;
+        $data['to'] = isset(request()->to) ? request()->to : null;
         if (isset(request()->property)) {
-            $data['properties'] = Properties::where('properties.id',request()->property )->select('id', 'name')->get();
+            $data['properties'] = Properties::where('properties.id', request()->property)->select('id', 'name')->get();
         } else {
             $data['properties'] = null;
         }
 
         if (isset(request()->reset_btn)) {
-            $data['from']        = null;
-            $data['to']          = null;
-            $data['allstatus']   = '';
-            $data['alltypes']   = '';
-            $data['allproperties']   = '';
+            $data['from'] = null;
+            $data['to'] = null;
+            $data['allstatus'] = '';
+            $data['alltypes'] = '';
+            $data['allproperties'] = '';
             return $dataTable->render('admin.customerdetails.payouts', $data);
         }
         isset(request()->property) ? $data['allproperties'] = request()->property : $data['allproperties'] = '';
@@ -354,40 +336,40 @@ class CustomerController extends Controller
     public function paymentMethods($id)
     {
         $data['payment_methods_tab'] = 'active';
-        $data['user'] = DB::table('users')->where('id',$id)->first();
+        $data['user'] = DB::table('users')->where('id', $id)->first();
 
-        $data['payouts']  = Accounts::where('user_id', $id)->orderBy('id','desc')->get();
-        $data['country']  = Country::all()->pluck('name','short_name');
+        $data['payouts'] = Accounts::where('user_id', $id)->orderBy('id', 'desc')->get();
+        $data['country'] = Country::all()->pluck('name', 'short_name');
 
         return view('admin.customerdetails.payment_methods', $data);
     }
 
     public function update(Request $request)
     {
-        $data['user'] = DB::table('users')->where('id',$request->id)->first();
+        $data['user'] = DB::table('users')->where('id', $request->id)->first();
 
-        if (! $request->isMethod('post')) {
+        if (!$request->isMethod('post')) {
             $data['customer_edit_tab'] = 'active';
             $data['form_name'] = 'Edit Customer';
             return view('admin.customers.edit', $data);
 
         } elseif ($request->isMethod('post')) {
             $rules = array(
-                'first_name'    => 'required|max:255',
-                'last_name'     => 'required|max:255',
-                'email'       => 'required|max:255|email|unique:users,email,'.$data['user']->id,
+                'first_name' => 'required|max:255',
+                'last_name' => 'required|max:255',
+                'email' => 'required|max:255|email|unique:users,email,' . $data['user']->id,
 
             );
-             $messages = array(
+            $messages = array(
                 'email' => 'Email already existed.',
 
             );
 
 
             $fieldNames = array(
-                'first_name'    => 'First Name',
-                'last_name'     => 'Last Name',
-                 'email'        => 'Email',
+                'first_name' => 'First Name',
+                'last_name' => 'Last Name',
+                'email' => 'Email',
 
             );
 
@@ -397,17 +379,17 @@ class CustomerController extends Controller
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput();
             } else {
-                $booking               = Bookings::where('host_id','=',$request->customer_id)->orWhere('user_id','=',$request->customer_id)->whereDate('end_date','>', now())->count();
-                $user                  = User::find($request->customer_id);
-                $user->first_name      = strip_tags($request->first_name);
-                $user->last_name       = strip_tags($request->last_name);
-                $user->email           = $request->email;
-                $user->status          = $request->status;
-                $user->profile_image   = NULL;
-                $formattedPhone        = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
-                $user->phone           = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
+                $booking = Bookings::where('host_id', '=', $request->customer_id)->orWhere('user_id', '=', $request->customer_id)->whereDate('end_date', '>', now())->count();
+                $user = User::find($request->customer_id);
+                $user->first_name = strip_tags($request->first_name);
+                $user->last_name = strip_tags($request->last_name);
+                $user->email = $request->email;
+                $user->status = $request->status;
+                $user->profile_image = NULL;
+                $formattedPhone = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
+                $user->phone = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
                 $user->default_country = isset($request->default_country) ? $request->default_country : NULL;
-                $user->carrier_code    = isset($request->carrier_code) ? $request->carrier_code : NULL;
+                $user->carrier_code = isset($request->carrier_code) ? $request->carrier_code : NULL;
                 $user->formatted_phone = isset($request->formatted_phone) ? $request->formatted_phone : NULL;
                 if ($request->password != '')
                     $user->password = bcrypt($request->password);
@@ -430,8 +412,8 @@ class CustomerController extends Controller
     }
     public function delete(Request $request)
     {
-        $propertiesWithBookingsCount = Bookings::where('host_id', $request->id)->where('end_date','>=', date('Y-m-d'))->where('status','Accepted')->count();
-        $bookingsCount   = Bookings::where('user_id', $request->id)->where('end_date','>=', date('Y-m-d'))->where('status','Accepted')->count();
+        $propertiesWithBookingsCount = Bookings::where('host_id', $request->id)->where('end_date', '>=', date('Y-m-d'))->where('status', 'Accepted')->count();
+        $bookingsCount = Bookings::where('user_id', $request->id)->where('end_date', '>=', date('Y-m-d'))->where('status', 'Accepted')->count();
 
         if (env('APP_MODE', '') != 'test') {
             if (($propertiesWithBookingsCount) && ($bookingsCount) > 0) {
@@ -466,17 +448,17 @@ class CustomerController extends Controller
 
     public function customerCsv()
     {
-        return Excel::download(new CustomersExport, 'customer_sheet' . time() .'.xls');
+        return Excel::download(new CustomersExport, 'customer_sheet' . time() . '.xls');
     }
 
     public function customerPdf()
     {
-        $to                   = setDateForDb(request()->to);
-        $from                 = setDateForDb(request()->from);
-        $customer             = isset(request()->customer) ? request()->customer : null;
+        $to = setDateForDb(request()->to);
+        $from = setDateForDb(request()->from);
+        $customer = isset(request()->customer) ? request()->customer : null;
 
-        $data['status']     = $status = isset(request()->status) ? request()->status : null;
-        $query= User::orderBy('id', 'desc')->select();
+        $data['status'] = $status = isset(request()->status) ? request()->status : null;
+        $query = User::orderBy('id', 'desc')->select();
 
         if ($from) {
             $query->whereDate('created_at', '>=', $from);
@@ -484,20 +466,21 @@ class CustomerController extends Controller
         if ($to) {
             $query->whereDate('created_at', '<=', $to);
         }
-        if ($status){
-            $query->where('status','=',$status);
+        if ($status) {
+            $query->where('status', '=', $status);
         }
-        if ($customer){
-            $query->where('id','=',$customer);
+        if ($customer) {
+            $query->where('id', '=', $customer);
         }
-        if ($from && $to){
-          $data['date_range'] = onlyFormat($from) . ' To ' . onlyFormat($to);
+        if ($from && $to) {
+            $data['date_range'] = onlyFormat($from) . ' To ' . onlyFormat($to);
         }
 
         $data['customerList'] = $query->get();
         $pdf = PDF::loadView('admin.customers.list_pdf', $data, [], [
-            'format' => 'A3', [750, 1060]
-          ]);
+            'format' => 'A3',
+            [750, 1060]
+        ]);
 
         return $pdf->download('customer_list_' . time() . '.pdf', array("Attachment" => 0));
     }
@@ -506,17 +489,17 @@ class CustomerController extends Controller
 
     public function getCurrentCustomerDetails(Request $request)
     {
-        $data        = [];
+        $data = [];
         $userDetails = User::find($request->customer_id)->makeHidden(['created_at', 'updated_at', 'status', 'profile_image', 'balance', 'profile_src']);
         if ($userDetails->exists()) {
-            $data['status']      = true;
+            $data['status'] = true;
             $data['userDetails'] = $userDetails;
         } else {
-            $data['status']      = false;
+            $data['status'] = false;
         }
         return $data;
     }
-        /**
+    /**
      * Add for user wallet info
      *
      * @param string Request as $request
@@ -525,18 +508,18 @@ class CustomerController extends Controller
      */
     public function wallet($userId)
     {
-       $defaultCurrencyId    = Settings::getAll()->where('name', 'default_currency')->first();
-       $wallet               = new Wallet();
-       $wallet->user_id      = $userId;
-       $wallet->currency_id  = (int)$defaultCurrencyId->value;
-       $wallet->save();
+        $defaultCurrencyId = Settings::getAll()->where('name', 'default_currency')->first();
+        $wallet = new Wallet();
+        $wallet->user_id = $userId;
+        $wallet->currency_id = (int) $defaultCurrencyId->value;
+        $wallet->save();
 
     }
-      public function customerWallet(WalletsDataTable $dataTable, $id)
+    public function customerWallet(WalletsDataTable $dataTable, $id)
     {
 
-        $data['wallet']      = 'active';
-        $data['user']         = DB::table('users')->where('id',$id)->first();
+        $data['wallet'] = 'active';
+        $data['user'] = DB::table('users')->where('id', $id)->first();
 
         return $dataTable->render('admin.customerdetails.wallets', $data);
 

@@ -69,7 +69,6 @@ class PropertiesController extends Controller
 
     public function add(Request $request)
     {
-        // dd($request);
         if ($request->isMethod('post')) {
             $rules = array(
                 'property_type_id' => 'required',
@@ -102,6 +101,7 @@ class PropertiesController extends Controller
             $validator->setAttributeNames($fieldNames);
 
             if ($validator->fails()) {
+                dd($validator);
                 return back()->withErrors($validator)->withInput();
             } else {
                 $addressParts = [$request->area];
