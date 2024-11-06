@@ -12,7 +12,7 @@
                                 <div class="col-xs-12">
                                     <div class="box">
                                         <div class="box-body">
-                                            <div class="table-responsive parent-table f-14">
+                                            <div class="table-responsive parent-table f-14 mt-3">
                                                 {!! $dataTable->table(['class' => 'table table-striped table-hover dt-responsive', 'width' => '100%', 'cellspacing' => '0']) !!}
                                             </div>
                                         </div>

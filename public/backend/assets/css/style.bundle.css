@@ -54784,6 +54784,7 @@ body {
 .custom-nav li a{
     font-size:13px;
     color: black;
+    text-decoration:none !important;
 
 }
 .custom-nav li.active{
@@ -54835,4 +54836,19 @@ border-top: 0.2rem solid #05384D;
 .my-custom-datatable table tfoot {
     background-color: transparent;
     color: inherit;
+}
+.payment-method-content {
+    padding: 20px;
+    background-color: #f9f9f9; /* Light background */
+    border-radius: 8px;
+}
+
+#payout_methods {
+    margin-top: 15px;
+    border: 1px solid #ddd;
+}
+
+#payout_methods th, #payout_methods td {
+    padding: 12px;
+    text-align: left;
 }
