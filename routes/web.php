@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\AreaController;
 use App\Http\Controllers\Admin\EmergencyContactController;
+use App\Http\Controllers\Admin\PropertiesController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 /*
@@ -145,7 +146,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('invoices/show/{id}', 'InvoiceController@show')->middleware(['permission:manage_invoices'])->name('admin.invoices.show');
     Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts'])->name('admin.payouts');
     Route::post('invoices/invoice/{id}', 'InvoiceController@getInvoiceByUserId');
-    
+
     //Admin Payout routes
     Route::get('payouts/create', 'PayoutsController@create')->name('payouts.create');
     Route::post('payouts/create/success', 'PayoutsController@asuccess')->name('payouts.asuccess');
@@ -327,7 +328,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('bookings/details/{date}', 'BookingsController@getBookingDetails')->middleware(['permission:manage_bookings'])->name('admin.bookings.details');
 
 
-    Route::match(['post', 'put'],'bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
+    Route::match(['post', 'put'], 'bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
     Route::get('bookings/edit/{id}', 'BookingsController@edit')->middleware(['permission:manage_bookings'])->name('admin.bookings.edit');
 
     Route::put('bookings/update/{id}', 'BookingsController@update')->middleware(['permission:manage_bookings'])->name('admin.bookings.update');
@@ -336,6 +337,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('bookings/form_property_search', 'BookingsController@searchFormProperty')->middleware(['permission:manage_bookings'])->name('admin.bookings.form_property_search');
     Route::get('bookings/customer_search', 'BookingsController@searchCustomer')->middleware(['permission:manage_bookings'])->name('admin.bookings.customer_search');
     Route::get('bookings/form_customer_search', 'BookingsController@searchFormCustomer')->middleware(['permission:manage_bookings'])->name('admin.bookings.form_customer_search');
+    // Route::get('bookings/form_area_search', 'BookingsController@searchFormArea')->middleware(['permission:manage_bookings'])->name('admin.get_areas');
     //booking details
     Route::get('bookings/detail/{id}', 'BookingsController@details')->middleware(['permission:manage_bookings']);
     Route::get('bookings/edit/{req}/{id}', 'BookingsController@updateBookingStatus')->middleware(['permission:manage_bookings']);
@@ -356,6 +358,11 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('reviews/review_list_pdf', 'ReviewsController@reviewPdf');
 
     });
+
+    // by sikander 
+
+
+        // admin/properties/get-areas/AF/1s
 
     // Route::get('reports', 'ReportsController@index')->middleware(['permission:manage_reports']);
 
@@ -641,4 +648,4 @@ Route::get('icalender/export/{id}', 'CalendarController@icalendarExport');
 Route::get('{name}', 'HomeController@staticPages')->middleware('locale');
 Route::post('duplicate-phone-number-check', 'UserController@duplicatePhoneNumberCheck');
 Route::post('duplicate-phone-number-check-for-existing-customer', 'UserController@duplicatePhoneNumberCheckForExistingCustomer');
-Route::match(['get', 'post'], 'upload_image', 'Admin\PagesController@uploadImage')->name('upload');
+// Route::match(['get', 'post'], 'upload_image', 'Admin\PagesController@uploadImage')->name('upload');

@@ -39,11 +39,13 @@ use App\Models\{
     Country,
     Amenities,
     AmenityType,
+    Area,
     User,
     Settings,
     Bookings,
     Currency,
-    City
+    City,
+    PricingType,
 };
 
 class PropertiesController extends Controller
@@ -53,22 +55,26 @@ class PropertiesController extends Controller
     {
         $data['from'] = isset(request()->from) ? request()->from : null;
         $data['to'] = isset(request()->to) ? request()->to : null;
-        $data['space_type_all'] = SpaceType::getAll();
+        $data['property_type_all'] = PropertyType::getAll();
+
 
         if (isset(request()->reset_btn)) {
             $data['from'] = null;
             $data['to'] = null;
             $data['allstatus'] = '';
-            $data['allSpaceType'] = '';
+            $data['allPropertyType'] = '';
             return $dataTable->render('admin.properties.view', $data);
         }
+
+
         isset(request()->status) ? $data['allstatus'] = $allstatus = request()->status : $data['allstatus'] = $allstatus = '';
-        isset(request()->space_type) ? $data['allSpaceType'] = request()->space_type : $data['allSpaceType'] = '';
+        isset(request()->property_type) ? $data['allPropertyType'] = request()->property_type : $data['allPropertyType'] = '';
         return $dataTable->render('admin.properties.view', $data);
     }
 
     public function add(Request $request)
     {
+        // dd($request);
         if ($request->isMethod('post')) {
             $rules = array(
                 'property_type_id' => 'required',
@@ -101,9 +107,11 @@ class PropertiesController extends Controller
             $validator->setAttributeNames($fieldNames);
 
             if ($validator->fails()) {
-                dd($validator);
                 return back()->withErrors($validator)->withInput();
             } else {
+                $country = Country::where('short_name', $request->country)->first();
+                $city = City::findOrFail($request->city);
+                // $area = Area::findOrFail($request->area);
                 $addressParts = [$request->area];
 
                 if (!empty($request->building)) {
@@ -125,13 +133,13 @@ class PropertiesController extends Controller
                 $property->slug = Common::pretty_url($property->name);
                 $property->is_verified = 'Approved';
                 $property->save();
-
+                // dd($property);
                 $property_address = new PropertyAddress;
                 $property_address->property_id = $property->id;
                 $property_address->address_line_1 = $request->route;
-                $property_address->city = $request->city;
-                $property_address->state = $request->state;
-                $property_address->country = $request->country;
+                $property_address->city = $city->name;
+                $property_address->state = $country->short_name;
+                $property_address->country = $country->short_name;
                 $property_address->postal_code = $request->postal_code;
                 $property_address->latitude = $request->latitude;
                 $property_address->longitude = $request->longitude;
@@ -139,10 +147,11 @@ class PropertiesController extends Controller
                 $property_address->building = $request->building;
                 $property_address->flat_no = $request->flat_no;
                 $property_address->save();
-
+                
                 $property_price = new PropertyPrice;
                 $property_price->property_id = $property->id;
                 $property_price->currency_code = \Session::get('currency');
+                $property_price->property_type_id = 1;
                 $property_price->save();
 
                 $property_steps = new PropertySteps;
@@ -169,9 +178,25 @@ class PropertiesController extends Controller
         $cities = City::where('country_id', $country->id)->get();
         return response()->json(['cities' => $cities]);
     }
+    public function getAreas($country, $city)
+    {
+        dd($country,$city);
+        $country = Country::where('short_name', $country)->first();
+        if (!$country) {
+            return response()->json(['error' => 'Country not found'], 404);
+        }
+        $city = City::findOrFail($city);
+        if (!$city) {
+            return response()->json(['error' => 'City not found'], 404);
+        }
+        $areas = Area::where('country_id', $country->id)
+            ->where('city_id', $city->id)
+            ->get();
+        return response()->json(['areas' => $areas]);
+    }
+
     public function listing(Request $request, CalendarController $calendar)
     {
-
         $step = $request->step;
         $property_id = $request->id;
 
@@ -335,6 +360,7 @@ class PropertiesController extends Controller
 
         } elseif ($step == 'photos') {
             if ($request->isMethod('post')) {
+
                 if ($request->crop == 'crop' && $request->photos) {
                     $baseText = explode(";base64,", $request->photos);
                     $name = explode(".", $request->img_name);
@@ -372,7 +398,7 @@ class PropertiesController extends Controller
                         $name = str_replace(' ', '_', $_FILES["file"]["name"]);
                         $ext = pathinfo($name, PATHINFO_EXTENSION);
                         $image = time() . '_' . $name;
-                        $path = 'public/images/property/' . $property_id;
+                        $path = 'images/property/' . $property_id;
                         if ($ext == 'png' || $ext == 'jpg' || $ext == 'jpeg' || $ext == 'gif' || $ext == 'JPG') {
                             $uploaded = move_uploaded_file($tmp_name, $path . "/" . $image);
                         }
@@ -406,7 +432,6 @@ class PropertiesController extends Controller
                 }
 
                 return redirect('admin/listing/' . $property_id . '/photos')->with('success', 'File Uploaded Successfully!');
-
             }
 
             $data['photos'] = PropertyPhotos::where('property_id', $property_id)
@@ -414,48 +439,83 @@ class PropertiesController extends Controller
                 ->get();
         } elseif ($step == 'pricing') {
             if ($request->isMethod('post')) {
-                $bookings = Bookings::where('property_id', $property_id)->where('currency_code', '!=', $request->currency_code)->first();
+                // Check for existing bookings with a different currency
+                $bookings = Bookings::where('property_id', $property_id)
+                    ->where('currency_code', '!=', $request->currency_code)
+                    ->first();
+
                 if ($bookings) {
                     Common::one_time_message('error', __('Booking has been made using the current currency. It cannot be changed now'));
                     return redirect()->back();
                 }
-                $rules = array(
-                    'price' => 'required|numeric|min:5',
-                );
 
-                $fieldNames = array(
-                    'price' => 'Price',
-                );
+                $rules = [
+                    'prices' => 'required|array',
+                    'pricing_type' => 'required|array', // Ensure pricing_type is also required
+                ];
 
+                $fieldNames = [
+                    'prices' => 'Price',
+                    'pricing_type' => 'Pricing Type',
+                ];
+
+                // Validate the request
                 $validator = Validator::make($request->all(), $rules);
                 $validator->setAttributeNames($fieldNames);
 
                 if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
                 } else {
-                    $property_price = PropertyPrice::where('property_id', $property_id)->first();
-                    $property_price->price = $request->price;
-                    $property_price->weekly_discount = $request->weekly_discount;
-                    $property_price->monthly_discount = $request->monthly_discount;
-                    $property_price->currency_code = $request->currency_code;
-                    $property_price->cleaning_fee = $request->cleaning_fee;
-                    $property_price->guest_fee = $request->guest_fee;
-                    $property_price->guest_after = $request->guest_after;
-                    $property_price->security_fee = $request->security_fee;
-                    $property_price->weekend_price = $request->weekend_price;
-                    $property_price->save();
+                    // Initialize arrays to avoid null errors
+                    $prices = $request->input('prices', []);
+                    $pricingTypes = $request->input('pricing_type', []);
 
+                    // Ensure both arrays are valid
+                    if (!is_array($prices) || !is_array($pricingTypes)) {
+                        return back()->with('error', __('Invalid data provided.'));
+                    }
+
+                    // Iterate through the price array
+                    foreach ($prices as $index => $price) {
+                        $property_type_id = $pricingTypes[$index]; // Get the corresponding property type ID
+
+                        // Use updateOrCreate to either update an existing record or create a new one
+                        PropertyPrice::updateOrCreate(
+                            [
+                                'property_id' => $property_id,
+                                'property_type_id' => $property_type_id,
+                            ],
+                            [
+                                'price' => $price,
+                                'weekly_discount' => $request->weekly_discount ?? 0, // Default to 0 if null
+                                'monthly_discount' => $request->monthly_discount ?? 0, // Default to 0 if null
+                                'currency_code' => $request->currency_code,
+                                'cleaning_fee' => $request->cleaning_fee ?? 0, // Default to 0 if null
+                                'guest_fee' => $request->guest_fee ?? 0, // Default to 0 if null
+                                'guest_after' => $request->guest_after ?? 0, // Default to 0 if null
+                                'security_fee' => $request->security_fee ?? 0, // Default to 0 if null
+                                'weekend_price' => $request->weekend_price ?? 0, // Default to 0 if null
+                            ]
+                        );
+                    }
+
+                    // Update the PropertySteps model after processing all prices
                     $property_steps = PropertySteps::where('property_id', $property_id)->first();
-                    $property_steps->pricing = 1;
-                    $property_steps->save();
+                    if ($property_steps) {
+                        $property_steps->pricing = 1;
+                        $property_steps->save();
+                    }
 
-                    return redirect('admin/listing/' . $property_id . '/booking');
+                    // Redirect to the booking page
+                    return redirect('admin/listing/' . $property_id . '/booking')->with('success', __('Pricing updated successfully.'));
                 }
             }
+
+
         } elseif ($step == 'booking') {
             if ($request->isMethod('post')) {
 
-                $property_steps          = PropertySteps::where('property_id', $property_id)->first();
+                $property_steps = PropertySteps::where('property_id', $property_id)->first();
                 $property_steps->booking = 1;
                 $property_steps->save();
 
@@ -464,13 +524,14 @@ class PropertiesController extends Controller
                 $properties->status = ($properties->steps_completed == 0) ? 'Listed' : 'Unlisted';
                 $properties->save();
 
-                return redirect('admin/listing/' . $property_id . '/calender');
+                return redirect('admin/properties')->with('success', 'Property has been listed');
             }
-        } elseif ($step == 'calender') {
-            $data['calendar'] = $calendar->generate($request->id);
         }
 
-        return view("admin.listing.$step", $data);
+        $pricing_types = PricingType::all();
+        $propertyPricing = PropertyPrice::where('property_id', $property_id)->get();
+        return view("admin.listing.$step", array_merge($data, compact('pricing_types', 'propertyPricing')));
+
     }
 
     public function update(Request $request)

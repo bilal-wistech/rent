@@ -213,6 +213,8 @@
 @endsection
 
 
+<!-- city Modal -->
+
 <div class="modal fade" id="cityModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -244,7 +246,7 @@
     </div>
 </div>
 
-
+<!-- Lanlord Modal -->
 
 <div class="modal" id="LandloardModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
@@ -326,9 +328,46 @@
 </div>
 
 
+<!-- Area Modal -->
+
+<div class="modal fade" id="areaModal" tabindex="-1" role="dialog" aria-labelledby="areaModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="areaModalLabel">Add Area Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add_area_form" method="POST" action="{{ route('area.addAjax') }}" class="form-horizontal">
+                    {{ csrf_field() }}
+                    <div class="box-body">
+                        <div class="form-group row">
+                            <label for="area_name" class="col-sm-3 col-form-label">Area Name</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="area_name" name="name"
+                                    placeholder="Area Name" required>
+                            </div>
+                        </div>
+                        <input type="hidden" id="modal_city" name="city" value="">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="AreaModalbtn">Add Area</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 
 <script>
     var addCityUrl = "{{ route('city.addAjax') }}";
+    var addAreaUrl = "{{ route('area.addAjax') }}";
     var csrfToken = "{{ csrf_token() }}"; // Fetch CSRF token for security
 </script>
 
@@ -340,6 +379,7 @@
 <script src="{{ asset('backend/js/intl-tel-input-13.0.0/build/js/intlTelInput.js') }}" type="text/javascript"></script>
 <script src="{{ asset('backend/js/isValidPhoneNumber.js') }}" type="text/javascript"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <!-- for Landlord -->
 <script>
     $(document).ready(function () {
@@ -421,7 +461,7 @@
 
                         // Trigger change event for Select2 to update its state
                         $('#host_id').trigger('change');
-
+                        $('#LandloardModal').modal('hide');
                         // Reset the form fields after successful addition
                         $("#signup_form")[0].reset();
                     },
@@ -439,12 +479,8 @@
 
 </script>
 
-
-
-
+<!--  code for the city  -->
 <script>
-    // code for the city 
-
     $(document).ready(function () {
         $('#AddCityModal').on('click', function () {
             let City = $('#city_name').val().trim(); // Trim whitespace
@@ -495,7 +531,60 @@
     });
 </script>
 
+<!-- code for area -->
+<script>
+    $(document).ready(function () {
+        $('#AreaModalbtn').on('click', function () {
+            let Area = $('#area_name').val().trim();
+            let cityP = $('#modal_city').val();
+            // Clear previous error messages
+            $('#area_name').removeClass('is-invalid');
+            $('#area_name').next('.error-message').remove();
 
+            if (!Area) {
+                // If the city name is empty, show an error message
+                $('#area_name').addClass('is-invalid');
+                $('#area_name').after('<span class="error-message text-danger">This field is required</span>');
+            } else {
+                // Send the city name to the server via AJAX
+                $.post({
+                    url: addAreaUrl,
+                    data: {
+                        name: Area,
+                        city: cityP,
+                        _token: csrfToken // Include CSRF token for security if required
+                    },
+
+                    success: function (response) {
+                        //         // Handle successful response
+                        if (response.area) { // Assuming your response has a success flag
+                            $('#area_name').val(''); // Clear the input field
+                            $('#modal_city').val(''); // Clear the input field
+                            $('#areaModal').modal('hide'); // Close the modal if using Bootstrap
+                            $("#area").append(
+                                '<option data-icon-class="icon-star-alt" value="' +
+                                response.area.id +
+                                '" selected="selected">' +
+                                response.area.name +
+                                "</option>"
+                            );
+
+                        } else {
+                            alert('Failed to add city: ' + response.message);
+                        }
+                        //     },
+                        //     error: function (xhr, status, error) {
+                        //         // Handle errors here
+                        //         console.error('Error adding city:', error);
+                        //         alert('An error occurred while adding the city. Please try again.');
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<!--  -->
 
 
 
@@ -523,20 +612,20 @@
 <script src="{{ asset('backend/js/add_customer_for_properties.min.js') }}" type="text/javascript"></script>
 <script>
     $(document).ready(function () {
-        // Initialize select2 for country and city
-        $('#country, #city').select2();
+        // Initialize Select2 for country, city, and area
+        $('#country, #city, #area').select2();
 
+        // Toggle building and flat number fields based on property type
         $('#property_type_id').on('change', function () {
-            let property_type_id = $(this).val();
-            if (property_type_id == 1) {
-                $('.building').removeClass('d-none');
-                $('.flat_no').removeClass('d-none');
+            let propertyTypeId = $(this).val();
+            if (propertyTypeId == 1) {
+                $('.building, .flat_no').removeClass('d-none');
             } else {
-                $('.building').addClass('d-none');
-                $('.flat_no').addClass('d-none');
+                $('.building, .flat_no').addClass('d-none');
             }
         });
 
+        // Initialize host select2 with AJAX for landlord search
         $('#host_id').select2({
             ajax: {
                 url: '{{ route('admin.bookings.form_customer_search') }}',
@@ -550,7 +639,6 @@
                 },
                 processResults: function (data, params) {
                     params.page = params.page || 1;
-
                     return {
                         results: data.results,
                         pagination: {
@@ -564,37 +652,37 @@
             minimumInputLength: 0,
         });
 
+        // Load cities based on selected country
         $('#country').on('change', function () {
-            var selectedCountry = $(this).val();
-
+            let selectedCountry = $(this).val();
             if (selectedCountry) {
                 $.ajax({
                     url: '/admin/properties/cities-by-country/' + selectedCountry,
                     type: 'GET',
                     dataType: 'json',
                     success: function (response) {
+                        $('#city').empty().append('<option value="">Select a City</option>');
                         if (response.cities) {
-                            $('#city').empty();
-                            $('#city').append('<option value="">Select a City</option>');
                             $.each(response.cities, function (key, city) {
-                                $('#city').append('<option value="' + city.id +
-                                    '">' + city.name + '</option>');
+                                $('#city').append('<option value="' + city.id + '">' + city.name + '</option>');
                             });
                         }
+                        $('#city').trigger('change'); // Refresh Select2 for city
                     },
                     error: function (xhr, status, error) {
-                        console.log('Error: ', error);
+                        console.error('Error fetching cities:', error);
                     }
                 });
             } else {
                 $('#city').empty().append('<option value="">Select a City</option>');
             }
+            $('#city, #area').trigger('change'); // Clear area options if country changes
         });
 
-        //Area
+        // Load areas based on selected city
         $('#city').on('change', function () {
-            var selectedCountry = $('#country').val();
-            var selectedCity = $('#city').val();
+            let selectedCountry = $('#country').val();
+            let selectedCity = $(this).val();
 
             if (selectedCountry && selectedCity) {
                 $.ajax({
@@ -602,67 +690,52 @@
                     type: 'GET',
                     dataType: 'json',
                     success: function (response) {
+                        $('#area').empty().append('<option value="">Select an Area</option>');
                         if (response.areas) {
-                            $('#area').empty();
-                            $('#area').append('<option value="">Select a Area</option>');
                             $.each(response.areas, function (key, area) {
-                                $('#area').append('<option value="' + area.name +
-                                    '">' + area.name + '</option>');
+                                $('#area').append('<option value="' + area.id + '">' + area.name + '</option>');
                             });
                         }
+                        $('#area').trigger('change'); // Refresh Select2 for area
                     },
                     error: function (xhr, status, error) {
-                        console.log('Error: ', error);
+                        console.error('Error fetching areas:', error);
                     }
                 });
             } else {
-                $('#area').empty().append('<option value="">Select a Area</option>');
+                $('#area').empty().append('<option value="">Select an Area</option>');
             }
         });
 
-
+        // Country, city, and area selection modals
         $('#cityIcon').on('click', function (event) {
             event.preventDefault();
-            $('#errorCountry').text('').removeClass('text-danger');
-
-            var selectedCountry = $('#country').val();
+            let selectedCountry = $('#country').val();
             if (!selectedCountry) {
-
                 $('#errorCountry').text('Please select a country first.').addClass('text-danger');
                 return;
             }
-
+            $('#errorCountry').text('').removeClass('text-danger');
             $('#modal_country').val(selectedCountry);
             $('#cityModal').modal('show');
         });
 
-
-
         $('#areaIcon').on('click', function (event) {
             event.preventDefault();
+            let selectedCountry = $('#country').val();
+            let selectedCity = $('#city').val();
 
-            $('#errorCountry').text('').removeClass('text-danger');
-
-            var selectedCountry = $('#country').val();
             if (!selectedCountry) {
-
                 $('#errorCountry').text('Please select a country first.').addClass('text-danger');
                 return;
             }
-            $('#errorCity').text('').removeClass('text-danger');
-
-            var selectedCity = $('#city').val();
             if (!selectedCity) {
-
                 $('#errorCity').text('Please select a city first.').addClass('text-danger');
                 return;
             }
-
-            // Populate hidden fields in the modal
+            $('#errorCountry, #errorCity').text('').removeClass('text-danger');
             $('#modal_country').val(selectedCountry);
             $('#modal_city').val(selectedCity);
-
-            // Show modal
             $('#areaModal').modal('show');
         });
     });

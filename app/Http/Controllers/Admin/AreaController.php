@@ -15,7 +15,7 @@ class AreaController extends Controller
     public function index()
     {
 
-      }
+    }
     public function create()
     {
 
@@ -31,7 +31,7 @@ class AreaController extends Controller
 
         try {
             $city = City::findOrFail($request->city_id);
-    Area::create([
+            Area::create([
                 'name' => $request->name,
                 'city_id' => $request->city_id,
                 'country_id' => $city->country_id,
@@ -46,33 +46,32 @@ class AreaController extends Controller
         }
     }
 
-     public function show($id)
-{
-    try {
-        $dataTable = new AreaDataTable($id);
-        return $dataTable->render('admin.area.view', ['cityId' => $id]);
-    } catch (\Exception $e) {
-        \Log::error($e->getMessage());
-        return response()->json(['error' => 'An error occurred.'], 500);
-    }
-}
+    // public function show($id)
+    // {
+    //     try {
+    //         $dataTable = new AreaDataTable($id);
+    //         return $dataTable->render('admin.area.view', ['cityId' => $id]);
+    //     } catch (\Exception $e) {
+    //         \Log::error($e->getMessage());
+    //         return response()->json(['error' => 'An error occurred.'], 500);
+    //     }
+    // }
 
     public function add($cityId)
     {
- return view('admin.area.add', compact('cityId'));
+        return view('admin.area.add', compact('cityId'));
     }
     public function edit($id)
     {
 
         $area = Area::findOrFail($id);
-        if($area){
+        if ($area) {
             return view('admin.area.edit', compact('area'));
-        }
-        else{
+        } else {
             return redirect()->back()->with('error', 'An error occurred while deleting the area.');
 
         }
-      }
+    }
 
 
     public function update(Request $request, $id)
@@ -83,13 +82,14 @@ class AreaController extends Controller
         ]);
 
 
-            $area= Area::find($id);
-            $area->name = $request->name;
-            $area->save();
-            return view('admin.area.edit', [
-                'area' =>$area,
-                'success', 'City updated successfully'
-            ]);
+        $area = Area::find($id);
+        $area->name = $request->name;
+        $area->save();
+        return view('admin.area.edit', [
+            'area' => $area,
+            'success',
+            'City updated successfully'
+        ]);
 
     }
     public function addAjax(Request $request)
@@ -125,10 +125,10 @@ class AreaController extends Controller
         try {
             $area = Area::findOrFail($id);
             $area->delete();
-          return redirect()->back()->with('success', 'Area deleted successfully.');
+            return redirect()->back()->with('success', 'Area deleted successfully.');
         } catch (\Exception $e) {
             \Log::error($e->getMessage());
-           return redirect()->back()->with('error', 'An error occurred while deleting the area.');
+            return redirect()->back()->with('error', 'An error occurred while deleting the area.');
         }
     }
 

@@ -20,11 +20,13 @@ use App\Models\{
     Properties,
     User,
     Currency,
+    Country,
     SpaceType,
     Payouts,
     Settings,
     PayoutSetting,
-    Wallet
+    Wallet,
+    Area
 };
 use Modules\DirectBankTransfer\Entities\DirectBankTransfer;
 use App\Models\PaymentMethods;
@@ -824,6 +826,53 @@ class BookingsController extends Controller
             ],
         ]);
     }
+
+
+    public function searchFormArea(Request $request)
+    {
+        $str = $request->term;
+        $page = $request->page ?? 1;
+        $perPage = 5;
+        $countryId = $request->country_id; // Get country ID directly from request
+        $cityId = $request->city_id; // Get city ID directly from request
+
+        $countryIdNew =  Area::where('short_name' , $countryId)->get('id');
+
+        // Query areas with matching country_id and city_id
+        $query = Area::where('country_id', $countryIdNew)
+            ->where('city_id', $cityId);
+
+        // Apply search term if provided
+        if ($str) {
+            $query->where('name', 'LIKE', '%' . $str . '%');
+        }
+
+        // Paginate the results
+        $myresult = $query->paginate($perPage, ['*'], 'page', $page);
+
+        // Format the results for Select2
+        $myArr = [];
+
+        if ($myresult->isEmpty()) {
+            $myArr = null;
+        } else {
+
+            foreach ($myresult as $result) {
+                $myArr[] = [
+                    "id" => $result->id,
+                    "text" => $result->name,
+                ];
+            }
+        }
+
+        return response()->json([
+            'results' => $myArr,
+            'pagination' => [
+                'more' => $myresult->hasMorePages(),
+            ],
+        ]);
+    }
+
 
 
 }
