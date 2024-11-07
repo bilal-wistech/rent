@@ -584,9 +584,6 @@
     });
 </script>
 
-<!--  -->
-
-
 
 @section('validate_script')
 <!-- Load jQuery first -->
@@ -614,7 +611,7 @@
 <script>
     $(document).ready(function () {
         // Initialize select2 for country and city
-        $('#country, #city').select2();
+        $('#country, #city , #area').select2();
 
         $('#property_type_id').on('change', function () {
             let property_type_id = $(this).val();
@@ -654,6 +651,45 @@
             minimumInputLength: 0,
         });
 
+
+        // $('#city').select2({
+        //     ajax: {
+        //         url: '{{ route('admin.bookings.form_area_search') }}',
+        //         dataType: 'json',
+        //         delay: 250,
+        //         data: function (params) {
+        //             // Get city and country IDs
+        //             const cityId = $('#city_id').val();
+        //             const countryId = $('#country_id').val();
+
+        //             // If city_id or country_id is missing, return an empty object to cancel the request
+        //             if (!cityId || !countryId) {
+        //                 return {};
+        //             }
+
+        //             return {
+        //                 term: params.term || null,
+        //                 page: params.page || 1,
+        //                 city_id: selectedCity,
+        //                 country_id: selectedCountry
+        //             };
+        //         },
+        //         processResults: function (data, params) {
+        //             params.page = params.page || 1;
+
+        //             return {
+        //                 results: data.results,
+        //                 pagination: {
+        //                     more: data.pagination.more
+        //                 }
+        //             };
+        //         },
+        //         cache: true
+        //     },
+        //     placeholder: 'Select a Area',
+        //     minimumInputLength: 0,
+        // });
+
         $('#country').on('change', function () {
             var selectedCountry = $(this).val();
 
@@ -681,38 +717,87 @@
             }
         });
 
-        //Area
         $('#city').on('change', function () {
-            var selectedCountry = $('#country').val();
-            var selectedCity = $('#city').val();
+            let selectedCountry = $('#country').val();
+            let selectedCity = $('#city').val();
 
             if (selectedCountry && selectedCity) {
+                // Check that both country and city are selected
                 $.ajax({
-                    url: AreaUrl,
-                    type: 'post',
-                    data: {
-                        country_code: selectedCountry,
-                        city_id: selectedCity,
-                    },
-                    // dataType: 'json',
+                    url: '/admin/properties/get-areas/' + selectedCountry + '/' + selectedCity,
+                    type: 'GET', // Use GET since we're retrieving data
                     success: function (response) {
-                        if (response.areas) {
-                            $('#area').empty();
-                            $('#area').append('<option value="">Select a Area</option>');
+                        // Check if response contains areas data
+                        if (response.areas && response.areas.length > 0) {
+                            $('#area').empty(); // Clear existing options
+                            $('#area').append('<option value="">Select an Area</option>');
+
+                            // Populate dropdown with new area data
                             $.each(response.areas, function (key, area) {
-                                $('#area').append('<option value="' + area.name +
-                                    '">' + area.name + '</option>');
+                                $('#area').append('<option value="' + area.name + '">' + area.name + '</option>');
                             });
+                        } else {
+                            console.warn("No areas found in the response");
+                            $('#area').empty().append('<option value="">No areas available</option>');
                         }
                     },
                     error: function (xhr, status, error) {
-                        console.log('Error: ', error);
+                        console.error("AJAX Error: ", status, error);
+                        $('#area').empty().append('<option value="">Error loading areas</option>');
                     }
                 });
             } else {
-                $('#area').empty().append('<option value="">Select a Area</option>');
+                console.warn("Please select both country and city");
+                $('#area').empty().append('<option value="">Select an Area</option>');
             }
         });
+
+
+        // if ($selectedCountry, $selectedCity) {
+        //     $.ajax({
+        //         url: AreaUrl,
+        //         type: 'post',
+        //         data: {
+        //             country_code: selectedCountry,
+        //             city_id: selectedCity,
+        //         },
+        //     });
+        // }
+
+        // });
+
+        //Area
+        // $('#city').on('change', function () {
+        //     var selectedCountry = $('#country').val();
+        //     var selectedCity = $('#city').val();
+
+        //     if (selectedCountry && selectedCity) {
+        //         $.ajax({
+        //             url: AreaUrl,
+        //             type: 'post',
+        //             data: {
+        //                 country_code: selectedCountry,
+        //                 city_id: selectedCity,
+        //             },
+        //             // dataType: 'json',
+        //             success: function (response) {
+        //                 if (response.areas) {
+        //                     $('#area').empty();
+        //                     $('#area').append('<option value="">Select a Area</option>');
+        //                     $.each(response.areas, function (key, area) {
+        //                         $('#area').append('<option value="' + area.name +
+        //                             '">' + area.name + '</option>');
+        //                     });
+        //                 }
+        //             },
+        //             error: function (xhr, status, error) {
+        //                 console.log('Error: ', error);
+        //             }
+        //         });
+        //     } else {
+        //         $('#area').empty().append('<option value="">Select a Area</option>');
+        //     }
+        // });
 
 
         $('#cityIcon').on('click', function (event) {

@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\DataTables\PropertyDataTable;
 use App\Exports\PropertiesExport;
+
 use App\Http\Controllers\Admin\CalendarController;
 use App\Models\{
     Properties,
@@ -43,7 +44,8 @@ use App\Models\{
     Settings,
     Bookings,
     Currency,
-    City
+    City,
+    Area
 };
 
 class PropertiesController extends Controller
@@ -455,7 +457,7 @@ class PropertiesController extends Controller
         } elseif ($step == 'booking') {
             if ($request->isMethod('post')) {
 
-                $property_steps          = PropertySteps::where('property_id', $property_id)->first();
+                $property_steps = PropertySteps::where('property_id', $property_id)->first();
                 $property_steps->booking = 1;
                 $property_steps->save();
 
@@ -649,4 +651,24 @@ class PropertiesController extends Controller
             ->orderBy('properties.id', 'desc');
         return $query;
     }
+
+
+    public function getAreas($country, $city)
+    {
+        // dd($country,$city);
+        $country = Country::where('short_name', $country)->first();
+        if (!$country) {
+            return response()->json(['error' => 'Country not found'], 404);
+        }
+        $city = City::findOrFail($city);
+        if (!$city) {
+            return response()->json(['error' => 'City not found'], 404);
+        }
+        $areas = Area::where('country_id', $country->id)
+            ->where('city_id', $city->id)
+            ->get();
+        return response()->json(['areas' => $areas]);
+    }
+
+
 }

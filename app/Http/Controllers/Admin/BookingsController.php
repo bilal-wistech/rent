@@ -24,13 +24,15 @@ use App\Models\{
     Payouts,
     Settings,
     PayoutSetting,
-    Wallet
+    Wallet,
+    Area
 };
 use Modules\DirectBankTransfer\Entities\DirectBankTransfer;
 use App\Models\PaymentMethods;
 use App\Http\Requests\AddAdminBookingRequest;
 use App\Http\Requests\CheckExistingBookingRequest;
 use App\Models\Invoice;
+use App\Models\Country;
 
 class BookingsController extends Controller
 {
@@ -817,6 +819,69 @@ class BookingsController extends Controller
         }
 
 
+        return response()->json([
+            'results' => $myArr,
+            'pagination' => [
+                'more' => $myresult->hasMorePages(),
+            ],
+        ]);
+    }
+
+
+
+    public function searchFormArea(Request $request)
+    {
+        $str = $request->term;
+        $page = $request->page ?? 1;
+        $perPage = 5;
+
+        // Get the country_id directly as an integer.
+        $country = Country::where('short_name', $request->country_id)->first();
+        $country_id = $country ? $country->id : null;
+
+
+        // Check if the country_id is valid, otherwise return an empty result.
+        if (!$country_id) {
+            return response()->json([
+                'results' => [],
+                'pagination' => ['more' => false],
+            ]);
+        }
+
+        // Build the query with city and country filters.
+        $query = Area::select('id', 'name')
+            ->where('city_id', $request->city_id)
+            ->where('country_id', $country_id);
+
+        dd($query);
+
+        // Apply the search filter if a term is provided.
+        if ($str) {
+            $query->where('name', 'LIKE', '%' . $str . '%');
+        }
+
+        // Paginate the results.
+        $myresult = $query->paginate($perPage, ['*'], 'page', $page);
+
+        // Prepare the response array.
+        $myArr = [];
+        if ($myresult->isEmpty()) {
+            $myArr = null;
+        } else {
+            $myArr[] = [
+                "id" => "",
+                "text" => "All"
+            ];
+
+            foreach ($myresult as $result) {
+                $myArr[] = [
+                    "id" => $result->id,
+                    "text" => $result->name,
+                ];
+            }
+        }
+
+        // Return the JSON response.
         return response()->json([
             'results' => $myArr,
             'pagination' => [
