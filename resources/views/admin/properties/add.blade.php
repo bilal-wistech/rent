@@ -611,21 +611,24 @@
 </script>
 <script src="{{ asset('backend/js/add_customer_for_properties.min.js') }}" type="text/javascript"></script>
 <script>
+    let AreaUrl = {{route('get-areas')}};
+</script>
+<script>
     $(document).ready(function () {
-        // Initialize Select2 for country, city, and area
-        $('#country, #city, #area').select2();
+        // Initialize select2 for country and city
+        $('#country, #city').select2();
 
-        // Toggle building and flat number fields based on property type
         $('#property_type_id').on('change', function () {
-            let propertyTypeId = $(this).val();
-            if (propertyTypeId == 1) {
-                $('.building, .flat_no').removeClass('d-none');
+            let property_type_id = $(this).val();
+            if (property_type_id == 1) {
+                $('.building').removeClass('d-none');
+                $('.flat_no').removeClass('d-none');
             } else {
-                $('.building, .flat_no').addClass('d-none');
+                $('.building').addClass('d-none');
+                $('.flat_no').addClass('d-none');
             }
         });
 
-        // Initialize host select2 with AJAX for landlord search
         $('#host_id').select2({
             ajax: {
                 url: '{{ route('admin.bookings.form_customer_search') }}',
@@ -639,6 +642,7 @@
                 },
                 processResults: function (data, params) {
                     params.page = params.page || 1;
+
                     return {
                         results: data.results,
                         pagination: {
@@ -652,90 +656,109 @@
             minimumInputLength: 0,
         });
 
-        // Load cities based on selected country
         $('#country').on('change', function () {
-            let selectedCountry = $(this).val();
+            var selectedCountry = $(this).val();
+
             if (selectedCountry) {
                 $.ajax({
                     url: '/admin/properties/cities-by-country/' + selectedCountry,
                     type: 'GET',
                     dataType: 'json',
                     success: function (response) {
-                        $('#city').empty().append('<option value="">Select a City</option>');
                         if (response.cities) {
+                            $('#city').empty();
+                            $('#city').append('<option value="">Select a City</option>');
                             $.each(response.cities, function (key, city) {
-                                $('#city').append('<option value="' + city.id + '">' + city.name + '</option>');
+                                $('#city').append('<option value="' + city.id +
+                                    '">' + city.name + '</option>');
                             });
                         }
-                        $('#city').trigger('change'); // Refresh Select2 for city
                     },
                     error: function (xhr, status, error) {
-                        console.error('Error fetching cities:', error);
+                        console.log('Error: ', error);
                     }
                 });
             } else {
                 $('#city').empty().append('<option value="">Select a City</option>');
             }
-            $('#city, #area').trigger('change'); // Clear area options if country changes
         });
 
-        // Load areas based on selected city
+        //Area
         $('#city').on('change', function () {
-            let selectedCountry = $('#country').val();
-            let selectedCity = $(this).val();
+            var selectedCountry = $('#country').val();
+            var selectedCity = $('#city').val();
 
             if (selectedCountry && selectedCity) {
                 $.ajax({
-                    url: '/admin/properties/get-areas/' + selectedCountry + '/' + selectedCity,
-                    type: 'GET',
-                    dataType: 'json',
+                    url: AreaUrl,
+                    type: 'post',
+                    data: {
+                        country_code: selectedCountry,
+                        city_id: selectedCity,
+                    },
+                    // dataType: 'json',
                     success: function (response) {
-                        $('#area').empty().append('<option value="">Select an Area</option>');
                         if (response.areas) {
+                            $('#area').empty();
+                            $('#area').append('<option value="">Select a Area</option>');
                             $.each(response.areas, function (key, area) {
-                                $('#area').append('<option value="' + area.id + '">' + area.name + '</option>');
+                                $('#area').append('<option value="' + area.name +
+                                    '">' + area.name + '</option>');
                             });
                         }
-                        $('#area').trigger('change'); // Refresh Select2 for area
                     },
                     error: function (xhr, status, error) {
-                        console.error('Error fetching areas:', error);
+                        console.log('Error: ', error);
                     }
                 });
             } else {
-                $('#area').empty().append('<option value="">Select an Area</option>');
+                $('#area').empty().append('<option value="">Select a Area</option>');
             }
         });
 
-        // Country, city, and area selection modals
+
         $('#cityIcon').on('click', function (event) {
             event.preventDefault();
-            let selectedCountry = $('#country').val();
+            $('#errorCountry').text('').removeClass('text-danger');
+
+            var selectedCountry = $('#country').val();
             if (!selectedCountry) {
+
                 $('#errorCountry').text('Please select a country first.').addClass('text-danger');
                 return;
             }
-            $('#errorCountry').text('').removeClass('text-danger');
+
             $('#modal_country').val(selectedCountry);
             $('#cityModal').modal('show');
         });
 
+
+
         $('#areaIcon').on('click', function (event) {
             event.preventDefault();
-            let selectedCountry = $('#country').val();
-            let selectedCity = $('#city').val();
 
+            $('#errorCountry').text('').removeClass('text-danger');
+
+            var selectedCountry = $('#country').val();
             if (!selectedCountry) {
+
                 $('#errorCountry').text('Please select a country first.').addClass('text-danger');
                 return;
             }
+            $('#errorCity').text('').removeClass('text-danger');
+
+            var selectedCity = $('#city').val();
             if (!selectedCity) {
+
                 $('#errorCity').text('Please select a city first.').addClass('text-danger');
                 return;
             }
-            $('#errorCountry, #errorCity').text('').removeClass('text-danger');
+
+            // Populate hidden fields in the modal
             $('#modal_country').val(selectedCountry);
             $('#modal_city').val(selectedCity);
+
+            // Show modal
             $('#areaModal').modal('show');
         });
     });

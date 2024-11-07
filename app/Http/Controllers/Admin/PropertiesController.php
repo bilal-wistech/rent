@@ -178,14 +178,13 @@ class PropertiesController extends Controller
         $cities = City::where('country_id', $country->id)->get();
         return response()->json(['cities' => $cities]);
     }
-    public function getAreas($country, $city)
-    {
-        dd($country,$city);
-        $country = Country::where('short_name', $country)->first();
+    public function getAreas(Request $request){
+        // dd($country,$city);
+        $country = Country::where('short_name', $request->country_code)->first();
         if (!$country) {
             return response()->json(['error' => 'Country not found'], 404);
         }
-        $city = City::findOrFail($city);
+        $city = City::findOrFail($request->city_id);
         if (!$city) {
             return response()->json(['error' => 'City not found'], 404);
         }
