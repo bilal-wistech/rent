@@ -34,7 +34,7 @@
                                         <div class="card-header">
                                             <h5 class="card-title">Listing Details</h5>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="card-body bg-white">
                                             <div class="row">
                                                 <div class="col-md-8 col-sm-12 col-xs-12 mb-4">
                                                     <label class="form-label fw-bold">Listing Name <span class="text-danger">*</span></label>
@@ -56,10 +56,10 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-6 text-start">
-                                                    <a href="{{ url('admin/listing/' . $result->id . '/basics') }}" class="btn btn-primary f-14">Back</a>
+                                                    <a href="{{ url('admin/listing/' . $result->id . '/basics') }}" class="btn btn-primary btn-sm f-14">Back</a>
                                                 </div>
                                                 <div class="col-6 text-end">
-                                                    <button type="submit" class="btn btn-primary next-section-button f-14">Next</button>
+                                                    <button type="submit" class="btn btn-primary btn-sm next-section-button f-14">Next</button>
                                                 </div>
                                             </div>
                                         </div>

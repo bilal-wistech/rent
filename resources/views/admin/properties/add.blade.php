@@ -368,7 +368,7 @@
 <script>
     var addCityUrl = "{{ route('city.addAjax') }}";
     var addAreaUrl = "{{ route('area.addAjax') }}";
-    var csrfToken = "{{ csrf_token() }}"; // Fetch CSRF token for security
+    var csrfToken = "{{ csrf_token() }}"; 
 </script>
 
 

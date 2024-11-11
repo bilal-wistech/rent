@@ -22,96 +22,130 @@
                             <div class="col-md-3 settings_bar_gap">
                                 @include('admin.common.property_bar')
                             </div>
+
+
                             <div class="col-md-9">
-                                <form id="listing_location" method="post"
-                                    action="{{ url('admin/listing/' . $result->id . '/' . $step) }}"
-                                    class="signup-form login-form" accept-charset="UTF-8">
-                                    @csrf
-                                    <div class="box box-info">
-                                        <div class="box-body">
-                                            <input type="hidden" name="latitude" id="latitude">
-                                            <input type="hidden" name="longitude" id="longitude">
-
-                                            <!-- Country Selection -->
-                                            <div class="row mb-3">
-                                                <div class="col-md-8">
-                                                    <label for="country" class="label-large fw-bold">Country <span
-                                                            class="text-danger">*</span></label>
-                                                    <select id="country" name="country" class="form-control f-14">
-                                                        @foreach ($country as $key => $value)
-                                                            <option value="{{ $key }}" {{ $key == $result->property_address->country ? 'selected' : '' }}>
-                                                                {{ $value }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <span class="text-danger">{{ $errors->first('country') }}</span>
-                                                </div>
-                                            </div>
-
-                                            <!-- Address Line 1 -->
-                                            <div class="row mb-3">
-                                                <div class="col-md-8">
-                                                    <label for="address_line_1" class="label-large fw-bold">Address Line
-                                                        1 <span class="text-danger">*</span></label>
-                                                    <input type="text" name="address_line_1" id="address_line_1"
-                                                        value="{{ $result->property_address->address_line_1 }}"
-                                                        class="form-control f-14"
-                                                        placeholder="House name/number + street/road">
-                                                    <span
-                                                        class="text-danger">{{ $errors->first('address_line_1') }}</span>
-                                                </div>
-                                            </div>
-
-                                            <!-- Map View -->
-                                            <div class="row mb-3">
-                                                <div class="col-md-8">
-                                                    <div id="map_view" style="width:100%; height:400px;"></div>
-                                                    <small class="text-muted">You can move the pointer to set the
-                                                        correct map position</small>
-                                                    <span class="text-danger">{{ $errors->first('latitude') }}</span>
-                                                </div>
-                                            </div>
-
-                                            <!-- Additional Address Fields -->
-                                            @php
-                                                $addressFields = [
-                                                    'address_line_2' => 'Address Line 2',
-                                                    'area' => 'Area',
-                                                    'building' => 'Building',
-                                                    'flat_no' => 'Flat No',
-                                                    'city' => 'City / Town / District',
-                                                    'state' => 'State / Province / Region',
-                                                    'postal_code' => 'ZIP / Postal Code'
-                                                ];
-                                            @endphp
-
-                                            @foreach($addressFields as $field => $label)
-                                                <div class="row mb-3">
-                                                    <div class="col-md-8">
-                                                        <label for="{{ $field }}"
-                                                            class="label-large fw-bold">{{ $label }}{{ in_array($field, ['address_line_1', 'city', 'state']) ? ' *' : '' }}</label>
-                                                        <input type="text" name="{{ $field }}" id="{{ $field }}"
-                                                            value="{{ $result->property_address->$field ?? '' }}"
-                                                            class="form-control f-14" {{ in_array($field, ['address_line_1', 'city', 'state']) ? 'required' : '' }}>
-                                                        <span class="text-danger">{{ $errors->first($field) }}</span>
-                                                    </div>
-                                                </div>
+                    <form id="listing_location" method="post"
+                        action="{{ url('admin/listing/' . $result->id . '/' . $step) }}" class='signup-form login-form'
+                        accept-charset='UTF-8'>
+                        {{ csrf_field() }}
+                        <div class="card">
+                            <div class="card-body bg-white">
+                                <input type="hidden" name='latitude' id='latitude'>
+                                <input type="hidden" name='longitude' id='longitude'>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">Country <span
+                                                class="text-danger">*</span></label>
+                                        <select id="basics-select-bed_type" name="country" class="form-control f-14"
+                                            id='country'>
+                                            @foreach ($country as $key => $value)
+                                                <option value="{{ $key }}"
+                                                    {{ $key == $result->property_address->country ? 'selected' : '' }}>
+                                                    {{ $value }}</option>
                                             @endforeach
-
-                                            <!-- Navigation Buttons -->
-                                            <div class="row">
-                                                <div class="col-6">
-                                                    <a href="{{ url('admin/listing/' . $result->id . '/description') }}"
-                                                        class="btn btn-primary f-14">Back</a>
-                                                </div>
-                                                <div class="col-6 text-end">
-                                                    <button type="submit" class="btn btn-primary f-14">Next</button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        </select>
+                                        <span class="text-danger">{{ $errors->first('country') }}</span>
                                     </div>
-                                </form>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">Address Line 1 <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" name="address_line_1" id="address_line_1"
+                                            value="{{ $result->property_address->address_line_1 }}"
+                                            class="form-control f-14" placeholder="House name/number + street/road">
+                                        <span class="text-danger">{{ $errors->first('address_line_1') }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <div id="map_view" style="width:100%; height:400px;"></div>
+                                    </div>
+                                    <div class="col-md-8 mb20">
+                                        <p>You can move the pointer to set the correct map position</p>
+                                        <span class="text-danger">{{ $errors->first('latitude') }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">Address Line 2</label>
+                                        <input type="text" name="address_line_2" id="address_line_2"
+                                            value="{{ $result->property_address->address_line_2 }}"
+                                            class="form-control f-14" placeholder="Apt., suite, building access code">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">Area <span class="text-danger">*</span></label>
+                                        <input type="text" name="area" id="area"
+                                            value="{{ $result->property_address->area }}" class="form-control f-14">
+                                        <span class="text-danger">{{ $errors->first('area') }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">Building</label>
+                                        <input type="text" name="building" id="building"
+                                            value="{{ $result->property_address->building }}" class="form-control f-14">
+                                        <span class="text-danger">{{ $errors->first('building') }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">Flat No</label>
+                                        <input type="text" name="flat_no" id="flat_no"
+                                            value="{{ $result->property_address->flat_no }}" class="form-control f-14">
+                                        <span class="text-danger">{{ $errors->first('flat_no') }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">City / Town / District <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" name="city" id="city"
+                                            value="{{ $result->property_address->city }}" class="form-control f-14">
+                                        <span class="text-danger">{{ $errors->first('city') }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">State / Province / Country / Region <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" name="state" id=""
+                                            value="{{ $result->property_address->state ?? ($result->property_address->country ?? '') }}"
+                                            class="form-control f-14">
+                                        <span class="text-danger">{{ $errors->first('state') }}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">ZIP / Postal Code</label>
+                                        <input type="text" name="postal_code" id="postal_code"
+                                            value="{{ $result->property_address->postal_code }}" class="form-control f-14">
+                                        <span class="text-danger">{{ $errors->first('postal_code') }}</span>
+                                    </div>
+                                </div>
+
+                                <br>
+                                <div class="row">
+                                    <div class="col-6 text-left">
+                                        <a data-prevent-default=""
+                                            href="{{ url('admin/listing/' . $result->id . '/description') }}"
+                                            class="btn btn-sm btn-primary f-14">Back</a>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <button type="submit" class="btn btn-sm btn-primary next-section-button f-14">
+                                            Next
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                    </form>
+                </div>
+
+
                         </div>
                     </section>
                 </div>

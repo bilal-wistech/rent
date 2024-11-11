@@ -43,39 +43,40 @@
                                                         <div class="row">
                                                             <div class="col-md-6">
                                                                 <input class="form-control f-14 text-16" name="file"
-                                                                    id="photo_file" type="file" value="">
-                                                                <input type="hidden" id="photo" type="text"
-                                                                    name="photos">
+                                                                    id="image_file" type="file">
+                                                                <input type="hidden" id="photo" name="photos">
                                                                 <input type="hidden" name="img_name" id="img_name">
                                                                 <input type="hidden" name="crop" id="type" value="crop">
                                                                 <p class="text-13">(Width 640px and Height 360px)</p>
                                                                 <div id="result" class="hide">
-                                                                    <img src="#" alt="">
+                                                                    <img src="#" alt="" required>
                                                                 </div>
-                                                                @if ($errors->any('file'))
+                                                                @error('file')
                                                                     <span
-                                                                        class="text-center text-danger">{{ $errors->first() }}</span>
-                                                                @endif
+                                                                        class="text-center text-danger">{{ $message }}</span>
+                                                                @enderror
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <button type="submit"
                                                                     class="btn btn-large btn-primary next-section-button f-14"
-                                                                    id="submit">Upload</button>
+                                                                    id="submit">
+                                                                    Upload
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <br><br>
                                         </form>
 
                                         <div class="row">
                                             <div id="photo-list-div" class="ps-4 min-height-div row">
-                                                <?php $serial = 0; ?>
-                                                @foreach($photos as $photo)
-                                                    <?php    $serial++; ?>
+                                                @foreach($photos as $index => $photo)
                                                     <div class="col-md-4 margin-top10" id="photo-div-{{ $photo->id }}">
-                                                        <div class="room-image-container200"
-                                                            style="background-image:url({{ url('/images/property/' . $photo->property_id . '/' . $photo->photo) }});">
+                                                        <div class="room-image-container200">
+                                                            <img src="{{ url('/images/property/' . $photo->property_id . '/' . $photo->photo) }}"
+                                                                alt="">
                                                             @if($photo->cover_photo == 0)
                                                                 <a class="photo-delete" href="javascript:void(0)"
                                                                     data-rel="{{ $photo->id }}">
@@ -91,7 +92,7 @@
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-md-6">
-                                                                <label class="fw-bold mb-1" for="sel1">Serial</label>
+                                                                <label class="fw-bold mb-1">Serial</label>
                                                                 <input type="text" image_id="{{ $photo->id }}"
                                                                     property_id="{{ $result->id }}"
                                                                     id="serial-{{ $photo->id }}"
@@ -100,36 +101,39 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 @if($photo->cover_photo == 0)
-                                                                    <label class="fw-bold mb-1" for="sel1">Cover Photo</label>
+                                                                    <label class="fw-bold mb-1">Cover Photo</label>
                                                                     <select class="form-control f-14 photoId" id="photoId">
-                                                                        <option value="Yes" <?= ($photo->cover_photo == 1) ? 'selected' : '' ?> image_id="{{ $photo->id }}"
+                                                                        <option value="Yes" {{ $photo->cover_photo == 1 ? 'selected' : '' }} image_id="{{ $photo->id }}"
                                                                             property_id="{{ $result->id }}">Yes</option>
-                                                                        <option value="No" <?= ($photo->cover_photo == 0) ? 'selected' : '' ?> image_id="{{ $photo->id }}"
+                                                                        <option value="No" {{ $photo->cover_photo == 0 ? 'selected' : '' }} image_id="{{ $photo->id }}"
                                                                             property_id="{{ $result->id }}">No</option>
                                                                     </select>
                                                                 @endif
                                                             </div>
                                                         </div>
-                                                        @if($serial % 3 == 0)
+
+                                                        @if(($index + 1) % 3 == 0)
                                                             <div class="clearfix">&nbsp;</div>
                                                         @endif
                                                     </div>
                                                 @endforeach
                                             </div>
                                             <div class="col-md-12">
-                                                <span class="text-danger display-off" id="photo">This field is
-                                                    required</span>
+                                                <span class="text-danger" id="photo-error" style="display:none;">
+                                                    This field is required.
+                                                </span>
                                             </div>
                                         </div>
 
                                         <div class="row">
+                                            <br>
                                             <div class="col-md-12 px-4 mt-3">
                                                 <div class="col-md-10 col-sm-6 col-xs-6 l-pad-none float-start">
                                                     <a href="{{ url('admin/listing/' . $result->id . '/amenities') }}"
                                                         class="btn btn-large btn-primary f-14">Back</a>
                                                 </div>
                                                 <div class="col-md-2 col-sm-6 col-xs-6 float-end text-end">
-                                                    <a href="{{ url('admin/listing/' . $result->id . '/pricing') }}"
+                                                    <a href="javascript:void(0)" id="next-section-button"
                                                         class="btn btn-large btn-primary next-section-button f-14">Next</a>
                                                 </div>
                                             </div>
@@ -145,10 +149,8 @@
     </div>
 </div>
 
-
 <div class="modal fade dis-none z-index-high" id="crop-modal" role="dialog">
     <div class="modal-dialog modal-xl">
-        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title f-18">Edit Image</h4>
@@ -156,12 +158,12 @@
             </div>
             <div>
                 <canvas id="canvas">
-                    Your browser does not HTML5 canvas element.
+                    <img id="cropper-image" src="" alt="Image to crop" style="display: none;" style="width : 100%;">
+                    Your browser does not support HTML5 canvas element.
                 </canvas>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-info text-white f-14" id="crop" type="submit" name="submit">Crop
-                </button>
+                <button class="btn btn-info text-white f-14" id="crop" type="submit" name="submit">Crop</button>
                 <button type="button" id="restore" class="btn btn-default pull-right f-14">Skip</button>
             </div>
         </div>
@@ -169,32 +171,38 @@
 </div>
 @endsection
 
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+<script>
+    $('#image_file').on('change', function () {
+        alert('Hello');
+    });
+</script>
+
+
+
+
+
+
 @push('css')
-    <link rel="stylesheet" href="{{ asset('css/cropper.css') }}" />
-    <link rel="stylesheet" href="{{ asset('css/photo-listing.min.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 @endpush
 
-@section('validate_script')
-<script src="{{ asset('js/cropper.min.js') }}"></script>
-<script type="text/javascript">
-    let photoUploadURL = '{{ url("add_photos/$result->id") }}';
-    var photoRoomURl = '{{ url("images/rooms/" . $result->id) }}';
-    var photoMessageURL = '{{url("admin/listing/$result->id/photo_message")}}';
-    let photoDeleteURL = '{{ url("admin/listing/$result->id/photo_delete") }}';
-    let makeDefaultPhotoURL = '{{ url("admin/listing/photo/make_default_photo") }}';
-    var makePhotoSerialURL = '{{ url("admin/listing/photo/make_photo_serial") }}';
-    let highlightsPhotoText = "{{ __('What are the highlights of this photo?') }}";
-    let networkErrorText = "{{ __('Network error! Please try again.') }}";
-    var token = '{{ csrf_token() }}';
-    let areYouSureText = "{{ __('Are you sure you want to delete this?') }}";
-    let deleteForeverText = "{{ __('If you delete this, it will be gone forever.') }}";
-    let invalidImagetypeText = "{{ __('Invalid file type! Please select an image file.') }}";
-    let noFileSelectedText = "{{ __('No file(s) selected.') }}";
-    let page = 'photos';
-    var message = "{{ __('The file must be an image (jpg, jpeg, png or gif)') }}";
-    let gl_photo_id = 0;
-</script>
-<script src="{{ asset('backend/js/additional-method.min.js') }}"></script>
-<script src="{{ asset('backend/dist/js/validate.min.js') }}"></script>
-<script src="{{ asset('backend/js/listing-photo.min.js') }}"></script>
-@endsection
+@push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/validate/1.19.3/validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.6.10/sweetalert2.all.min.js"></script>
+    <script type="text/javascript">
+        let photoUploadURL = '{{ url("add_photos/$result->id") }}';
+        var photoRoomURl = '{{ url("images/rooms/" . $result->id) }}';
+        var photoMessageURL = '{{ url("admin/listing/$result->id/photo_message") }}';
+        let photoDeleteURL = '{{ url("admin/listing/$result->id/photo_delete") }}';
+        let makeDefaultPhotoURL = '{{ url("admin/listing/photo/make_default_photo") }}';
+        var makePhotoSerialURL = '{{ url("admin/listing/photo/make_photo_serial") }}';
+        let highlightsPhotoText = "{{ __('What are the highlights of this photo?') }}";
+        let SelectedText = "{{ __('No file selected! Please select a file to upload.') }}";
+    </script>
+@endpush

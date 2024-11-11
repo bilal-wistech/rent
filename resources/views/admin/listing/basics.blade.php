@@ -34,7 +34,7 @@
                                         <div class="card-header">
                                             <h4 class="card-title">Rooms and Beds</h4>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="card-body bg-white">
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <label class="label-large fw-bold">Bedrooms</label>
@@ -87,7 +87,7 @@
                                         <div class="card-header">
                                             <h4 class="card-title">Listings</h4>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="card-body bg-white">
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <label class="label-large fw-bold">Property Type</label>
@@ -141,7 +141,7 @@
                                             <div class="row mt-4">
                                                 <div class="col-12 text-right">
                                                     <button type="submit"
-                                                        class="btn btn-primary btn-lg next-section-button f-14">
+                                                        class="btn btn-primary btn-sm next-section-button f-14">
                                                         Next
                                                     </button>
                                                 </div>
