@@ -114,6 +114,30 @@
             animation: spin 1s linear infinite;
         }
 
+        .year-navigation {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .year-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 0 20px;
+        }
+
+        .calendar-day {
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .days-grid {
+            grid-template-rows: repeat(6, 1fr);
+        }
+
         @keyframes spin {
             0% {
                 transform: rotate(0deg);
@@ -250,7 +274,7 @@
                                             <div class="modal-footer mt-2">
                                                 <button type="submit" id="customerModalBtn"
                                                     class="btn btn-success pull-left f-14">Submit</button>
-                                                    <button type="submit" id="customerModalBtnClose"
+                                                <button type="submit" id="customerModalBtnClose"
                                                     class="btn btn-info pull-left f-14">Close</button>
                                             </div>
                                         </form>
@@ -462,6 +486,7 @@
             let calendar;
             let propertyDates = {};
             let isSelectingStartDate = true;
+            let currentYear = moment().year();
 
             // Initialize Select2 for property_id
             $('#property_id').select2({
@@ -573,24 +598,57 @@
                 });
             }
 
+            function updateYearDisplay() {
+                $('.year-display').text(currentYear);
+            }
+
             function checkSelections() {
                 const propertyId = $('#propertyId').val();
                 if (propertyId) {
                     $('.calendar-container').show();
+                    // Clear previous navigation if it exists
+                    $('.year-navigation').remove();
+
+                    // Add year navigation when showing calendar
+                    $('.calendar-container').prepend(`
+            <div class="year-navigation text-center mb-4">
+                <button class="btn btn-outline-secondary prev-year">&lt; Previous Year</button>
+                <span class="year-display mx-3 font-weight-bold">${currentYear}</span>
+                <button class="btn btn-outline-secondary next-year">Next Year &gt;</button>
+            </div>
+        `);
+
+                    // Reattach event handlers for the newly added buttons
+                    $('.prev-year').click(function() {
+                        currentYear--;
+                        updateYearDisplay();
+                        renderCalendars();
+                    });
+
+                    $('.next-year').click(function() {
+                        currentYear++;
+                        updateYearDisplay();
+                        renderCalendars();
+                    });
+
                     renderCalendars();
                 } else {
                     $('.calendar-container').hide();
                 }
             }
 
+
+
+            // Modified renderCalendars function to use currentYear
             function renderCalendars() {
                 const calendarGrid = $('#calendarGrid');
                 calendarGrid.empty();
 
-                const today = moment();
+                // Create a moment object for January 1st of the current year
+                const startOfYear = moment().year(currentYear).startOf('year');
 
                 for (let i = 0; i < 12; i++) {
-                    const currentMonth = moment(today).add(i, 'months');
+                    const currentMonth = moment(startOfYear).add(i, 'months');
                     const monthCalendar = createMonthCalendar(currentMonth);
                     calendarGrid.append(monthCalendar);
                 }
@@ -611,7 +669,7 @@
                 const lastDay = moment(month).endOf('month');
                 const today = moment();
 
-                // Fill in empty days
+                // Fill in empty days at the start
                 for (let i = 0; i < firstDay.day(); i++) {
                     daysGrid.append($('<div>').addClass('calendar-day other-month'));
                 }
@@ -626,7 +684,7 @@
                         .text(day)
                         .data('date', dateString);
 
-                    // Apply color based on property date status
+                    // Apply status colors
                     if (propertyDates[dateString]) {
                         if (propertyDates[dateString].status === 'booked not paid') {
                             dayDiv.addClass('booked-not-paid');
@@ -637,11 +695,11 @@
                         }
                     }
 
+                    // Highlight current date only if we're in the current year and month
                     if (currentDate.isSame(today, 'day')) {
                         dayDiv.addClass('current-date');
                     }
 
-                    // All dates are clickable
                     dayDiv.click(function() {
                         const propertyId = $('#property_id').val();
                         const userId = $('#user_id').val();
@@ -651,9 +709,16 @@
                     daysGrid.append(dayDiv);
                 }
 
+                // Fill in empty days at the end to maintain grid
+                const remainingDays = 42 - (firstDay.day() + lastDay.date()); // 42 = 6 rows × 7 days
+                for (let i = 0; i < remainingDays; i++) {
+                    daysGrid.append($('<div>').addClass('calendar-day other-month'));
+                }
+
                 monthDiv.append(daysGrid);
                 return monthDiv;
             }
+
 
             function handleDateClick(propertyId, userId, date) {
                 if (isSelectingStartDate) {
