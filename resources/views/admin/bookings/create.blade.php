@@ -138,6 +138,19 @@
             grid-template-rows: repeat(6, 1fr);
         }
 
+        .modal-dialog {
+            max-width: 1000px;
+            /* or whatever width works best for your design */
+        }
+
+        .price-breakdown-table td {
+            padding: 0.5rem;
+        }
+
+        .card {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
         @keyframes spin {
             0% {
                 transform: rotate(0deg);
@@ -201,6 +214,7 @@
                                             Add Booking</h4>
                                         <a type="button" class="close cls-reload f-18" data-bs-dismiss="modal">×</a>
                                     </div>
+
                                     <div id="addCustomerForm" style="display: none;">
                                         <form class="form-horizontal" id="customer_form" method="post" name="customer_form"
                                             action="{{ url('admin/add-ajax-customer') }}" accept-charset='UTF-8'>
@@ -283,136 +297,204 @@
                                         class='form-horizontal' id='booking_form'>
                                         {{ csrf_field() }}
                                         <div class="modal-body">
+                                            <div class="row">
+                                                <!-- Form Column -->
+                                                <div class="col-md-7">
+                                                    <p class="calendar-m-msg" id="model-message"></p>
+                                                    <!-- Hidden inputs -->
+                                                    <input type="hidden" name="booking_id" id="booking_id">
+                                                    <input type="hidden" name="property_id" id="propertyId"
+                                                        value="">
+                                                    <input type="hidden" name="min_stay" value="1">
+                                                    <input type="hidden" name="booking_added_by" id="booking_added_by"
+                                                        value="{{ Auth::guard('admin')->id() }}">
+                                                    <input type="hidden" name="booking_type" value="instant"
+                                                        id="booking_type">
+                                                    <input type="hidden" name="status" value="pending"
+                                                        id="booking_status">
 
-                                            <p class="calendar-m-msg" id="model-message"></p>
-                                            <input type="hidden" name="booking_id" id="booking_id">
-                                            <input type="hidden" name="property_id" id="propertyId" value="">
-                                            {{-- <input type="hidden" name="user_id" id="userId" value=""> --}}
-                                            <input type="hidden" name="min_stay" value="1">
-                                            <input type="hidden" name="booking_added_by" id="booking_added_by"
-                                                value="{{ Auth::guard('admin')->id() }}">
-                                            <input type="hidden" name="booking_type" value="instant" id="booking_type">
-                                            <input type="hidden" name="status" value="pending" id="booking_status">
-                                            <div class="form-group row mt-3 user_id">
-                                                <label for="user_id"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Customer <span class="text-danger">*</span>
-                                                </label>
+                                                    <!-- User ID Selection -->
+                                                    <div class="form-group row mt-3 user_id">
+                                                        <label for="user_id"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Customer <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-7">
+                                                            <select class="form-control select2" name="user_id"
+                                                                id="user_id">
+                                                                <option value="">Select a Customer</option>
+                                                                <option value="{{ old('user_id') }}" selected>
+                                                                    {{ old('user_name') }}</option>
+                                                            </select>
+                                                            <span
+                                                                class="text-danger">{{ $errors->first('user_id') }}</span>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <button type="button" class="btn btn-primary btn-sm"
+                                                                id="addCustomerButton">
+                                                                <span class="fa fa-user"></span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
 
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="user_id" id="user_id">
-                                                        <option value="">Select a Customer</option>
-                                                        <option value="{{ old('user_id') }}" selected>
-                                                            {{ old('user_name') }}
-                                                        </option>
-                                                    </select>
-                                                    <span class="text-danger">{{ $errors->first('user_id') }}</span>
-                                                </div>
-                                                <div class="col-sm-1">
-                                                    <button type="button" class="btn btn-primary btn-sm"
-                                                        id="addCustomerButton">
-                                                        <span class="fa fa-user"></span>
-                                                    </button>
+                                                    <!-- Pricing Selection -->
+                                                    <div class="form-group row mt-3 pricing_type_id">
+                                                        <label for="pricing_type_id"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Pricing <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control select2" name="pricing_type_id"
+                                                                id="pricing_type_id">
+                                                                <option value="">Select Pricing</option>
+                                                            </select>
+                                                            <span class="text-danger"
+                                                                id="error-pricing_type_id">{{ $errors->first('pricing_type_id') }}</span>
+                                                        </div>
+                                                    </div>
 
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3 pricing_type_id">
-                                                <label for="pricing_type_id"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Pricing <span class="text-danger">*</span>
-                                                </label>
+                                                    <!-- Start Date -->
+                                                    <div class="form-group row mt-3">
+                                                        <label for="start_date"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Start Date <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <input type="date" class="form-control f-14"
+                                                                name="start_date" id="start_date"
+                                                                value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->start_date)->format('d-m-Y') : old('start_date') }}">
+                                                            <span class="text-danger"
+                                                                id="error-start_date">{{ $errors->first('start_date') }}</span>
+                                                        </div>
+                                                    </div>
 
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="pricing_type_id"
-                                                        id="pricing_type_id">
-                                                        <option value="">Select Pricing</option>
+                                                    <!-- End Date -->
+                                                    <div class="form-group row mt-3">
+                                                        <label for="end_date"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            End Date <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <input type="date" class="form-control f-14"
+                                                                name="end_date" id="end_date"
+                                                                value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->end_date)->format('d-m-Y') : old('end_date') }}">
+                                                            <span class="text-danger"
+                                                                id="error-end_date">{{ $errors->first('end_date') }}</span>
+                                                        </div>
+                                                    </div>
 
-                                                    </select>
-                                                    <span class="text-danger" id="error-pricing_type_id">
-                                                        {{ $errors->first('pricing_type_id') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="input_dob"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Start Date
-                                                    <em class="text-danger">*</em>
-                                                </label>
-                                                <div class="col-sm-6">
-                                                    <input type="date" class="form-control f-14" name="start_date"
-                                                        id="start_date" placeholder="Start Date" autocomplete="off"
-                                                        value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->start_date)->format('d-m-Y') : old('start_date') }}">
-                                                    <span class="text-danger" id="error-start_date">
-                                                        {{ $errors->first('start_date') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="clear-both"></div>
-                                            <div class="form-group row mt-3">
-                                                <label for="input_dob"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    End Date
-                                                    <em class="text-danger">*</em>
-                                                </label>
-                                                <div class="col-sm-6">
-                                                    <input type="date" class="form-control f-14" name="end_date"
-                                                        id="end_date" placeholder="End Date" autocomplete="off"
-                                                        value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->end_date)->format('d-m-Y') : old('end_date') }}">
-                                                    <span class="text-danger" id="error-end_date">
-                                                        {{ $errors->first('end_date') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="clear-both"></div>
-                                            <div class="form-group row mt-3 number_of_guests">
-                                                <label for="number_of_guests"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Number of Guests <span class="text-danger">*</span>
-                                                </label>
+                                                    <!-- Number of Guests -->
+                                                    <div class="form-group row mt-3 number_of_guests">
+                                                        <label for="number_of_guests"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Number of Guests <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control select2" name="number_of_guests"
+                                                                id="number_of_guests">
+                                                                <option value="">Select Number of Guests</option>
+                                                                <option value="{{ old('number_of_guests') }}" selected>
+                                                                    {{ old('number_of_guests') }}</option>
+                                                            </select>
+                                                            <span class="text-danger"
+                                                                id="error-number_of_guests">{{ $errors->first('number_of_guests') }}</span>
+                                                        </div>
+                                                    </div>
 
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="number_of_guests"
-                                                        id="number_of_guests">
-                                                        <option value="">Select Number of Guests</option>
-                                                        <option value="{{ old('number_of_guests') }}" selected>
-                                                            {{ old('number_of_guests') }}</option>
-                                                    </select>
-                                                    <span class="text-danger"
-                                                        id="error-number_of_guests">{{ $errors->first('number_of_guests') }}</span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3 renewal_type">
-                                                <label for="renewal_type"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Renewal<span class="text-danger">*</span>
-                                                </label>
+                                                    <!-- Renewal Type -->
+                                                    <div class="form-group row mt-3 renewal_type">
+                                                        <label for="renewal_type"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Renewal <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control select2" name="renewal_type"
+                                                                id="renewal_type">
+                                                                <option value="">Is Renewal Needed</option>
+                                                                <option value="yes"
+                                                                    {{ (isset($booking) && $booking->renewal_type == 'yes') || old('renewal_type') == 'yes' ? 'selected' : '' }}>
+                                                                    Yes</option>
+                                                                <option value="no"
+                                                                    {{ (isset($booking) && $booking->renewal_type == 'no') || old('renewal_type') == 'no' ? 'selected' : '' }}>
+                                                                    No</option>
+                                                            </select>
+                                                            <span class="text-danger"
+                                                                id="error-renewal_type">{{ $errors->first('renewal_type') }}</span>
+                                                        </div>
+                                                    </div>
 
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="renewal_type"
-                                                        id="renewal_type">
-                                                        <option value="">Is Renewal Needed</option>
-                                                        <option value="yes"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'yes') || old('renewal_type') == 'yes' ? 'selected' : '' }}>
-                                                            Yes
-                                                        </option>
-                                                        <option value="no"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'no') || old('renewal_type') == 'no' ? 'selected' : '' }}>
-                                                            No
-                                                        </option>
-                                                    </select>
-                                                    <span class="text-danger" id="error-renewal_type">
-                                                        {{ $errors->first('renewal_type') }}
-                                                    </span>
+                                                    <!-- Buffer Days -->
+                                                    <div class="form-group row mt-3 buffer-days-group">
+                                                        <label for="buffer_days"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Notice Period <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <input type="number" class="form-control f-14"
+                                                                name="buffer_days" id="buffer_days">
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="form-group row mt-3 buffer-days-group">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Notice Period<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="col-sm-6">
-                                                    <input type="number" class="form-control f-14" name="buffer_days"
-                                                        id="buffer_days" placeholder="">
+
+                                                <!-- Price Breakdown Column -->
+                                                <div class="col-md-5">
+                                                    <div class="card">
+                                                        <div class="card-header bg-light">
+                                                            <h5 class="card-title mb-0">Price Breakdown</h5>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <table class="table table-bordered price-breakdown-table"
+                                                                style="display: none;">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>Pricing Type</td>
+                                                                        <td id="displayPricingType"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Number of Days</td>
+                                                                        <td id="displayNumberOfDays"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Base Price</td>
+                                                                        <td id="displayTotalPrice"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Cleaning Fee</td>
+                                                                        <td id="displayCleaningFee"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Security Fee</td>
+                                                                        <td id="displaySecurityFee"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Guest Fee</td>
+                                                                        <td id="displayGuestFee"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Host Service Charge</td>
+                                                                        <td id="displayHostServiceCharge"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Guest Service Charge</td>
+                                                                        <td id="displayGuestServiceCharge"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>IVA Tax</td>
+                                                                        <td id="displayIvaTax"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Accommodation Tax</td>
+                                                                        <td id="displayAccommodationTax"></td>
+                                                                    </tr>
+                                                                    <tr class="table-info">
+                                                                        <td><strong>Total Price</strong></td>
+                                                                        <td id="displayTotalPriceWithAll"><strong></strong>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -420,6 +502,8 @@
                                         <div class="modal-footer">
                                             <button class="btn btn-info pull-right text-white f-14" type="submit"
                                                 name="submit">Submit</button>
+                                                <button class="btn btn-success pull-right text-white f-14" type="button"
+                                                name="submit_save">Submit/Save</button>
                                             <button type="button" class="btn btn-default cls-reload f-14"
                                                 data-bs-dismiss="modal">Close</button>
                                         </div>
@@ -531,6 +615,13 @@
                     .endDate, values.propertyId);
             });
 
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'AED'
+                }).format(amount);
+            }
+
             function updateCalculations(pricingType, pricingTypeAmount, startDate, endDate, propertyId) {
                 if (pricingType && pricingTypeAmount && startDate && endDate && propertyId) {
                     $.ajax({
@@ -544,37 +635,32 @@
                             endDate: endDate,
                             propertyId: propertyId
                         },
-                        // success: function(response) {
-                        //     // console.log('Success:', response);
-                        //     // Handle the response here
-                        // },
-                        // error: function(xhr, status, error) {
-                        //     console.log('Error:', error);
-                        // }
+                        success: function(response) {
+                            $('#displayPricingType').text(response.pricingType);
+                            $('#displayNumberOfDays').text(response.numberOfDays + ' days');
+                            $('#displayTotalPrice').text(formatCurrency(response.totalPrice));
+                            $('#displayCleaningFee').text(formatCurrency(response.cleaning_fee));
+                            $('#displaySecurityFee').text(formatCurrency(response.security_fee));
+                            $('#displayGuestFee').text(formatCurrency(response.guest_fee));
+                            $('#displayHostServiceCharge').text(formatCurrency(response
+                                .host_service_charge));
+                            $('#displayGuestServiceCharge').text(formatCurrency(response
+                                .guest_service_charge));
+                            $('#displayIvaTax').text(formatCurrency(response.iva_tax));
+                            $('#displayAccommodationTax').text(formatCurrency(response
+                                .accomodation_tax));
+                            $('#displayTotalPriceWithAll').text(formatCurrency(response
+                                .totalPriceWithChargesAndFees));
+
+                            // Show the table
+                            $('.price-breakdown-table').show();
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Error:', error);
+                        }
                     });
                 }
             }
-            // $('#pricing_type_id').on('change', function() {
-            //     let selectedOption = $(this).find('option:selected');
-
-            //     let pricingType = selectedOption.data('pricing');
-            //     console.log('pricingType: ', pricingType);
-            //     let startDate = $('#start_date').val();
-            //     console.log('startDate: ', startDate);
-            //     let endDate = $('#end_date').val();
-            //     console.log('endDate: ', endDate);
-            //     $('#start_date').on('change', function() {
-            //         let startDate = $(this).val();
-            //         console.log('Updated Start Date:', startDate);
-            //     });
-            //     $('#end_date').on('change', function() {
-            //         let endDate = $(this).val();
-            //         console.log('Updated End Date:', endDate);
-            //     });
-
-            // });
-
-
             function updateNumberOfGuests(propertyId) {
                 $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
 
@@ -786,7 +872,7 @@
                                 // Handle pricing types (assuming array of pricing types)
                                 const pricingSelect = $('#pricing_type_id');
                                 pricingSelect.empty().append(
-                                '<option value="">Select Pricing</option>');
+                                    '<option value="">Select Pricing</option>');
 
                                 if (Array.isArray(response.property_price)) {
                                     response.property_price.forEach(priceItem => {
@@ -827,7 +913,7 @@
                                 // Handle pricing types for new booking
                                 const pricingSelect = $('#pricing_type_id');
                                 pricingSelect.empty().append(
-                                '<option value="">Select Pricing</option>');
+                                    '<option value="">Select Pricing</option>');
 
                                 if (Array.isArray(response.property_price)) {
                                     response.property_price.forEach(priceItem => {

@@ -248,7 +248,7 @@ class BookingsController extends Controller
         $end = Carbon::parse($endDate);
 
         // Calculate the difference in days
-        $numberOfDays = $end->diffInDays($start) + 1;
+        $numberOfDays = $end->diffInDays($start);
 
         $rateMultiplier = $multiplierMapping[strtolower($pricingType)] ?? 1;
         // Calculate total price
