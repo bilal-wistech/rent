@@ -502,7 +502,7 @@
                                         <div class="modal-footer">
                                             <button class="btn btn-info pull-right text-white f-14" type="submit"
                                                 name="submit">Submit</button>
-                                                <button class="btn btn-success pull-right text-white f-14" type="button"
+                                            <button class="btn btn-success pull-right text-white f-14" type="button"
                                                 name="submit_save">Submit/Save</button>
                                             <button type="button" class="btn btn-default cls-reload f-14"
                                                 data-bs-dismiss="modal">Close</button>
@@ -654,6 +654,23 @@
 
                             // Show the table
                             $('.price-breakdown-table').show();
+                            const hiddenFields = `
+        <input type="hidden" name="total_price" value="${response.totalPrice}">
+        <input type="hidden" name="total_price_with_charges" value="${response.totalPriceWithOtherCharges}">
+        <input type="hidden" name="total_price_with_fees" value="${response.totalPriceWithChargesAndFees}">
+        <input type="hidden" name="host_service_charge" value="${response.host_service_charge}">
+        <input type="hidden" name="guest_service_charge" value="${response.guest_service_charge}">
+        <input type="hidden" name="iva_tax" value="${response.iva_tax}">
+        <input type="hidden" name="accomodation_tax" value="${response.accomodation_tax}">
+        <input type="hidden" name="cleaning_fee" value="${response.cleaning_fee}">
+        <input type="hidden" name="security_fee" value="${response.security_fee}">
+        <input type="hidden" name="guest_fee" value="${response.guest_fee}">
+        <input type="hidden" name="rate_multiplier" value="${response.rateMultiplier}">
+        <input type="hidden" name="number_of_days" value="${response.numberOfDays}">
+    `;
+
+                            // Append hidden fields to the form
+                            $('#booking_form').append(hiddenFields);
                         },
                         error: function(xhr, status, error) {
                             console.log('Error:', error);
@@ -661,6 +678,7 @@
                     });
                 }
             }
+
             function updateNumberOfGuests(propertyId) {
                 $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
 

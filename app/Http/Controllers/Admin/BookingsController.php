@@ -246,7 +246,7 @@ class BookingsController extends Controller
         // Convert start and end dates to Carbon instances
         $start = Carbon::parse($startDate);
         $end = Carbon::parse($endDate);
-
+        $totalPrice = 0;
         // Calculate the difference in days
         $numberOfDays = $end->diffInDays($start);
 
