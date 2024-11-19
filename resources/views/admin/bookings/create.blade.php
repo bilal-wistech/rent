@@ -316,26 +316,20 @@
 
                                                 </div>
                                             </div>
-                                            <div class="form-group row mt-3 renewal_type">
-                                                <label for="time_period_id"
+                                            <div class="form-group row mt-3 pricing_type_id">
+                                                <label for="pricing_type_id"
                                                     class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Time Period <span class="text-danger">*</span>
+                                                    Pricing <span class="text-danger">*</span>
                                                 </label>
 
                                                 <div class="col-sm-6">
-                                                    <select class="form-control select2" name="time_period_id"
-                                                        id="time_period_id">
-                                                        <option value="">Select Time Period</option>
-                                                        @foreach ($time_periods as $time_period)
-                                                            <option value="{{ $time_period->id }}"
-                                                                data-days="{{ $time_period->days }}"
-                                                                {{ old('time_period_id') == $time_period->id ? 'selected' : '' }}>
-                                                                {{ $time_period->name }}
-                                                            </option>
-                                                        @endforeach
+                                                    <select class="form-control select2" name="pricing_type_id"
+                                                        id="pricing_type_id">
+                                                        <option value="">Select Pricing</option>
+
                                                     </select>
-                                                    <span class="text-danger" id="error-time_period_id">
-                                                        {{ $errors->first('time_period_id') }}
+                                                    <span class="text-danger" id="error-pricing_type_id">
+                                                        {{ $errors->first('pricing_type_id') }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -412,33 +406,9 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="input_dob"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Status <em class="text-danger">*</em>
-                                                </label>
-                                                <div class="col-sm-6">
-                                                    <select class="form-control f-14" name="property_date_status"
-                                                        id="property_date_status">
-                                                        <option value="">--Please Select--</option>
-                                                        <option value="booked not paid"
-                                                            {{ isset($status) && $status == 'booked not paid' ? 'selected' : '' }}>
-                                                            Booked Not Paid</option>
-                                                        <option value="booked paid"
-                                                            {{ isset($status) && $status == 'booked paid' ? 'selected' : '' }}>
-                                                            Booked Paid</option>
-                                                        <option value="maintainence"
-                                                            {{ isset($status) && $status == 'maintainence' ? 'selected' : '' }}>
-                                                            Maintainence</option>
-                                                    </select>
-                                                    <span class="text-danger" id="error-property_date_status">
-                                                        {{ $errors->first('property_date_status') }}
-                                                    </span>
-                                                </div>
-                                            </div>
                                             <div class="form-group row mt-3 buffer-days-group">
                                                 <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Buffer Days<span
+                                                    class="control-label col-sm-3 mt-2 fw-bold">Notice Period<span
                                                         class="text-danger">*</span></label>
                                                 <div class="col-sm-6">
                                                     <input type="number" class="form-control f-14" name="buffer_days"
@@ -545,23 +515,64 @@
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
             });
-            $('#time_period_id').on('change', function() {
-                const selectedOption = $(this).find('option:selected');
-                const daysToAdd = parseInt(selectedOption.data('days'));
-                const startDateValue = $('#start_date').val();
 
-                if (startDateValue) {
-                    const startDate = moment(startDateValue);
-
-                    if (daysToAdd && daysToAdd > 0) {
-
-                        const endDate = startDate.add(daysToAdd, 'days').format('YYYY-MM-DD');
-                        $('#end_date').val(endDate);
-                    } else {
-                        $('#end_date').val(startDate.format('YYYY-MM-DD'));
-                    }
-                }
+            function getCurrentValues() {
+                return {
+                    pricingType: $('#pricing_type_id').find('option:selected').data('pricing'),
+                    pricingTypeAmount: $('#pricing_type_id').find('option:selected').data('pricing-amount'),
+                    startDate: $('#start_date').val(),
+                    endDate: $('#end_date').val(),
+                    propertyId: $('#property_id').val()
+                };
+            }
+            $('#pricing_type_id, #start_date, #end_date').on('change', function() {
+                const values = getCurrentValues();
+                updateCalculations(values.pricingType, values.pricingTypeAmount, values.startDate, values
+                    .endDate, values.propertyId);
             });
+
+            function updateCalculations(pricingType, pricingTypeAmount, startDate, endDate, propertyId) {
+                if (pricingType && pricingTypeAmount && startDate && endDate && propertyId) {
+                    $.ajax({
+                        url: '{{ route('calculate-booking-price') }}',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {
+                            pricingType: pricingType,
+                            pricingTypeAmount: pricingTypeAmount,
+                            startDate: startDate,
+                            endDate: endDate,
+                            propertyId: propertyId
+                        },
+                        // success: function(response) {
+                        //     // console.log('Success:', response);
+                        //     // Handle the response here
+                        // },
+                        // error: function(xhr, status, error) {
+                        //     console.log('Error:', error);
+                        // }
+                    });
+                }
+            }
+            // $('#pricing_type_id').on('change', function() {
+            //     let selectedOption = $(this).find('option:selected');
+
+            //     let pricingType = selectedOption.data('pricing');
+            //     console.log('pricingType: ', pricingType);
+            //     let startDate = $('#start_date').val();
+            //     console.log('startDate: ', startDate);
+            //     let endDate = $('#end_date').val();
+            //     console.log('endDate: ', endDate);
+            //     $('#start_date').on('change', function() {
+            //         let startDate = $(this).val();
+            //         console.log('Updated Start Date:', startDate);
+            //     });
+            //     $('#end_date').on('change', function() {
+            //         let endDate = $(this).val();
+            //         console.log('Updated End Date:', endDate);
+            //     });
+
+            // });
 
 
             function updateNumberOfGuests(propertyId) {
@@ -728,7 +739,7 @@
                 } else {
                     $('#end_date').val(date);
 
-                    // Make the AJAX call
+                    // Get form values
                     const startDate = $('#start_date').val();
                     const endDate = $('#end_date').val();
                     const no_of_guests = $('#no_of_guests').val();
@@ -748,10 +759,9 @@
                         },
                         success: function(response) {
                             $('#booking_form_modal').modal('show');
+
                             if (response.exists) {
-                                // console.log(response.booking);
-                                // console.log('dates: ', response.property_dates);
-                                // console.log('time period: ', response.time_period);
+                                // Handle existing booking
                                 $('#propertyId').val(response.booking.property_id);
                                 $('#booking_type').val(response.booking.booking_type);
                                 $('#booking_status').val(response.booking.status);
@@ -761,23 +771,48 @@
                                 $('#property_date_status').val(response.property_dates[0].status);
                                 $('#min_stay').val(response.property_dates[0].min_stay);
                                 $('#buffer_days').val(response.booking.buffer_days);
+
+                                // Handle user selection
                                 if (response.user) {
-                                    let newOption = new Option(response.user.user_name, response.user
+                                    const userOption = new Option(response.user.user_name, response.user
                                         .user_id, true, true);
-                                    $('#user_id').empty()
+                                    $('#user_id')
+                                        .empty()
                                         .append('<option value="">Select a Customer</option>')
-                                        .append(newOption)
+                                        .append(userOption)
                                         .trigger('change');
                                 }
-                                if (response.time_period) {
-                                    // Just set the value and trigger change, keeping existing options
-                                    $('#time_period_id').val(response.time_period.time_period_id)
-                                        .trigger('change');
+
+                                // Handle pricing types (assuming array of pricing types)
+                                const pricingSelect = $('#pricing_type_id');
+                                pricingSelect.empty().append(
+                                '<option value="">Select Pricing</option>');
+
+                                if (Array.isArray(response.property_price)) {
+                                    response.property_price.forEach(priceItem => {
+                                        if (priceItem.pricing_type) {
+                                            const pricingOption = new Option(
+                                                priceItem.pricing_type.name,
+                                                priceItem.pricing_type.id,
+                                                true,
+                                                true
+                                            );
+                                            $(pricingOption)
+                                                .attr('data-pricing', priceItem.pricing_type
+                                                    .name)
+                                                .attr('data-pricing-amount', priceItem.price);
+                                            pricingSelect.append(pricingOption);
+                                        }
+                                    });
                                 }
+                                pricingSelect.trigger('change');
+
                                 $('#start_date').val(response.booking.start_date);
                                 $('#end_date').val(response.booking.end_date);
                                 $('.booking-modal').text('Edit Booking');
+
                             } else {
+                                // Handle new booking
                                 $('#booking_id').val('');
                                 $('#start_date').val(startDate);
                                 $('#end_date').val(endDate);
@@ -785,11 +820,33 @@
                                 $('#renewal_type').val(renewal_type);
                                 $('#property_date_status').val(property_date_status);
                                 $('#propertyId').val(propertyId);
-                                $('#user_id').val(userId);
                                 $('#booking_type').val(booking_type);
                                 $('#booking_status').val(booking_status);
                                 $('#user_id').val('').trigger('change');
-                                $('#time_period_id').val('').trigger('change');
+
+                                // Handle pricing types for new booking
+                                const pricingSelect = $('#pricing_type_id');
+                                pricingSelect.empty().append(
+                                '<option value="">Select Pricing</option>');
+
+                                if (Array.isArray(response.property_price)) {
+                                    response.property_price.forEach(priceItem => {
+                                        if (priceItem.pricing_type) {
+                                            const pricingOption = new Option(
+                                                priceItem.pricing_type.name,
+                                                priceItem.pricing_type.id,
+                                                false,
+                                                false
+                                            );
+                                            $(pricingOption)
+                                                .attr('data-pricing', priceItem.pricing_type
+                                                    .name)
+                                                .attr('data-pricing-amount', priceItem.price);
+                                            pricingSelect.append(pricingOption);
+                                        }
+                                    });
+                                }
+                                pricingSelect.trigger('change');
                                 $('#buffer_days').val('');
                             }
                         },

@@ -32,6 +32,9 @@ use App\Models\PaymentMethods;
 use App\Http\Requests\AddAdminBookingRequest;
 use App\Http\Requests\CheckExistingBookingRequest;
 use App\Models\Invoice;
+use App\Models\PropertyPrice;
+use App\Models\PricingType;
+use App\Models\PropertyFees;
 
 class BookingsController extends Controller
 {
@@ -151,8 +154,7 @@ class BookingsController extends Controller
     {
         $properties = Properties::all('id', 'name');
         $customers = User::where('status', 'Active')->get();
-        $time_periods = TimePeriod::all();
-        return view('admin.bookings.create', compact('properties', 'customers','time_periods'));
+        return view('admin.bookings.create', compact('properties', 'customers'));
     }
     public function getNumberofGuests($property_id)
     {
@@ -161,23 +163,24 @@ class BookingsController extends Controller
             'numberofguests' => $propety->accommodates ?? 0
         ]);
     }
-    public function getBookingDetails($date)
-    {
-        $booking = Bookings::where('start_date', '<=', $date)
-            ->where('end_date', '>=', $date)
-            ->with('properties', 'users')
-            ->first();
+    // public function getBookingDetails($date)
+    // {
+    //     $booking = Bookings::where('start_date', '<=', $date)
+    //         ->where('end_date', '>=', $date)
+    //         ->with('properties', 'users')
+    //         ->first();
 
-        if ($booking) {
-            return response()->json([
-                'booking' => $booking,
-                'property' => $booking->properties,
-                'customer' => $booking->users
-            ]);
-        }
+    //     if ($booking) {
+    //         return response()->json([
+    //             'booking' => $booking,
+    //             'property' => $booking->properties,
+    //             'customer' => $booking->users
+    //         ]);
+    //     }
 
-        return response()->json(null);
-    }
+    //     return response()->json(null);
+    // }
+
     public function checkExistingPropertyBooking(Request $request)
     {
         $validated = $request->validate([
@@ -190,7 +193,8 @@ class BookingsController extends Controller
             'properties.property_dates' => function ($query) use ($validated) {
                 $query->whereBetween('date', [$validated['start_date'], $validated['end_date']]);
             },
-            'users','time_period'
+            'users',
+            'time_period'
         ])
             ->where('property_id', $validated['property_id'])
             ->where(function ($query) use ($validated) {
@@ -198,10 +202,10 @@ class BookingsController extends Controller
                     ->where('end_date', '>=', $validated['start_date']);
             })
             ->first();
+        $property_price = PropertyPrice::with('pricingType')->where('property_id', $validated['property_id'])->get();
         if ($booking) {
 
             $property_dates = $booking->properties->property_dates;
-
             return response()->json([
                 'exists' => true,
                 'booking_id' => $booking->id,
@@ -209,17 +213,72 @@ class BookingsController extends Controller
                 'property_dates' => $property_dates,
                 'user' => [
                     'user_id' => $booking->users->id,
-                    'user_name' =>  $booking->users->first_name . " " . $booking->users->last_name,
+                    'user_name' => $booking->users->first_name . " " . $booking->users->last_name,
                 ],
                 'time_period' => [
                     'time_period_id' => $booking->time_period->id,
-                    'time_period_name' =>  $booking->time_period->name,
+                    'time_period_name' => $booking->time_period->name,
                     'time_period_days' => $booking->time_period->days
-                ]
+                ],
+                'property_price' => $property_price
             ]);
         }
 
-        return response()->json(['exists' => false]);
+        return response()->json([
+            'exists' => false,
+            'property_price' => $property_price
+        ]);
+    }
+    public function calculateBookingPrice(Request $request)
+    {
+        $multiplierMapping = [
+            'daily' => 1,
+            'weekly' => 7,
+            'monthly' => 30,
+            'yearly' => 365,
+        ];
+        $pricingType = $request->get('pricingType');
+        $pricingTypeAmount = $request->get('pricingTypeAmount');
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
+        $property_id = $request->get('propertyId');
+        $property = Properties::findOrFail($property_id);
+        // Convert start and end dates to Carbon instances
+        $start = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+
+        // Calculate the difference in days
+        $numberOfDays = $end->diffInDays($start) + 1;
+
+        $rateMultiplier = $multiplierMapping[strtolower($pricingType)] ?? 1;
+        // Calculate total price
+        $totalPrice = ($numberOfDays / $rateMultiplier) * $pricingTypeAmount;
+        $pricingTypeDetail = PricingType::where('name', $pricingType)->first();
+        $propertyPrice = PropertyPrice::where('property_id', $property_id)->where('property_type_id', $pricingTypeDetail->id)->first();
+        $totalPriceWithOtherCharges = $totalPrice + $propertyPrice->cleaning_fee + $propertyPrice->security_fee + ($propertyPrice->guest_fee * $property->accommodates);
+        $propertyFee = PropertyFees::pluck('value', 'field');
+        $host_service_charge = ($propertyFee['host_service_charge'] / 100) * $totalPrice;
+        $guest_service_charge = ($propertyFee['guest_service_charge'] / 100) * $totalPrice;
+        $iva_tax = ($propertyFee['iva_tax'] / 100) * $totalPrice;
+        $accomodation_tax = ($propertyFee['accomodation_tax'] / 100) * $totalPrice;
+        $totalPriceWithChargesAndFees = $totalPriceWithOtherCharges + $host_service_charge + $guest_service_charge + $iva_tax + $accomodation_tax;
+        return response()->json([
+            'pricingType' => $pricingType,
+            'numberOfDays' => $numberOfDays,
+            'rateMultiplier' => $rateMultiplier,
+            'totalPrice' => $totalPrice,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'totalPriceWithOtherCharges' => $totalPriceWithOtherCharges,
+            'totalPriceWithChargesAndFees' => $totalPriceWithChargesAndFees,
+            'host_service_charge' => $host_service_charge,
+            'guest_service_charge' => $guest_service_charge,
+            'iva_tax' => $iva_tax,
+            'accomodation_tax' => $accomodation_tax,
+            'cleaning_fee' => $propertyPrice->cleaning_fee,
+            'security_fee' => $propertyPrice->security_fee,
+            'guest_fee' => ($propertyPrice->guest_fee * $property->accommodates)
+        ]);
     }
     public function store(AddAdminBookingRequest $request)
     {

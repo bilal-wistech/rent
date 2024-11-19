@@ -94,7 +94,7 @@ $("#phone").intlTelInput({
     preferredCountries: ["us"],
     autoPlaceholder: "polite",
     placeholderNumberType: "MOBILE",
-    utilsScript: "../public/backend/js/intl-tel-input-13.0.0/build/js/utils.js",
+    utilsScript: "../backend/js/intl-tel-input-13.0.0/build/js/utils.js",
 });
 
 var hasPhoneError = false;
