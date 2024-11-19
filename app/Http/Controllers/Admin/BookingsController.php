@@ -193,8 +193,7 @@ class BookingsController extends Controller
             'properties.property_dates' => function ($query) use ($validated) {
                 $query->whereBetween('date', [$validated['start_date'], $validated['end_date']]);
             },
-            'users',
-            'time_period'
+            'users'
         ])
             ->where('property_id', $validated['property_id'])
             ->where(function ($query) use ($validated) {
@@ -214,11 +213,6 @@ class BookingsController extends Controller
                 'user' => [
                     'user_id' => $booking->users->id,
                     'user_name' => $booking->users->first_name . " " . $booking->users->last_name,
-                ],
-                'time_period' => [
-                    'time_period_id' => $booking->time_period->id,
-                    'time_period_name' => $booking->time_period->name,
-                    'time_period_days' => $booking->time_period->days
                 ],
                 'property_price' => $property_price
             ]);
