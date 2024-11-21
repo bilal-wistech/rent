@@ -867,11 +867,14 @@
                         dayDiv.addClass('current-date');
                     }
 
-                    dayDiv.click(function() {
+                    dayDiv.on('click', function(event) {
                         const propertyId = $('#property_id').val();
                         const userId = $('#user_id').val();
                         handleDateClick(propertyId, userId, dateString);
                     });
+
+
+
 
                     daysGrid.append(dayDiv);
                 }
@@ -888,36 +891,36 @@
 
 
             function handleDateClick(propertyId, userId, date) {
+                console.log('Date clicked:', date);
                 if (isSelectingStartDate) {
                     $('#start_date').val(date);
-                    isSelectingStartDate = false;
-                    $('.calendar-container').addClass('selecting-end-date');
-                } else {
-                    $('#end_date').val(date);
-
-                    // Get form values
-                    const startDate = $('#start_date').val();
-                    const endDate = $('#end_date').val();
+                    const startDate = new Date(date);
+                    const endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + 1);
+                    const formattedEndDate = endDate.toISOString().split('T')[0];
+                    $('#end_date').val(formattedEndDate);
+                    const start_date = $('#start_date').val();
+                    const end_date = $('#end_date').val();
                     const no_of_guests = $('#no_of_guests').val();
                     const renewal_type = $('#renewal_type').val();
                     const property_date_status = $('#property_date_status').val();
                     const booking_type = $('#booking_type').val();
                     const booking_status = $('#booking_status').val();
 
+
                     $.ajax({
                         url: '{{ route('admin.bookings.check-booking-exists') }}',
                         type: 'POST',
                         data: {
                             property_id: propertyId,
-                            start_date: startDate,
-                            end_date: endDate,
+                            start_date: start_date,
+                            end_date: end_date,
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
                             $('#booking_form_modal').modal('show');
 
                             if (response.exists) {
-                                // Handle existing booking
                                 $('#propertyId').val(response.booking.property_id);
                                 $('#booking_type').val(response.booking.booking_type);
                                 $('#booking_status').val(response.booking.status);
@@ -939,20 +942,17 @@
                                         .trigger('change');
                                 }
 
-                                // Handle pricing types (assuming array of pricing types)
+                                // Handle pricing types
                                 const pricingSelect = $('#pricing_type_id');
                                 pricingSelect.empty().append(
-                                    '<option value="">Select Pricing</option>');
+                                '<option value="">Select Pricing</option>');
 
                                 if (Array.isArray(response.property_price)) {
                                     response.property_price.forEach(priceItem => {
                                         if (priceItem.pricing_type) {
-                                            const pricingOption = new Option(
-                                                priceItem.pricing_type.name,
-                                                priceItem.pricing_type.id,
-                                                true,
-                                                true
-                                            );
+                                            const pricingOption = new Option(priceItem
+                                                .pricing_type.name, priceItem.pricing_type
+                                                .id, true, true);
                                             $(pricingOption)
                                                 .attr('data-pricing', priceItem.pricing_type
                                                     .name)
@@ -970,8 +970,8 @@
                             } else {
                                 // Handle new booking
                                 $('#booking_id').val('');
-                                $('#start_date').val(startDate);
-                                $('#end_date').val(endDate);
+                                $('#start_date').val(start_date);
+                                $('#end_date').val(end_date);
                                 $('#number_of_guests').val(no_of_guests);
                                 $('#renewal_type').val(renewal_type);
                                 $('#property_date_status').val(property_date_status);
@@ -979,21 +979,16 @@
                                 $('#booking_type').val(booking_type);
                                 $('#booking_status').val(booking_status);
                                 $('#user_id').val('').trigger('change');
-
-                                // Handle pricing types for new booking
                                 const pricingSelect = $('#pricing_type_id');
                                 pricingSelect.empty().append(
-                                    '<option value="">Select Pricing</option>');
+                                '<option value="">Select Pricing</option>');
 
                                 if (Array.isArray(response.property_price)) {
                                     response.property_price.forEach(priceItem => {
                                         if (priceItem.pricing_type) {
-                                            const pricingOption = new Option(
-                                                priceItem.pricing_type.name,
-                                                priceItem.pricing_type.id,
-                                                false,
-                                                false
-                                            );
+                                            const pricingOption = new Option(priceItem
+                                                .pricing_type.name, priceItem.pricing_type
+                                                .id, false, false);
                                             $(pricingOption)
                                                 .attr('data-pricing', priceItem.pricing_type
                                                     .name)
@@ -1010,13 +1005,11 @@
                             console.log(error);
                         }
                     });
-
                     isSelectingStartDate = true;
-                    $('.calendar-container').removeClass('selecting-end-date');
                 }
-
                 updateCalendarSelection();
             }
+
 
             function updateCalendarSelection() {
                 $('.calendar-day').removeClass('selected in-range');
