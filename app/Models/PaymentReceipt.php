@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class PaymentReceipt extends Model
 {
     use HasFactory;
+    protected $fillable = ['booking_id', 'paid_through', 'payment_date', 'amount'];
 }

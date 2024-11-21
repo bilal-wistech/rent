@@ -434,6 +434,58 @@
                                                                 name="buffer_days" id="buffer_days">
                                                         </div>
                                                     </div>
+
+                                                    <div class="col-6 mt-5">
+                                                        <input type="checkbox" name="payment_receipt"
+                                                            id="payment_receipt" value="1">
+                                                        Generate Payment Receipt
+                                                    </div>
+                                                    <div class="payment-receipt">
+                                                        <div class="form-group row mt-3">
+                                                            <label for="payment_date"
+                                                                class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                                Payment Date <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="col-sm-9">
+                                                                <input type="date" class="form-control f-14"
+                                                                    name="payment_date" id="payment_date"
+                                                                    value="{{-- {{ isset($booking) ? \Carbon\Carbon::parse($booking->payment_date)->format('d-m-Y') : old('payment_date') }} --}}">
+                                                                <span class="text-danger"
+                                                                    id="error-payment_date">{{-- {{ $errors->first('payment_date') }} --}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row mt-3 paid_through">
+                                                            <label for="paid_through"
+                                                                class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                                Paid Through <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="col-sm-9">
+                                                                <select class="form-control select2" name="paid_through"
+                                                                    id="paid_through">
+                                                                    <option value="">Select Paid Through</option>
+                                                                    <option value="bank">
+                                                                        Bank</option>
+                                                                    <option value="cash">
+                                                                        Cash</option>
+                                                                    <option value="credit card">
+                                                                        Credit Card</option>
+                                                                </select>
+                                                                <span class="text-danger"
+                                                                    id="error-paid_through">{{ $errors->first('paid_through') }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row mt-3 amount">
+                                                            <label for="amount"
+                                                                class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                                Amount <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="col-sm-9">
+                                                                <input type="text" class="form-control f-14"
+                                                                    name="amount" id="amount">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
                                                 </div>
 
                                                 <!-- Price Breakdown Column -->
@@ -502,8 +554,6 @@
                                         <div class="modal-footer">
                                             <button class="btn btn-info pull-right text-white f-14" type="submit"
                                                 name="submit">Submit</button>
-                                            <button class="btn btn-success pull-right text-white f-14" type="button"
-                                                name="submit_save">Submit/Save</button>
                                             <button type="button" class="btn btn-default cls-reload f-14"
                                                 data-bs-dismiss="modal">Close</button>
                                         </div>
@@ -651,23 +701,25 @@
                                 .accomodation_tax));
                             $('#displayTotalPriceWithAll').text(formatCurrency(response
                                 .totalPriceWithChargesAndFees));
-
+                            $('#amount').val(response
+                                .totalPriceWithChargesAndFees);
                             // Show the table
                             $('.price-breakdown-table').show();
                             const hiddenFields = `
-        <input type="hidden" name="total_price" value="${response.totalPrice}">
-        <input type="hidden" name="total_price_with_charges" value="${response.totalPriceWithOtherCharges}">
-        <input type="hidden" name="total_price_with_fees" value="${response.totalPriceWithChargesAndFees}">
-        <input type="hidden" name="host_service_charge" value="${response.host_service_charge}">
-        <input type="hidden" name="guest_service_charge" value="${response.guest_service_charge}">
-        <input type="hidden" name="iva_tax" value="${response.iva_tax}">
-        <input type="hidden" name="accomodation_tax" value="${response.accomodation_tax}">
-        <input type="hidden" name="cleaning_fee" value="${response.cleaning_fee}">
-        <input type="hidden" name="security_fee" value="${response.security_fee}">
-        <input type="hidden" name="guest_fee" value="${response.guest_fee}">
-        <input type="hidden" name="rate_multiplier" value="${response.rateMultiplier}">
-        <input type="hidden" name="number_of_days" value="${response.numberOfDays}">
-    `;
+<input type="hidden" name="total_price" value="${response.totalPrice}">
+<input type="hidden" name="total_price_with_other_charges" value="${response.totalPriceWithOtherCharges}">
+<input type="hidden" name="total_price_with_charges_and_fees" value="${response.totalPriceWithChargesAndFees}">
+<input type="hidden" name="host_service_charge" value="${response.host_service_charge}">
+<input type="hidden" name="guest_service_charge" value="${response.guest_service_charge}">
+<input type="hidden" name="iva_tax" value="${response.iva_tax}">
+<input type="hidden" name="accomodation_tax" value="${response.accomodation_tax}">
+<input type="hidden" name="cleaning_fee" value="${response.cleaning_fee}">
+<input type="hidden" name="security_fee" value="${response.security_fee}">
+<input type="hidden" name="guest_fee" value="${response.guest_fee}">
+<input type="hidden" name="rate_multiplier" value="${response.rateMultiplier}">
+<input type="hidden" name="number_of_days" value="${response.numberOfDays}">
+<input type="hidden" name="per_day_price" value="${response.perDayPrice}">
+`;
 
                             // Append hidden fields to the form
                             $('#booking_form').append(hiddenFields);
@@ -726,12 +778,12 @@
 
                     // Add year navigation when showing calendar
                     $('.calendar-container').prepend(`
-            <div class="year-navigation text-center mb-4">
-                <button class="btn btn-outline-secondary prev-year">&lt; Previous Year</button>
-                <span class="year-display mx-3 font-weight-bold">${currentYear}</span>
-                <button class="btn btn-outline-secondary next-year">Next Year &gt;</button>
-            </div>
-        `);
+<div class="year-navigation text-center mb-4">
+<button class="btn btn-outline-secondary prev-year">&lt; Previous Year</button>
+<span class="year-display mx-3 font-weight-bold">${currentYear}</span>
+<button class="btn btn-outline-secondary next-year">Next Year &gt;</button>
+</div>
+`);
 
                     // Reattach event handlers for the newly added buttons
                     $('.prev-year').click(function() {
@@ -1015,9 +1067,6 @@
                     renewal_type: {
                         required: true
                     },
-                    property_date_status: {
-                        required: true
-                    }
                 },
                 messages: {
                     user_id: {
@@ -1039,9 +1088,6 @@
                     renewal_type: {
                         required: "Please select a renewal type"
                     },
-                    property_date_status: {
-                        required: "Please select a Property Status"
-                    }
                 },
                 errorPlacement: function(error, element) {
                     error.appendTo(element.closest('.col-sm-6'));
@@ -1186,6 +1232,23 @@
             // Add event listener for renewal_type change
             $('#renewal_type').on('change', function() {
                 toggleBufferDays();
+            });
+            const checkbox = document.getElementById('payment_receipt');
+            const paymentReceiptDiv = document.querySelector('.payment-receipt');
+            // Initially hide the payment receipt form
+            paymentReceiptDiv.style.display = 'none';
+
+            // Add event listener to checkbox
+            checkbox.addEventListener('change', function() {
+                // Show/hide the payment receipt form based on checkbox state
+                paymentReceiptDiv.style.display = this.checked ? 'block' : 'none';
+
+                // Clear form fields when hiding
+                if (!this.checked) {
+                    document.getElementById('payment_date').value = '';
+                    document.getElementById('paid_through').value = '';
+                    document.getElementById('amount').value = '';
+                }
             });
         });
     </script>
