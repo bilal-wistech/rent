@@ -945,7 +945,7 @@
                                 // Handle pricing types
                                 const pricingSelect = $('#pricing_type_id');
                                 pricingSelect.empty().append(
-                                '<option value="">Select Pricing</option>');
+                                    '<option value="">Select Pricing</option>');
 
                                 if (Array.isArray(response.property_price)) {
                                     response.property_price.forEach(priceItem => {
@@ -981,7 +981,7 @@
                                 $('#user_id').val('').trigger('change');
                                 const pricingSelect = $('#pricing_type_id');
                                 pricingSelect.empty().append(
-                                '<option value="">Select Pricing</option>');
+                                    '<option value="">Select Pricing</option>');
 
                                 if (Array.isArray(response.property_price)) {
                                     response.property_price.forEach(priceItem => {
@@ -1140,6 +1140,9 @@
 
                             // Reset date selection
                             resetDateSelection();
+                            $('.price-breakdown-table').hide();
+                            $('#payment_receipt').prop('checked', false);
+                            $('.payment-receipt').hide();
                         } else {
                             // Show error message
                             Swal.fire({
