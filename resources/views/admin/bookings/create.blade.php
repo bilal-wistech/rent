@@ -450,10 +450,8 @@
                                                             </label>
                                                             <div class="col-sm-9">
                                                                 <input type="date" class="form-control f-14"
-                                                                    name="payment_date" id="payment_date"
-                                                                    value="{{-- {{ isset($booking) ? \Carbon\Carbon::parse($booking->payment_date)->format('d-m-Y') : old('payment_date') }} --}}">
-                                                                <span class="text-danger"
-                                                                    id="error-payment_date">{{-- {{ $errors->first('payment_date') }} --}}</span>
+                                                                    name="payment_date" id="payment_date">
+                                                                <span class="text-danger" id="error-payment_date"></span>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row mt-3 paid_through">
@@ -465,15 +463,11 @@
                                                                 <select class="form-control select2" name="paid_through"
                                                                     id="paid_through">
                                                                     <option value="">Select Paid Through</option>
-                                                                    <option value="bank">
-                                                                        Bank</option>
-                                                                    <option value="cash">
-                                                                        Cash</option>
-                                                                    <option value="credit card">
-                                                                        Credit Card</option>
+                                                                    <option value="bank">Bank</option>
+                                                                    <option value="cash">Cash</option>
+                                                                    <option value="credit card">Credit Card</option>
                                                                 </select>
-                                                                <span class="text-danger"
-                                                                    id="error-paid_through">{{ $errors->first('paid_through') }}</span>
+                                                                <span class="text-danger" id="error-paid_through"></span>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row mt-3 amount">
@@ -654,7 +648,11 @@
             });
             $('.closeButtonForModal').on('click', function() {
                 document.getElementById('payment_receipt').checked = false;
+
                 $('.payment-receipt').hide();
+                $('#payment_date').val('');
+                $('#paid_through').val('');
+                $('#amount').val('');
             });
 
             function getCurrentValues() {
@@ -1106,8 +1104,26 @@
             }, "End date must be after the start date");
             $('#booking_form').on('submit', function(e) {
                 e.preventDefault();
-
-                if (!$(this).valid()) {
+                if ($('#payment_receipt').is(':checked')) {
+                    if ($('#payment_date').val() === '') {
+                        $('#error-payment_date').text('Payment Date is required').show();
+                        isValid = false;
+                    } else {
+                        $('#error-payment_date').text('').hide();
+                    }
+                    if ($('#paid_through').val() === '') {
+                        $('#error-paid_through').text('Paid Through is required').show();
+                        isValid = false;
+                    } else {
+                        $('#error-paid_through').text('').hide();
+                    }
+                    if ($('#amount').val() === '') {
+                        $('#amount').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#amount').removeClass('is-invalid');
+                    }
+                } else if (!$(this).valid()) {
                     return false;
                 }
 
