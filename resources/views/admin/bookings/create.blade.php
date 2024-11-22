@@ -9,6 +9,7 @@
             margin-top: 20px;
         }
 
+
         .month-calendar {
             border: 1px solid #ddd;
             padding: 10px;
@@ -209,10 +210,11 @@
                             <div class="modal-dialog">
                                 <!-- Modal content-->
                                 <div class="modal-content">
-                                    <div class="modal-header">
+                                    <div class="modal-header bg-light ">
                                         <h4 class="modal-title booking-modal f-18">
                                             Add Booking</h4>
-                                        <a type="button" class="close cls-reload f-18" data-bs-dismiss="modal">×</a>
+                                        <a type="button" class="close cls-reload f-18 closeButtonForModal "
+                                            data-bs-dismiss="modal">×</a>
                                     </div>
 
                                     <div id="addCustomerForm" style="display: none;">
@@ -319,7 +321,7 @@
                                                             class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
                                                             Customer <span class="text-danger">*</span>
                                                         </label>
-                                                        <div class="col-sm-7">
+                                                        <div class="col-sm-8">
                                                             <select class="form-control select2" name="user_id"
                                                                 id="user_id">
                                                                 <option value="">Select a Customer</option>
@@ -329,7 +331,7 @@
                                                             <span
                                                                 class="text-danger">{{ $errors->first('user_id') }}</span>
                                                         </div>
-                                                        <div class="col-sm-2">
+                                                        <div class="col-sm-1">
                                                             <button type="button" class="btn btn-primary btn-sm"
                                                                 id="addCustomerButton">
                                                                 <span class="fa fa-user"></span>
@@ -435,7 +437,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-6 mt-5">
+                                                    <div class="col-6 mx-auto mt-3 ">
                                                         <input type="checkbox" name="payment_receipt"
                                                             id="payment_receipt" value="1">
                                                         Generate Payment Receipt
@@ -554,7 +556,8 @@
                                         <div class="modal-footer">
                                             <button class="btn btn-info pull-right text-white f-14" type="submit"
                                                 name="submit">Submit</button>
-                                            <button type="button" class="btn btn-default cls-reload f-14"
+                                            <button type="button"
+                                                class="btn btn-default cls-reload f-14  closeButtonForModal"
                                                 data-bs-dismiss="modal">Close</button>
                                         </div>
                                     </form>
@@ -648,6 +651,10 @@
                 },
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
+            });
+            $('.closeButtonForModal').on('click', function() {
+                document.getElementById('payment_receipt').checked = false;
+                $('.payment-receipt').hide();
             });
 
             function getCurrentValues() {
