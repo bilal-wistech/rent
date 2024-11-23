@@ -437,7 +437,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-6 mx-auto mt-3 ">
+                                                    <div class="col-sm-9 mx-5 mt-3 ">
                                                         <input type="checkbox" name="payment_receipt"
                                                             id="payment_receipt" value="1">
                                                         Generate Payment Receipt
