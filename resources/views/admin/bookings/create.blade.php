@@ -86,6 +86,12 @@
             color: #e8f5e9;
         }
 
+        .calendar-day.booked-but-not-fully-paid {
+            background-color: #000000;
+            /* orange */
+            color: #e8f5e9;
+        }
+
         .select2-dropdown {
             z-index: 9999;
         }
@@ -862,6 +868,8 @@
                             dayDiv.addClass('booked-not-paid');
                         } else if (propertyDates[dateString].status === 'booked paid') {
                             dayDiv.addClass('booked-paid');
+                        } else if (propertyDates[dateString].status === 'booked but not fully paid') {
+                            dayDiv.addClass('booked-but-not-fully-paid');
                         } else if (propertyDates[dateString].status === 'maintainence') {
                             dayDiv.addClass('maintainence');
                         }
@@ -1219,7 +1227,8 @@
 
                     if (date.isBetween(start, end, 'day', '[]')) {
                         // Remove existing status classes
-                        $(this).removeClass('booked-not-paid booked-paid maintainence');
+                        $(this).removeClass(
+                            'booked-not-paid booked-paid maintainence booked-but-not-fully-paid');
 
                         // Add new status class
                         switch (status) {
@@ -1231,6 +1240,9 @@
                                 break;
                             case 'maintainence':
                                 $(this).addClass('maintainence');
+                                break;
+                            case 'booked but not fully paid':
+                                $(this).addClass('booked-but-not-fully-paid');
                                 break;
                         }
                     }

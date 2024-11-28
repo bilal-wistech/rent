@@ -372,7 +372,11 @@ class BookingsController extends Controller
             foreach ($bookedDates as $date) {
                 $status = '';
                 if ($request->payment_receipt == 1) {
-                    $status = 'booked paid';
+                    if ($request->amount < $request->total_price_with_charges_and_fees) {
+                        $status = 'booked but not fully paid';
+                    } else {
+                        $status = 'booked paid';
+                    }
                 } else {
                     $status = 'booked not paid';
                 }
@@ -405,8 +409,8 @@ class BookingsController extends Controller
                     'invoice_date' => Carbon::now(),
                     'due_date' => Carbon::now()->addDays(5),
                     'description' => 'Booking invoice for ' . $property->name,
-                    'sub_total' => Common::convert_currency('', $currencyDefault->code, $request->subtotal),
-                    'grand_total' => Common::convert_currency('', $currencyDefault->code, $request->total),
+                    'sub_total' => Common::convert_currency('', $currencyDefault->code, $request->total_price),
+                    'grand_total' => Common::convert_currency('', $currencyDefault->code, $request->total_price_with_charges_and_fees),
                 ]
             );
 
