@@ -9,4 +9,9 @@ class PaymentReceipt extends Model
 {
     use HasFactory;
     protected $fillable = ['booking_id', 'paid_through', 'payment_date', 'amount'];
+
+    public function booking()
+    {
+        return $this->belongsTo(Bookings::class,'booking_id','id');
+    }
 }
