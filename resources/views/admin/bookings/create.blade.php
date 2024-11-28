@@ -101,7 +101,7 @@
 
         .current-date {
             background-color: #f5f544;
-            color:#e8f5e9
+
             /* Highlight color for the current date */
             font-weight: bold;
         }
