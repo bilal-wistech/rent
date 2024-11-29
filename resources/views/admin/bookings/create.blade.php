@@ -4,9 +4,13 @@
     <style>
         .calendar-grid {
             display: grid;
+            margin-top:20px;
+            margin-left:50px;
+            margin-right:50px;
+            padding-bottom: 2rem;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            margin-top: 20px;
+
         }
 
 
@@ -19,8 +23,45 @@
             text-align: center;
             font-weight: bold;
             margin-bottom: 10px;
-            background-color: #f5f5f5;
+            background-color: #6C7888;
+            color:white;
             padding: 5px;
+        }
+
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            border-radius: 4px;
+        }
+
+        .legend-color.booked-paid {
+            background-color: #b81f16c7;
+        }
+
+        .legend-color.booked-not-paid {
+            background-color: #388e3c;
+        }
+
+        .legend-color.maintainence {
+            background-color: #f5f544;
+        }
+
+        .legend-color.booked-but-not-fully-paid {
+            background-color: #000000;
         }
 
         .weekday-header {
@@ -40,8 +81,9 @@
             padding: 5px;
             text-align: center;
             cursor: pointer;
-            border: 1px solid transparent;
+            border: 1px solid #6c78884d;
         }
+
 
         .calendar-day:hover {
             background-color: #e9ecef;
@@ -58,7 +100,8 @@
         }
 
         .current-date {
-            background-color: yellow;
+            background-color: #f5f544;
+
             /* Highlight color for the current date */
             font-weight: bold;
         }
@@ -69,13 +112,13 @@
         }
 
         .calendar-day.booked-paid {
-            background-color: #d32f2f;
+            background-color: #b81f16c7;
             /* Light red */
             color: #e8f5e9;
         }
 
         .calendar-day.booked-not-paid {
-            background-color: #388e3c;
+            background-color: #388e3c
             /* Light green */
             color: #e8f5e9;
         }
@@ -790,11 +833,27 @@
                     // Add year navigation when showing calendar
                     $('.calendar-container').prepend(`
 <div class="year-navigation text-center mb-4">
-<button class="btn btn-outline-secondary prev-year">&lt; Previous Year</button>
-<span class="year-display mx-3 font-weight-bold">${currentYear}</span>
-<button class="btn btn-outline-secondary next-year">Next Year &gt;</button>
+    <button class="btn btn-outline-secondary prev-year">&lt; Previous Year</button>
+    <span class="year-display mx-3 font-weight-bold">${currentYear}</span>
+    <button class="btn btn-outline-secondary next-year">Next Year &gt;</button>
+</div>
+
+<div class="calendar-legend text-center mb-3">
+    <span class="legend-item">
+        <span class="legend-color booked-paid"></span> Booked & Paid
+    </span>
+    <span class="legend-item">
+        <span class="legend-color booked-not-paid"></span> Booked but Not Paid
+    </span>
+    <span class="legend-item">
+        <span class="legend-color maintainence"></span> Maintenance
+    </span>
+    <span class="legend-item">
+        <span class="legend-color booked-but-not-fully-paid"></span> Booked but Not Fully Paid
+    </span>
 </div>
 `);
+
 
                     // Reattach event handlers for the newly added buttons
                     $('.prev-year').click(function() {
