@@ -1006,7 +1006,7 @@
                                         // Redirect to the edit form when "Edit" button is clicked
                                         console.log(response.booking_id);
 
-                                        // window.location.href = `/edit/${response.id}`;
+                                        window.location.href = `{{ route('admin.bookings.edit', ':id') }}`.replace(':id', response.booking_id);
                                     }
                                 });
                             }

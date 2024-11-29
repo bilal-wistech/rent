@@ -484,7 +484,7 @@ class BookingsController extends Controller
             $status = $propertyDates->first()->status;
         }
 
-        return view('admin.bookings.create', compact('property_id', 'propertyName', 'customer_id', 'customerName', 'numberOfGuests', 'booking', 'propertyDates', 'status'));
+        return view('admin.bookings.edit', compact('property_id', 'propertyName', 'customer_id', 'customerName', 'numberOfGuests', 'booking', 'propertyDates', 'status'));
     }
     public function update(Request $request, $id)
     {
