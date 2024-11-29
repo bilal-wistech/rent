@@ -572,4 +572,8 @@ class Bookings extends Model
         }
         return $url;
     }
+    public function paymentReceipts()
+    {
+        return $this->hasMany(PaymentReceipt::class, 'booking_id', 'id');
+    }
 }

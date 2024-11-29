@@ -29,6 +29,12 @@
                     <a href="{{ url('admin/invoices') }}"><i class="fa fa-paypal"></i><span>Invoices</span></a>
                 </li>
             @endif
+            @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_payment_receipts'))
+                <li
+                    class="{{ Route::current()->uri() == 'admin/payment-receipts' ? 'active' : '' }}">
+                    <a href="{{ url('admin/payment-receipts') }}"><i class="fa fa-shopping-cart"></i><span>Payment Receipts</span></a>
+                </li>
+            @endif
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'view_payouts'))
                 <li
                     class="{{ Route::current()->uri() == 'admin/payouts' || Route::current()->uri() == 'admin/payouts/details/{id}' || Route::current()->uri() == 'admin/payouts/edit/{id}' ? 'active' : '' }}">

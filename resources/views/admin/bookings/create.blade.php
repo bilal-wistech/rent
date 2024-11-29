@@ -4,10 +4,15 @@
     <style>
         .calendar-grid {
             display: grid;
+            margin-top: 20px;
+            margin-left: 50px;
+            margin-right: 50px;
+            padding-bottom: 2rem;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            margin-top: 20px;
+
         }
+
 
         .month-calendar {
             border: 1px solid #ddd;
@@ -18,8 +23,45 @@
             text-align: center;
             font-weight: bold;
             margin-bottom: 10px;
-            background-color: #f5f5f5;
+            background-color: #6C7888;
+            color: white;
             padding: 5px;
+        }
+
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            border-radius: 4px;
+        }
+
+        .legend-color.booked-paid {
+            background-color: #b81f16c7;
+        }
+
+        .legend-color.booked-not-paid {
+            background-color: #388e3c;
+        }
+
+        .legend-color.maintainence {
+            background-color: #f5f544;
+        }
+
+        .legend-color.booked-but-not-fully-paid {
+            background-color: #000000;
         }
 
         .weekday-header {
@@ -39,8 +81,9 @@
             padding: 5px;
             text-align: center;
             cursor: pointer;
-            border: 1px solid transparent;
+            border: 1px solid #6c78884d;
         }
+
 
         .calendar-day:hover {
             background-color: #e9ecef;
@@ -57,7 +100,8 @@
         }
 
         .current-date {
-            background-color: yellow;
+            background-color: #f5f544;
+
             /* Highlight color for the current date */
             font-weight: bold;
         }
@@ -68,19 +112,25 @@
         }
 
         .calendar-day.booked-paid {
-            background-color: #d32f2f;
+            background-color: #b81f16c7;
             /* Light red */
             color: #e8f5e9;
         }
 
         .calendar-day.booked-not-paid {
-            background-color: #388e3c;
-            /* Light green */
-            color: #e8f5e9;
+            background-color: #388e3c
+                /* Light green */
+                color: #e8f5e9;
         }
 
         .calendar-day.maintainence {
             background-color: #FFA500;
+            /* orange */
+            color: #e8f5e9;
+        }
+
+        .calendar-day.booked-but-not-fully-paid {
+            background-color: #000000;
             /* orange */
             color: #e8f5e9;
         }
@@ -112,6 +162,43 @@
             border-top: 2px solid #3498db;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+        }
+
+        .year-navigation {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .year-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 0 20px;
+        }
+
+        .calendar-day {
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .days-grid {
+            grid-template-rows: repeat(6, 1fr);
+        }
+
+        .modal-dialog {
+            max-width: 1000px;
+            /* or whatever width works best for your design */
+        }
+
+        .price-breakdown-table td {
+            padding: 0.5rem;
+        }
+
+        .card {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         @keyframes spin {
@@ -172,11 +259,13 @@
                             <div class="modal-dialog">
                                 <!-- Modal content-->
                                 <div class="modal-content">
-                                    <div class="modal-header">
+                                    <div class="modal-header bg-light ">
                                         <h4 class="modal-title booking-modal f-18">
                                             Add Booking</h4>
-                                        <a type="button" class="close cls-reload f-18" data-bs-dismiss="modal">×</a>
+                                        <a type="button" class="close cls-reload f-18 closeButtonForModal "
+                                            data-bs-dismiss="modal">×</a>
                                     </div>
+
                                     <div id="addCustomerForm" style="display: none;">
                                         <form class="form-horizontal" id="customer_form" method="post" name="customer_form"
                                             action="{{ url('admin/add-ajax-customer') }}" accept-charset='UTF-8'>
@@ -250,7 +339,7 @@
                                             <div class="modal-footer mt-2">
                                                 <button type="submit" id="customerModalBtn"
                                                     class="btn btn-success pull-left f-14">Submit</button>
-                                                    <button type="submit" id="customerModalBtnClose"
+                                                <button type="submit" id="customerModalBtnClose"
                                                     class="btn btn-info pull-left f-14">Close</button>
                                             </div>
                                         </form>
@@ -259,166 +348,250 @@
                                         class='form-horizontal' id='booking_form'>
                                         {{ csrf_field() }}
                                         <div class="modal-body">
+                                            <div class="row">
+                                                <!-- Form Column -->
+                                                <div class="col-md-7">
+                                                    <p class="calendar-m-msg" id="model-message"></p>
+                                                    <!-- Hidden inputs -->
+                                                    <input type="hidden" name="booking_id" id="booking_id">
+                                                    <input type="hidden" name="property_id" id="propertyId"
+                                                        value="">
+                                                    <input type="hidden" name="min_stay" value="1">
+                                                    <input type="hidden" name="booking_added_by" id="booking_added_by"
+                                                        value="{{ Auth::guard('admin')->id() }}">
+                                                    <input type="hidden" name="booking_type" value="instant"
+                                                        id="booking_type">
+                                                    <input type="hidden" name="status" value="pending"
+                                                        id="booking_status">
 
-                                            <p class="calendar-m-msg" id="model-message"></p>
-                                            <input type="hidden" name="booking_id" id="booking_id">
-                                            <input type="hidden" name="property_id" id="propertyId" value="">
-                                            {{-- <input type="hidden" name="user_id" id="userId" value=""> --}}
-                                            <input type="hidden" name="min_stay" value="1">
-                                            <input type="hidden" name="booking_added_by" id="booking_added_by"
-                                                value="{{ Auth::guard('admin')->id() }}">
-                                            <input type="hidden" name="booking_type" value="instant" id="booking_type">
-                                            <input type="hidden" name="status" value="pending" id="booking_status">
-                                            <div class="form-group row mt-3 user_id">
-                                                <label for="user_id"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Customer <span class="text-danger">*</span>
-                                                </label>
+                                                    <!-- User ID Selection -->
+                                                    <div class="form-group row mt-3 user_id">
+                                                        <label for="user_id"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Customer <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-8">
+                                                            <select class="form-control select2" name="user_id"
+                                                                id="user_id">
+                                                                <option value="">Select a Customer</option>
+                                                                <option value="{{ old('user_id') }}" selected>
+                                                                    {{ old('user_name') }}</option>
+                                                            </select>
+                                                            <span
+                                                                class="text-danger">{{ $errors->first('user_id') }}</span>
+                                                        </div>
+                                                        <div class="col-sm-1">
+                                                            <button type="button" class="btn btn-primary btn-sm"
+                                                                id="addCustomerButton">
+                                                                <span class="fa fa-user"></span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
 
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="user_id" id="user_id">
-                                                        <option value="">Select a Customer</option>
-                                                        <option value="{{ old('user_id') }}" selected>
-                                                            {{ old('user_name') }}
-                                                        </option>
-                                                    </select>
-                                                    <span class="text-danger">{{ $errors->first('user_id') }}</span>
-                                                </div>
-                                                <div class="col-sm-1">
-                                                    <button type="button" class="btn btn-primary btn-sm"
-                                                        id="addCustomerButton">
-                                                        <span class="fa fa-user"></span>
-                                                    </button>
+                                                    <!-- Pricing Selection -->
+                                                    <div class="form-group row mt-3 pricing_type_id">
+                                                        <label for="pricing_type_id"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Pricing <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control select2" name="pricing_type_id"
+                                                                id="pricing_type_id">
+                                                                <option value="">Select Pricing</option>
+                                                            </select>
+                                                            <span class="text-danger"
+                                                                id="error-pricing_type_id">{{ $errors->first('pricing_type_id') }}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Start Date -->
+                                                    <div class="form-group row mt-3">
+                                                        <label for="start_date"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Start Date <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <input type="date" class="form-control f-14"
+                                                                name="start_date" id="start_date"
+                                                                value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->start_date)->format('d-m-Y') : old('start_date') }}">
+                                                            <span class="text-danger"
+                                                                id="error-start_date">{{ $errors->first('start_date') }}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- End Date -->
+                                                    <div class="form-group row mt-3">
+                                                        <label for="end_date"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            End Date <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <input type="date" class="form-control f-14"
+                                                                name="end_date" id="end_date"
+                                                                value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->end_date)->format('d-m-Y') : old('end_date') }}">
+                                                            <span class="text-danger"
+                                                                id="error-end_date">{{ $errors->first('end_date') }}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Number of Guests -->
+                                                    <div class="form-group row mt-3 number_of_guests">
+                                                        <label for="number_of_guests"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Number of Guests <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control select2" name="number_of_guests"
+                                                                id="number_of_guests">
+                                                                <option value="">Select Number of Guests</option>
+                                                                <option value="{{ old('number_of_guests') }}" selected>
+                                                                    {{ old('number_of_guests') }}</option>
+                                                            </select>
+                                                            <span class="text-danger"
+                                                                id="error-number_of_guests">{{ $errors->first('number_of_guests') }}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Renewal Type -->
+                                                    <div class="form-group row mt-3 renewal_type">
+                                                        <label for="renewal_type"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Renewal <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control select2" name="renewal_type"
+                                                                id="renewal_type">
+                                                                <option value="">Is Renewal Needed</option>
+                                                                <option value="yes"
+                                                                    {{ (isset($booking) && $booking->renewal_type == 'yes') || old('renewal_type') == 'yes' ? 'selected' : '' }}>
+                                                                    Yes</option>
+                                                                <option value="no"
+                                                                    {{ (isset($booking) && $booking->renewal_type == 'no') || old('renewal_type') == 'no' ? 'selected' : '' }}>
+                                                                    No</option>
+                                                            </select>
+                                                            <span class="text-danger"
+                                                                id="error-renewal_type">{{ $errors->first('renewal_type') }}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Buffer Days -->
+                                                    <div class="form-group row mt-3 buffer-days-group">
+                                                        <label for="buffer_days"
+                                                            class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                            Notice Period <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <input type="number" class="form-control f-14"
+                                                                name="buffer_days" id="buffer_days">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-9 mx-5 mt-3 ">
+                                                        <input type="checkbox" name="payment_receipt"
+                                                            id="payment_receipt" value="1">
+                                                        Generate Payment Receipt
+                                                    </div>
+                                                    <div class="payment-receipt">
+                                                        <div class="form-group row mt-3">
+                                                            <label for="payment_date"
+                                                                class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                                Payment Date <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="col-sm-9">
+                                                                <input type="date" class="form-control f-14"
+                                                                    name="payment_date" id="payment_date">
+                                                                <span class="text-danger" id="error-payment_date"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row mt-3 paid_through">
+                                                            <label for="paid_through"
+                                                                class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                                Paid Through <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="col-sm-9">
+                                                                <select class="form-control select2" name="paid_through"
+                                                                    id="paid_through">
+                                                                    <option value="">Select Paid Through</option>
+                                                                    <option value="bank">Bank</option>
+                                                                    <option value="cash">Cash</option>
+                                                                    <option value="credit card">Credit Card</option>
+                                                                </select>
+                                                                <span class="text-danger" id="error-paid_through"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row mt-3 amount">
+                                                            <label for="amount"
+                                                                class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                                                Amount <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="col-sm-9">
+                                                                <input type="text" class="form-control f-14"
+                                                                    name="amount" id="amount">
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
                                                 </div>
-                                            </div>
-                                            <div class="form-group row mt-3 renewal_type">
-                                                <label for="time_period_id"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Time Period <span class="text-danger">*</span>
-                                                </label>
 
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="time_period_id"
-                                                        id="time_period_id">
-                                                        <option value="">Select Time Period</option>
-                                                        @foreach ($time_periods as $time_period)
-                                                            <option value="{{ $time_period->id }}"
-                                                                data-days="{{ $time_period->days }}"
-                                                                {{ old('time_period_id') == $time_period->id ? 'selected' : '' }}>
-                                                                {{ $time_period->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <span class="text-danger" id="error-time_period_id">
-                                                        {{ $errors->first('time_period_id') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="input_dob"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Start Date
-                                                    <em class="text-danger">*</em>
-                                                </label>
-                                                <div class="col-sm-6">
-                                                    <input type="date" class="form-control f-14" name="start_date"
-                                                        id="start_date" placeholder="Start Date" autocomplete="off"
-                                                        value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->start_date)->format('d-m-Y') : old('start_date') }}">
-                                                    <span class="text-danger" id="error-start_date">
-                                                        {{ $errors->first('start_date') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="clear-both"></div>
-                                            <div class="form-group row mt-3">
-                                                <label for="input_dob"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    End Date
-                                                    <em class="text-danger">*</em>
-                                                </label>
-                                                <div class="col-sm-6">
-                                                    <input type="date" class="form-control f-14" name="end_date"
-                                                        id="end_date" placeholder="End Date" autocomplete="off"
-                                                        value="{{ isset($booking) ? \Carbon\Carbon::parse($booking->end_date)->format('d-m-Y') : old('end_date') }}">
-                                                    <span class="text-danger" id="error-end_date">
-                                                        {{ $errors->first('end_date') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="clear-both"></div>
-                                            <div class="form-group row mt-3 number_of_guests">
-                                                <label for="number_of_guests"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Number of Guests <span class="text-danger">*</span>
-                                                </label>
-
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="number_of_guests"
-                                                        id="number_of_guests">
-                                                        <option value="">Select Number of Guests</option>
-                                                        <option value="{{ old('number_of_guests') }}" selected>
-                                                            {{ old('number_of_guests') }}</option>
-                                                    </select>
-                                                    <span class="text-danger"
-                                                        id="error-number_of_guests">{{ $errors->first('number_of_guests') }}</span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3 renewal_type">
-                                                <label for="renewal_type"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Renewal<span class="text-danger">*</span>
-                                                </label>
-
-                                                <div class="col-sm-6">
-                                                    <select class="form-control select2" name="renewal_type"
-                                                        id="renewal_type">
-                                                        <option value="">Is Renewal Needed</option>
-                                                        <option value="yes"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'yes') || old('renewal_type') == 'yes' ? 'selected' : '' }}>
-                                                            Yes
-                                                        </option>
-                                                        <option value="no"
-                                                            {{ (isset($booking) && $booking->renewal_type == 'no') || old('renewal_type') == 'no' ? 'selected' : '' }}>
-                                                            No
-                                                        </option>
-                                                    </select>
-                                                    <span class="text-danger" id="error-renewal_type">
-                                                        {{ $errors->first('renewal_type') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3">
-                                                <label for="input_dob"
-                                                    class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
-                                                    Status <em class="text-danger">*</em>
-                                                </label>
-                                                <div class="col-sm-6">
-                                                    <select class="form-control f-14" name="property_date_status"
-                                                        id="property_date_status">
-                                                        <option value="">--Please Select--</option>
-                                                        <option value="booked not paid"
-                                                            {{ isset($status) && $status == 'booked not paid' ? 'selected' : '' }}>
-                                                            Booked Not Paid</option>
-                                                        <option value="booked paid"
-                                                            {{ isset($status) && $status == 'booked paid' ? 'selected' : '' }}>
-                                                            Booked Paid</option>
-                                                        <option value="maintainence"
-                                                            {{ isset($status) && $status == 'maintainence' ? 'selected' : '' }}>
-                                                            Maintainence</option>
-                                                    </select>
-                                                    <span class="text-danger" id="error-property_date_status">
-                                                        {{ $errors->first('property_date_status') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mt-3 buffer-days-group">
-                                                <label for="exampleInputPassword1"
-                                                    class="control-label col-sm-3 mt-2 fw-bold">Buffer Days<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="col-sm-6">
-                                                    <input type="number" class="form-control f-14" name="buffer_days"
-                                                        id="buffer_days" placeholder="">
+                                                <!-- Price Breakdown Column -->
+                                                <div class="col-md-5">
+                                                    <div class="card">
+                                                        <div class="card-header bg-light">
+                                                            <h5 class="card-title mb-0">Price Breakdown</h5>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <table class="table table-bordered price-breakdown-table"
+                                                                style="display: none;">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>Pricing Type</td>
+                                                                        <td id="displayPricingType"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Number of Days</td>
+                                                                        <td id="displayNumberOfDays"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Base Price</td>
+                                                                        <td id="displayTotalPrice"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Cleaning Fee</td>
+                                                                        <td id="displayCleaningFee"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Security Fee</td>
+                                                                        <td id="displaySecurityFee"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Guest Fee</td>
+                                                                        <td id="displayGuestFee"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Host Service Charge</td>
+                                                                        <td id="displayHostServiceCharge"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Guest Service Charge</td>
+                                                                        <td id="displayGuestServiceCharge"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>IVA Tax</td>
+                                                                        <td id="displayIvaTax"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Accommodation Tax</td>
+                                                                        <td id="displayAccommodationTax"></td>
+                                                                    </tr>
+                                                                    <tr class="table-info">
+                                                                        <td><strong>Total Price</strong></td>
+                                                                        <td id="displayTotalPriceWithAll"><strong></strong>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -426,7 +599,8 @@
                                         <div class="modal-footer">
                                             <button class="btn btn-info pull-right text-white f-14" type="submit"
                                                 name="submit">Submit</button>
-                                            <button type="button" class="btn btn-default cls-reload f-14"
+                                            <button type="button"
+                                                class="btn btn-default cls-reload f-14  closeButtonForModal"
                                                 data-bs-dismiss="modal">Close</button>
                                         </div>
                                     </form>
@@ -462,6 +636,7 @@
             let calendar;
             let propertyDates = {};
             let isSelectingStartDate = true;
+            let currentYear = moment().year();
 
             // Initialize Select2 for property_id
             $('#property_id').select2({
@@ -520,24 +695,95 @@
                 placeholder: 'Select a Customer',
                 minimumInputLength: 0,
             });
-            $('#time_period_id').on('change', function() {
-                const selectedOption = $(this).find('option:selected');
-                const daysToAdd = parseInt(selectedOption.data('days'));
-                const startDateValue = $('#start_date').val();
+            $('.closeButtonForModal').on('click', function() {
+                document.getElementById('payment_receipt').checked = false;
 
-                if (startDateValue) {
-                    const startDate = moment(startDateValue);
-
-                    if (daysToAdd && daysToAdd > 0) {
-
-                        const endDate = startDate.add(daysToAdd, 'days').format('YYYY-MM-DD');
-                        $('#end_date').val(endDate);
-                    } else {
-                        $('#end_date').val(startDate.format('YYYY-MM-DD'));
-                    }
-                }
+                $('.payment-receipt').hide();
+                $('#payment_date').val('');
+                $('#paid_through').val('');
+                $('#amount').val('');
             });
 
+            function getCurrentValues() {
+                return {
+                    pricingType: $('#pricing_type_id').find('option:selected').data('pricing'),
+                    pricingTypeAmount: $('#pricing_type_id').find('option:selected').data('pricing-amount'),
+                    startDate: $('#start_date').val(),
+                    endDate: $('#end_date').val(),
+                    propertyId: $('#property_id').val()
+                };
+            }
+            $('#pricing_type_id, #start_date, #end_date').on('change', function() {
+                const values = getCurrentValues();
+                updateCalculations(values.pricingType, values.pricingTypeAmount, values.startDate, values
+                    .endDate, values.propertyId);
+            });
+
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'AED'
+                }).format(amount);
+            }
+
+            function updateCalculations(pricingType, pricingTypeAmount, startDate, endDate, propertyId) {
+                if (pricingType && pricingTypeAmount && startDate && endDate && propertyId) {
+                    $.ajax({
+                        url: '{{ route('calculate-booking-price') }}',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {
+                            pricingType: pricingType,
+                            pricingTypeAmount: pricingTypeAmount,
+                            startDate: startDate,
+                            endDate: endDate,
+                            propertyId: propertyId
+                        },
+                        success: function(response) {
+                            $('#displayPricingType').text(response.pricingType);
+                            $('#displayNumberOfDays').text(response.numberOfDays + ' days');
+                            $('#displayTotalPrice').text(formatCurrency(response.totalPrice));
+                            $('#displayCleaningFee').text(formatCurrency(response.cleaning_fee));
+                            $('#displaySecurityFee').text(formatCurrency(response.security_fee));
+                            $('#displayGuestFee').text(formatCurrency(response.guest_fee));
+                            $('#displayHostServiceCharge').text(formatCurrency(response
+                                .host_service_charge));
+                            $('#displayGuestServiceCharge').text(formatCurrency(response
+                                .guest_service_charge));
+                            $('#displayIvaTax').text(formatCurrency(response.iva_tax));
+                            $('#displayAccommodationTax').text(formatCurrency(response
+                                .accomodation_tax));
+                            $('#displayTotalPriceWithAll').text(formatCurrency(response
+                                .totalPriceWithChargesAndFees));
+                            $('#amount').val(response
+                                .totalPriceWithChargesAndFees);
+                            // Show the table
+                            $('.price-breakdown-table').show();
+                            const hiddenFields = `
+<input type="hidden" name="total_price" value="${response.totalPrice}">
+<input type="hidden" name="total_price_with_other_charges" value="${response.totalPriceWithOtherCharges}">
+<input type="hidden" name="total_price_with_charges_and_fees" value="${response.totalPriceWithChargesAndFees}">
+<input type="hidden" name="host_service_charge" value="${response.host_service_charge}">
+<input type="hidden" name="guest_service_charge" value="${response.guest_service_charge}">
+<input type="hidden" name="iva_tax" value="${response.iva_tax}">
+<input type="hidden" name="accomodation_tax" value="${response.accomodation_tax}">
+<input type="hidden" name="cleaning_fee" value="${response.cleaning_fee}">
+<input type="hidden" name="security_fee" value="${response.security_fee}">
+<input type="hidden" name="guest_fee" value="${response.guest_fee}">
+<input type="hidden" name="rate_multiplier" value="${response.rateMultiplier}">
+<input type="hidden" name="number_of_days" value="${response.numberOfDays}">
+<input type="hidden" name="per_day_price" value="${response.perDayPrice}">
+`;
+
+                            // Append hidden fields to the form
+                            $('#booking_form').append(hiddenFields);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Error:', error);
+                        }
+                    });
+                }
+            }
 
             function updateNumberOfGuests(propertyId) {
                 $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
@@ -573,24 +819,73 @@
                 });
             }
 
+            function updateYearDisplay() {
+                $('.year-display').text(currentYear);
+            }
+
             function checkSelections() {
                 const propertyId = $('#propertyId').val();
                 if (propertyId) {
                     $('.calendar-container').show();
+                    // Clear previous navigation if it exists
+                    $('.year-navigation').remove();
+
+                    // Add year navigation when showing calendar
+                    $('.calendar-container').prepend(`
+<div class="year-navigation text-center mb-4">
+    <button class="btn btn-outline-secondary prev-year">&lt; Previous Year</button>
+    <span class="year-display mx-3 font-weight-bold">${currentYear}</span>
+    <button class="btn btn-outline-secondary next-year">Next Year &gt;</button>
+</div>
+
+<div class="calendar-legend text-center mb-3">
+    <span class="legend-item">
+        <span class="legend-color booked-paid"></span> Booked & Paid
+    </span>
+    <span class="legend-item">
+        <span class="legend-color booked-not-paid"></span> Booked but Not Paid
+    </span>
+    <span class="legend-item">
+        <span class="legend-color maintainence"></span> Maintenance
+    </span>
+    <span class="legend-item">
+        <span class="legend-color booked-but-not-fully-paid"></span> Booked but Not Fully Paid
+    </span>
+</div>
+`);
+
+
+                    // Reattach event handlers for the newly added buttons
+                    $('.prev-year').click(function() {
+                        currentYear--;
+                        updateYearDisplay();
+                        renderCalendars();
+                    });
+
+                    $('.next-year').click(function() {
+                        currentYear++;
+                        updateYearDisplay();
+                        renderCalendars();
+                    });
+
                     renderCalendars();
                 } else {
                     $('.calendar-container').hide();
                 }
             }
 
+
+
+            // Modified renderCalendars function to use currentYear
             function renderCalendars() {
                 const calendarGrid = $('#calendarGrid');
                 calendarGrid.empty();
 
-                const today = moment();
+                // Create a moment object for January 1st of the current year
+                const startOfYear = moment().year(currentYear).startOf('year');
 
                 for (let i = 0; i < 12; i++) {
-                    const currentMonth = moment(today).add(i, 'months');
+                    const currentMonth = moment(startOfYear).add(i, 'months');
                     const monthCalendar = createMonthCalendar(currentMonth);
                     calendarGrid.append(monthCalendar);
                 }
@@ -611,7 +906,7 @@
                 const lastDay = moment(month).endOf('month');
                 const today = moment();
 
-                // Fill in empty days
+                // Fill in empty days at the start
                 for (let i = 0; i < firstDay.day(); i++) {
                     daysGrid.append($('<div>').addClass('calendar-day other-month'));
                 }
@@ -626,105 +921,173 @@
                         .text(day)
                         .data('date', dateString);
 
-                    // Apply color based on property date status
+                    // Apply status colors
                     if (propertyDates[dateString]) {
                         if (propertyDates[dateString].status === 'booked not paid') {
                             dayDiv.addClass('booked-not-paid');
                         } else if (propertyDates[dateString].status === 'booked paid') {
                             dayDiv.addClass('booked-paid');
+                        } else if (propertyDates[dateString].status === 'booked but not fully paid') {
+                            dayDiv.addClass('booked-but-not-fully-paid');
                         } else if (propertyDates[dateString].status === 'maintainence') {
                             dayDiv.addClass('maintainence');
                         }
                     }
 
+                    // Highlight current date only if we're in the current year and month
                     if (currentDate.isSame(today, 'day')) {
                         dayDiv.addClass('current-date');
                     }
 
-                    // All dates are clickable
-                    dayDiv.click(function() {
+                    dayDiv.on('click', function(event) {
                         const propertyId = $('#property_id').val();
                         const userId = $('#user_id').val();
                         handleDateClick(propertyId, userId, dateString);
                     });
 
+
+
+
                     daysGrid.append(dayDiv);
+                }
+
+                // Fill in empty days at the end to maintain grid
+                const remainingDays = 42 - (firstDay.day() + lastDay.date()); // 42 = 6 rows × 7 days
+                for (let i = 0; i < remainingDays; i++) {
+                    daysGrid.append($('<div>').addClass('calendar-day other-month'));
                 }
 
                 monthDiv.append(daysGrid);
                 return monthDiv;
             }
 
+
             function handleDateClick(propertyId, userId, date) {
+                console.log('Date clicked:', date);
                 if (isSelectingStartDate) {
                     $('#start_date').val(date);
-                    isSelectingStartDate = false;
-                    $('.calendar-container').addClass('selecting-end-date');
-                } else {
-                    $('#end_date').val(date);
-
-                    // Make the AJAX call
-                    const startDate = $('#start_date').val();
-                    const endDate = $('#end_date').val();
+                    const startDate = new Date(date);
+                    const endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + 1);
+                    const formattedEndDate = endDate.toISOString().split('T')[0];
+                    $('#end_date').val(formattedEndDate);
+                    const start_date = $('#start_date').val();
+                    const end_date = $('#end_date').val();
                     const no_of_guests = $('#no_of_guests').val();
                     const renewal_type = $('#renewal_type').val();
                     const property_date_status = $('#property_date_status').val();
                     const booking_type = $('#booking_type').val();
                     const booking_status = $('#booking_status').val();
 
+
                     $.ajax({
                         url: '{{ route('admin.bookings.check-booking-exists') }}',
                         type: 'POST',
                         data: {
                             property_id: propertyId,
-                            start_date: startDate,
-                            end_date: endDate,
+                            start_date: start_date,
+                            end_date: end_date,
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            $('#booking_form_modal').modal('show');
+
+
                             if (response.exists) {
-                                // console.log(response.booking);
-                                // console.log('dates: ', response.property_dates);
-                                // console.log('time period: ', response.time_period);
-                                $('#propertyId').val(response.booking.property_id);
-                                $('#booking_type').val(response.booking.booking_type);
-                                $('#booking_status').val(response.booking.status);
-                                $('#booking_id').val(response.booking.id);
-                                $('#number_of_guests').val(response.booking.guest);
-                                $('#renewal_type').val(response.booking.renewal_type);
-                                $('#property_date_status').val(response.property_dates[0].status);
-                                $('#min_stay').val(response.property_dates[0].min_stay);
-                                $('#buffer_days').val(response.booking.buffer_days);
-                                if (response.user) {
-                                    let newOption = new Option(response.user.user_name, response.user
-                                        .user_id, true, true);
-                                    $('#user_id').empty()
-                                        .append('<option value="">Select a Customer</option>')
-                                        .append(newOption)
-                                        .trigger('change');
-                                }
-                                if (response.time_period) {
-                                    // Just set the value and trigger change, keeping existing options
-                                    $('#time_period_id').val(response.time_period.time_period_id)
-                                        .trigger('change');
-                                }
-                                $('#start_date').val(response.booking.start_date);
-                                $('#end_date').val(response.booking.end_date);
-                                $('.booking-modal').text('Edit Booking');
-                            } else {
+
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Info!',
+                                    text: response.message || 'Something went wrong!',
+                                    showDenyButton: true,
+                                    confirmButtonText: 'Ok',
+                                    denyButtonText: 'Edit Booking',
+                                }).then((result) => {
+                                    if (result.isDenied) {
+                                        // Redirect to the edit form when "Edit" button is clicked
+                                        console.log(response.booking_id);
+
+                                        window.location.href = `{{ route('admin.bookings.edit', ':id') }}`.replace(':id', response.booking_id);
+                                    }
+                                });
+                            }
+
+                            /* $('#propertyId').val(response.booking.property_id);
+                            $('#booking_type').val(response.booking.booking_type);
+                            $('#booking_status').val(response.booking.status);
+                            $('#booking_id').val(response.booking.id);
+                            $('#number_of_guests').val(response.booking.guest);
+                            $('#renewal_type').val(response.booking.renewal_type);
+                            $('#property_date_status').val(response.property_dates[0].status);
+                            $('#min_stay').val(response.property_dates[0].min_stay);
+                            $('#buffer_days').val(response.booking.buffer_days);
+
+                            // Handle user selection
+                            if (response.user) {
+                                const userOption = new Option(response.user.user_name, response.user
+                                    .user_id, true, true);
+                                $('#user_id')
+                                    .empty()
+                                    .append('<option value="">Select a Customer</option>')
+                                    .append(userOption)
+                                    .trigger('change');
+                            }
+
+                            // Handle pricing types
+                            const pricingSelect = $('#pricing_type_id');
+                            pricingSelect.empty().append(
+                                '<option value="">Select Pricing</option>');
+
+                            if (Array.isArray(response.property_price)) {
+                                response.property_price.forEach(priceItem => {
+                                    if (priceItem.pricing_type) {
+                                        const pricingOption = new Option(priceItem
+                                            .pricing_type.name, priceItem.pricing_type
+                                            .id, true, true);
+                                        $(pricingOption)
+                                            .attr('data-pricing', priceItem.pricing_type
+                                                .name)
+                                            .attr('data-pricing-amount', priceItem.price);
+                                        pricingSelect.append(pricingOption);
+                                    }
+                                });
+                            }
+                            pricingSelect.trigger('change');
+
+                            $('#start_date').val(response.booking.start_date);
+                            $('#end_date').val(response.booking.end_date);
+                            $('.booking-modal').text('Edit Booking'); */
+                            else {
+                                $('#booking_form_modal').modal('show');
+                                // Handle new booking
                                 $('#booking_id').val('');
-                                $('#start_date').val(startDate);
-                                $('#end_date').val(endDate);
+                                $('#start_date').val(start_date);
+                                $('#end_date').val(end_date);
                                 $('#number_of_guests').val(no_of_guests);
                                 $('#renewal_type').val(renewal_type);
                                 $('#property_date_status').val(property_date_status);
                                 $('#propertyId').val(propertyId);
-                                $('#user_id').val(userId);
                                 $('#booking_type').val(booking_type);
                                 $('#booking_status').val(booking_status);
                                 $('#user_id').val('').trigger('change');
-                                $('#time_period_id').val('').trigger('change');
+                                const pricingSelect = $('#pricing_type_id');
+                                pricingSelect.empty().append(
+                                    '<option value="">Select Pricing</option>');
+
+                                if (Array.isArray(response.property_price)) {
+                                    response.property_price.forEach(priceItem => {
+                                        if (priceItem.pricing_type) {
+                                            const pricingOption = new Option(priceItem
+                                                .pricing_type.name, priceItem.pricing_type
+                                                .id, false, false);
+                                            $(pricingOption)
+                                                .attr('data-pricing', priceItem.pricing_type
+                                                    .name)
+                                                .attr('data-pricing-amount', priceItem.price);
+                                            pricingSelect.append(pricingOption);
+                                        }
+                                    });
+                                }
+                                pricingSelect.trigger('change');
                                 $('#buffer_days').val('');
                             }
                         },
@@ -732,13 +1095,11 @@
                             console.log(error);
                         }
                     });
-
                     isSelectingStartDate = true;
-                    $('.calendar-container').removeClass('selecting-end-date');
                 }
-
                 updateCalendarSelection();
             }
+
 
             function updateCalendarSelection() {
                 $('.calendar-day').removeClass('selected in-range');
@@ -789,9 +1150,6 @@
                     renewal_type: {
                         required: true
                     },
-                    property_date_status: {
-                        required: true
-                    }
                 },
                 messages: {
                     user_id: {
@@ -813,9 +1171,6 @@
                     renewal_type: {
                         required: "Please select a renewal type"
                     },
-                    property_date_status: {
-                        required: "Please select a Property Status"
-                    }
                 },
                 errorPlacement: function(error, element) {
                     error.appendTo(element.closest('.col-sm-6'));
@@ -834,8 +1189,26 @@
             }, "End date must be after the start date");
             $('#booking_form').on('submit', function(e) {
                 e.preventDefault();
-
-                if (!$(this).valid()) {
+                if ($('#payment_receipt').is(':checked')) {
+                    if ($('#payment_date').val() === '') {
+                        $('#error-payment_date').text('Payment Date is required').show();
+                        isValid = false;
+                    } else {
+                        $('#error-payment_date').text('').hide();
+                    }
+                    if ($('#paid_through').val() === '') {
+                        $('#error-paid_through').text('Paid Through is required').show();
+                        isValid = false;
+                    } else {
+                        $('#error-paid_through').text('').hide();
+                    }
+                    if ($('#amount').val() === '') {
+                        $('#amount').addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $('#amount').removeClass('is-invalid');
+                    }
+                } else if (!$(this).valid()) {
                     return false;
                 }
 
@@ -875,6 +1248,9 @@
 
                             // Reset date selection
                             resetDateSelection();
+                            $('.price-breakdown-table').hide();
+                            $('#payment_receipt').prop('checked', false);
+                            $('.payment-receipt').hide();
                         } else {
                             // Show error message
                             Swal.fire({
@@ -928,7 +1304,8 @@
 
                     if (date.isBetween(start, end, 'day', '[]')) {
                         // Remove existing status classes
-                        $(this).removeClass('booked-not-paid booked-paid maintainence');
+                        $(this).removeClass(
+                            'booked-not-paid booked-paid maintainence booked-but-not-fully-paid');
 
                         // Add new status class
                         switch (status) {
@@ -940,6 +1317,9 @@
                                 break;
                             case 'maintainence':
                                 $(this).addClass('maintainence');
+                                break;
+                            case 'booked but not fully paid':
+                                $(this).addClass('booked-but-not-fully-paid');
                                 break;
                         }
                     }
@@ -960,6 +1340,23 @@
             // Add event listener for renewal_type change
             $('#renewal_type').on('change', function() {
                 toggleBufferDays();
+            });
+            const checkbox = document.getElementById('payment_receipt');
+            const paymentReceiptDiv = document.querySelector('.payment-receipt');
+            // Initially hide the payment receipt form
+            paymentReceiptDiv.style.display = 'none';
+
+            // Add event listener to checkbox
+            checkbox.addEventListener('change', function() {
+                // Show/hide the payment receipt form based on checkbox state
+                paymentReceiptDiv.style.display = this.checked ? 'block' : 'none';
+
+                // Clear form fields when hiding
+                if (!this.checked) {
+                    document.getElementById('payment_date').value = '';
+                    document.getElementById('paid_through').value = '';
+                    document.getElementById('amount').value = '';
+                }
             });
         });
     </script>
