@@ -28,14 +28,14 @@ class PaymentReceiptDataTable extends DataTable
                 return $payment_receipts->booking->properties->name;
             })
             ->addColumn('user_id', function ($payment_receipts) {
-                return $payment_receipts->booking->users->first_name. ' ' . $payment_receipts->booking->users->last_name;
+                return $payment_receipts->booking->users->first_name . ' ' . $payment_receipts->booking->users->last_name;
             })
             ->addColumn('payment_date', function ($payment_receipts) {
                 return Carbon::parse($payment_receipts->payment_date)->format('m-d-Y');
             })
             ->addColumn('amount', function ($payment_receipt) use ($currencyDefault) {
 
-                return $currencyDefault->code.' '.Common::convert_currency(
+                return $currencyDefault->code . ' ' . Common::convert_currency(
                     '',
                     $currencyDefault->code,
                     $payment_receipt->amount ?? 0
@@ -43,7 +43,7 @@ class PaymentReceiptDataTable extends DataTable
             })
             ->addColumn('total_amount', function ($payment_receipt) use ($currencyDefault) {
 
-                return $currencyDefault->code.' '.Common::convert_currency(
+                return $currencyDefault->code . ' ' . Common::convert_currency(
                     '',
                     $currencyDefault->code,
                     $payment_receipt->booking->total ?? 0
@@ -64,12 +64,10 @@ class PaymentReceiptDataTable extends DataTable
             ->addColumn('created_at', function ($payment_receipts) {
                 return dateFormat($payment_receipts->created_at);
             })
-            // ->addColumn('action', function ($payment_receipts) {
-            //     return '<a href="' . url('admin/payment-receipts/show/' . $payment_receipts->id) . '" class="btn btn-xs btn-primary" title="Show Invoice"><i class="fa fa-share"></i></a>&nbsp;' .
-            //         '<a href="' . url('admin/payment-receipts/edit/' . $payment_receipts->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>&nbsp;';
-
-            // })
-            ->rawColumns(['DT_RowIndex','booking_id', 'property_id', 'user_id', 'payment_date', 'amount','total_amount','status','created'])
+            ->addColumn('action', function ($payment_receipts) {
+                return '<a href="' . url('admin/payment-receipts/edit/' . $payment_receipts->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>';
+            })
+            ->rawColumns(['DT_RowIndex', 'booking_id', 'property_id', 'user_id', 'payment_date', 'amount', 'total_amount', 'status', 'created','action'])
             ->make(true);
     }
 
@@ -92,7 +90,7 @@ class PaymentReceiptDataTable extends DataTable
     public function html()
     {
         return $this->builder()
-        ->addColumn(['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'title' => '#', 'orderable' => false, 'searchable' => false])
+            ->addColumn(['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'title' => '#', 'orderable' => false, 'searchable' => false])
             ->addColumn(['data' => 'booking_id', 'name' => 'booking_id', 'title' => 'Booking ID', 'orderable' => true, 'searchable' => false])
             ->addColumn(['data' => 'property_id', 'name' => 'property_id', 'title' => 'Property', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'user_id', 'name' => 'user_id', 'title' => 'Tenant', 'orderable' => true, 'searchable' => true])
@@ -102,7 +100,7 @@ class PaymentReceiptDataTable extends DataTable
             ->addColumn(['data' => 'total_amount', 'name' => 'total_amount', 'title' => 'Total Amount', 'orderable' => true, 'searchable' => false])
             ->addColumn(['data' => 'status', 'name' => 'status', 'title' => 'Payment Status', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At', 'orderable' => true, 'searchable' => true])
-            // ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => true, 'searchable' => false])
+            ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
             ->parameters(dataTableOptions());
     }
 
