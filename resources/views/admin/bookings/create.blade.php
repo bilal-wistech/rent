@@ -4,9 +4,9 @@
     <style>
         .calendar-grid {
             display: grid;
-            margin-top:20px;
-            margin-left:50px;
-            margin-right:50px;
+            margin-top: 20px;
+            margin-left: 50px;
+            margin-right: 50px;
             padding-bottom: 2rem;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
@@ -24,7 +24,7 @@
             font-weight: bold;
             margin-bottom: 10px;
             background-color: #6C7888;
-            color:white;
+            color: white;
             padding: 5px;
         }
 
@@ -119,8 +119,8 @@
 
         .calendar-day.booked-not-paid {
             background-color: #388e3c
-            /* Light green */
-            color: #e8f5e9;
+                /* Light green */
+                color: #e8f5e9;
         }
 
         .calendar-day.maintainence {
@@ -990,56 +990,74 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            $('#booking_form_modal').modal('show');
+
 
                             if (response.exists) {
-                                $('#propertyId').val(response.booking.property_id);
-                                $('#booking_type').val(response.booking.booking_type);
-                                $('#booking_status').val(response.booking.status);
-                                $('#booking_id').val(response.booking.id);
-                                $('#number_of_guests').val(response.booking.guest);
-                                $('#renewal_type').val(response.booking.renewal_type);
-                                $('#property_date_status').val(response.property_dates[0].status);
-                                $('#min_stay').val(response.property_dates[0].min_stay);
-                                $('#buffer_days').val(response.booking.buffer_days);
 
-                                // Handle user selection
-                                if (response.user) {
-                                    const userOption = new Option(response.user.user_name, response.user
-                                        .user_id, true, true);
-                                    $('#user_id')
-                                        .empty()
-                                        .append('<option value="">Select a Customer</option>')
-                                        .append(userOption)
-                                        .trigger('change');
-                                }
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Info!',
+                                    text: response.message || 'Something went wrong!',
+                                    showDenyButton: true,
+                                    confirmButtonText: 'Ok',
+                                    denyButtonText: 'Edit Booking',
+                                }).then((result) => {
+                                    if (result.isDenied) {
+                                        // Redirect to the edit form when "Edit" button is clicked
+                                        console.log(response.booking_id);
 
-                                // Handle pricing types
-                                const pricingSelect = $('#pricing_type_id');
-                                pricingSelect.empty().append(
-                                    '<option value="">Select Pricing</option>');
+                                        // window.location.href = `/edit/${response.id}`;
+                                    }
+                                });
+                            }
 
-                                if (Array.isArray(response.property_price)) {
-                                    response.property_price.forEach(priceItem => {
-                                        if (priceItem.pricing_type) {
-                                            const pricingOption = new Option(priceItem
-                                                .pricing_type.name, priceItem.pricing_type
-                                                .id, true, true);
-                                            $(pricingOption)
-                                                .attr('data-pricing', priceItem.pricing_type
-                                                    .name)
-                                                .attr('data-pricing-amount', priceItem.price);
-                                            pricingSelect.append(pricingOption);
-                                        }
-                                    });
-                                }
-                                pricingSelect.trigger('change');
+                            /* $('#propertyId').val(response.booking.property_id);
+                            $('#booking_type').val(response.booking.booking_type);
+                            $('#booking_status').val(response.booking.status);
+                            $('#booking_id').val(response.booking.id);
+                            $('#number_of_guests').val(response.booking.guest);
+                            $('#renewal_type').val(response.booking.renewal_type);
+                            $('#property_date_status').val(response.property_dates[0].status);
+                            $('#min_stay').val(response.property_dates[0].min_stay);
+                            $('#buffer_days').val(response.booking.buffer_days);
 
-                                $('#start_date').val(response.booking.start_date);
-                                $('#end_date').val(response.booking.end_date);
-                                $('.booking-modal').text('Edit Booking');
+                            // Handle user selection
+                            if (response.user) {
+                                const userOption = new Option(response.user.user_name, response.user
+                                    .user_id, true, true);
+                                $('#user_id')
+                                    .empty()
+                                    .append('<option value="">Select a Customer</option>')
+                                    .append(userOption)
+                                    .trigger('change');
+                            }
 
-                            } else {
+                            // Handle pricing types
+                            const pricingSelect = $('#pricing_type_id');
+                            pricingSelect.empty().append(
+                                '<option value="">Select Pricing</option>');
+
+                            if (Array.isArray(response.property_price)) {
+                                response.property_price.forEach(priceItem => {
+                                    if (priceItem.pricing_type) {
+                                        const pricingOption = new Option(priceItem
+                                            .pricing_type.name, priceItem.pricing_type
+                                            .id, true, true);
+                                        $(pricingOption)
+                                            .attr('data-pricing', priceItem.pricing_type
+                                                .name)
+                                            .attr('data-pricing-amount', priceItem.price);
+                                        pricingSelect.append(pricingOption);
+                                    }
+                                });
+                            }
+                            pricingSelect.trigger('change');
+
+                            $('#start_date').val(response.booking.start_date);
+                            $('#end_date').val(response.booking.end_date);
+                            $('.booking-modal').text('Edit Booking'); */
+                            else {
+                                $('#booking_form_modal').modal('show');
                                 // Handle new booking
                                 $('#booking_id').val('');
                                 $('#start_date').val(start_date);

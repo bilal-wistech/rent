@@ -208,14 +208,15 @@ class BookingsController extends Controller
             $property_dates = $booking->properties->property_dates;
             return response()->json([
                 'exists' => true,
+                'message' => 'Booking from ' . Carbon::parse($booking->start_date)->format('d-m-Y') . ' to '.Carbon::parse($booking->end_date)->format('d-m-Y').' already exists',
                 'booking_id' => $booking->id,
-                'booking' => $booking,
-                'property_dates' => $property_dates,
-                'user' => [
-                    'user_id' => $booking->users->id,
-                    'user_name' => $booking->users->first_name . " " . $booking->users->last_name,
-                ],
-                'property_price' => $property_price
+                // 'booking' => $booking,
+                // 'property_dates' => $property_dates,
+                // 'user' => [
+                //     'user_id' => $booking->users->id,
+                //     'user_name' => $booking->users->first_name . " " . $booking->users->last_name,
+                // ],
+                // 'property_price' => $property_price
             ]);
         }
 
