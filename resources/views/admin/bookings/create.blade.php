@@ -255,6 +255,7 @@
                         <div class="calendar-container">
                             <div class="calendar-grid" id="calendarGrid"></div>
                         </div>
+
                         <div class="modal fade dis-none z-index-high" id="booking_form_modal" role="dialog">
                             <div class="modal-dialog">
                                 <!-- Modal content-->
@@ -829,6 +830,7 @@
                     $('.calendar-container').show();
                     // Clear previous navigation if it exists
                     $('.year-navigation').remove();
+                    $('.calendar-legend ').remove();
 
                     // Add year navigation when showing calendar
                     $('.calendar-container').prepend(`
@@ -837,7 +839,6 @@
     <span class="year-display mx-3 font-weight-bold">${currentYear}</span>
     <button class="btn btn-outline-secondary next-year">Next Year &gt;</button>
 </div>
-
 <div class="calendar-legend text-center mb-3">
     <span class="legend-item">
         <span class="legend-color booked-paid"></span> Booked & Paid
@@ -852,6 +853,8 @@
         <span class="legend-color booked-but-not-fully-paid"></span> Booked but Not Fully Paid
     </span>
 </div>
+
+
 `);
 
 
