@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\DataTables\PaymentReceiptDataTable;
 use App\Models\PaymentReceipt;
+use App\Models\PropertyDates;
 use App\Models\User;
 use App\Models\Properties;
 use Illuminate\Http\Request;
@@ -68,6 +69,33 @@ class PaymentReceiptController extends Controller
 
     public function edit(PaymentReceipt $payment_receipt)
     {
-        dd($payment_receipt);
+        return view('admin.payment-receipts.edit', compact('payment_receipt'));
+    }
+
+    public function update(Request $request, PaymentReceipt $payment_receipt)
+    {
+        $booking = $payment_receipt->booking;
+
+        // Create the payment receipt
+        PaymentReceipt::create([
+            'booking_id' => $booking->id,
+            'paid_through' => $request->paid_through,
+            'payment_date' => $request->payment_date,
+            'amount' => $request->amount
+        ]);
+        if ($request->amount < $booking->total) {
+            // Partial payment
+            PropertyDates::where('booking_id', $booking->id)
+                ->where('property_id', $booking->property_id)
+                ->update(['status' => 'booked but not fully paid']);
+        } elseif ($request->amount == $booking->total) {
+
+            PropertyDates::where('booking_id', $booking->id)
+                ->where('property_id', $booking->property_id)
+                ->update(['status' => 'booked paid']);
+        }
+
+        return redirect()->route('payment-receipts.index')
+            ->with('success', 'New payment receipt created');
     }
 }
