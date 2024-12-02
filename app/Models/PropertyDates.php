@@ -24,7 +24,7 @@ use Cache;
 class PropertyDates extends Model
 {
     protected $table    = 'property_dates';
-    protected $fillable = ['property_id', 'status', 'date', 'min_day', 'min_stay', 'price','color','type'];
+    protected $fillable = ['property_id','booking_id' ,'status', 'date', 'min_day', 'min_stay', 'price','color','type'];
 
     public function properties()
     {

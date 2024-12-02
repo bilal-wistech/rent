@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\DataTables\PaymentReceiptDataTable;
+use App\Models\PaymentReceipt;
 use App\Models\User;
 use App\Models\Properties;
 use Illuminate\Http\Request;
@@ -63,5 +64,10 @@ class PaymentReceiptController extends Controller
         isset(request()->customer) ? $data['allcustomers'] = request()->customer : $data['allcustomers'] = '';
         isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
         return $dataTable->render('admin.payment-receipts.index', $data);
+    }
+
+    public function edit(PaymentReceipt $payment_receipt)
+    {
+        dd($payment_receipt);
     }
 }
