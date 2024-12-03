@@ -23,15 +23,20 @@ use Cache;
 
 class PropertyDates extends Model
 {
-    protected $table    = 'property_dates';
-    protected $fillable = ['property_id','booking_id' ,'status', 'date', 'min_day', 'min_stay', 'price','color','type'];
+    protected $table = 'property_dates';
+    protected $fillable = ['property_id', 'booking_id', 'status', 'date', 'min_day', 'min_stay', 'price', 'color', 'type'];
 
     public function properties()
     {
         return $this->belongsTo('App\Models\Properties', 'property_id', 'id');
     }
+    public function bookings()
+    {
+        return $this->belongsTo(Bookings::class, 'booking_id');
+    }
 
-    public static function getTempDates() {
+    public static function getTempDates()
+    {
         $data = Cache::get(config('cache.prefix') . '.calc.property_price');
         if (empty($data)) {
             $data = PropertyDates::all();

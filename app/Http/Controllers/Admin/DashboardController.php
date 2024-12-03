@@ -9,7 +9,9 @@ use Illuminate\Pagination\LengthAwarePaginator; // Import LengthAwarePaginator
 use App\Models\{
     User,
     Properties,
-    Bookings
+    Bookings,
+    PaymentReceipt,
+    PropertyDates
 };
 
 class DashboardController extends Controller
@@ -25,7 +27,7 @@ class DashboardController extends Controller
         })->pluck('id');
 
         // Step 2: Paginate the vacant properties
-        $perPage = 10; // Change this to the desired number of items per page
+        $perPage = 5; // Change this to the desired number of items per page
         $currentPage = request()->get('page', 1);
         $offset = ($currentPage - 1) * $perPage;
 
@@ -50,8 +52,6 @@ class DashboardController extends Controller
                 'propertiesName' => $propertiesName,
             ];
         }
-
-        // Create a LengthAwarePaginator for vacant properties
         $vacantPropertiesPaginated = new LengthAwarePaginator(
             $vacantProperties,
             $vacantPropertyIds->count(),
@@ -59,6 +59,38 @@ class DashboardController extends Controller
             $currentPage,
             ['path' => request()->url(), 'query' => request()->query()]
         );
+
+        // Step 2: Get the paymentReceiptIds as a collection
+        $paymentReceiptIds = PaymentReceipt::pluck('booking_id');
+
+        // Step 3: Paginate paymentReceiptIds using slice
+        $paginatedReceiptIds = $paymentReceiptIds->slice($offset, $perPage);
+
+        // Step 4: Query PropertyDates using the paginated booking IDs
+        $receipts = PropertyDates::with(['properties', 'bookings'])
+            ->whereIn('booking_id', $paginatedReceiptIds->toArray())
+            ->whereIn('status', ['booked not paid', 'booked but not fully paid'])
+            ->get();
+
+        // Step 5: Prepare the data for each receipt
+        $paginatedPaymentReceipts = $receipts->map(function ($receipt) {
+            return [
+                'status' => $receipt->status,
+                'booking' => $receipt->bookings ? $receipt->bookings->toArray() : [],
+                'receipts' => $receipt->bookings->paymentReceipts ? $receipt->bookings->paymentReceipts->toArray() : [],
+                'properties' => $receipt->bookings->properties ? $receipt->bookings->properties->toArray() : [],
+            ];
+        })->toArray();
+
+        // Step 6: Create LengthAwarePaginator
+        $paginatedPaymentReceiptsData = new LengthAwarePaginator(
+            $paginatedPaymentReceipts, // Paginated data
+            $paymentReceiptIds->count(), // Total records count for pagination
+            $perPage, // Records per page
+            $currentPage, // Current page
+            ['path' => request()->url(), 'query' => request()->query()] // Preserve query parameters for pagination links
+        );
+
 
 
         $data['total_users_count'] = User::count();
@@ -75,7 +107,7 @@ class DashboardController extends Controller
         $bookings = new Bookings;
         $data['bookingList'] = $bookings->getBookingLists();
         $data['vacantProperties'] = $vacantPropertiesPaginated; // Use the paginated properties
-
+        $data['paymentReceipts'] = $paginatedPaymentReceiptsData;
         return view('admin.dashboard', $data);
     }
 }
