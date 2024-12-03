@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Properties;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdatePaymentReceiptRequest;
 use Illuminate\Support\Facades\Session;
 
 class PaymentReceiptController extends Controller
@@ -69,13 +70,24 @@ class PaymentReceiptController extends Controller
 
     public function edit(PaymentReceipt $payment_receipt)
     {
-        return view('admin.payment-receipts.edit', compact('payment_receipt'));
+        $property_id = $payment_receipt->booking->property_id;
+        $start_date = $payment_receipt->booking->start_date;
+        $end_date = $payment_receipt->booking->end_date;
+
+        $property_status = PropertyDates::where('property_id', $property_id)
+            ->whereBetween('date', [$start_date, $end_date])
+            ->first();
+        return view('admin.payment-receipts.edit', compact('payment_receipt','property_status'));
     }
 
-    public function update(Request $request, PaymentReceipt $payment_receipt)
+    public function update(UpdatePaymentReceiptRequest $request, PaymentReceipt $payment_receipt)
     {
-        $booking = $payment_receipt->booking;
 
+        $booking = $payment_receipt->booking;
+        if ($booking->total == $payment_receipt->amount) {
+            return redirect()->back()
+                ->with('error', 'This booking is already fully paid. No further payments can be added.');
+        }
         // Create the payment receipt
         PaymentReceipt::create([
             'booking_id' => $booking->id,

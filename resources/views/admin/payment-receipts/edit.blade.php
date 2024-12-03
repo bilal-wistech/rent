@@ -1,6 +1,23 @@
 @extends('admin.template')
+@push('css')
+    <style>
+        .form-group {
+            margin-bottom: 1rem;
+        }
 
+        .control-label {
+            text-align: left;
+        }
+
+        .form-control-static {
+            padding: 6px 12px;
+            /* background-color: #f7f7f7; */
+            border: 1px solid #ddd;
+        }
+    </style>
+@endpush
 @section('main')
+
     <div class="content-wrapper">
         <section class="content-header">
             <h1>Payment Receipt <small>Edit</small></h1>
@@ -17,18 +34,63 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         @endif
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <form class="form-horizontal" action="{{ route('payment-receipts.update', $payment_receipt) }}"
-                            id="edit_payment_receipt" method="post" name="edit_payment_receipt" accept-charset='UTF-8'>
+                            id="edit_payment_receipt" method="post" name="edit_payment_receipt" accept-charset="UTF-8">
                             {{ csrf_field() }}
                             @method('PUT')
                             <div class="box-body">
                                 <input type="hidden" name="booking_id" id="booking_id"
                                     value="{{ $payment_receipt->booking_id }}" class="form-control">
+
                                 <div class="form-group mt-3 row">
-                                    <label class="control-label col-sm-3 mt-2 fw-bold">Paid Through<span
+                                    <label class="control-label col-sm-3">Booking ID:</label>
+                                    <div class="col-sm-4">
+                                        <p class="form-control-static">{{ $payment_receipt->booking_id }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mt-3 row">
+                                    <label class="control-label col-sm-3">Property:</label>
+                                    <div class="col-sm-4">
+                                        <p class="form-control-static">
+                                            {{ $payment_receipt->booking->properties->name ?? '' }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mt-3 row">
+                                    <label class="control-label col-sm-3">Tenant/Customer:</label>
+                                    <div class="col-sm-4">
+                                        <p class="form-control-static">
+                                            {{ $payment_receipt->booking->users->getFullNameAttribute() ?? '' }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mt-3 row">
+                                    <label class="control-label col-sm-3">Total Booking Amount:</label>
+                                    <div class="col-sm-4">
+                                        <p class="form-control-static">{{ $payment_receipt->booking->total ?? 0 }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-group mt-3 row">
+                                    <label class="control-label col-sm-3">Status:</label>
+                                    <div class="col-sm-4">
+                                        <p class="form-control-static">{{ $property_status->status }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-group mt-3 row">
+                                    <label for="paid_through" class="control-label col-sm-3">Paid Through<span
                                             class="text-danger">*</span></label>
-                                    <div class="col-sm-8">
-                                        <select name="paid_through" class="form-control mt-3">
+                                    <div class="col-sm-4">
+                                        <select name="paid_through" class="form-control">
                                             <option value="" disabled selected>Select Paid Through</option>
                                             <option value="bank"
                                                 {{ old('paid_through', $payment_receipt->paid_through) == 'bank' ? 'selected' : '' }}>
@@ -42,46 +104,33 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group mt-1 row">
-                                    <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">Payment
-                                        Date<span class="text-danger">*</span></label>
-                                    <div class="col-sm-8">
+                                <div class="form-group mt-3 row">
+                                    <label for="payment_date" class="control-label col-sm-3">Payment Date<span
+                                            class="text-danger">*</span></label>
+                                    <div class="col-sm-4">
                                         <input type="date" class="form-control" name="payment_date" id="payment_date"
                                             value="{{ $payment_receipt->payment_date }}">
                                     </div>
                                 </div>
 
                                 <div class="form-group mt-3 row">
-                                    <label for="exampleInputPassword1" class="control-label col-sm-3 mt-2 fw-bold">Payment
-                                        Amount<span class="text-danger">*</span></label>
-                                    <div class="col-sm-8">
+                                    <label for="amount" class="control-label col-sm-3">Payment Amount<span
+                                            class="text-danger">*</span></label>
+                                    <div class="col-sm-4">
                                         <input type="number" class="form-control" name="amount" id="amount"
-                                            value="{{ $payment_receipt->amount }}"  max="{{ $payment_receipt->booking->total }}">
+                                            value="{{ $payment_receipt->amount }}"
+                                            max="{{ $payment_receipt->booking->total }}">
                                     </div>
                                 </div>
                             </div>
-                            <div class="box-footer" style="text-align: right; margin-right:5rem">
-                                <button type="submit" class="btn btn-info f-14 text-white" id="submitBtn">Submit</button>
+
+                            <div class="box-footer" style="text-align: right;">
+                                <button type="submit" class="btn btn-info f-14 text-white">Submit</button>
                             </div>
+                        </form>
                     </div>
-
                 </div>
-
-
             </div>
-
-
-            </form>
+        </section>
     </div>
-    </div>
-    </div>
-    </section>
-    </div>
-@endsection
-@section('validate_script')
-    <script src="{{ asset('backend/js/intl-tel-input-13.0.0/build/js/intlTelInput.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('js/isValidPhoneNumber.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('backend/dist/js/validate.min.js') }}" type="text/javascript"></script>
-    <link href="{{ asset('backend/css/customer-form.css') }}" rel="stylesheet">
-    <script src="{{ asset('addCustomer.js') }}"></script>
 @endsection
