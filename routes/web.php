@@ -327,8 +327,11 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
 
     Route::get('calculate-booking-price', 'BookingsController@calculateBookingPrice')->middleware(['permission:manage_bookings'])->name('calculate-booking-price');
     Route::get('payment-receipts', 'PaymentReceiptController@index')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.index');
+    Route::get('payment-receipts/create', 'PaymentReceiptController@create')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.create');
+    Route::post('payment-receipts/store', 'PaymentReceiptController@store')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.store');
     Route::get('payment-receipts/edit/{payment_receipt}', 'PaymentReceiptController@edit')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.edit');
     Route::put('payment-receipts/update/{payment_receipt}', 'PaymentReceiptController@update')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.update');
+    Route::get('payment-receipts/get-booking-details/{booking_id}', 'PaymentReceiptController@getBookingDetails')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.get-booking-details');
 
     Route::match(['post', 'put'],'bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
     Route::get('bookings/edit/{id}', 'BookingsController@edit')->middleware(['permission:manage_bookings'])->name('admin.bookings.edit');

@@ -562,7 +562,9 @@
                                                                     </tr>
                                                                     <tr>
                                                                         <td>Security Fee</td>
-                                                                        <td id="displaySecurityFee"></td>
+                                                                        <td>
+                                                                            <input type="text" id="displaySecurityFee">
+                                                                        </td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td>Guest Fee</td>
@@ -745,7 +747,7 @@
                             $('#displayNumberOfDays').text(response.numberOfDays + ' days');
                             $('#displayTotalPrice').text(formatCurrency(response.totalPrice));
                             $('#displayCleaningFee').text(formatCurrency(response.cleaning_fee));
-                            $('#displaySecurityFee').text(formatCurrency(response.security_fee));
+                            $('#displaySecurityFee').val(formatCurrency(response.security_fee));
                             $('#displayGuestFee').text(formatCurrency(response.guest_fee));
                             $('#displayHostServiceCharge').text(formatCurrency(response
                                 .host_service_charge));
@@ -1009,7 +1011,9 @@
                                         // Redirect to the edit form when "Edit" button is clicked
                                         console.log(response.booking_id);
 
-                                        window.location.href = `{{ route('admin.bookings.edit', ':id') }}`.replace(':id', response.booking_id);
+                                        window.location.href =
+                                            `{{ route('admin.bookings.edit', ':id') }}`
+                                            .replace(':id', response.booking_id);
                                     }
                                 });
                             }

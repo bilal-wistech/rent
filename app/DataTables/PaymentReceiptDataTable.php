@@ -49,18 +49,6 @@ class PaymentReceiptDataTable extends DataTable
                     $payment_receipt->booking->total ?? 0
                 );
             })
-            ->addColumn('status', function ($payment_receipts) {
-                // Fetch the status for the specific date range
-                $property_id = $payment_receipts->booking->property_id;
-                $start_date = $payment_receipts->booking->start_date;
-                $end_date = $payment_receipts->booking->end_date;
-
-                $property_dates = PropertyDates::where('property_id', $property_id)
-                    ->whereBetween('date', [$start_date, $end_date])
-                    ->first(); // Get the first matching record
-
-                return $property_dates ? $property_dates->status : 'N/A';
-            })
             ->addColumn('created_at', function ($payment_receipts) {
                 return dateFormat($payment_receipts->created_at);
             })
@@ -98,7 +86,6 @@ class PaymentReceiptDataTable extends DataTable
             ->addColumn(['data' => 'payment_date', 'name' => 'payment_date', 'title' => 'Payment Date', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'amount', 'name' => 'amount', 'title' => 'Amount Paid', 'orderable' => true, 'searchable' => false])
             ->addColumn(['data' => 'total_amount', 'name' => 'total_amount', 'title' => 'Total Amount', 'orderable' => true, 'searchable' => false])
-            ->addColumn(['data' => 'status', 'name' => 'status', 'title' => 'Payment Status', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
             ->parameters(dataTableOptions());
