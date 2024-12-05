@@ -13,8 +13,8 @@
 
                         <div class="box-body">
                             <div class="box-header">
-                                {{-- <div class="pull-right"><a class="btn btn-success f-14"
-                                        href="{{ route('admin.bookings.create') }}">Add Invoices</a></div> --}}
+                                <div class="pull-right"><a class="btn btn-success f-14"
+                                        href="{{ route('payment-receipts.create') }}">Add Payment Receipt</a></div>
                             </div>
                             <form class="form-horizontal" enctype='multipart/form-data'
                                 action="{{ url('admin/invoices') }}" method="GET" accept-charset="UTF-8">

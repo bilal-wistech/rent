@@ -208,7 +208,7 @@ class BookingsController extends Controller
             $property_dates = $booking->properties->property_dates;
             return response()->json([
                 'exists' => true,
-                'message' => 'Booking from ' . Carbon::parse($booking->start_date)->format('d-m-Y') . ' to '.Carbon::parse($booking->end_date)->format('d-m-Y').' already exists',
+                'message' => 'Booking from ' . Carbon::parse($booking->start_date)->format('d-m-Y') . ' to ' . Carbon::parse($booking->end_date)->format('d-m-Y') . ' already exists',
                 'booking_id' => $booking->id,
                 // 'booking' => $booking,
                 // 'property_dates' => $property_dates,
@@ -323,14 +323,8 @@ class BookingsController extends Controller
                 'buffer_days' => $request->buffer_days ?? 0
             ];
 
-            if ($bookingId) {
-                // Update existing booking
-                $booking = Bookings::findOrFail($bookingId);
-                $booking->update($bookingData);
-            } else {
-                // Create new booking
-                $booking = Bookings::create($bookingData);
-            }
+
+            $booking = Bookings::create($bookingData);
             $start_date = date('Y-m-d', strtotime($request->start_date));
             $end_date = date('Y-m-d', strtotime($request->end_date));
 
@@ -340,35 +334,11 @@ class BookingsController extends Controller
 
             // Calculate the difference in days
             $min_days = ($end_date_timestamp - $start_date_timestamp) / 86400;
-
-            // Retrieve all existing dates for the property
-            $existingDates = PropertyDates::where('property_id', $request->property_id)->get();
-
             // Create an array of booked dates
             $bookedDates = [];
             for ($i = $start_date_timestamp; $i <= $end_date_timestamp; $i += 86400) {
                 $bookedDates[] = date("Y-m-d", $i);
             }
-
-            // Loop through existing dates to update statuses accordingly
-            foreach ($existingDates as $existingDate) {
-                if (in_array($existingDate->date, $bookedDates)) {
-                    // If the date is in the booked range, update its status
-                    $existingDate->update([
-                        'status' => $request->property_date_status,
-                        'min_day' => $min_days,
-                        'min_stay' => ($request->min_stay) ? '1' : '0',
-                    ]);
-                } else {
-                    // If the date is not booked, retain the existing status and clear the price
-                    $existingDate->update([
-                        'price' => null, // Optional: clear the price if you want
-                        'min_day' => null, // Optional: clear min_day if you want
-                        'min_stay' => null, // Optional: clear min_stay if you want
-                    ]);
-                }
-            }
-
             // Create new entries for booked dates that may not already exist
             foreach ($bookedDates as $date) {
                 $status = '';
@@ -381,9 +351,11 @@ class BookingsController extends Controller
                 } else {
                     $status = 'booked not paid';
                 }
-                PropertyDates::updateOrCreate(
-                    ['property_id' => $request->property_id, 'date' => $date],
+                PropertyDates::create(
                     [
+                        'property_id' => $request->property_id,
+                        'booking_id' => $booking->id,
+                        'date' => $date,
                         'price' => ($request->per_day_price) ? $request->per_day_price : '0',
                         'status' => $status,
                         'min_day' => $min_days,

@@ -43,7 +43,9 @@ class BookingsDataTable extends DataTable
             })
             ->addColumn('action', function ($bookings) {
                 return '<a href="' . url('admin/bookings/detail/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Detail View"><i class="fa fa-share"></i></a>&nbsp;' .
-                    '<a href="' . url('admin/bookings/edit/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>&nbsp;';
+                    '<a href="' . url('admin/bookings/edit/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>&nbsp;'
+                    .
+                    '<a href="' . url('admin/payment-receipts/create?booking_id=' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Create Payment Receipt"><i class="fa-regular fa-receipt"></i></a>&nbsp;';
 
             })
             ->rawColumns(['host_name', 'guest_name', 'total_amount', 'property_name', 'action'])

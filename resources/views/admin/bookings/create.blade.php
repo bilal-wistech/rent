@@ -118,7 +118,7 @@
         }
 
         .calendar-day.booked-not-paid {
-            background-color: #388e3c
+            background-color: #388e3c;
                 /* Light green */
                 color: #e8f5e9;
         }
@@ -255,6 +255,7 @@
                         <div class="calendar-container">
                             <div class="calendar-grid" id="calendarGrid"></div>
                         </div>
+
                         <div class="modal fade dis-none z-index-high" id="booking_form_modal" role="dialog">
                             <div class="modal-dialog">
                                 <!-- Modal content-->
@@ -561,7 +562,9 @@
                                                                     </tr>
                                                                     <tr>
                                                                         <td>Security Fee</td>
-                                                                        <td id="displaySecurityFee"></td>
+                                                                        <td>
+                                                                            <input type="text" id="displaySecurityFee">
+                                                                        </td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td>Guest Fee</td>
@@ -637,7 +640,27 @@
             let propertyDates = {};
             let isSelectingStartDate = true;
             let currentYear = moment().year();
+            $('#displaySecurityFee').on('input', function() {
+                let securityFee = parseFloat($(this).val()) ||
+                    0; // Get the security fee and ensure it's a number
 
+                // Get the total price from the response (you can also store it in a variable)
+                let totalPrice = parseFloat($('#displayTotalPrice').text()) || 0;
+
+                // Add the security fee to the total price
+                let updatedTotalPrice = totalPrice + securityFee;
+
+                // Update the displayed values
+                $('#displaySecurityFee').val(securityFee); // Set the hidden field for security fee
+                $('#displayTotalPriceWithAll').text(updatedTotalPrice.toFixed(
+                    2)); // Update total price with security fee
+                $('#amount').val(updatedTotalPrice.toFixed(
+                    2)); // Set the hidden total price with updated value
+
+                    security_fee
+                $('input[name="security_fee"]').val(securityFee);
+                $('input[name="total_price_with_charges_and_fees"]').val(updatedTotalPrice);
+            });
             // Initialize Select2 for property_id
             $('#property_id').select2({
                 ajax: {
@@ -719,12 +742,12 @@
                     .endDate, values.propertyId);
             });
 
-            function formatCurrency(amount) {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'AED'
-                }).format(amount);
-            }
+            // function formatCurrency(amount) {
+            //     return new Intl.NumberFormat('en-US', {
+            //         style: 'currency',
+            //         currency: 'AED'
+            //     }).format(amount);
+            // }
 
             function updateCalculations(pricingType, pricingTypeAmount, startDate, endDate, propertyId) {
                 if (pricingType && pricingTypeAmount && startDate && endDate && propertyId) {
@@ -742,21 +765,20 @@
                         success: function(response) {
                             $('#displayPricingType').text(response.pricingType);
                             $('#displayNumberOfDays').text(response.numberOfDays + ' days');
-                            $('#displayTotalPrice').text(formatCurrency(response.totalPrice));
-                            $('#displayCleaningFee').text(formatCurrency(response.cleaning_fee));
-                            $('#displaySecurityFee').text(formatCurrency(response.security_fee));
-                            $('#displayGuestFee').text(formatCurrency(response.guest_fee));
-                            $('#displayHostServiceCharge').text(formatCurrency(response
-                                .host_service_charge));
-                            $('#displayGuestServiceCharge').text(formatCurrency(response
-                                .guest_service_charge));
-                            $('#displayIvaTax').text(formatCurrency(response.iva_tax));
-                            $('#displayAccommodationTax').text(formatCurrency(response
-                                .accomodation_tax));
-                            $('#displayTotalPriceWithAll').text(formatCurrency(response
-                                .totalPriceWithChargesAndFees));
-                            $('#amount').val(response
-                                .totalPriceWithChargesAndFees);
+                            $('#displayTotalPrice').text((response.totalPrice).toFixed(
+                            2)); // Update total price
+                            $('#displayCleaningFee').text((response.cleaning_fee).toFixed(2));
+                            $('#displaySecurityFee').val((response.security_fee).toFixed(2));
+                            $('#displayGuestFee').text((response.guest_fee).toFixed(2));
+                            $('#displayHostServiceCharge').text((response.host_service_charge).toFixed(
+                                2));
+                            $('#displayGuestServiceCharge').text((response.guest_service_charge)
+                                .toFixed(2));
+                            $('#displayIvaTax').text((response.iva_tax).toFixed(2));
+                            $('#displayAccommodationTax').text((response.accomodation_tax).toFixed(2));
+                            $('#displayTotalPriceWithAll').text((response.totalPriceWithChargesAndFees)
+                                .toFixed(2));
+                            $('#amount').val(response.totalPriceWithChargesAndFees.toFixed(2));
                             // Show the table
                             $('.price-breakdown-table').show();
                             const hiddenFields = `
@@ -768,7 +790,7 @@
 <input type="hidden" name="iva_tax" value="${response.iva_tax}">
 <input type="hidden" name="accomodation_tax" value="${response.accomodation_tax}">
 <input type="hidden" name="cleaning_fee" value="${response.cleaning_fee}">
-<input type="hidden" name="security_fee" value="${response.security_fee}">
+<input type="hidden" name="security_fee" id="security_fee" value="${response.security_fee}">
 <input type="hidden" name="guest_fee" value="${response.guest_fee}">
 <input type="hidden" name="rate_multiplier" value="${response.rateMultiplier}">
 <input type="hidden" name="number_of_days" value="${response.numberOfDays}">
@@ -784,6 +806,7 @@
                     });
                 }
             }
+
 
             function updateNumberOfGuests(propertyId) {
                 $('#number_of_guests').empty().append('<option value="">Select Number of Guests</option>');
@@ -829,6 +852,7 @@
                     $('.calendar-container').show();
                     // Clear previous navigation if it exists
                     $('.year-navigation').remove();
+                    $('.calendar-legend ').remove();
 
                     // Add year navigation when showing calendar
                     $('.calendar-container').prepend(`
@@ -837,7 +861,6 @@
     <span class="year-display mx-3 font-weight-bold">${currentYear}</span>
     <button class="btn btn-outline-secondary next-year">Next Year &gt;</button>
 </div>
-
 <div class="calendar-legend text-center mb-3">
     <span class="legend-item">
         <span class="legend-color booked-paid"></span> Booked & Paid
@@ -852,6 +875,8 @@
         <span class="legend-color booked-but-not-fully-paid"></span> Booked but Not Fully Paid
     </span>
 </div>
+
+
 `);
 
 
@@ -1006,7 +1031,9 @@
                                         // Redirect to the edit form when "Edit" button is clicked
                                         console.log(response.booking_id);
 
-                                        window.location.href = `{{ route('admin.bookings.edit', ':id') }}`.replace(':id', response.booking_id);
+                                        window.location.href =
+                                            `{{ route('admin.bookings.edit', ':id') }}`
+                                            .replace(':id', response.booking_id);
                                     }
                                 });
                             }
