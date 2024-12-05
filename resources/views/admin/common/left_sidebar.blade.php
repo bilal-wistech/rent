@@ -35,6 +35,12 @@
                     <a href="{{ url('admin/payment-receipts') }}"><i class="fa fa-shopping-cart"></i><span>Payment Receipts</span></a>
                 </li>
             @endif
+            @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_securities'))
+                <li
+                    class="{{ Route::current()->uri() == 'admin/securities' ? 'active' : '' }}">
+                    <a href="{{ url('admin/securities') }}"><i class="fa fa-shopping-cart"></i><span>Securities</span></a>
+                </li>
+            @endif
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'view_payouts'))
                 <li
                     class="{{ Route::current()->uri() == 'admin/payouts' || Route::current()->uri() == 'admin/payouts/details/{id}' || Route::current()->uri() == 'admin/payouts/edit/{id}' ? 'active' : '' }}">
