@@ -1,7 +1,4 @@
  @extends('admin.template')
- @push('css')
- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
- @endpush
  @section('main')
      <div class="content-wrapper">
          <section class="content-header">
