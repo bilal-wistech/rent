@@ -16,8 +16,8 @@
                                 {{-- <div class="pull-right"><a class="btn btn-success f-14"
                                         href="{{ route('payment-receipts.create') }}">Add Payment Receipt</a></div> --}}
                             </div>
-                            <form class="form-horizontal" enctype='multipart/form-data'
-                                action="{{ url('admin/invoices') }}" method="GET" accept-charset="UTF-8">
+                            <form class="form-horizontal" enctype='multipart/form-data' action="{{ url('admin/invoices') }}"
+                                method="GET" accept-charset="UTF-8">
                                 {{ csrf_field() }}
                                 <div class="col-md-12  d-none">
                                     <input class="form-control" type="text" id="startDate" name="from"
@@ -82,6 +82,28 @@
                 <div class="col-xs-12">
                     <div class="box">
                         <div class="box-body">
+                            @if (session('success'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert"
+                                    style="position: relative;">
+                                    {{ session('success') }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                                        style="position: absolute; right: 10px; top: 10px;">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            @endif
+
+                            {{-- Error Alert --}}
+                            @if (session('error'))
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert"
+                                    style="position: relative;">
+                                    {{ session('error') }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                                        style="position: absolute; right: 10px; top: 10px;">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            @endif
                             <div class="table-responsive parent-table f-14">
                                 {!! $dataTable->table([
                                     'class' => 'table table-striped table-hover dt-responsive',
@@ -94,6 +116,32 @@
                 </div>
             </div>
         </section>
+        <!-- Modal -->
+        <div class="modal fade dis-none z-index-high" id="authorize_refund_form" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-light">
+                        <h4 class="modal-title booking-modal f-18">Authorize Refund Form</h4>
+                        <button type="button" class="close" data-bs-dismiss="modal">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Security Refund for Booking ID: <span id="refundSecurityId"></span></p>
+
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="authorizeRefundSwitch">
+                            <label class="form-check-label" for="authorizeRefundSwitch">
+                                Authorize Refund
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="confirmRefundButton">Confirm
+                            Refund</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -103,13 +151,17 @@
     {!! $dataTable->scripts() !!}
 
     <script type="text/javascript">
-        'use strict'
-
         var sessionDate = '{{ strtoupper(Session::get('date_format_type')) }}';
         var user_id = '{{ $user->id ?? '' }}';
         var page = 'booking'
     </script>
-
+    <script>
+        $(document).on('click', '.authorize_for_refund', function() {
+            var securityId = $(this).data('authorized_for_refund');
+            $('#refundSecurityId').text(securityId);
+            $('#authorize_refund_form').modal('show');
+        });
+    </script>
     <script src="{{ asset('backend/js/property_customer_dropdown.min.js') }}"></script>
     <script src="{{ asset('backend/js/reset-btn.min.js') }}"></script>
     <script src="{{ asset('backend/js/admin-date-range-picker.min.js') }}"></script>

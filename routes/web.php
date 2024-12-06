@@ -364,7 +364,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     });
     Route::get('securities', 'SecurityController@index')->middleware(['permission:manage_securities'])->name('securities.index');
     Route::get('securities/refund-form/{booking_id}', 'SecurityController@refundForm')->middleware(['permission:manage_securities'])->name('securities.refund-form');
-    Route::get('securities/refund', 'SecurityController@refund')->middleware(['permission:manage_securities'])->name('securities.refund');
+    Route::post('securities/refund', 'SecurityController@refund')->middleware(['permission:manage_securities'])->name('securities.refund');
     // Route::get('reports', 'ReportsController@index')->middleware(['permission:manage_reports']);
 
     // For Reporting

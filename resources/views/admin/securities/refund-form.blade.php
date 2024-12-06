@@ -26,12 +26,30 @@
                                 </ul>
                             </div>
                         @endif
-                        <form class="form-horizontal" action="{{ route('securities.refund') }}"
-                            id="security_refund_form" method="post" name="security_refund_form" accept-charset="UTF-8">
+                        <form class="form-horizontal" action="{{ route('securities.refund') }}" id="security_refund_form"
+                            method="post" name="security_refund_form" accept-charset="UTF-8">
                             {{ csrf_field() }}
-                            @method('POST')
                             <div class="box-body">
                                 <input type="hidden" name="booking_id" value="{{ $booking->id }}">
+                                <input type="hidden" name="created_by" value="{{ Auth::guard('admin')->id() }}">
+                                <div class="form-group mt-3 row">
+                                    <label for="security_amount" class="control-label col-sm-3">Security
+                                        Amount<span class="text-danger">*</span></label>
+                                    <div class="col-sm-4">
+                                        <input type="number" class="form-control" name="security_amount"
+                                            id="security_amount" value="{{ $booking->security_money ?? 0 }}" readonly>
+                                        <small id="security_amount_error" class="text-danger d-none"></small>
+                                    </div>
+                                </div>
+                                <div class="form-group mt-3 row">
+                                    <label for="security_refund_amount" class="control-label col-sm-3">Security
+                                        Amount Refunded<span class="text-danger">*</span></label>
+                                    <div class="col-sm-4">
+                                        <input type="number" class="form-control" name="security_refund_amount"
+                                            id="security_refund_amount">
+                                        <small id="security_refund_amount_error" class="text-danger d-none"></small>
+                                    </div>
+                                </div>
                                 <div class="form-group mt-3 row">
                                     <label for="security_refund_date" class="control-label col-sm-3">Security Refund
                                         Date<span class="text-danger">*</span></label>
@@ -40,14 +58,39 @@
                                             id="security_refund_date" value="{{ old('security_refund_date') }}">
                                     </div>
                                 </div>
-
                                 <div class="form-group mt-3 row">
-                                    <label for="security_refund_amount" class="control-label col-sm-3">Security Refund
-                                        Amount<span class="text-danger">*</span></label>
+                                    <label for="security_refund_paid_through" class="control-label col-sm-3">Paid
+                                        Through<span class="text-danger">*</span></label>
                                     <div class="col-sm-4">
-                                        <input type="number" class="form-control" name="security_refund_amount"
-                                            id="security_refund_amount" value="{{ $booking->security_money ?? 0 }}">
-                                        <small id="security_refund_amount_error" class="text-danger d-none"></small>
+                                        <select name="security_refund_paid_through" class="form-control">
+                                            <option value="" disabled selected>Select Paid Through</option>
+                                            <option value="bank"
+                                                {{ old('security_refund_paid_through') == 'bank' ? 'selected' : '' }}>
+                                                Bank</option>
+                                            <option value="cash"
+                                                {{ old('security_refund_paid_through') == 'cash' ? 'selected' : '' }}>
+                                                Cash</option>
+                                            <option value="credit card"
+                                                {{ old('security_refund_paid_through') == 'credit card' ? 'selected' : '' }}>
+                                                Credit Card</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group mt-3 row">
+                                    <label for="description" class="control-label col-sm-3">
+                                        Description
+                                    </label>
+                                    <div class="col-sm-4">
+                                        <textarea class="form-control" name="description" id="description" rows="4"></textarea>
+                                        <small id="description_error" class="text-danger d-none"></small>
+                                    </div>
+                                </div>
+                                <div class="form-group mt-3 row">
+                                    <label for="recieved_by" class="control-label col-sm-3">Recieved by<span
+                                            class="text-danger">*</span></label>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control" name="recieved_by" id="recieved_by">
+                                        <small id="recieved_by_error" class="text-danger d-none"></small>
                                     </div>
                                 </div>
                             </div>
@@ -63,5 +106,38 @@
     </div>
 @endsection
 @section('validate_script')
-    <script></script>
+    <script>
+        document.getElementById('security_refund_form').addEventListener('submit', function(e) {
+            const securityAmount = parseFloat(document.getElementById('security_amount').value) || 0;
+            const refundAmount = parseFloat(document.getElementById('security_refund_amount').value) || 0;
+            const description = document.getElementById('description').value.trim();
+
+            // Clear previous error messages
+            document.getElementById('description_error').classList.add('d-none');
+            document.getElementById('security_refund_amount_error').classList.add('d-none');
+
+            let isValid = true;
+
+            // Check if refund amount is less than security amount and description is empty
+            if (refundAmount < securityAmount && description === '') {
+                document.getElementById('description_error').classList.remove('d-none');
+                document.getElementById('description_error').innerText =
+                    'Description is required when refund amount is less than security amount.';
+                isValid = false;
+            }
+
+            // Check if refund amount is greater than security amount
+            if (refundAmount > securityAmount) {
+                document.getElementById('security_refund_amount_error').classList.remove('d-none');
+                document.getElementById('security_refund_amount_error').innerText =
+                    'Refund amount cannot be greater than the security amount.';
+                isValid = false;
+            }
+
+            // Prevent form submission if validation fails
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    </script>
 @endsection
