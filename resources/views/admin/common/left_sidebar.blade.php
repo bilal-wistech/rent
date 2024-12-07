@@ -42,6 +42,13 @@
                 </li>
             @endif
 
+            @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_renewal_bookings'))
+                <li
+                    class="{{ Route::current()->uri() == 'admin/renewal-bookings' ? 'active' : '' }}">
+                    <a href="{{ url('admin/renewal-bookings') }}"><i class="fa fa-paypal"></i><span>Renewal Bookings</span></a>
+                </li>
+            @endif
+
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_amenities'))
                 <li
                     class="{{ Route::current()->uri() == 'admin/amenities' || Route::current()->uri() == 'admin/add-amenities' || Route::current()->uri() == 'admin/edit-amenities/{id}' ? 'active' : '' }}">

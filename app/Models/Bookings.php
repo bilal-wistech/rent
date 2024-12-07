@@ -64,7 +64,14 @@ class Bookings extends Model
         'transaction_id',
         'payment_method_id',
         'buffer_days',
-        'time_period_id'
+        'time_period_id',
+        'is_booking_renewed',
+        'renewal_booking_cancel_date',
+        'renewal_booking_cancel_by',
+        'renewed_booking_id',
+        'is_security_refunded',
+        'is_expired',
+        'pricing_type_id'
     ];
 
     protected $table = 'bookings';
