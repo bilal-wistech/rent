@@ -66,6 +66,15 @@ class RenewalBookingController extends Controller
         isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
         return $dataTable->render('admin.renewal-bookings.index', $data);
     }
+    public function renewBookingForm($booking_id)
+    {
+        $booking = Bookings::findOrFail($booking_id);
+        return view('admin.renewal-bookings.renew-bookings-form', compact('booking'));
+    }
+    public function renew(Request $request)
+    {
+
+    }
     public function cancelRenewalBooking(Request $request)
     {
         Bookings::where('id', $request->booking_id)->update([

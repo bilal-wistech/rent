@@ -350,6 +350,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('booking/booking_list_csv', 'BookingsController@bookingCsv');
     Route::get('booking/booking_list_pdf', 'BookingsController@bookingPdf');
     Route::get('renewal-bookings', 'RenewalBookingController@index')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.index');
+    Route::get('renewal-bookings/renew-bookings-form/{booking_id}', 'RenewalBookingController@renewBookingForm')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.renew-bookings-form');
+    Route::get('renewal-bookings/renew', 'RenewalBookingController@renew')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.renew');
     Route::post('renewal-bookings/cancel-renewal-booking', 'RenewalBookingController@cancelRenewalBooking')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.cancel-renewal-booking');
     Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts']);
     Route::match(array('GET', 'POST'), 'payouts/edit/{id}', 'PayoutsController@edit');
