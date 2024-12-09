@@ -27,8 +27,8 @@ class AddAdminBookingRequest extends FormRequest
             'property_id' => 'required',
             'start_date' => [
                 'required',
-                'date',
-                'after_or_equal:today',
+                // 'date',
+                // 'after_or_equal:today',
             ],
             'end_date' => [
                 'required',
