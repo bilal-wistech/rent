@@ -88,11 +88,10 @@ class PaymentReceiptController extends Controller
             'booking' => $booking,
         ]);
     }
-    public function store(AddPaymentReceiptRequest $request)
+    public function store(Request $request)
     {
         try {
             $booking = Bookings::findOrFail($request->booking_id);
-
             if ($request->amount > $booking->total) {
                 return redirect()->back()
                     ->with('error', 'You have entered an amount that is greater than the actual booking amount.');
