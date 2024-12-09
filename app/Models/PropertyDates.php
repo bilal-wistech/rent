@@ -20,9 +20,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Cache;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 class PropertyDates extends Model
 {
+    use SoftDeletes;
     protected $table = 'property_dates';
     protected $fillable = ['property_id', 'booking_id', 'status', 'date', 'min_day', 'min_stay', 'price', 'color', 'type'];
 

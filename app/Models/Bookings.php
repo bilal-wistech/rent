@@ -134,7 +134,7 @@ class Bookings extends Model
     }
     public function time_period()
     {
-        return $this->belongsTo('App\Models\TimePeriod', 'time_period_id', 'id');
+        return $this->belongsTo('App\Models\PricingType', 'pricing_type_id', 'id');
     }
 
     public function getHostPenaltyAmountAttribute()
