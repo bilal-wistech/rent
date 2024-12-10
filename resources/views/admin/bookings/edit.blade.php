@@ -524,18 +524,31 @@
             minimumInputLength: 0,
         });
 
-        function updateTotalPrice() {
-            let securityFee = parseFloat($('#displaySecurityFee').val()) || 0;
-            let totalPrice = parseFloat($('#displayTotalPrice').text()) || 0;
+        let previousSecurityFee = 0; // Initialize to track the previous value of the security fee
 
-            let updatedTotalPrice = totalPrice + securityFee;
-            $('#displaySecurityFee').val(securityFee);
-            $('#displayTotalPriceWithAll').text(updatedTotalPrice.toFixed(2));
-            $('#amount').val(updatedTotalPrice.toFixed(2));
-            $('input[name="security_fee"]').val(securityFee);
-            $('input[name="total_price_with_charges_and_fees"]').val(
-                updatedTotalPrice);
+        function updateTotalPrice() {
+            // Get the current security fee from the input field
+            let currentSecurityFee = parseFloat($('#displaySecurityFee').val()) || 0;
+
+            // Get the current total price with all charges and fees
+            let totalPrice = parseFloat($('#displayTotalPriceWithAll').text()) || 0;
+
+            // Calculate the updated total price by adjusting it with the new security fee
+            let updatedTotalPrice = totalPrice - previousSecurityFee + currentSecurityFee;
+
+            // Update the displayed values
+            $('#displaySecurityFee').val(currentSecurityFee.toFixed(2)); // Update the security fee input
+            $('#displayTotalPriceWithAll').text(updatedTotalPrice.toFixed(2)); // Update the total price display
+            $('#amount').val(updatedTotalPrice.toFixed(2)); // Set the hidden total price field
+
+            // Update the hidden fields for security fee and total price
+            $('input[name="security_fee"]').val(currentSecurityFee);
+            $('input[name="total_price_with_charges_and_fees"]').val(updatedTotalPrice);
+
+            // Update the previous security fee value for the next calculation
+            previousSecurityFee = currentSecurityFee;
         }
+
         // Update the total price when the security fee input changes
         $('#displaySecurityFee').on('input', function() {
             updateTotalPrice();

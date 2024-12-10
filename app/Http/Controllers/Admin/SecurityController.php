@@ -79,9 +79,16 @@ class SecurityController extends Controller
             DB::beginTransaction();
 
             $security_refund = Refund::create($request->all());
-
+            $security_amount = 0;
             if ($security_refund) {
-                Bookings::where('id', $request->booking_id)->update(['is_security_refunded' => 1]);
+                $booking = Bookings::findOrFail($request->booking_id);
+
+                $security_amount = ($booking->security_money) - ($request->security_refund_amount);
+                Bookings::where('id', $request->booking_id)->update([
+                    'is_security_refunded' => 1,
+                    'security_money' => $security_amount,
+                    'total' => ($booking->total) - ($security_amount),
+                ]);
             }
 
             DB::commit();
