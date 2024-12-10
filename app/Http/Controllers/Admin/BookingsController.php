@@ -462,6 +462,22 @@ class BookingsController extends Controller
     {
         $currencyDefault = Currency::getAll()->where('default', 1)->first();
         $booking = Bookings::findOrFail($id);
+        $overlapBooking = Bookings::where('property_id', $request->property_id)
+            ->where('id', '!=', $id) // Exclude the current booking
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('start_date', [setDateForDb($request->start_date), setDateForDb($request->end_date)])
+                    ->orWhereBetween('end_date', [setDateForDb($request->start_date), setDateForDb($request->end_date)])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('start_date', '<=', setDateForDb($request->start_date))
+                            ->where('end_date', '>=', setDateForDb($request->end_date));
+                    });
+            })
+            ->first();
+
+        if ($overlapBooking) {
+            Common::one_time_message('error', 'The requested dates overlap with an existing booking.');
+            return redirect()->back()->withErrors(['error' => 'The requested dates overlap with an existing booking.']);
+        }
         $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
         $priceData = json_decode($priceDetails);
         $property = Properties::findOrFail($request->property_id);
