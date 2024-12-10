@@ -90,6 +90,7 @@ class PaymentReceiptController extends Controller
     }
     public function store(Request $request)
     {
+
         try {
             $booking = Bookings::findOrFail($request->booking_id);
             if ($request->amount > $booking->total) {
