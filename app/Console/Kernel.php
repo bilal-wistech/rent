@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Bookings;
 use App\Models\Currency;
 use App\Models\PropertyDates;
+use App\Models\SkippedRenewalBooking;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Stringable;
 use Illuminate\Support\Facades\Log;
@@ -38,7 +39,7 @@ class Kernel extends ConsoleKernel
                 ->whereDate('end_date', '<=', now())
                 ->where('renewed_booking_id', 0)
                 ->get();
-            // dd($bookings);
+
             try {
                 DB::beginTransaction();
 
@@ -47,9 +48,33 @@ class Kernel extends ConsoleKernel
                         $booking_start_date = Carbon::parse($booking->start_date);
                         $booking_end_date = Carbon::parse($booking->end_date);
                         $daysDifference = $booking_start_date->diffInDays($booking_end_date);
-                        $renewBookingStartDate = $booking_end_date->copy()->addDays($daysDifference);
+                        $renewBookingStartDate = $booking_end_date->copy()->addDays(1);
                         $renewBookingEndDate = $renewBookingStartDate->copy()->addDays($daysDifference);
-                        // Create renewed booking
+
+                        // Check for existing bookings during the proposed renewal period
+                        $conflictingBookings = Bookings::where('property_id', $booking->property_id)
+                            ->where(function ($query) use ($renewBookingStartDate, $renewBookingEndDate) {
+                                $query->whereBetween('start_date', [$renewBookingStartDate, $renewBookingEndDate])
+                                    ->orWhereBetween('end_date', [$renewBookingStartDate, $renewBookingEndDate])
+                                    ->orWhere(function ($subQuery) use ($renewBookingStartDate, $renewBookingEndDate) {
+                                        $subQuery->where('start_date', '<=', $renewBookingStartDate)
+                                            ->where('end_date', '>=', $renewBookingEndDate);
+                                    });
+                            })
+                            ->exists();
+
+                        // If there are conflicting bookings, log and skip this renewal
+                        if ($conflictingBookings) {
+                            Log::warning('Booking Renewal Skipped: Conflicts exist for Property ID ' . $booking->property_id .
+                                ' from ' . $renewBookingStartDate->toDateString() .
+                                ' to ' . $renewBookingEndDate->toDateString());
+
+                            // Optional: Store skipped renewal information
+                            $this->storeSkippedRenewal($booking, $renewBookingStartDate, $renewBookingEndDate);
+
+                            continue;
+                        }
+
                         $renewedBooking = new Bookings();
                         $renewedBooking->property_id = $booking->property_id;
                         $renewedBooking->user_id = $booking->user_id;
@@ -117,34 +142,42 @@ class Kernel extends ConsoleKernel
                         Log::info($renewedBooking->id . ': Renew Booking: ' . $renewBookingStartDate);
                         Log::info($renewedBooking->id . ': Renew Booking: ' . $renewBookingEndDate);
 
+                        Log::info('Booking renewed successfully: Original ID ' . $booking->id . ', New ID ' . $renewedBooking->id);
+
                     } catch (\Exception $innerException) {
-                        // Log the specific booking renewal error
                         Log::error('Booking Renewal Error for Booking ID ' . $booking->id . ': ' . $innerException->getMessage());
                         continue;
                     }
                 }
 
-                // Commit the transaction if all bookings are processed successfully
                 DB::commit();
 
             } catch (\Exception $outerException) {
-                // Rollback the transaction in case of any unhandled errors
                 DB::rollBack();
-
-                // Log the overall error
                 Log::error('Batch Booking Renewal Error: ' . $outerException->getMessage());
-
-                // Optionally, you can rethrow the exception or handle it as needed
                 throw $outerException;
             }
+
             Log::info("Booking renewal process completed.");
-        })->everyMinute() // Schedule to run every minute
+        })->everyMinute()
             ->onSuccess(function (Stringable $output) {
-                Log::info("Booking Renewed Successfully.");
+                Log::info("Booking Renewal Process Finished.");
             });
     }
 
-
+    protected function storeSkippedRenewal($booking, $renewStartDate, $renewEndDate)
+    {
+        // You can create a new model for tracking skipped renewals
+        // This is a placeholder method to demonstrate logging skipped renewals
+        // Implement according to your specific requirements
+        SkippedRenewalBooking::create([
+            'booking_id' => $booking->id,
+            'property_id' => $booking->property_id,
+            'start_date' => $renewStartDate,
+            'end_date' => $renewEndDate,
+            'reason' => 'Conflicting bookings exist'
+        ]);
+    }
     /**
      * Register the commands for the application.
      *
