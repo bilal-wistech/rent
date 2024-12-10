@@ -37,7 +37,6 @@ class Kernel extends ConsoleKernel
                 ->where('is_booking_renewed', 0)
                 ->whereDate('end_date', '<=', now())
                 ->where('renewed_booking_id', 0)
-                ->whereRaw('? > DATE_SUB(end_date, INTERVAL buffer_days DAY)', [now()])
                 ->get();
             // dd($bookings);
             try {
