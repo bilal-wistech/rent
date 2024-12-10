@@ -380,34 +380,6 @@
                 });
             });
 
-            function updateTotalPrice() {
-                // Get the security fee and ensure it's a number
-                let securityFee = parseFloat($('#displaySecurityFee').val()) || 0;
-                console.log('security: ',securityFee);
-
-                // Get the total price from the response (or displayed value)
-                let totalPrice = parseFloat($('#displayTotalPrice').text()) || 0;
-                console.log('total:',totalPrice);
-
-                // Calculate the updated total price
-                let updatedTotalPrice = totalPrice + securityFee;
-
-                // Update the displayed and hidden fields
-                $('#displaySecurityFee').val(securityFee); // Ensure security fee field is updated
-                $('#displayTotalPriceWithAll').text(updatedTotalPrice.toFixed(2)); // Update the displayed total
-                $('#amount').val(updatedTotalPrice.toFixed(2)); // Update hidden field for total amount
-                $('input[name="security_fee"]').val(securityFee); // Update security fee hidden input
-                $('input[name="total_price_with_charges_and_fees"]').val(
-                updatedTotalPrice); // Update total price hidden input
-            }
-
-            // Initial update on page load
-            updateTotalPrice();
-
-            // Update the total price when the security fee input changes
-            $('#displaySecurityFee').on('input', function() {
-                updateTotalPrice();
-            });
             let propertyId = $('#property_id').val();
             let userId = $('#user_id').val();
             handleDateClick(propertyId)
@@ -552,6 +524,23 @@
             minimumInputLength: 0,
         });
 
+        function updateTotalPrice() {
+            let securityFee = parseFloat($('#displaySecurityFee').val()) || 0;
+            let totalPrice = parseFloat($('#displayTotalPrice').text()) || 0;
+
+            let updatedTotalPrice = totalPrice + securityFee;
+            $('#displaySecurityFee').val(securityFee);
+            $('#displayTotalPriceWithAll').text(updatedTotalPrice.toFixed(2));
+            $('#amount').val(updatedTotalPrice.toFixed(2));
+            $('input[name="security_fee"]').val(securityFee);
+            $('input[name="total_price_with_charges_and_fees"]').val(
+                updatedTotalPrice);
+        }
+        // Update the total price when the security fee input changes
+        $('#displaySecurityFee').on('input', function() {
+            updateTotalPrice();
+        });
+
         function getCurrentValues() {
             const $pricingTypeOption = $('#pricing_type_id').find('option:selected');
             return {
@@ -619,6 +608,8 @@
 <input type="hidden" name="per_day_price" value="${response.perDayPrice}">
 `;
                         $('#booking_form').append(hiddenFields);
+                        // Initial update on page load
+                        updateTotalPrice();
                     },
                     error: function(xhr, status, error) {
                         console.log('Error:', error);
