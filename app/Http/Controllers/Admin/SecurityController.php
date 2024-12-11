@@ -87,7 +87,7 @@ class SecurityController extends Controller
                 Bookings::where('id', $request->booking_id)->update([
                     'is_security_refunded' => 1,
                     'security_money' => $security_amount,
-                    'total' => ($booking->total) - ($security_amount),
+                    'total' => ($booking->total) - ($request->security_refund_amount),
                 ]);
             }
 
