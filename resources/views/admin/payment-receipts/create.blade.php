@@ -49,16 +49,18 @@
                             @method('POST')
                             <div class="box-body">
                                 <div class="form-group mt-3 row">
-                                    <label for="booking_id" class="control-label col-sm-3">Booked Property<span class="text-danger">*</span></label>
+                                    <label for="booking_id" class="control-label col-sm-3">Booked Property<span
+                                            class="text-danger">*</span></label>
                                     <div class="col-sm-4">
                                         <select name="booking_id" class="form-control booking_id" id="booking_id"
                                             {{ request('booking_id') ? 'readonly' : '' }}>
-                                            <option value="" readonly {{ !request('booking_id') ? 'selected' : '' }}>Select Booked Property</option>
+                                            <option value="" readonly {{ !request('booking_id') ? 'selected' : '' }}>
+                                                Select Booked Property</option>
                                             @foreach ($payment_receipts as $payment_receipt)
-                                                <option value="{{ $payment_receipt->booking_id }}"
-                                                    data-total="{{ $payment_receipt->bookings->total }}"
-                                                    {{ request('booking_id') == $payment_receipt->booking_id ? 'selected' : '' }}>
-                                                    {{ $payment_receipt->booking_id . ' - ' . $payment_receipt->bookings->properties->name }}
+                                                <option value="{{ $payment_receipt->id }}"
+                                                    data-total="{{ $payment_receipt->total }}"
+                                                    {{ request('booking_id') == $payment_receipt->id ? 'selected' : '' }}>
+                                                    {{ $payment_receipt->id . ' - ' . $payment_receipt->properties->name }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -93,7 +95,8 @@
                                     <label for="amount" class="control-label col-sm-3">Payment Amount<span
                                             class="text-danger">*</span></label>
                                     <div class="col-sm-4">
-                                        <input type="number" class="form-control" name="amount" id="amount" value="{{ old('amount') }}">
+                                        <input type="number" class="form-control" name="amount" id="amount"
+                                            value="{{ old('amount') }}">
                                         <small id="amount_error" class="text-danger d-none"></small>
                                     </div>
                                 </div>
@@ -140,7 +143,7 @@
                         .removeClass('d-none')
                         .text(
                             `Entered amount (${enteredAmount}) cannot exceed the total booking amount (${totalAmount}).`
-                            );
+                        );
                     return false;
                 }
 

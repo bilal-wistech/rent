@@ -73,11 +73,7 @@ class PaymentReceiptController extends Controller
     }
     public function create()
     {
-        $payment_receipts = PropertyDates::with('bookings')
-            ->whereIn('status', ['booked not paid', 'booked but not fully paid'])
-            ->whereNotNull('booking_id')
-            ->groupBy(['booking_id', 'property_id'])
-            ->get();
+        $payment_receipts = Bookings::whereIn('booking_property_status', ['booked not paid', 'booked but not fully paid'])->get();
         // dd($payment_receipts);
         return view('admin.payment-receipts.create', compact('payment_receipts'));
     }
@@ -106,11 +102,15 @@ class PaymentReceiptController extends Controller
                     PropertyDates::where('booking_id', $booking->id)
                         ->where('property_id', $booking->property_id)
                         ->update(['status' => 'booked but not fully paid']);
+                    Bookings::where('id', $request->booking_id)
+                        ->update(['booking_property_status' => 'booked but not fully paid']);
                 } elseif ($request->amount == $booking->total) {
                     // Fully paid
                     PropertyDates::where('booking_id', $booking->id)
                         ->where('property_id', $booking->property_id)
                         ->update(['status' => 'booked paid']);
+                    Bookings::where('id', $request->booking_id)
+                        ->update(['booking_property_status' => 'booked paid']);
                 }
             }
 
@@ -155,11 +155,15 @@ class PaymentReceiptController extends Controller
             PropertyDates::where('booking_id', $booking->id)
                 ->where('property_id', $booking->property_id)
                 ->update(['status' => 'booked but not fully paid']);
+            Bookings::where('id', $booking->id)
+                ->update(['booking_property_status' => 'booked but not fully paid']);
         } elseif ($request->amount == $booking->total) {
-
+            // Fully paid
             PropertyDates::where('booking_id', $booking->id)
                 ->where('property_id', $booking->property_id)
                 ->update(['status' => 'booked paid']);
+            Bookings::where('id', $booking->id)
+                ->update(['booking_property_status' => 'booked paid']);
         }
 
         return redirect()->route('payment-receipts.index')
