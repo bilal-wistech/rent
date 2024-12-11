@@ -524,7 +524,7 @@ class BookingsController extends Controller
                 'status' => $request->status,
                 'cancellation' => $property->cancellation,
                 'per_night' => Common::convert_currency('', $currencyDefault->code, $request->per_day_price ?? 0), // Default to 0 if not set
-                'booking_property_status' => $request->booking_property_status,
+                'booking_property_status' => $request->property_date_status,
                 'transaction_id' => '',
                 'payment_method_id' => '',
                 'pricing_type_id' => $request->pricing_type_id,

@@ -256,16 +256,16 @@
                                                         id="property_date_status">
                                                         <option value="">Select Property Status</option>
                                                         <option value="booked paid"
-                                                            {{ (isset($booking) && $booking->properties->property_dates[0]->status == 'booked paid') == 'booked paid' ? 'selected' : '' }}>
+                                                            {{ (isset($booking) && $booking->booking_property_status == 'booked paid') == 'booked paid' ? 'selected' : '' }}>
                                                             Booked Paid</option>
                                                         <option value="booked not paid"
-                                                            {{ (isset($booking) && $booking->properties->property_dates[0]->status == 'booked not paid') == 'booked not paid' ? 'selected' : '' }}>
+                                                            {{ (isset($booking) && $booking->booking_property_status == 'booked not paid') == 'booked not paid' ? 'selected' : '' }}>
                                                             Booked not paid</option>
                                                         <option value="booked but not fully paid"
-                                                            {{ (isset($booking) && $booking->properties->property_dates[0]->status == 'booked but not fully paid') == 'booked but not fully paid' ? 'selected' : '' }}>
+                                                            {{ (isset($booking) && $booking->booking_property_status == 'booked but not fully paid') == 'booked but not fully paid' ? 'selected' : '' }}>
                                                             Booked but not fully paid</option>
                                                         <option value="maintainence"
-                                                            {{ (isset($booking) && $booking->properties->property_dates[0]->status == 'maintainence') == 'maintainence' ? 'selected' : '' }}>
+                                                            {{ (isset($booking) && $booking->booking_property_status == 'maintainence') == 'maintainence' ? 'selected' : '' }}>
                                                             Maintainence</option>
                                                     </select>
                                                     <span class="text-danger"
