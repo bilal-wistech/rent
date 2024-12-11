@@ -245,27 +245,27 @@
                                                 </div>
                                             </div>
                                             <div class="form-group row mb-2">
-                                                <label for="property_date_status"
+                                                <label for="booking_property_status"
                                                     class="col-sm-3 col-form-label fw-bold">Booking
                                                     Property Status
                                                     <span class="text-danger">*</span>
                                                 </label>
 
                                                 <div class="col-sm-9">
-                                                    <select class="form-control select2" name="property_date_status"
-                                                        id="property_date_status">
+                                                    <select class="form-control select2" name="booking_property_status"
+                                                        id="booking_property_status">
                                                         <option value="">Select Property Status</option>
                                                         <option value="booked paid"
-                                                            {{ (isset($booking) && $booking->properties->property_dates[0]->status == 'booked paid') == 'booked paid' ? 'selected' : '' }}>
+                                                            {{ (isset($booking) && $booking->booking_property_status == 'booked paid') == 'booked paid' ? 'selected' : '' }}>
                                                             Booked Paid</option>
                                                         <option value="booked not paid"
-                                                            {{ (isset($booking) && $booking->properties->property_dates[0]->status == 'booked not paid') == 'booked not paid' ? 'selected' : '' }}>
+                                                            {{ (isset($booking) && $booking->booking_property_status == 'booked not paid') == 'booked not paid' ? 'selected' : '' }}>
                                                             Booked not paid</option>
                                                         <option value="booked but not fully paid"
-                                                            {{ (isset($booking) && $booking->properties->property_dates[0]->status == 'booked but not fully paid') == 'booked but not fully paid' ? 'selected' : '' }}>
+                                                            {{ (isset($booking) && $booking->booking_property_status == 'booked but not fully paid') == 'booked but not fully paid' ? 'selected' : '' }}>
                                                             Booked but not fully paid</option>
                                                         <option value="maintainence"
-                                                            {{ (isset($booking) && $booking->properties->property_dates[0]->status == 'maintainence') == 'maintainence' ? 'selected' : '' }}>
+                                                            {{ (isset($booking) && $booking->booking_property_status == 'maintainence') == 'maintainence' ? 'selected' : '' }}>
                                                             Maintainence</option>
                                                     </select>
                                                     <span class="text-danger"

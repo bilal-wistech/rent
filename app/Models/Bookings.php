@@ -71,7 +71,8 @@ class Bookings extends Model
         'renewed_booking_id',
         'is_security_refunded',
         'is_expired',
-        'pricing_type_id'
+        'pricing_type_id',
+        'booking_property_status'
     ];
 
     protected $table = 'bookings';
@@ -92,7 +93,10 @@ class Bookings extends Model
     {
         return $this->belongsTo('App\Models\Properties', 'property_id', 'id');
     }
-
+    public function property_dates()
+    {
+        return $this->hasMany('App\Models\PropertyDates', 'booking_id', 'id');
+    }
     public function payment_methods()
     {
         return $this->belongsTo('Modules\Gateway\Entities\Gateway', 'payment_method_id', 'id');

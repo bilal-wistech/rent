@@ -91,6 +91,24 @@
                                                  Processing</option>
                                          </select>
                                      </div>
+                                     <div class="col-xl-2 col-sm-6 col-12">
+                                        <label>Booking Payment Status</label>
+                                        <select class="form-control" name="booking_property_status" id="booking_property_status">
+                                            <option value="">All</option>
+                                            <option value="booked paid"
+                                                {{ $allbookingpropertystatus == 'booked paid' ? ' selected = "selected"' : '' }}>booked paid
+                                            </option>
+                                            <option value="booked not paid"
+                                                {{ $allbookingpropertystatus == 'booked not paid' ? ' selected = "selected"' : '' }}>booked not paid
+                                            </option>
+                                            <option value="maintainence"
+                                                {{ $allbookingpropertystatus == 'maintainence' ? ' selected = "selected"' : '' }}>maintainence
+                                            </option>
+                                            <option value="booked but not fully paid"
+                                                {{ $allbookingpropertystatus == 'booked but not fully paid' ? ' selected = "selected"' : '' }}>booked but not fully paid
+                                            </option>
+                                        </select>
+                                    </div>
 
                                      <div class="col-xl-1 col-sm-2 col-4 d-flex gap-2 mt-4">
                                          <button type="submit" name="btn"

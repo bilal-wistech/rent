@@ -42,9 +42,9 @@ class BookingsController extends Controller
 
     public function index(BookingsDataTable $dataTable)
     {
+
         $data['from'] = isset(request()->from) ? request()->from : null;
         $data['to'] = isset(request()->to) ? request()->to : null;
-
         if (isset(request()->property)) {
             $data['properties'] = Properties::where('properties.id', request()->property)->select('id', 'name')->get();
         } else {
@@ -56,11 +56,12 @@ class BookingsController extends Controller
             $data['customers'] = null;
         }
 
-        if (!empty(request()->btn) || !empty(request()->status) || !empty(request()->from) || !empty(request()->property) || !empty(request()->customer)) {
+        if (!empty(request()->btn) || !empty(request()->status) || !empty(request()->from) || !empty(request()->property) || !empty(request()->customer) || !empty(request()->booking_property_status)) {
 
             $status = request()->status;
             $from = request()->from;
             $to = request()->to;
+            $booking_property_status = request()->booking_property_status;
             if (isset(request()->property)) {
                 $property = request()->property;
             } else {
@@ -78,12 +79,8 @@ class BookingsController extends Controller
             $customer = null;
             $from = null;
             $to = null;
+            $booking_property_status = null;
         }
-
-        // if (n_as_k_c()) {
-        //     Session::flush();
-        //     return view('vendor.installer.errors.admin');
-        // }
 
         //Calculating total customers, bookings and total amount in distinct currency
         $total_bookings_initial = $this->getAllBookings();
@@ -106,6 +103,7 @@ class BookingsController extends Controller
             $data['allstatus'] = null;
             $data['allproperties'] = null;
             $data['allcustomers'] = null;
+            $data['allbookingpropertystatus'] = null;
             return $dataTable->render('admin.bookings.view', $data);
         }
 
@@ -135,6 +133,11 @@ class BookingsController extends Controller
             $total_customers_initial = $total_customers_initial->where('bookings.status', '=', $status);
             $different_currency_total_initial = $different_currency_total_initial->where('bookings.status', '=', $status);
         }
+        if ($booking_property_status) {
+            $total_bookings_initial = $total_bookings_initial->where('bookings.booking_property_status', '=', $booking_property_status);
+            $total_customers_initial = $total_customers_initial->where('bookings.booking_property_status', '=', $booking_property_status);
+            $different_currency_total_initial = $different_currency_total_initial->where('bookings.booking_property_status', '=', $booking_property_status);
+        }
 
         $data['total_bookings'] = $total_bookings_initial->get()->count();
         $data['total_customers'] = $total_customers_initial->get()->count();
@@ -149,6 +152,7 @@ class BookingsController extends Controller
         isset(request()->property) ? $data['allproperties'] = request()->property : $data['allproperties'] = '';
         isset(request()->customer) ? $data['allcustomers'] = request()->customer : $data['allcustomers'] = '';
         isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
+        isset(request()->booking_property_status) ? $data['allbookingpropertystatus'] = request()->booking_property_status : $data['allbookingpropertystatus'] = '';
         return $dataTable->render('admin.bookings.view', $data);
     }
     public function create(Request $request)
@@ -290,7 +294,16 @@ class BookingsController extends Controller
             $booking = '';
             // Check if we're updating an existing booking
             $bookingId = $request->booking_id ?? null;
-
+            $status = '';
+            if ($request->payment_receipt == 1) {
+                if ($request->amount < $request->total_price_with_charges_and_fees) {
+                    $status = 'booked but not fully paid';
+                } else {
+                    $status = 'booked paid';
+                }
+            } else {
+                $status = 'booked not paid';
+            }
             // If booking ID exists, update the existing booking, else create a new one
             $bookingData = [
                 'property_id' => $request->property_id,
@@ -316,7 +329,7 @@ class BookingsController extends Controller
                 'status' => $request->status,
                 'cancellation' => $property->cancellation,
                 'per_night' => Common::convert_currency('', $currencyDefault->code, $request->per_day_price ?? 0), // Default to 0 if not set
-                // 'date_with_price' => json_encode($allData),
+                'booking_property_status' => $status,
                 'transaction_id' => '',
                 'payment_method_id' => '',
                 'pricing_type_id' => $request->pricing_type_id,
@@ -396,7 +409,7 @@ class BookingsController extends Controller
                         'id' => $booking->id,
                         'start_date' => $booking->start_date,
                         'end_date' => $booking->end_date,
-                        'status' => $request->property_date_status,
+                        'status' => $request->booking_property_status,
                         'property_id' => $booking->property_id
                     ]
                 ]);
@@ -478,13 +491,7 @@ class BookingsController extends Controller
             Common::one_time_message('error', 'The requested dates overlap with an existing booking.');
             return redirect()->back()->withErrors(['error' => 'The requested dates overlap with an existing booking.']);
         }
-        $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
-        $priceData = json_decode($priceDetails);
         $property = Properties::findOrFail($request->property_id);
-        foreach ($priceData->date_with_price as $key => $value) {
-            $allData[$key]['price'] = Common::convert_currency('', $currencyDefault->code, $value->original_price);
-            $allData[$key]['date'] = setDateForDb($value->date);
-        }
         DB::beginTransaction();
         try {
             $bookingData = [
@@ -511,7 +518,7 @@ class BookingsController extends Controller
                 'status' => $request->status,
                 'cancellation' => $property->cancellation,
                 'per_night' => Common::convert_currency('', $currencyDefault->code, $request->per_day_price ?? 0), // Default to 0 if not set
-                // 'date_with_price' => json_encode($allData),
+                'booking_property_status' => $request->booking_property_status,
                 'transaction_id' => '',
                 'payment_method_id' => '',
                 'pricing_type_id' => $request->pricing_type_id,
@@ -544,7 +551,7 @@ class BookingsController extends Controller
                     'property_id' => $request->property_id,
                     'date' => $date,
                     'price' => ($request->per_day_price) ? $request->per_day_price : '0',
-                    'status' => $request->property_date_status,
+                    'status' => $request->booking_property_status,
                     'min_day' => $min_days,
                     'min_stay' => ($request->min_stay) ? '1' : '0',
                 ]);
