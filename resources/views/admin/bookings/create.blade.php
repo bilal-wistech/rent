@@ -119,8 +119,8 @@
 
         .calendar-day.booked-not-paid {
             background-color: #388e3c;
-                /* Light green */
-                color: #e8f5e9;
+            /* Light green */
+            color: #e8f5e9;
         }
 
         .calendar-day.maintainence {
@@ -640,27 +640,34 @@
             let propertyDates = {};
             let isSelectingStartDate = true;
             let currentYear = moment().year();
+            let previousSecurityFee = 0; // Initialize to track the previous value of the security fee
+
             $('#displaySecurityFee').on('input', function() {
-                let securityFee = parseFloat($(this).val()) ||
-                    0; // Get the security fee and ensure it's a number
+                let currentSecurityFee = parseFloat($(this).val()) ||
+                    0; // Get the current security fee from the input
 
-                // Get the total price from the response (you can also store it in a variable)
-                let totalPrice = parseFloat($('#displayTotalPrice').text()) || 0;
+                // Get the current total price with all charges and fees
+                let totalPrice = parseFloat($('#displayTotalPriceWithAll').text()) || 0;
 
-                // Add the security fee to the total price
-                let updatedTotalPrice = totalPrice + securityFee;
+                // Calculate the change in security fee (added or subtracted)
+                let updatedTotalPrice = totalPrice - previousSecurityFee + currentSecurityFee;
 
                 // Update the displayed values
-                $('#displaySecurityFee').val(securityFee); // Set the hidden field for security fee
+                $('#displaySecurityFee').val(currentSecurityFee.toFixed(
+                    2)); // Update the input field with the current fee
                 $('#displayTotalPriceWithAll').text(updatedTotalPrice.toFixed(
-                    2)); // Update total price with security fee
+                    2)); // Update the total price with the security fee
                 $('#amount').val(updatedTotalPrice.toFixed(
-                    2)); // Set the hidden total price with updated value
+                    2)); // Set the hidden total price with the updated value
 
-                    security_fee
-                $('input[name="security_fee"]').val(securityFee);
+                // Update the hidden fields for security fee and total price
+                $('input[name="security_fee"]').val(currentSecurityFee);
                 $('input[name="total_price_with_charges_and_fees"]').val(updatedTotalPrice);
+
+                // Update the previous security fee value for the next calculation
+                previousSecurityFee = currentSecurityFee;
             });
+
             // Initialize Select2 for property_id
             $('#property_id').select2({
                 ajax: {
@@ -766,7 +773,7 @@
                             $('#displayPricingType').text(response.pricingType);
                             $('#displayNumberOfDays').text(response.numberOfDays + ' days');
                             $('#displayTotalPrice').text((response.totalPrice).toFixed(
-                            2)); // Update total price
+                                2)); // Update total price
                             $('#displayCleaningFee').text((response.cleaning_fee).toFixed(2));
                             $('#displaySecurityFee').val((response.security_fee).toFixed(2));
                             $('#displayGuestFee').text((response.guest_fee).toFixed(2));

@@ -52,8 +52,8 @@
                                     <label for="booking_id" class="control-label col-sm-3">Booked Property<span class="text-danger">*</span></label>
                                     <div class="col-sm-4">
                                         <select name="booking_id" class="form-control booking_id" id="booking_id"
-                                            {{ request('booking_id') ? 'disabled' : '' }}>
-                                            <option value="" disabled {{ !request('booking_id') ? 'selected' : '' }}>Select Booked Property</option>
+                                            {{ request('booking_id') ? 'readonly' : '' }}>
+                                            <option value="" readonly {{ !request('booking_id') ? 'selected' : '' }}>Select Booked Property</option>
                                             @foreach ($payment_receipts as $payment_receipt)
                                                 <option value="{{ $payment_receipt->booking_id }}"
                                                     data-total="{{ $payment_receipt->bookings->total }}"
