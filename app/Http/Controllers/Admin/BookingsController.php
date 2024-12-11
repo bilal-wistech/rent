@@ -409,7 +409,7 @@ class BookingsController extends Controller
                         'id' => $booking->id,
                         'start_date' => $booking->start_date,
                         'end_date' => $booking->end_date,
-                        'status' => $request->property_date_status,
+                        'status' => $request->booking_property_status,
                         'property_id' => $booking->property_id
                     ]
                 ]);
@@ -491,13 +491,7 @@ class BookingsController extends Controller
             Common::one_time_message('error', 'The requested dates overlap with an existing booking.');
             return redirect()->back()->withErrors(['error' => 'The requested dates overlap with an existing booking.']);
         }
-        $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
-        $priceData = json_decode($priceDetails);
         $property = Properties::findOrFail($request->property_id);
-        foreach ($priceData->date_with_price as $key => $value) {
-            $allData[$key]['price'] = Common::convert_currency('', $currencyDefault->code, $value->original_price);
-            $allData[$key]['date'] = setDateForDb($value->date);
-        }
         DB::beginTransaction();
         try {
             $bookingData = [
@@ -524,7 +518,7 @@ class BookingsController extends Controller
                 'status' => $request->status,
                 'cancellation' => $property->cancellation,
                 'per_night' => Common::convert_currency('', $currencyDefault->code, $request->per_day_price ?? 0), // Default to 0 if not set
-                'booking_property_status' => $request->property_date_status,
+                'booking_property_status' => $request->booking_property_status,
                 'transaction_id' => '',
                 'payment_method_id' => '',
                 'pricing_type_id' => $request->pricing_type_id,
@@ -557,7 +551,7 @@ class BookingsController extends Controller
                     'property_id' => $request->property_id,
                     'date' => $date,
                     'price' => ($request->per_day_price) ? $request->per_day_price : '0',
-                    'status' => $request->property_date_status,
+                    'status' => $request->booking_property_status,
                     'min_day' => $min_days,
                     'min_stay' => ($request->min_stay) ? '1' : '0',
                 ]);

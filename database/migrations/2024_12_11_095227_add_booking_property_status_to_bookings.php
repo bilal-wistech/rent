@@ -13,7 +13,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->enum('booking_property_status', ['booked not paid', 'booked paid', 'maintainence'])->nullable();
+            $table->enum('booking_property_status', ['booked not paid', 'booked paid', 'maintainence','booked but not fully paid'])->nullable();
         });
     }
 

@@ -102,14 +102,14 @@ class PaymentReceiptController extends Controller
                     PropertyDates::where('booking_id', $booking->id)
                         ->where('property_id', $booking->property_id)
                         ->update(['status' => 'booked but not fully paid']);
-                    Bookings::where('id', $request->booking_id)
+                    Bookings::where('id', $booking->id)
                         ->update(['booking_property_status' => 'booked but not fully paid']);
                 } elseif ($request->amount == $booking->total) {
                     // Fully paid
                     PropertyDates::where('booking_id', $booking->id)
                         ->where('property_id', $booking->property_id)
                         ->update(['status' => 'booked paid']);
-                    Bookings::where('id', $request->booking_id)
+                    Bookings::where('id', $booking->id)
                         ->update(['booking_property_status' => 'booked paid']);
                 }
             }

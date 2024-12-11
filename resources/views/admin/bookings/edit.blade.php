@@ -245,15 +245,15 @@
                                                 </div>
                                             </div>
                                             <div class="form-group row mb-2">
-                                                <label for="property_date_status"
+                                                <label for="booking_property_status"
                                                     class="col-sm-3 col-form-label fw-bold">Booking
                                                     Property Status
                                                     <span class="text-danger">*</span>
                                                 </label>
 
                                                 <div class="col-sm-9">
-                                                    <select class="form-control select2" name="property_date_status"
-                                                        id="property_date_status">
+                                                    <select class="form-control select2" name="booking_property_status"
+                                                        id="booking_property_status">
                                                         <option value="">Select Property Status</option>
                                                         <option value="booked paid"
                                                             {{ (isset($booking) && $booking->booking_property_status == 'booked paid') == 'booked paid' ? 'selected' : '' }}>
