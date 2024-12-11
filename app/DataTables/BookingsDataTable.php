@@ -35,7 +35,7 @@ class BookingsDataTable extends DataTable
                 return $status;
             })
             ->addColumn('booking_property_status', function ($bookings) {
-                $status = $bookings->properties->property_dates[0]->status;
+                $status = $bookings->booking_property_status;
                 // dd($status);
                 return $status;
             })
@@ -46,13 +46,13 @@ class BookingsDataTable extends DataTable
                 return dateFormat($bookings->created_at);
             })
             ->addColumn('action', function ($bookings) {
-                $status = $bookings->properties->property_dates[0]->status;
+                $status = $bookings->booking_property_status;
 
                 $actions = '<a href="' . url('admin/bookings/detail/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Detail View"><i class="fa fa-share"></i></a>&nbsp;' .
                     '<a href="' . url('admin/bookings/edit/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>&nbsp;';
 
                 if ($status !== 'booked paid') {
-                    $actions .= '<a href="' . url('admin/payment-receipts/create?booking_id=' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Payment Receipt">Payment Receipt</a>&nbsp;';
+                $actions .= '<a href="' . url('admin/payment-receipts/create?booking_id=' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Payment Receipt">Payment Receipt</a>&nbsp;';
                 }
 
                 return $actions;
@@ -69,7 +69,7 @@ class BookingsDataTable extends DataTable
         $to = isset(request()->to) ? setDateForDb(request()->to) : null;
         $property = isset(request()->property) ? request()->property : null;
         $customer = isset(request()->customer) ? request()->customer : null;
-
+        $booking_property_status = isset(request()->booking_property_status) ? request()->booking_property_status : null;
         $bookings = Bookings::join('properties', function ($join) {
             $join->on('properties.id', '=', 'bookings.property_id');
         })
@@ -79,11 +79,33 @@ class BookingsDataTable extends DataTable
             ->join('currency', function ($join) {
                 $join->on('currency.code', '=', 'bookings.currency_code');
             })
-            ->Join('users as u', function ($join) {
+            ->join('users as u', function ($join) {
                 $join->on('u.id', '=', 'bookings.host_id');
             })
-            ->select(['bookings.id as id', 'u.first_name as host_name', 'users.first_name as guest_name', 'bookings.property_id as property_id', 'properties.name as property_name', 'bookings.total AS total_amount', 'bookings.payment_method_id', 'bookings.payment_method_id', 'bookings.status', 'bookings.created_at as created_at', 'bookings.updated_at as updated_at', 'bookings.start_date', 'bookings.end_date', 'bookings.guest', 'u.id as host_id', 'users.id as user_id', 'bookings.total', 'bookings.currency_code', 'currency.symbol', 'bookings.service_charge', 'bookings.host_fee', 'bookings.iva_tax', 'bookings.accomodation_tax']);
-
+            ->select([
+                'bookings.id as id',
+                'u.first_name as host_name',
+                'users.first_name as guest_name',
+                'bookings.property_id as property_id',
+                'properties.name as property_name',
+                'bookings.total as total_amount',
+                'bookings.payment_method_id',
+                'bookings.status',
+                'bookings.created_at',
+                'bookings.updated_at',
+                'bookings.start_date',
+                'bookings.end_date',
+                'bookings.guest',
+                'u.id as host_id',
+                'users.id as user_id',
+                'bookings.currency_code',
+                'currency.symbol',
+                'bookings.service_charge',
+                'bookings.host_fee',
+                'bookings.iva_tax',
+                'bookings.accomodation_tax',
+                'bookings.booking_property_status as booking_property_status',
+            ]);
         if (isset($user_id)) {
             $bookings->where('bookings.user_id', '=', $user_id);
         }
@@ -102,13 +124,17 @@ class BookingsDataTable extends DataTable
         if (!empty($status)) {
             $bookings->where('bookings.status', '=', $status);
         }
+        if (!empty($booking_property_status)) {
+            $bookings->where('bookings.booking_property_status', '=', $booking_property_status);
+        }
+        // dd($bookings->first());
         return $this->applyScopes($bookings);
     }
 
     public function html()
     {
         return $this->builder()
-            ->addColumn(['data' => 'id', 'name' => 'bookings.id', 'title' => 'Booking ID', 'visible' => true])
+            ->addColumn(['data' => 'id', 'name' => 'bookings.id', 'title' => 'Booking ID', 'visible' => false])
             ->addColumn(['data' => 'host_name', 'name' => 'u.first_name', 'title' => 'Host Name'])
             ->addColumn(['data' => 'guest_name', 'name' => 'users.first_name', 'title' => 'Guest Name'])
             ->addColumn(['data' => 'property_name', 'name' => 'properties.name', 'title' => 'Property Name'])
@@ -116,7 +142,7 @@ class BookingsDataTable extends DataTable
             ->addColumn(['data' => 'end_date', 'name' => 'bookings.end_date', 'title' => 'End Date'])
             ->addColumn(['data' => 'total_amount', 'name' => 'bookings.total', 'title' => 'Total Amount'])
             ->addColumn(['data' => 'status', 'name' => 'bookings.status', 'title' => 'Booking Status'])
-            ->addColumn(['data' => 'booking_property_status', 'name' => 'bookings.property_dates.status', 'title' => 'Booking Payment Status'])
+            ->addColumn(['data' => 'booking_property_status', 'name' => 'bookings.booking_property_status', 'title' => 'Booking Payment Status'])
             ->addColumn(['data' => 'created_at', 'name' => 'bookings.created_at', 'title' => 'Created Date'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
             ->parameters(dataTableOptions());

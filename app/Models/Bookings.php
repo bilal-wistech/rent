@@ -71,7 +71,8 @@ class Bookings extends Model
         'renewed_booking_id',
         'is_security_refunded',
         'is_expired',
-        'pricing_type_id'
+        'pricing_type_id',
+        'booking_property_status'
     ];
 
     protected $table = 'bookings';
