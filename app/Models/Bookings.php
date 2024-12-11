@@ -92,7 +92,10 @@ class Bookings extends Model
     {
         return $this->belongsTo('App\Models\Properties', 'property_id', 'id');
     }
-
+    public function property_dates()
+    {
+        return $this->hasMany('App\Models\PropertyDates', 'booking_id', 'id');
+    }
     public function payment_methods()
     {
         return $this->belongsTo('Modules\Gateway\Entities\Gateway', 'payment_method_id', 'id');

@@ -20,35 +20,44 @@ class BookingsDataTable extends DataTable
             ->addColumn('guest_name', function ($bookings) {
                 return '<a href="' . url('admin/edit-customer/' . $bookings->user_id) . '">' . ucfirst($bookings->guest_name) . '</a>';
             })
-            ->addColumn('total_amount', function ($bookings) {
-                return moneyFormat($bookings->symbol, $bookings->total_amount);
-            })
             ->addColumn('property_name', function ($bookings) {
                 return '<a href="' . url('admin/listing/' . $bookings->property_id . '/basics') . '">' . ucfirst($bookings->property_name) . '</a>';
             })
-            ->addColumn('method', function ($bookings) {
-                return optional($bookings->payment_methods)->name ?? '-';
+            ->addColumn('start_date', function ($bookings) {
+                return setDateForDb($bookings->start_date);
+            })
+            ->addColumn('end_date', function ($bookings) {
+                return setDateForDb($bookings->end_date);
+            })
+
+            ->addColumn('status', function ($bookings) {
+                $status = $bookings->status;
+                return $status;
+            })
+            ->addColumn('booking_property_status', function ($bookings) {
+                $status = $bookings->properties->property_dates[0]->status;
+                // dd($status);
+                return $status;
+            })
+            ->addColumn('total_amount', function ($bookings) {
+                return moneyFormat($bookings->symbol, $bookings->total_amount);
             })
             ->addColumn('created_at', function ($bookings) {
                 return dateFormat($bookings->created_at);
             })
-            ->addColumn('status', function ($bookings) {
-                $status = $bookings->status;
-                if (!$status == 'Accepted' && !$status == 'Pending') {
-                    if ($bookings->check_guest_payout == 'yes') {
-                        $status = $bookings->status . "<br/><span class='label label-info'>Refund</span>";
-                    }
-                }
-                return $status;
-            })
             ->addColumn('action', function ($bookings) {
-                return '<a href="' . url('admin/bookings/detail/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Detail View"><i class="fa fa-share"></i></a>&nbsp;' .
-                    '<a href="' . url('admin/bookings/edit/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>&nbsp;'
-                    .
-                    '<a href="' . url('admin/payment-receipts/create?booking_id=' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Payment Receipt">Payment Receipt</a>&nbsp;';
+                $status = $bookings->properties->property_dates[0]->status;
 
+                $actions = '<a href="' . url('admin/bookings/detail/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Detail View"><i class="fa fa-share"></i></a>&nbsp;' .
+                    '<a href="' . url('admin/bookings/edit/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>&nbsp;';
+
+                if ($status !== 'booked paid') {
+                    $actions .= '<a href="' . url('admin/payment-receipts/create?booking_id=' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Payment Receipt">Payment Receipt</a>&nbsp;';
+                }
+
+                return $actions;
             })
-            ->rawColumns(['host_name', 'guest_name', 'total_amount', 'property_name', 'action'])
+            ->rawColumns(['host_name', 'guest_name', 'start_date', 'end_date', 'total_amount', 'property_name', 'action'])
             ->make(true);
     }
 
@@ -99,14 +108,16 @@ class BookingsDataTable extends DataTable
     public function html()
     {
         return $this->builder()
-            ->addColumn(['data' => 'id', 'name' => 'bookings.id', 'title' => 'ID', 'visible' => false])
+            ->addColumn(['data' => 'id', 'name' => 'bookings.id', 'title' => 'Booking ID', 'visible' => true])
             ->addColumn(['data' => 'host_name', 'name' => 'u.first_name', 'title' => 'Host Name'])
             ->addColumn(['data' => 'guest_name', 'name' => 'users.first_name', 'title' => 'Guest Name'])
             ->addColumn(['data' => 'property_name', 'name' => 'properties.name', 'title' => 'Property Name'])
-            ->addColumn(['data' => 'method', 'name' => 'payment_methods.name', 'title' => 'Payment Method', 'orderable' => false, 'searchable' => false])
+            ->addColumn(['data' => 'start_date', 'name' => 'bookings.start_date', 'title' => 'Start Date'])
+            ->addColumn(['data' => 'end_date', 'name' => 'bookings.end_date', 'title' => 'End Date'])
             ->addColumn(['data' => 'total_amount', 'name' => 'bookings.total', 'title' => 'Total Amount'])
-            ->addColumn(['data' => 'status', 'name' => 'bookings.status', 'title' => 'Status'])
-            ->addColumn(['data' => 'created_at', 'name' => 'bookings.created_at', 'title' => 'Date'])
+            ->addColumn(['data' => 'status', 'name' => 'bookings.status', 'title' => 'Booking Status'])
+            ->addColumn(['data' => 'booking_property_status', 'name' => 'bookings.property_dates.status', 'title' => 'Booking Payment Status'])
+            ->addColumn(['data' => 'created_at', 'name' => 'bookings.created_at', 'title' => 'Created Date'])
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
             ->parameters(dataTableOptions());
     }
