@@ -38,27 +38,27 @@ class SettingsController extends Controller
 
     public function general(Request $request)
     {
-        if (! $request->isMethod('post')) {
-            $general          = Settings::getAll()->whereIn('type', ['general','googleMap'])->toArray();
-            $data['result']   = Common::key_value('name', 'value', $general);
+        if (!$request->isMethod('post')) {
+            $general = Settings::getAll()->whereIn('type', ['general', 'googleMap'])->toArray();
+            $data['result'] = Common::key_value('name', 'value', $general);
             $data['language'] = Common::key_value('id', 'name', Language::where('status', '=', 'active')->get()->toArray());
             $data['currency'] = Common::key_value('id', 'name', Currency::where('status', '=', 'active')->get()->toArray());
 
             return view('admin.settings.general', $data);
         } elseif ($request->isMethod('post')) {
             $rules = array(
-                    'name'              => 'required',
-                    'email'              => 'required|email',
-                    'default_currency'  => 'required',
-                    'default_language'  => 'required',
-                );
+                'name' => 'required',
+                'email' => 'required|email',
+                'default_currency' => 'required',
+                'default_language' => 'required',
+            );
 
             $fieldNames = array(
-                    'name'              => 'Name',
-                    'email'              => 'Email',
-                    'default_currency'  => 'Default Currency',
-                    'default_language'  => 'required',
-                 );
+                'name' => 'Name',
+                'email' => 'Email',
+                'default_currency' => 'Default Currency',
+                'default_language' => 'required',
+            );
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
@@ -67,10 +67,10 @@ class SettingsController extends Controller
                 return back()->withErrors($validator)->withInput();
             } else {
                 if (env('APP_MODE', '') != 'test') {
-                    $head_code = is_null($request->head_code)?'':$request->head_code;
+                    $head_code = is_null($request->head_code) ? '' : $request->head_code;
                     Settings::where(['name' => 'name'])->update(['value' => $request->name]);
                     Settings::where(['name' => 'email'])->update(['value' => $request->email]);
-                    Settings::where(['name' => 'head_code'])->update(['value' =>  $head_code]);
+                    Settings::where(['name' => 'head_code'])->update(['value' => $head_code]);
                     Settings::where(['name' => 'default_currency'])->update(['value' => $request->default_currency]);
                     Settings::where(['name' => 'default_language'])->update(['value' => $request->default_language]);
                     Language::where('default', '=', '1')->update(['default' => '0']);
@@ -79,23 +79,32 @@ class SettingsController extends Controller
                     Currency::where('default', '=', '1')->update(['default' => '0']);
                     Currency::where('id', $request->default_currency)->update(['default' => '1']);
 
-                    $defaultCurrencyCode =  Currency::where('id', $request->default_currency)->value('code');
+                    $defaultCurrencyCode = Currency::where('id', $request->default_currency)->value('code');
                     $defaultCurrencySymbol = Currency::where('id', $request->default_currency)->value('symbol');
                     $languageShortName = Language::where('id', $request->default_language)->value('short_name');
 
+                    $uploadDir = public_path("front/images/logos/");
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
                     foreach ($_FILES["photos"]["error"] as $key => $error) {
-                        $tmp_name = $_FILES["photos"]["tmp_name"][$key];
+                        if ($error == UPLOAD_ERR_OK) {
+                            $tmp_name = $_FILES["photos"]["tmp_name"][$key];
+                            $name = str_replace(' ', '', $_FILES["photos"]["name"][$key]);
+                            $ext = pathinfo($name, PATHINFO_EXTENSION);
+                            $name = time() . '_' . $key . '.' . $ext;
 
-                        $name = str_replace(' ', '_', $_FILES["photos"]["name"][$key]);
-
-                        $ext = pathinfo($name, PATHINFO_EXTENSION);
-
-                        $name = time() . '_' . $key . '.' . $ext;
-
-                        if ($ext == 'png' || $ext == 'jpg' || $ext == 'jpeg' || $ext == 'gif' || $ext == 'ico') {
-                            if (move_uploaded_file($tmp_name, "public/front/images/logos/" . $name)) {
-                                Settings::where(['name' => $key])->update(['value' => $name]);
+                            if (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'ico'])) {
+                                if (move_uploaded_file($tmp_name, $uploadDir . $name)) {
+                                    Settings::where(['name' => $key])->update(['value' => $name]);
+                                } else {
+                                    // Log or handle upload failure
+                                    error_log("Failed to move uploaded file: $name");
+                                }
                             }
+                        } else {
+                            // Log or handle file upload error
+                            error_log("Upload error for file $key: $error");
                         }
                     }
                 }
@@ -124,7 +133,7 @@ class SettingsController extends Controller
         $response['status'] = 'success';
 
         if (empty($getreCaptchaKey) || is_null($getreCaptchaKey) || empty($getreCaptchaSecret) || is_null($getreCaptchaSecret)) {
-            $response['status']  = 'error';
+            $response['status'] = 'error';
             $response['message'] = __('The credentails of Google reCaptcha is missing, setup reCaptcha credentials in  ');
         }
 
@@ -135,26 +144,26 @@ class SettingsController extends Controller
     public function preferences(Request $request)
     {
         if (!$request->isMethod('post')) {
-            $preferences                    = Settings::getAll()->where('type','preferences')->toArray();
-            $data['result']                 = Common::key_value('name', 'value', $preferences);
-            $data['recaptcha_place']        = $data['result']['recaptcha_preference'] ?? NULL;
-            $data['row_per_page']           = ['10' => '10', '25' => '25', '50' => '50', '100' => '100'];
-            $data['timezones']              = $timezones = phpDefaultTimeZones();
+            $preferences = Settings::getAll()->where('type', 'preferences')->toArray();
+            $data['result'] = Common::key_value('name', 'value', $preferences);
+            $data['recaptcha_place'] = $data['result']['recaptcha_preference'] ?? NULL;
+            $data['row_per_page'] = ['10' => '10', '25' => '25', '50' => '50', '100' => '100'];
+            $data['timezones'] = $timezones = phpDefaultTimeZones();
             return view('admin.settings.preference', $data);
         } else {
             $rules = array(
-                    'row_per_page'                   => 'required',
-                    'recaptcha_preference'           => 'required',
-                    'min_search_price'               => 'required|numeric|min:1',
-                    'max_search_price'               => 'required|numeric|gt:min_search_price'
-                );
+                'row_per_page' => 'required',
+                'recaptcha_preference' => 'required',
+                'min_search_price' => 'required|numeric|min:1',
+                'max_search_price' => 'required|numeric|gt:min_search_price'
+            );
 
             $fieldNames = array(
-                    'row_per_page'                   => 'Row Per Page',
-                    'recaptcha_preference'           => 'Google reCaptcha',
-                    'min_search_price'               => 'Search Price (Min)',
-                    'max_search_price'               => 'Search Price (Max)',
-                 );
+                'row_per_page' => 'Row Per Page',
+                'recaptcha_preference' => 'Google reCaptcha',
+                'min_search_price' => 'Search Price (Min)',
+                'max_search_price' => 'Search Price (Max)',
+            );
 
 
 
@@ -169,41 +178,41 @@ class SettingsController extends Controller
                     unset($request['_token']);
 
                     if ($request['date_format'] == 0) {
-                        $request['date_format_type']       = 'yyyy' . $request['date_separator'] . 'mm' . $request['date_separator'] . 'dd';
+                        $request['date_format_type'] = 'yyyy' . $request['date_separator'] . 'mm' . $request['date_separator'] . 'dd';
                         $request['front_date_format_type'] = 'yy' . $request['date_separator'] . 'mm' . $request['date_separator'] . 'dd';
-                        $request['search_date_format_type']= 'yy' . $request['date_separator'] . 'm' . $request['date_separator'] . 'd';
+                        $request['search_date_format_type'] = 'yy' . $request['date_separator'] . 'm' . $request['date_separator'] . 'd';
                     } elseif ($request['date_format'] == 1) {
-                        $request['date_format_type']       = 'dd' . $request['date_separator'] . 'mm' . $request['date_separator'] . 'yyyy';
+                        $request['date_format_type'] = 'dd' . $request['date_separator'] . 'mm' . $request['date_separator'] . 'yyyy';
                         $request['front_date_format_type'] = 'dd' . $request['date_separator'] . 'mm' . $request['date_separator'] . 'yy';
-                        $request['search_date_format_type']= 'd' . $request['date_separator'] . 'm' . $request['date_separator'] . 'yy';
+                        $request['search_date_format_type'] = 'd' . $request['date_separator'] . 'm' . $request['date_separator'] . 'yy';
                     } elseif ($request['date_format'] == 2) {
-                        $request['date_format_type']       = 'mm' . $request['date_separator'] . 'dd' . $request['date_separator'] . 'yyyy';
+                        $request['date_format_type'] = 'mm' . $request['date_separator'] . 'dd' . $request['date_separator'] . 'yyyy';
                         $request['front_date_format_type'] = 'mm' . $request['date_separator'] . 'dd' . $request['date_separator'] . 'yy';
-                        $request['search_date_format_type']= 'm' . $request['date_separator'] . 'd' . $request['date_separator'] . 'yy';
+                        $request['search_date_format_type'] = 'm' . $request['date_separator'] . 'd' . $request['date_separator'] . 'yy';
                     } elseif ($request['date_format'] == 3) {
-                        $request['date_format_type']       = 'dd' . $request['date_separator'] . 'M' . $request['date_separator'] . 'yyyy';
+                        $request['date_format_type'] = 'dd' . $request['date_separator'] . 'M' . $request['date_separator'] . 'yyyy';
                         $request['front_date_format_type'] = 'dd' . $request['date_separator'] . 'M' . $request['date_separator'] . 'yy';
-                        $request['search_date_format_type']= 'd' . $request['date_separator'] . 'M' . $request['date_separator'] . 'yy';
+                        $request['search_date_format_type'] = 'd' . $request['date_separator'] . 'M' . $request['date_separator'] . 'yy';
                     } elseif ($request['date_format'] == 4) {
-                        $request['date_format_type']       = 'yyyy' . $request['date_separator'] . 'M' . $request['date_separator'] . 'dd';
+                        $request['date_format_type'] = 'yyyy' . $request['date_separator'] . 'M' . $request['date_separator'] . 'dd';
                         $request['front_date_format_type'] = 'yy' . $request['date_separator'] . 'M' . $request['date_separator'] . 'dd';
-                        $request['search_date_format_type']= 'yy' . $request['date_separator'] . 'M' . $request['date_separator'] . 'd';
+                        $request['search_date_format_type'] = 'yy' . $request['date_separator'] . 'M' . $request['date_separator'] . 'd';
                     }
 
 
                     $request['recaptcha_preference'] = ($request->recaptcha_preference == 'disable' ? 'disable' : implode(',', $request->recaptcha_preference));
 
                     foreach ($request->all() as $key => $value) {
-                        $matches            = ['name' => $key, 'type'=>'preferences'];
-                        $preferences        = Settings::firstOrNew($matches);
-                        $preferences->name  = $key;
+                        $matches = ['name' => $key, 'type' => 'preferences'];
+                        $preferences = Settings::firstOrNew($matches);
+                        $preferences->name = $key;
                         $preferences->value = $value;
-                        $preferences->type  = 'preferences';
+                        $preferences->type = 'preferences';
                         $preferences->save();
                     }
 
                     $pref = Settings::getAll()->where('type', 'preferences');
-                    if (! empty($pref)) {
+                    if (!empty($pref)) {
                         foreach ($pref as $value) {
                             $prefer[$value->name] = $value->value;
                         }
@@ -221,23 +230,23 @@ class SettingsController extends Controller
 
     public function photos(Request $request)
     {
-        if (! $request->isMethod('post')) {
-             $photos = Settings::getAll()->where('type', 'photos')->toArray();
-             $data['result'] = Common::key_value('name', 'value', $photos);
-             return view('admin.settings.photos', $data);
+        if (!$request->isMethod('post')) {
+            $photos = Settings::getAll()->where('type', 'photos')->toArray();
+            $data['result'] = Common::key_value('name', 'value', $photos);
+            return view('admin.settings.photos', $data);
         } elseif ($request->isMethod('post')) {
             $rules = array(
-                    'photo_min_height' => 'required',
-                    'photo_min_width'  => 'required',
-                    'photo_max_size'   => 'required'
-                );
+                'photo_min_height' => 'required',
+                'photo_min_width' => 'required',
+                'photo_max_size' => 'required'
+            );
 
 
             $fieldNames = array(
-                    'photo_min_height' => 'Minimum Height',
-                    'photo_min_width'  => 'Minimum Width',
-                    'photo_max_size'   => 'Max Size'
-                 );
+                'photo_min_height' => 'Minimum Height',
+                'photo_min_width' => 'Minimum Width',
+                'photo_max_size' => 'Max Size'
+            );
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
@@ -262,33 +271,33 @@ class SettingsController extends Controller
 
     public function email(Request $request)
     {
-        if (! $request->isMethod('post')) {
-             $general         = Settings::getAll()->where('type', 'email')->toArray();
-             $data['result']  = Common::key_value('name', 'value', $general);
-             $data['drivers'] = array('smtp'=>'SMTP','sendmail'=>'Send Mail');
-             return view('admin.settings.email', $data);
+        if (!$request->isMethod('post')) {
+            $general = Settings::getAll()->where('type', 'email')->toArray();
+            $data['result'] = Common::key_value('name', 'value', $general);
+            $data['drivers'] = array('smtp' => 'SMTP', 'sendmail' => 'Send Mail');
+            return view('admin.settings.email', $data);
         } elseif ($request->isMethod('post')) {
             $rules = array(
-                    'driver'            => 'required',
-                    'host'              => 'required',
-                    'port'              => 'required',
-                    'from_address'      => 'required',
-                    'from_name'         => 'required',
-                    'encryption'        => 'required',
-                    'username'          => 'required',
-                    'password'          => 'required',
-                );
+                'driver' => 'required',
+                'host' => 'required',
+                'port' => 'required',
+                'from_address' => 'required',
+                'from_name' => 'required',
+                'encryption' => 'required',
+                'username' => 'required',
+                'password' => 'required',
+            );
 
             $fieldNames = array(
-                    'driver'            => 'Driver',
-                    'host'              => 'Host',
-                    'port'              => 'Port',
-                    'from_address'      => 'From Address',
-                    'from_name'         => 'From Name',
-                    'encryption'        => 'Encryption',
-                    'username'          => 'Username',
-                    'password'          => 'Password',
-                 );
+                'driver' => 'Driver',
+                'host' => 'Host',
+                'port' => 'Port',
+                'from_address' => 'From Address',
+                'from_name' => 'From Name',
+                'encryption' => 'Encryption',
+                'username' => 'Username',
+                'password' => 'Password',
+            );
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
@@ -296,28 +305,30 @@ class SettingsController extends Controller
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput();
             } else {
-                if ($request->driver=='smtp') {
+                if ($request->driver == 'smtp') {
                     \Config::set([
-                    'mail.driver'     => isset($request->driver) ? $request->driver : '',
+                        'mail.driver' => isset($request->driver) ? $request->driver : '',
 
-                    'mail.host'       => isset($request->host) ? $request->host : '',
+                        'mail.host' => isset($request->host) ? $request->host : '',
 
-                    'mail.port'       => isset($request->port) ?$request->port : '',
+                        'mail.port' => isset($request->port) ? $request->port : '',
 
-                    'mail.from'       => ['address' => isset($request->from_address) ? $request->from_address : '',
-                    'name'            => isset($request->from_name) ? $request->from_name : '' ],
+                        'mail.from' => [
+                            'address' => isset($request->from_address) ? $request->from_address : '',
+                            'name' => isset($request->from_name) ? $request->from_name : ''
+                        ],
 
-                    'mail.encryption' => isset($request->encryption) ? $request->encryption : '',
+                        'mail.encryption' => isset($request->encryption) ? $request->encryption : '',
 
-                    'mail.username'   => isset($request->username) ? $request->username : '',
+                        'mail.username' => isset($request->username) ? $request->username : '',
 
-                    'mail.password'   => isset($request->password) ? $request->password : ''
+                        'mail.password' => isset($request->password) ? $request->password : ''
                     ]);
-                    $adminDetails     = Admin::where('status', 'active')->first();
-                    $fromInfo         = \Config::get('mail.from');
-                    $user             = [];
-                    $user['to']       = $fromInfo['address'];
-                    $user['from']     = $adminDetails->email;
+                    $adminDetails = Admin::where('status', 'active')->first();
+                    $fromInfo = \Config::get('mail.from');
+                    $user = [];
+                    $user['to'] = $fromInfo['address'];
+                    $user['from'] = $adminDetails->email;
                     $user['fromName'] = ucfirst($adminDetails->username);
                     try {
                         $ok = Mail::send('emails.verify', ['user' => $user], function ($m) use ($user) {
@@ -325,21 +336,21 @@ class SettingsController extends Controller
                             $m->to($user['to']);
                             $m->subject('Verify SMTP Settings');
                         });
-                        $field    = 'email_status';
-                        $res      =  DB::table('settings')->where(['name' => $field])->count();
-                        if ($res==0) {
+                        $field = 'email_status';
+                        $res = DB::table('settings')->where(['name' => $field])->count();
+                        if ($res == 0) {
                             DB::insert(DB::raw("INSERT INTO settings(name,value,type) VALUES ('$field','1','email')"));
                         } else {
-                            DB::table('settings')->where(['name' => $field])->update(array('name'=>$field,'value' => 1));
+                            DB::table('settings')->where(['name' => $field])->update(array('name' => $field, 'value' => 1));
                         }
                         Common::one_time_message('success', 'Updated Successfully');
                     } catch (\Exception $e) {
-                        $field    = 'email_status';
-                        $res      =  DB::table('settings')->where(['name' => $field])->count();
+                        $field = 'email_status';
+                        $res = DB::table('settings')->where(['name' => $field])->count();
                         if ($res == 0) {
                             DB::insert(DB::raw("INSERT INTO settings(name,value,type) VALUES ('$field','0','email')"));
                         } else {
-                            DB::table('settings')->where(['name' => $field])->update(array('name'=>$field,'value' => 0));
+                            DB::table('settings')->where(['name' => $field])->update(array('name' => $field, 'value' => 0));
                         }
                     }
 
@@ -375,42 +386,42 @@ class SettingsController extends Controller
     public function paymentMethods(Request $request, BankDataTable $dataTable)
     {
 
-        if (! $request->isMethod('post')) {
-             $paypal = Settings::getAll()->where('type', 'PayPal')->toArray();
-             $stripe = Settings::getAll()->where('type', 'Stripe')->toArray();
-             $data['paypal'] = Common::key_value('name', 'value', $paypal);
-             $data['stripe'] = Common::key_value('name', 'value', $stripe);
-             $data['countries'] = Country::getAll()->pluck('name','id');
+        if (!$request->isMethod('post')) {
+            $paypal = Settings::getAll()->where('type', 'PayPal')->toArray();
+            $stripe = Settings::getAll()->where('type', 'Stripe')->toArray();
+            $data['paypal'] = Common::key_value('name', 'value', $paypal);
+            $data['stripe'] = Common::key_value('name', 'value', $stripe);
+            $data['countries'] = Country::getAll()->pluck('name', 'id');
             //  if (n_as_k_c()) {
             //     Session::flush();
             //     return view('vendor.installer.errors.admin');
             // }
 
-             return $dataTable->render('admin.settings.payment', $data);
+            return $dataTable->render('admin.settings.payment', $data);
         } elseif ($request['gateway'] == 'paypal') {
             $rules = array(
-                    'username'      => 'required',
-                    'password'      => 'required',
-                    'signature'     => 'required',
-                    'mode'          => 'required',
-                    'paypal_status' => 'required',
-                );
+                'username' => 'required',
+                'password' => 'required',
+                'signature' => 'required',
+                'mode' => 'required',
+                'paypal_status' => 'required',
+            );
 
 
             $fieldNames = array(
-                    'username'      => 'PayPal Username',
-                    'password'      => 'PayPal Password',
-                    'signature'     => 'PayPal Signature',
-                    'mode'          => 'PayPal Mode',
-                    'paypal_status' => 'Paypal Status',
-                 );
+                'username' => 'PayPal Username',
+                'password' => 'PayPal Password',
+                'signature' => 'PayPal Signature',
+                'mode' => 'PayPal Mode',
+                'paypal_status' => 'Paypal Status',
+            );
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
 
             if ($validator->fails()) {
                 $data['success'] = 0;
-                $data['errors']  = $validator->messages();
+                $data['errors'] = $validator->messages();
                 echo json_encode($data);
             } else {
                 if (env('APP_MODE', '') != 'test') {
@@ -419,11 +430,11 @@ class SettingsController extends Controller
                     Settings::where(['name' => 'signature', 'type' => 'PayPal'])->update(['value' => $request->signature]);
                     Settings::where(['name' => 'mode', 'type' => 'PayPal'])->update(['value' => $request->mode]);
 
-                    $match                  = ['type'=>'PayPal','name'=>'paypal_status'];
-                    $paymentSettings        = Settings::firstOrNew($match);
-                    $paymentSettings->name  = 'paypal_status';
+                    $match = ['type' => 'PayPal', 'name' => 'paypal_status'];
+                    $paymentSettings = Settings::firstOrNew($match);
+                    $paymentSettings->name = 'paypal_status';
                     $paymentSettings->value = $request->paypal_status;
-                    $paymentSettings->type  = 'PayPal';
+                    $paymentSettings->type = 'PayPal';
                     $paymentSettings->save();
 
                 }
@@ -434,15 +445,15 @@ class SettingsController extends Controller
             }
         } elseif ($request['gateway'] == 'stripe') {
             $rules = array(
-                'secret_key'            => 'required',
-                'publishable_key'       => 'required',
-                'stripe_status'         => 'required',
+                'secret_key' => 'required',
+                'publishable_key' => 'required',
+                'stripe_status' => 'required',
             );
 
             $fieldNames = array(
-                'secret_key'        => 'Secret Key',
-                'publishable_key'   => 'Publishable Key',
-                'stripe_status'     => 'Stripe Status',
+                'secret_key' => 'Secret Key',
+                'publishable_key' => 'Publishable Key',
+                'stripe_status' => 'Stripe Status',
             );
 
             $validator = Validator::make($request->all(), $rules);
@@ -457,11 +468,11 @@ class SettingsController extends Controller
                     Settings::where(['name' => 'secret', 'type' => 'Stripe'])->update(['value' => $request->secret_key]);
                     Settings::where(['name' => 'publishable', 'type' => 'Stripe'])->update(['value' => $request->publishable_key]);
 
-                    $match                  = ['type'=>'Stripe','name'=>'stripe_status'];
-                    $paymentSettings        = Settings::firstOrNew($match);
-                    $paymentSettings->name  = 'stripe_status';
+                    $match = ['type' => 'Stripe', 'name' => 'stripe_status'];
+                    $paymentSettings = Settings::firstOrNew($match);
+                    $paymentSettings->name = 'stripe_status';
                     $paymentSettings->value = $request->stripe_status;
-                    $paymentSettings->type  = 'Stripe';
+                    $paymentSettings->type = 'Stripe';
                     $paymentSettings->save();
                 }
 
@@ -476,33 +487,33 @@ class SettingsController extends Controller
 
     public function socialLinks(Request $request)
     {
-        if (! $request->isMethod('post')) {
-              $general = Settings::getAll()->where('type', 'join_us')->toArray();
-              $data['result'] = Common::key_value('name', 'value', $general);
+        if (!$request->isMethod('post')) {
+            $general = Settings::getAll()->where('type', 'join_us')->toArray();
+            $data['result'] = Common::key_value('name', 'value', $general);
 
-              return view('admin.settings.social', $data);
+            return view('admin.settings.social', $data);
         } elseif ($request->isMethod('post')) {
             $rules = array(
-                    'facebook'          => 'required',
-                    'google_plus'       => 'required',
-                    'twitter'           => 'required',
-                    'linkedin'          => 'required',
-                    'pinterest'         => 'required',
-                    'youtube'           => 'required',
-                    'instagram'         =>'required'
+                'facebook' => 'required',
+                'google_plus' => 'required',
+                'twitter' => 'required',
+                'linkedin' => 'required',
+                'pinterest' => 'required',
+                'youtube' => 'required',
+                'instagram' => 'required'
 
-                );
+            );
 
             $fieldNames = array(
-                    'facebook'            => 'Facebook',
-                    'google_plus'         => 'Google Plus',
-                    'twitter'             => 'Twitter',
-                    'linkedin'            => 'Linkedin',
-                    'pinterest'           => 'Pinterest',
-                    'youtube'             => 'Youtube',
-                    'instagram'           => 'Instagram'
+                'facebook' => 'Facebook',
+                'google_plus' => 'Google Plus',
+                'twitter' => 'Twitter',
+                'linkedin' => 'Linkedin',
+                'pinterest' => 'Pinterest',
+                'youtube' => 'Youtube',
+                'instagram' => 'Instagram'
 
-                 );
+            );
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
@@ -527,22 +538,21 @@ class SettingsController extends Controller
         }
     }
 
-    public function socialLogin(Request $request) {
-        if (! $request->isMethod('post')) {
+    public function socialLogin(Request $request)
+    {
+        if (!$request->isMethod('post')) {
             $general = Settings::getAll()->where('type', 'social')->toArray();
             $data['social'] = Common::key_value('name', 'value', $general);
             return view('admin.settings.socialite', $data);
-        }
-
-        elseif ($request->isMethod('post')) {
+        } elseif ($request->isMethod('post')) {
             $rules = array(
-                'facebook_login'          => ['required', Rule::in([0,1]),],
-                'google_login'       => ['required', Rule::in([0,1]),],
+                'facebook_login' => ['required', Rule::in([0, 1]),],
+                'google_login' => ['required', Rule::in([0, 1]),],
             );
 
             $fieldNames = array(
-                'facebook_login'            => 'Facebook Login',
-                'google_login'         => 'Google Login'
+                'facebook_login' => 'Facebook Login',
+                'google_login' => 'Google Login'
             );
 
             $validator = Validator::make($request->all(), $rules);
@@ -565,31 +575,31 @@ class SettingsController extends Controller
 
     public function apiInformations(Request $request)
     {
-        if (! $request->isMethod('post')) {
+        if (!$request->isMethod('post')) {
 
-              $map_key = config("vrent.google_map_key");
-              $data['google'] = Settings::where('type', 'google')->pluck('value', 'name')->toArray();
-              $data['google_map'] = (!empty($map_key) || is_null($map_key)) ? $map_key : Settings::where('type', 'googleMap')->value('value');
-              $data['facebook'] = Settings::where('type', 'facebook')->pluck('value', 'name')->toArray();
-              return view('admin.api_credentials', $data);
+            $map_key = config("vrent.google_map_key");
+            $data['google'] = Settings::where('type', 'google')->pluck('value', 'name')->toArray();
+            $data['google_map'] = (!empty($map_key) || is_null($map_key)) ? $map_key : Settings::where('type', 'googleMap')->value('value');
+            $data['facebook'] = Settings::where('type', 'facebook')->pluck('value', 'name')->toArray();
+            return view('admin.api_credentials', $data);
 
         } elseif ($request->isMethod('post')) {
             $rules = array(
-                    'facebook_client_id'     => 'required',
-                    'facebook_client_secret' => 'required',
-                    'google_client_id'       => 'required',
-                    'google_client_secret'   => 'required',
-                    'google_map_key'         => 'required',
-                    );
+                'facebook_client_id' => 'required',
+                'facebook_client_secret' => 'required',
+                'google_client_id' => 'required',
+                'google_client_secret' => 'required',
+                'google_map_key' => 'required',
+            );
 
             $fieldNames = array(
-                        'facebook_client_id'     => 'Facebook Client ID',
-                        'facebook_client_secret' => 'Facebook Client Secret',
-                        'google_client_id'       => 'Google Client ID',
-                        'google_client_secret'   => 'Google Client Secret',
-                        'google_map_key'   => 'Google Map Browser Key',
-                        'google_map_server_key'   => 'Google Map Server Key',
-                        );
+                'facebook_client_id' => 'Facebook Client ID',
+                'facebook_client_secret' => 'Facebook Client Secret',
+                'google_client_id' => 'Google Client ID',
+                'google_client_secret' => 'Google Client Secret',
+                'google_map_key' => 'Google Map Browser Key',
+                'google_map_server_key' => 'Google Map Server Key',
+            );
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
@@ -608,7 +618,7 @@ class SettingsController extends Controller
 
                     Settings::where(['name' => 'key', 'type' => 'googleMap'])->update(['value' => $request->google_map_key]);
 
-                    changeEnvironmentVariable('GOOGLE_MAP_KEY' , $request->google_map_key);
+                    changeEnvironmentVariable('GOOGLE_MAP_KEY', $request->google_map_key);
 
                     event('eloquent.updated: App\Models\Settings', (new Settings()));
 
@@ -625,19 +635,19 @@ class SettingsController extends Controller
     public function googleRecaptchaInformation(Request $request)
     {
 
-        if (! $request->isMethod('post')) {
-              return view('admin.settings.google_reCaptcha');
+        if (!$request->isMethod('post')) {
+            return view('admin.settings.google_reCaptcha');
 
         } elseif ($request->isMethod('post')) {
             $rules = array(
-                    'google_recaptcha_key'     => 'required',
-                    'google_recaptcha_secret' => 'required',
-                    );
+                'google_recaptcha_key' => 'required',
+                'google_recaptcha_secret' => 'required',
+            );
 
             $fieldNames = array(
-                        'google_recaptcha_key'     => 'Google reCaptcha Key',
-                        'google_recaptcha_secret' => 'Google reCaptcha Secret',
-                        );
+                'google_recaptcha_key' => 'Google reCaptcha Key',
+                'google_recaptcha_secret' => 'Google reCaptcha Secret',
+            );
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
@@ -649,10 +659,10 @@ class SettingsController extends Controller
 
 
                     Settings::updateOrCreate(
-                            ['name' => 'recaptcha_key', 'type' => 'google_reCaptcha'],
-                            ['name' => 'recaptcha_key', 'type' => 'google_reCaptcha', 'value' => $request->google_recaptcha_key],
+                        ['name' => 'recaptcha_key', 'type' => 'google_reCaptcha'],
+                        ['name' => 'recaptcha_key', 'type' => 'google_reCaptcha', 'value' => $request->google_recaptcha_key],
 
-                        )->updateOrCreate(
+                    )->updateOrCreate(
                             ['name' => 'recaptcha_secret', 'type' => 'google_reCaptcha'],
                             ['name' => 'recaptcha_secret', 'value' => $request->google_recaptcha_secret, 'type' => 'google_reCaptcha'],
                         );
@@ -676,18 +686,18 @@ class SettingsController extends Controller
 
             $rules = array(
 
-                    'guest_service_charge'  => $validationRule,
-                    'iva_tax'               => $validationRule,
-                    'accomodation_tax'      => $validationRule
+                'guest_service_charge' => $validationRule,
+                'iva_tax' => $validationRule,
+                'accomodation_tax' => $validationRule
 
-                );
+            );
 
             $fieldNames = array(
 
-                    'guest_service_charge'   => 'Guest service charge',
-                    'iva_tax'                => 'I.V.A Tax',
-                    'accomodation_tax'       => 'Accomadation Tax',
-                );
+                'guest_service_charge' => 'Guest service charge',
+                'iva_tax' => 'I.V.A Tax',
+                'accomodation_tax' => 'Accomadation Tax',
+            );
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($fieldNames);
@@ -710,12 +720,12 @@ class SettingsController extends Controller
     }
     public function deleteLogo(Request $request)
     {
-        $logo             = $request->company_logo;
+        $logo = $request->company_logo;
 
         if (isset($logo)) {
             $record = Settings::where('name', 'logo')->first();
             if ($record) {
-                $record->value=null;
+                $record->value = null;
                 $record->save();
 
                 if ($logo != null) {
@@ -724,10 +734,10 @@ class SettingsController extends Controller
                         unlink($dir);
                     }
                 }
-                $data['success']  = 1;
+                $data['success'] = 1;
                 $data['message'] = __('Image has been deleted successfully!');
             } else {
-                $data['success']  = 0;
+                $data['success'] = 0;
                 $data['message'] = __("No Record Found!");
             }
         }
@@ -741,7 +751,7 @@ class SettingsController extends Controller
         if (isset($favicon)) {
             $record = Settings::where('name', 'favicon')->first();
             if ($record) {
-                $record->value=null;
+                $record->value = null;
                 $record->save();
 
                 if ($record != null) {
@@ -750,38 +760,38 @@ class SettingsController extends Controller
                         unlink($dir);
                     }
                 }
-                $data['success']  = 1;
+                $data['success'] = 1;
                 $data['message'] = __('Favicon has been deleted successfully!');
             } else {
-                $data['success']  = 0;
+                $data['success'] = 0;
                 $data['message'] = __("No Record Found!");
             }
         }
         echo json_encode($data);
         exit();
     }
-     public function smsSettings(Request $request)
+    public function smsSettings(Request $request)
     {
 
-        $phoneSms         = Settings::where('type','twilio')->get()->toArray();
-        $data['phoneSms']  = Common::key_value('name', 'value', $phoneSms);
+        $phoneSms = Settings::where('type', 'twilio')->get()->toArray();
+        $data['phoneSms'] = Common::key_value('name', 'value', $phoneSms);
 
-      if (!$request->isMethod('post')) {
-          return view('admin.settings.sms',$data);
-      } else {
+        if (!$request->isMethod('post')) {
+            return view('admin.settings.sms', $data);
+        } else {
             unset($request['_token']);
             foreach ($request->all() as $key => $value) {
-                $match               = ['name' => $key, 'type' => 'twilio'];
-                $smsSettings         = Settings::firstOrNew($match);
-                $smsSettings->name   = $key;
-                $smsSettings->value  = $value;
-                $smsSettings->type   = 'twilio';
+                $match = ['name' => $key, 'type' => 'twilio'];
+                $smsSettings = Settings::firstOrNew($match);
+                $smsSettings->name = $key;
+                $smsSettings->value = $value;
+                $smsSettings->type = 'twilio';
                 $smsSettings->save();
             }
-           Common::one_time_message('success', 'Updated Successfully');
-           return redirect('admin/settings/sms');
+            Common::one_time_message('success', 'Updated Successfully');
+            return redirect('admin/settings/sms');
         }
-  }
+    }
 
 }
 
