@@ -295,14 +295,18 @@ class BookingsController extends Controller
             // Check if we're updating an existing booking
             $bookingId = $request->booking_id ?? null;
             $status = '';
+            $payment_status = '';
             if ($request->payment_receipt == 1) {
                 if ($request->amount < $request->total_price_with_charges_and_fees) {
                     $status = 'booked but not fully paid';
+                    $payment_status = 'partial paid';
                 } else {
                     $status = 'booked paid';
+                    $payment_status = 'paid';
                 }
             } else {
                 $status = 'booked not paid';
+                $payment_status = 'unpaid';
             }
             // If booking ID exists, update the existing booking, else create a new one
             $bookingData = [
@@ -377,17 +381,10 @@ class BookingsController extends Controller
                 );
             }
             // dd($booking->id);
-            if ($request->payment_receipt == 1) {
-                PaymentReceipt::create([
-                    'booking_id' => $booking->id,
-                    'paid_through' => $request->paid_through,
-                    'payment_date' => $request->payment_date,
-                    'amount' => $request->amount
-                ]);
-            }
-            Invoice::updateOrCreate(
-                ['booking_id' => $booking->id], // Update existing invoice if booking ID matches
+
+            $invoice = Invoice::create(
                 [
+                    'booking_id' => $booking->id,
                     'property_id' => $property->id,
                     'customer_id' => $request->user_id,
                     'currency_code' => $currencyDefault->code,
@@ -397,9 +394,18 @@ class BookingsController extends Controller
                     'description' => 'Booking invoice for ' . $property->name,
                     'sub_total' => Common::convert_currency('', $currencyDefault->code, $request->total_price),
                     'grand_total' => Common::convert_currency('', $currencyDefault->code, $request->total_price_with_charges_and_fees),
+                    'payment_status' => $payment_status
                 ]
             );
-
+            if ($request->payment_receipt == 1) {
+                PaymentReceipt::create([
+                    'booking_id' => $booking->id,
+                    'invoice_id' => $invoice->id,
+                    'paid_through' => $request->paid_through,
+                    'payment_date' => $request->payment_date,
+                    'amount' => $request->amount
+                ]);
+            }
             DB::commit();
             if ($request->ajax()) {
                 return response()->json([

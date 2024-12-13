@@ -57,8 +57,7 @@
                                             <option value="" readonly {{ !request('booking_id') ? 'selected' : '' }}>
                                                 Select Booked Property</option>
                                             @foreach ($payment_receipts as $payment_receipt)
-                                                <option value="{{ $payment_receipt->id }}"
-                                                    data-total="{{ $payment_receipt->total }}"
+                                                <option value="{{ $payment_receipt->id }}" {{-- data-total="{{ $payment_receipt->total }}" --}}
                                                     {{ request('booking_id') == $payment_receipt->id ? 'selected' : '' }}>
                                                     {{ $payment_receipt->id . ' - ' . $payment_receipt->properties->name }}
                                                 </option>
@@ -100,6 +99,7 @@
                                         <small id="amount_error" class="text-danger d-none"></small>
                                     </div>
                                 </div>
+                                <input type="hidden" name="remaining_amount" id="remaining_amount">
                             </div>
 
                             <div class="box-footer" style="text-align: right;">
@@ -115,34 +115,80 @@
 @section('validate_script')
     <script>
         $(document).ready(function() {
-            $('#booking_id').select2();
+            $('#booking_id').select2(); // Initialize Select2 for better dropdown styling
+
+            function fetchBookingDetails(bookingId) {
+                if (bookingId) {
+                    // Make the AJAX request
+                    $.ajax({
+                        url: "{{ route('payment-receipts.get-booking-details', '') }}/" + bookingId,
+                        method: 'GET',
+                        success: function(response) {
+                            // console.log(response);
+
+                            // Populate the amount input field with the remaining amount
+                            const remainingAmount = response.totalBookingAmount - response.totalAmount;
+                            $('#amount').val(remainingAmount);
+                            $('#remaining_amount').val(remainingAmount);
+                            // Optionally display remaining payment details
+                            if (response.totalAmount < response.totalBookingAmount) {
+                                $('#amount_error')
+                                    .text(`Remaining payment is ${remainingAmount.toFixed(2)}`)
+                                    .removeClass('d-none');
+                            } else {
+                                $('#amount_error').addClass('d-none');
+                            }
+
+                            // Store remaining amount in a data attribute for validation
+                            $('#amount').data('remaining', remainingAmount);
+                        },
+                        error: function(xhr) {
+                            console.error(xhr.responseText); // Log the error for debugging
+                            alert('Error fetching booking details. Please try again.');
+                        }
+                    });
+                } else {
+                    // Clear the amount field if no booking is selected
+                    $('#amount').val('');
+                    $('#amount_error').addClass('d-none');
+                }
+            }
+
+            // Handle dropdown change
+            $('#booking_id').change(function() {
+                const bookingId = $(this).val();
+                fetchBookingDetails(bookingId);
+            });
+
+            // Fetch details for default selected value on page load
+            const defaultBookingId = $('#booking_id').val();
+            if (defaultBookingId) {
+                fetchBookingDetails(defaultBookingId);
+            }
+
+            // Handle form submission
             $('#add_payment_receipt').on('submit', function(e) {
-                e.preventDefault(); // Prevent the default form submission temporarily
+                e.preventDefault(); // Prevent the default form submission
 
                 const bookingId = $('#booking_id').val();
-                const selectedOption = $('#booking_id').find('option:selected');
-                const totalAmount = selectedOption.data('total');
                 const enteredAmount = parseFloat($('#amount').val());
+                const remainingAmount = parseFloat($('#amount').data('remaining'));
 
                 // Reset error message
                 $('#amount_error').addClass('d-none').text('');
 
-                // Validation
-                if (!bookingId) {
-                    alert('Please select a booked property.');
-                    return false;
-                }
-
                 if (!enteredAmount || enteredAmount <= 0) {
-                    $('#amount_error').removeClass('d-none').text('Amount must be greater than zero.');
+                    $('#amount_error')
+                        .removeClass('d-none')
+                        .text('Amount must be greater than zero.');
                     return false;
                 }
 
-                if (enteredAmount > totalAmount) {
+                if (enteredAmount > remainingAmount) {
                     $('#amount_error')
                         .removeClass('d-none')
                         .text(
-                            `Entered amount (${enteredAmount}) cannot exceed the total booking amount (${totalAmount}).`
+                            `Entered amount (${enteredAmount}) cannot exceed the remaining amount (${remainingAmount}).`
                         );
                     return false;
                 }
