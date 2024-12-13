@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use Exception;
 use App\Models\User;
+use App\Models\Invoice;
 use App\Models\Bookings;
 use App\Models\Properties;
 use Illuminate\Http\Request;
 use App\Models\PropertyDates;
 use App\Models\PaymentReceipt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
@@ -79,43 +81,69 @@ class PaymentReceiptController extends Controller
     }
     public function getBookingDetails($booking_id)
     {
-        $booking = Bookings::with('paymentReceipts')->where('id', $booking_id)->first();
+        $booking = Bookings::with('paymentReceipts')->where('id', $booking_id)->firstOrFail();
+
+        // Calculate the total amount for this booking's payment receipts
+        $totalAmount = $booking->paymentReceipts->sum('amount');
         return response()->json([
             'booking' => $booking,
+            'totalBookingAmount' => $booking->total,
+            'totalAmount' => $totalAmount
         ]);
     }
+
     public function store(Request $request)
     {
+        // dd($request);
+        DB::beginTransaction();
 
         try {
             $booking = Bookings::findOrFail($request->booking_id);
-            if ($request->amount > $booking->total) {
-                return redirect()->back()
-                    ->with('error', 'You have entered an amount that is greater than the actual booking amount.');
-            }
+            // Find the invoice for the booking
+            $invoice = Invoice::where('booking_id', $booking->id)->firstOrFail();
 
+            // Add invoice_id to the request data
+            $request->merge(['invoice_id' => $invoice->id]);
+
+            // Create the payment receipt
             $payment_receipt = PaymentReceipt::create($request->all());
 
             if ($payment_receipt) {
-                if ($request->amount < $booking->total) {
-                    // Partial payment
+                if ($request->amount < $request->remaining_amount) {
+                    // Partial payment logic
                     PropertyDates::where('booking_id', $booking->id)
                         ->where('property_id', $booking->property_id)
                         ->update(['status' => 'booked but not fully paid']);
+
                     Bookings::where('id', $booking->id)
                         ->update(['booking_property_status' => 'booked but not fully paid']);
-                } elseif ($request->amount == $booking->total) {
-                    // Fully paid
+
+                    Invoice::where('id', $invoice->id)
+                        ->where('booking_id', $booking->id)
+                        ->update(['payment_status' => 'partial paid']); // Corrected syntax
+                } elseif ($request->amount == $request->remaining_amount) {
+                    // Fully paid logic
                     PropertyDates::where('booking_id', $booking->id)
                         ->where('property_id', $booking->property_id)
                         ->update(['status' => 'booked paid']);
+
                     Bookings::where('id', $booking->id)
                         ->update(['booking_property_status' => 'booked paid']);
+
+                    Invoice::where('id', $invoice->id)
+                        ->where('booking_id', $booking->id)
+                        ->update(['payment_status' => 'paid']); // Corrected syntax
                 }
             }
 
-            return redirect()->route('payment-receipts.index')->with('success', 'Payment receipt Created successfully.');
+            // Commit the transaction
+            DB::commit();
+
+            return redirect()->route('payment-receipts.index')->with('success', 'Payment receipt created successfully.');
         } catch (Exception $e) {
+            // Rollback the transaction in case of an error
+            DB::rollBack();
+
             // Log the exception for debugging
             Log::error('Error adding payment receipt: ' . $e->getMessage());
 
@@ -123,6 +151,7 @@ class PaymentReceiptController extends Controller
             return redirect()->back()->with('error', 'An error occurred while adding the payment receipt. Please try again.');
         }
     }
+
 
     public function edit(PaymentReceipt $payment_receipt)
     {
