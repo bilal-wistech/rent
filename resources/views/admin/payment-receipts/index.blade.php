@@ -7,6 +7,12 @@
         </section>
 
         <section class="content">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
             <div class="row">
                 <div class="col-xs-12">
                     <div class="box">
@@ -16,8 +22,8 @@
                                 <div class="pull-right"><a class="btn btn-success f-14"
                                         href="{{ route('payment-receipts.create') }}">Add Payment Receipt</a></div>
                             </div>
-                            <form class="form-horizontal" enctype='multipart/form-data'
-                                action="{{ url('admin/invoices') }}" method="GET" accept-charset="UTF-8">
+                            <form class="form-horizontal" enctype='multipart/form-data' action="{{ url('admin/invoices') }}"
+                                method="GET" accept-charset="UTF-8">
                                 {{ csrf_field() }}
                                 <div class="col-md-12  d-none">
                                     <input class="form-control" type="text" id="startDate" name="from"

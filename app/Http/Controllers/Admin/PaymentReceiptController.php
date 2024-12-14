@@ -92,7 +92,7 @@ class PaymentReceiptController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(AddPaymentReceiptRequest $request)
     {
         // dd($request);
         DB::beginTransaction();
