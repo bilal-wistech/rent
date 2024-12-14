@@ -17,7 +17,6 @@
     </style>
 @endpush
 @section('main')
-
     <div class="content-wrapper">
         <section class="content-header">
             <h1>Payment Receipt <small>Create</small></h1>
@@ -28,23 +27,8 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="box">
-                        @if (session('success'))
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        @endif
-                        @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul>
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        <form class="form-horizontal" action="{{ route('payment-receipts.store') }}"
-                            id="add_payment_receipt" method="post" name="add_payment_receipt" accept-charset="UTF-8">
+                        <form class="form-horizontal" action="{{ route('payment-receipts.store') }}" id="add_payment_receipt"
+                            method="post" name="add_payment_receipt" accept-charset="UTF-8">
                             {{ csrf_field() }}
                             @method('POST')
                             <div class="box-body">
@@ -63,6 +47,7 @@
                                                 </option>
                                             @endforeach
                                         </select>
+                                        <span class="text-danger">{{ $errors->first('booking_id') }}</span>
                                     </div>
                                 </div>
                                 <div class="form-group mt-3 row">
@@ -79,6 +64,7 @@
                                                 {{ old('paid_through') == 'credit card' ? 'selected' : '' }}>
                                                 Credit Card</option>
                                         </select>
+                                        <span class="text-danger">{{ $errors->first('paid_through') }}</span>
                                     </div>
                                 </div>
                                 <div class="form-group mt-3 row">
@@ -87,6 +73,7 @@
                                     <div class="col-sm-4">
                                         <input type="date" class="form-control" name="payment_date" id="payment_date"
                                             value="{{ old('payment_date') }}">
+                                        <span class="text-danger">{{ $errors->first('payment_date') }}</span>
                                     </div>
                                 </div>
 
@@ -97,6 +84,7 @@
                                         <input type="number" class="form-control" name="amount" id="amount"
                                             value="{{ old('amount') }}">
                                         <small id="amount_error" class="text-danger d-none"></small>
+                                        <span class="text-danger">{{ $errors->first('amount') }}</span>
                                     </div>
                                 </div>
                                 <input type="hidden" name="remaining_amount" id="remaining_amount">

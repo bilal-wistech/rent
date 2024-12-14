@@ -52,10 +52,10 @@ class PaymentReceiptDataTable extends DataTable
             ->addColumn('created_at', function ($payment_receipts) {
                 return dateFormat($payment_receipts->created_at);
             })
-            ->addColumn('action', function ($payment_receipts) {
-                return '<a href="' . url('admin/payment-receipts/edit/' . $payment_receipts->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>';
-            })
-            ->rawColumns(['DT_RowIndex', 'booking_id', 'property_id', 'user_id', 'payment_date', 'amount', 'total_amount', 'status', 'created','action'])
+            // ->addColumn('action', function ($payment_receipts) {
+            //     return '<a href="' . url('admin/payment-receipts/edit/' . $payment_receipts->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>';
+            // })
+            ->rawColumns(['DT_RowIndex', 'booking_id', 'property_id', 'user_id', 'payment_date', 'amount', 'total_amount', 'status', 'created',/* 'action' */])
             ->make(true);
     }
 
@@ -87,7 +87,7 @@ class PaymentReceiptDataTable extends DataTable
             ->addColumn(['data' => 'amount', 'name' => 'amount', 'title' => 'Amount Paid', 'orderable' => true, 'searchable' => false])
             ->addColumn(['data' => 'total_amount', 'name' => 'total_amount', 'title' => 'Total Amount', 'orderable' => true, 'searchable' => false])
             ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created At', 'orderable' => true, 'searchable' => true])
-            ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
+            // ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
             ->parameters(dataTableOptions());
     }
 
