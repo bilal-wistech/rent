@@ -47,7 +47,7 @@ class DocumentController extends Controller
             // Create the documents directory if it doesn't exist
             $documentPath = storage_path('app/public/documents');
             if (!File::exists($documentPath)) {
-                File::makeDirectory($documentPath, 0775, true);
+                File::makeDirectory($documentPath, 0777, true);
             }
 
             $image = $request->file('image');
