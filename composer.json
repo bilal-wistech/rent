@@ -12,6 +12,7 @@
         "doctrine/dbal": "^3.0",
         "eluceo/ical": "^0.16.1",
         "guzzlehttp/guzzle": "^7.0.1",
+        "haruncpi/laravel-user-activity": "^1.0",
         "laravel/framework": "9.*",
         "laravel/helpers": "^1.5",
         "laravel/socialite": "^5.1",
