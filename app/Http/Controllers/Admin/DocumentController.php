@@ -148,7 +148,7 @@ class DocumentController extends Controller
 
             return redirect()->back()->with([
                 'success' => 'Document deleted successfully.',
-                'user' => $user
+                // 'user' => $user
             ]);
         } else {
 
