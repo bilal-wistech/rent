@@ -41,25 +41,43 @@ class DocumentController extends Controller
             'expire' => 'required|date'
         ]);
 
+        $path = null;
         if ($request->hasFile('image')) {
+            // Create the documents directory if it doesn't exist
+            $documentPath = storage_path('app/public/documents');
+            if (!File::exists($documentPath)) {
+                File::makeDirectory($documentPath, 0775, true);
+            }
+
             $image = $request->file('image');
             $filename = time() . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('documents', $filename, 'public');
+
+            try {
+                $path = $image->storeAs('documents', $filename, 'public');
+            } catch (\Exception $e) {
+                return back()->with('error', 'Error uploading file: ' . $e->getMessage());
+            }
         }
 
-        $document = Document::create([
-            'user_id' => $request->user_id,
-            'image' => $path,
-            'expire' => $request->expire,
-            'type' => $request->type,
-        ]);
-        $documents = Document::where('user_id', $request->user_id)->get();
-        return view('admin.customers.viewDocument')->with([
-            'success' => 'Document created successfully.',
-            'user' => User::findOrFail($request->user_id),
-            'document' => $documents,
-            'documentActive' => 'active'
-        ]);
+        try {
+            $document = Document::create([
+                'user_id' => $request->user_id,
+                'image' => $path,
+                'expire' => $request->expire,
+                'type' => $request->type,
+            ]);
+
+            $documents = Document::where('user_id', $request->user_id)->get();
+
+            return view('admin.customers.viewDocument')->with([
+                'success' => 'Document created successfully.',
+                'user' => User::findOrFail($request->user_id),
+                'document' => $documents,
+                'documentActive' => 'active'
+            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error creating document: ' . $e->getMessage());
+        }
     }
 
 
