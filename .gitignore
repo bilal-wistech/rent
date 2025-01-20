@@ -28,5 +28,6 @@ Thumbs.db
 public/front
 /bootstrap/cache
 vRentNew.zip
-.htaccess
+/.htaccess
 /public/.htaccess
+
