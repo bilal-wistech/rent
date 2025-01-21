@@ -20,7 +20,7 @@ $(document).ready(function () {
     });
 
 
-    $(document).on('submit', '#msg_reply', function() {
+    $(document).on('submit', '#msg_reply', function () {
         $('#reply_message').attr('disabled', 'disabled');
     });
 
@@ -33,7 +33,7 @@ $(document).ready(function () {
         }
     });
 
-    $(document).on('submit', '#send_email', function() {
+    $(document).on('submit', '#send_email', function () {
         $('button').attr('disabled', 'disabled');
     });
 
@@ -55,7 +55,7 @@ $(document).ready(function () {
             }
         }
     });
-    
+
     $('#edit_language').validate({
         rules: {
             name: {
@@ -69,12 +69,12 @@ $(document).ready(function () {
 
     $('#edit_payout').validate({
         rules: {
-           amount: { 
-                    required:true,
-                    digits:true
-                }
-         
+            amount: {
+                required: true,
+                digits: true
             }
+
+        }
     });
 
     $('#add_page').validate({
@@ -88,14 +88,14 @@ $(document).ready(function () {
             },
             content: {
 
-                required: function(textarea) {
+                required: function (textarea) {
                     CKEDITOR.instances[textarea.id].updateElement(); // update textarea
                     var editorcontent = textarea.value.replace(/<[^>]*>/gi, ''); // strip tags
                     return editorcontent.length === 0;
                 }
             }
         },
-        errorPlacement: function(error, element) {
+        errorPlacement: function (error, element) {
             if (element.prop('type') === 'textarea') {
                 $('#content-validation-error').html(error);
             } else {
@@ -115,14 +115,14 @@ $(document).ready(function () {
             },
             content: {
 
-                required: function(textarea) {
+                required: function (textarea) {
                     CKEDITOR.instances[textarea.id].updateElement(); // update textarea
                     var editorcontent = textarea.value.replace(/<[^>]*>/gi, ''); // strip tags
                     return editorcontent.length === 0;
                 }
             }
         },
-        errorPlacement: function(error, element) {
+        errorPlacement: function (error, element) {
             if (element.prop('type') === 'textarea') {
                 $('#content-validation-error').html(error);
             } else {
@@ -130,13 +130,13 @@ $(document).ready(function () {
             }
         }
     });
-    
+
     $('#rev_form').validate({
         rules: {
             message: {
                 required: true
             }
-         
+
         }
     });
 
@@ -152,14 +152,14 @@ $(document).ready(function () {
                 required: true
             },
             "permission[]": {
-              required: true,
-              minlength: 1
+                required: true,
+                minlength: 1
             },
         },
         messages: {
-          "permission[]": {
-            required: message,
-          },
+            "permission[]": {
+                required: message,
+            },
         },
     });
 
@@ -175,15 +175,15 @@ $(document).ready(function () {
                 required: true
             },
             "permission[]": {
-              required: true,
-              minlength: 1
+                required: true,
+                minlength: 1
             },
 
         },
         messages: {
-          "permission[]": {
-            required: message,
-          },
+            "permission[]": {
+                required: message,
+            },
         },
     });
 
@@ -285,7 +285,7 @@ $(document).ready(function () {
             image: {
                 accept: message
             }
-        }  
+        }
     });
 
     $('#edit_staritng_city').validate({
@@ -327,12 +327,12 @@ $(document).ready(function () {
     });
 
     $('#edit_bed').validate({
-		rules: {
-			name: {
-				required: true
-			}
-		}
-	});
+        rules: {
+            name: {
+                required: true
+            }
+        }
+    });
 
     $('#add_bed').validate({
         rules: {
@@ -383,7 +383,7 @@ $(document).ready(function () {
             }
         }
     });
-    
+
     $('#icalendar_form').validate({
         rules: {
             url: {
@@ -392,20 +392,18 @@ $(document).ready(function () {
                 minlength: 6,
             },
             name: {
-                required:true,
-                maxlength:255,
-                minlength:6,
+                required: true,
+                maxlength: 255,
+                minlength: 6,
             }
         },
-        submitHandler: function(form)
-        {
-            $("#import_btn").on("click", function (e)
-            {
+        submitHandler: function (form) {
+            $("#import_btn").on("click", function (e) {
                 $("#import_btn").attr("disabled", true);
                 e.preventDefault();
             });
 
-            
+
             return true;
 
         },
@@ -426,7 +424,7 @@ $(document).ready(function () {
                 required: true
             },
             address_line_1: {
-                required: true
+                required: false
             },
             address_line_2: {
                 maxlength: 255
@@ -435,7 +433,7 @@ $(document).ready(function () {
                 required: true
             },
             state: {
-                required: true
+                required: false
             }
         }
     });
@@ -446,7 +444,7 @@ $(document).ready(function () {
                 required: true
             },
             summary: {
-                required: true
+                required: false
             }
         }
     });
@@ -616,7 +614,7 @@ $(document).ready(function () {
             email: {
                 required: true,
                 maxlength: 255,
-                laxEmail:true
+                laxEmail: true
             },
             password: {
                 required: true,
@@ -662,7 +660,7 @@ $(document).ready(function () {
         }
     });
 
-    
+
 
     $('#add_admin').validate({
         rules: {
@@ -683,7 +681,7 @@ $(document).ready(function () {
         }
     });
 
-    
+
     $('#profile_edit').validate({
         rules: {
             name: {
@@ -702,7 +700,7 @@ $(document).ready(function () {
             },
             profile_pic: {
                 extension: "jpg|png|gif"
-                
+
             }
         },
         messages: {
@@ -712,48 +710,47 @@ $(document).ready(function () {
         }
     });
 
-    $('.icon-click').on('click', function(){
+    $('.icon-click').on('click', function () {
         var temp = $(this).attr('id');
         var i;
-        temp     = temp.split('-');
+        temp = temp.split('-');
         var name = temp[0];
-        var val  = temp[1];
-        var prv  = $('#'+name).val();
-        $('#'+name).val(val);
+        var val = temp[1];
+        var prv = $('#' + name).val();
+        $('#' + name).val(val);
         $('#rating_1').val(val);
-        for(i = 1; i <= prv; i++){
-          $('#'+name+'-'+i).removeClass('fa-star-beach');
-          $('#'+name+'-'+i).addClass('icon-light-gray');
+        for (i = 1; i <= prv; i++) {
+            $('#' + name + '-' + i).removeClass('fa-star-beach');
+            $('#' + name + '-' + i).addClass('icon-light-gray');
         }
-        for(i = 1; i <= val; i++){
-          $('#'+name+'-'+i).removeClass('icon-light-gray');
-          $('#'+name+'-'+i).addClass('fa-star-beach');
+        for (i = 1; i <= val; i++) {
+            $('#' + name + '-' + i).removeClass('icon-light-gray');
+            $('#' + name + '-' + i).addClass('fa-star-beach');
         }
-      })
+    })
 
-    jQuery.validator.addMethod("laxEmail", function(value, element) {
-        return this.optional( element ) || /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test( value );
-        }, "Please enter a valid email address." );
-    
-    jQuery.validator.addMethod("letters_with_spaces", function(value, element)
-    {
-      return this.optional(element) || /^[A-Za-z ]+$/i.test(value); //only letters
+    jQuery.validator.addMethod("laxEmail", function (value, element) {
+        return this.optional(element) || /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(value);
+    }, "Please enter a valid email address.");
+
+    jQuery.validator.addMethod("letters_with_spaces", function (value, element) {
+        return this.optional(element) || /^[A-Za-z ]+$/i.test(value); //only letters
     }, "Please enter letters only!");
-  
+
     $.validator.setDefaults({
-        highlight: function(element) {
-          $(element).parent('div').addClass('has-error');
+        highlight: function (element) {
+            $(element).parent('div').addClass('has-error');
         },
-        unhighlight: function(element) {
-         $(element).parent('div').removeClass('has-error');
-       },
-       errorPlacement: function (error, element) {
-        if (element.prop('type') === 'checkbox') {
-          $('#error-message').html(error);
-        } else {
-          error.insertAfter(element);
+        unhighlight: function (element) {
+            $(element).parent('div').removeClass('has-error');
+        },
+        errorPlacement: function (error, element) {
+            if (element.prop('type') === 'checkbox') {
+                $('#error-message').html(error);
+            } else {
+                error.insertAfter(element);
+            }
         }
-      }
     });
 
 
