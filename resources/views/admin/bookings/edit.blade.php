@@ -719,73 +719,76 @@
 
             // AJAX calculation function
             function updateCalculations(pricingType, pricingTypeAmount, startDate, endDate, propertyId) {
-    if (pricingType && pricingTypeAmount && startDate && endDate && propertyId) {
-        // Store the initial form state
-        const initialFormState = {
-            cleaningFee: $('#displayCleaningFee').val(),
-            securityFee: $('#displaySecurityFee').val(),
-            guestFee: $('#displayGuestFee').val(),
-            hostServiceCharge: $('#displayHostServiceCharge').val(),
-            guestServiceCharge: $('#displayGuestServiceCharge').val(),
-            ivaTax: $('#displayIvaTax').val(),
-            accommodationTax: $('#displayAccommodationTax').val()
-        };
+                if (pricingType && pricingTypeAmount && startDate && endDate && propertyId) {
+                    // Store the initial form state
+                    const initialFormState = {
+                        cleaningFee: $('#displayCleaningFee').val(),
+                        securityFee: $('#displaySecurityFee').val(),
+                        guestFee: $('#displayGuestFee').val(),
+                        hostServiceCharge: $('#displayHostServiceCharge').val(),
+                        guestServiceCharge: $('#displayGuestServiceCharge').val(),
+                        ivaTax: $('#displayIvaTax').val(),
+                        accommodationTax: $('#displayAccommodationTax').val()
+                    };
 
-        // Get the trigger element that caused this update
-        const triggerElement = $(document.activeElement);
-        const isUserInitiated = triggerElement.is('#pricing_type_id, #start_date, #end_date');
+                    // Get the trigger element that caused this update
+                    const triggerElement = $(document.activeElement);
+                    const isUserInitiated = triggerElement.is('#pricing_type_id, #start_date, #end_date');
 
-        $.ajax({
-            url: '{{ route('calculate-booking-price') }}',
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                pricingType: pricingType,
-                pricingTypeAmount: pricingTypeAmount,
-                startDate: startDate,
-                endDate: endDate,
-                propertyId: propertyId
-            },
-            success: function(response) {
-                // Always update these display values as they are calculated
-                $('#displayPricingType').text(response.pricingType);
-                $('#displayNumberOfDays').text(response.numberOfDays + ' days');
-                $('#displayTotalPrice').text((response.totalPrice).toFixed(2));
+                    $.ajax({
+                        url: '{{ route('calculate-booking-price') }}',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {
+                            pricingType: pricingType,
+                            pricingTypeAmount: pricingTypeAmount,
+                            startDate: startDate,
+                            endDate: endDate,
+                            propertyId: propertyId
+                        },
+                        success: function(response) {
+                            // Always update these display values as they are calculated
+                            $('#displayPricingType').text(response.pricingType);
+                            $('#displayNumberOfDays').text(response.numberOfDays + ' days');
+                            $('#displayTotalPrice').text((response.totalPrice).toFixed(2));
 
-                // Only update fee fields if this was triggered by user changing dates or pricing
-                if (isUserInitiated) {
-                    // Update only if the field wasn't previously set (empty or 0)
-                    if (!parseFloat(initialFormState.cleaningFee)) {
-                        $('#displayCleaningFee').val((response.cleaning_fee).toFixed(2));
-                    }
-                    if (!parseFloat(initialFormState.securityFee)) {
-                        $('#displaySecurityFee').val((response.security_fee).toFixed(2));
-                    }
-                    if (!parseFloat(initialFormState.guestFee)) {
-                        $('#displayGuestFee').val((response.guest_fee).toFixed(2));
-                    }
-                    if (!parseFloat(initialFormState.hostServiceCharge)) {
-                        $('#displayHostServiceCharge').val((response.host_service_charge).toFixed(2));
-                    }
-                    if (!parseFloat(initialFormState.guestServiceCharge)) {
-                        $('#displayGuestServiceCharge').val((response.guest_service_charge).toFixed(2));
-                    }
-                    if (!parseFloat(initialFormState.ivaTax)) {
-                        $('#displayIvaTax').val((response.iva_tax).toFixed(2));
-                    }
-                    if (!parseFloat(initialFormState.accommodationTax)) {
-                        $('#displayAccommodationTax').val((response.accomodation_tax).toFixed(2));
-                    }
-                }
+                            // Only update fee fields if this was triggered by user changing dates or pricing
+                            if (isUserInitiated) {
+                                // Update only if the field wasn't previously set (empty or 0)
+                                if (!parseFloat(initialFormState.cleaningFee)) {
+                                    $('#displayCleaningFee').val((response.cleaning_fee).toFixed(2));
+                                }
+                                if (!parseFloat(initialFormState.securityFee)) {
+                                    $('#displaySecurityFee').val((response.security_fee).toFixed(2));
+                                }
+                                if (!parseFloat(initialFormState.guestFee)) {
+                                    $('#displayGuestFee').val((response.guest_fee).toFixed(2));
+                                }
+                                if (!parseFloat(initialFormState.hostServiceCharge)) {
+                                    $('#displayHostServiceCharge').val((response.host_service_charge)
+                                        .toFixed(2));
+                                }
+                                if (!parseFloat(initialFormState.guestServiceCharge)) {
+                                    $('#displayGuestServiceCharge').val((response.guest_service_charge)
+                                        .toFixed(2));
+                                }
+                                if (!parseFloat(initialFormState.ivaTax)) {
+                                    $('#displayIvaTax').val((response.iva_tax).toFixed(2));
+                                }
+                                if (!parseFloat(initialFormState.accommodationTax)) {
+                                    $('#displayAccommodationTax').val((response.accomodation_tax)
+                                        .toFixed(2));
+                                }
+                            }
 
-                let totalPrice = calculateTotalPrice();
-                $('#displayTotalPriceWithAll').text(totalPrice.toFixed(2));
-                $('#amount').val(totalPrice.toFixed(2));
+                            let totalPrice = calculateTotalPrice();
+                            $('#displayTotalPriceWithAll').text(totalPrice.toFixed(2));
+                            $('#amount').val(totalPrice.toFixed(2));
 
-                $('.price-breakdown-table').show();
+                            $('.price-breakdown-table').show();
 
-                // Update hidden fields
-                const hiddenFields = `
+                            // Update hidden fields
+                            const hiddenFields = `
                     <input type="hidden" name="total_price" value="${response.totalPrice}">
                     <input type="hidden" name="total_price_with_other_charges" value="${response.totalPriceWithOtherCharges}">
                     <input type="hidden" name="total_price_with_charges_and_fees" value="${totalPrice}">
@@ -801,19 +804,19 @@
                     <input type="hidden" name="per_day_price" value="${response.perDayPrice}">
                 `;
 
-                $('#booking_form input[type="hidden"]').remove();
-                $('#booking_form').append(`
+                            $('#booking_form input[type="hidden"]').remove();
+                            $('#booking_form').append(`
                     <input type="hidden" name="_method" value="PUT">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     ${hiddenFields}
                 `);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                }
             }
-        });
-    }
-}
 
             // Initial setup and event handlers for date/pricing changes
             const initialCalcValues = getCurrentValues();
