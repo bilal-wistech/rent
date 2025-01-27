@@ -306,49 +306,49 @@
                                                                 <td>Cleaning Fee</td>
                                                                 <td>
                                                                     <input type="text" id="displayCleaningFee"
-                                                                        value="{{ number_format($booking->cleaning_charge ?? 0, 2) }}">
+                                                                        value="{{ ($booking->cleaning_charge ?? 0) }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Security Fee</td>
                                                                 <td>
                                                                     <input type="text" id="displaySecurityFee"
-                                                                        value="{{ $booking->is_security_refunded == 0 ? number_format($booking->security_money, 2) : number_format(0, 2) }}">
+                                                                        value="{{ $booking->is_security_refunded == 0 ? ($booking->security_money) : 0 }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Guest Fee</td>
                                                                 <td>
                                                                     <input type="text" id="displayGuestFee"
-                                                                        value="{{ number_format($booking->guest_charge ?? 0, 2) }}">
+                                                                        value="{{ ($booking->guest_charge ?? 0) }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Host Service Charge (%)</td>
                                                                 <td>
                                                                     <input type="text" id="displayHostServiceCharge"
-                                                                        value="{{ number_format($booking->host_fee ?? 0, 2) }}">
+                                                                        value="{{ ($booking->host_fee ?? 0) }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Guest Service Charge (%)</td>
                                                                 <td>
                                                                     <input type="text" id="displayGuestServiceCharge"
-                                                                        value="{{ number_format($booking->service_charge ?? 0, 2) }}">
+                                                                        value="{{ ($booking->service_charge ?? 0) }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>IVA Tax (%)</td>
                                                                 <td>
                                                                     <input type="text" id="displayIvaTax"
-                                                                        value="{{ number_format($booking->iva_tax ?? 0, 2) }}">
+                                                                        value="{{ ($booking->iva_tax ?? 0) }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Accommodation Tax (%)</td>
                                                                 <td>
                                                                     <input type="text" id="displayAccommodationTax"
-                                                                        value="{{ number_format($booking->accomodation_tax ?? 0, 2) }}">
+                                                                        value="{{ ($booking->accomodation_tax ?? 0) }}">
                                                                 </td>
                                                             </tr>
                                                             <tr class="table-info">
