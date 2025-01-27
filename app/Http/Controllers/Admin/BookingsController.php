@@ -479,6 +479,7 @@ class BookingsController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // dd($request);
         $currencyDefault = Currency::getAll()->where('default', 1)->first();
         $booking = Bookings::findOrFail($id);
         $overlapBooking = Bookings::where('property_id', $request->property_id)
@@ -512,8 +513,8 @@ class BookingsController extends Controller
                 'service_charge' => Common::convert_currency('', $currencyDefault->code, $request->guest_service_charge ?? 0),
                 'host_fee' => Common::convert_currency('', $currencyDefault->code, $request->host_service_charge ?? 0),
                 'iva_tax' => Common::convert_currency('', $currencyDefault->code, $request->iva_tax ?? 0), // Default to 0 if not set
-                'accommodation_tax' => Common::convert_currency('', $currencyDefault->code, $request->accomodation_tax ?? 0), // Default to 0 if not set
-                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $request->additional_guest ?? 0), // Default to 0 if not set
+                'accomodation_tax' => Common::convert_currency('', $currencyDefault->code, $request->accomodation_tax ?? 0), // Default to 0 if not set
+                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $request->guest_charge ?? 0), // Default to 0 if not set
                 'security_money' => Common::convert_currency('', $currencyDefault->code, $request->security_fee ?? 0), // Default to 0 if not set
                 'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $request->cleaning_fee ?? 0), // Default to 0 if not set
                 'total' => Common::convert_currency('', $currencyDefault->code, $request->total_price_with_charges_and_fees ?? 0), // Default to 0 if not set
