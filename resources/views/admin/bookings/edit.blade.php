@@ -306,49 +306,49 @@
                                                                 <td>Cleaning Fee</td>
                                                                 <td>
                                                                     <input type="text" id="displayCleaningFee"
-                                                                        value="{{ ($booking->cleaning_charge ?? 0) }}">
+                                                                        value="{{ $booking->cleaning_charge ?? 0 }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Security Fee</td>
                                                                 <td>
                                                                     <input type="text" id="displaySecurityFee"
-                                                                        value="{{ $booking->is_security_refunded == 0 ? ($booking->security_money) : 0 }}">
+                                                                        value="{{ $booking->is_security_refunded == 0 ? $booking->security_money : 0 }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Guest Fee</td>
                                                                 <td>
                                                                     <input type="text" id="displayGuestFee"
-                                                                        value="{{ ($booking->guest_charge ?? 0) }}">
+                                                                        value="{{ $booking->guest_charge ?? 0 }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Host Service Charge (%)</td>
                                                                 <td>
                                                                     <input type="text" id="displayHostServiceCharge"
-                                                                        value="{{ ($booking->host_fee ?? 0) }}">
+                                                                        value="{{ $booking->host_fee ?? 0 }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Guest Service Charge (%)</td>
                                                                 <td>
                                                                     <input type="text" id="displayGuestServiceCharge"
-                                                                        value="{{ ($booking->service_charge ?? 0) }}">
+                                                                        value="{{ $booking->service_charge ?? 0 }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>IVA Tax (%)</td>
                                                                 <td>
                                                                     <input type="text" id="displayIvaTax"
-                                                                        value="{{ ($booking->iva_tax ?? 0) }}">
+                                                                        value="{{ $booking->iva_tax ?? 0 }}">
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Accommodation Tax (%)</td>
                                                                 <td>
                                                                     <input type="text" id="displayAccommodationTax"
-                                                                        value="{{ ($booking->accomodation_tax ?? 0) }}">
+                                                                        value="{{ $booking->accomodation_tax ?? 0 }}">
                                                                 </td>
                                                             </tr>
                                                             <tr class="table-info">
@@ -373,22 +373,6 @@
 @endsection
 
 @section('validate_script')
-    <script type="text/javascript" src="{{ asset('backend/dist/js/validate.min.js') }}"></script>
-    <script src="{{ asset('backend/js/admin-date-range-picker.min.js') }}"></script>
-    <script src="{{ asset('backend/js/intl-tel-input-13.0.0/build/js/intlTelInput.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('backend/js/isValidPhoneNumber.js') }}" type="text/javascript"></script>
-    <script type="text/javascript">
-        let validEmailText = "Please enter a valid email address.";
-        let checkUserURL = "{{ route('checkUser.check') }}";
-        var token = "{{ csrf_token() }}";
-        let emailExistText = "Email address is already Existed.";
-        let validInternationalNumber = "Please enter a valid International Phone Number.";
-        let numberExists = "The number has already been taken!";
-        let signedUpText = "Sign Up..";
-        let baseURL = "{{ url('/') }}";
-        let duplicateNumberCheckURL = "{{ url('duplicate-phone-number-check') }}";
-    </script>
-    <script src="{{ asset('backend/js/add_customer_for_properties.js') }}" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
@@ -802,7 +786,11 @@
                     `;
 
                             $('#booking_form input[type="hidden"]').remove();
-                            $('#booking_form').append(hiddenFields);
+                            $('#booking_form').append(`
+    <input type="hidden" name="_method" value="PUT">
+    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+    ${hiddenFields}
+`);
                         },
                         error: function(xhr, status, error) {
                             console.error('Error:', error);

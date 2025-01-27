@@ -479,6 +479,7 @@ class BookingsController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // dd($request);
         $currencyDefault = Currency::getAll()->where('default', 1)->first();
         $booking = Bookings::findOrFail($id);
         $overlapBooking = Bookings::where('property_id', $request->property_id)
