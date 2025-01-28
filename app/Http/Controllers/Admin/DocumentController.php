@@ -54,7 +54,9 @@ class DocumentController extends Controller
         'type' => $request->type,
     ]);
     $documents = Document::where('user_id', $request->user_id)->get();
-    return view('admin.customers.viewDocument')->with([
+
+
+    return redirect()->route('admin.document.show', ['id' =>$request->user_id])->with([
         'success' => 'Document created successfully.',
         'user' => User::findOrFail($request->user_id),
         'document' => $documents,
@@ -119,6 +121,7 @@ class DocumentController extends Controller
 
     public function destroy($id)
     {
+
         $document = Document::find($id);
 
 
@@ -127,14 +130,17 @@ class DocumentController extends Controller
            if ($document->image) {
                 Storage::delete($document->image);
            }
+
             $document->delete();
 
             return redirect()->back()->with([
                 'success' => 'Document deleted successfully.',
                 'user' => $user
-            ]); } else {
-
-            return redirect()->back()->with('error', 'Document not found.');
+            ]); }
+            else {
+                $user = User::find($document->user_id);
+            return redirect()->back()->with(['error'=> 'Document not found.',
+        'user' => $user]);
         }
 
     }
