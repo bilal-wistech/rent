@@ -42,44 +42,22 @@ class DocumentController extends Controller
             'expire' => 'required|date'
         ]);
 
-        $path = null;
-        if ($request->hasFile('image')) {
-            // Create the documents directory if it doesn't exist
-            $documentPath = storage_path('app/public/documents');
-            if (!File::exists($documentPath)) {
-                File::makeDirectory($documentPath, 0777, true);
-            }
+    $document = Document::create([
+        'user_id' => $request->user_id,
+        'image' => $path,
+        'expire' => $request->expire,
+        'type' => $request->type,
+    ]);
+    $documents = Document::where('user_id', $request->user_id)->get();
 
-            $image = $request->file('image');
-            $filename = time() . '.' . $image->getClientOriginalExtension();
 
-            try {
-                $path = $image->storeAs('documents', $filename, 'public');
-            } catch (\Exception $e) {
-                return back()->with('error', 'Error uploading file: ' . $e->getMessage());
-            }
-        }
-
-        try {
-            $document = Document::create([
-                'user_id' => $request->user_id,
-                'image' => $path,
-                'expire' => $request->expire,
-                'type' => $request->type,
-            ]);
-
-            $documents = Document::where('user_id', $request->user_id)->get();
-
-            return view('admin.customers.viewDocument')->with([
-                'success' => 'Document created successfully.',
-                'user' => User::findOrFail($request->user_id),
-                'document' => $documents,
-                'documentActive' => 'active'
-            ]);
-        } catch (\Exception $e) {
-            return back()->with('error', 'Error creating document: ' . $e->getMessage());
-        }
-    }
+    return redirect()->route('admin.document.show', ['id' =>$request->user_id])->with([
+        'success' => 'Document created successfully.',
+        'user' => User::findOrFail($request->user_id),
+        'document' => $documents,
+        'documentActive' => 'active'
+    ]);
+}
 
 
 
@@ -136,6 +114,7 @@ class DocumentController extends Controller
 
     public function destroy($id)
     {
+
         $document = Document::find($id);
 
 
@@ -143,16 +122,18 @@ class DocumentController extends Controller
             $user = User::find($document->user_id);
             if ($document->image) {
                 Storage::delete($document->image);
-            }
+           }
+
             $document->delete();
 
             return redirect()->back()->with([
                 'success' => 'Document deleted successfully.',
-                // 'user' => $user
-            ]);
-        } else {
-
-            return redirect()->back()->with('error', 'Document not found.');
+                'user' => $user
+            ]); }
+            else {
+                $user = User::find($document->user_id);
+            return redirect()->back()->with(['error'=> 'Document not found.',
+        'user' => $user]);
         }
     }
 }
