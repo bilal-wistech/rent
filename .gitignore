@@ -26,5 +26,8 @@ yarn-error.log
 _ide_helper.php
 Thumbs.db
 public/front
-
+/bootstrap/cache
 vRentNew.zip
+/.htaccess
+/public/.htaccess
+

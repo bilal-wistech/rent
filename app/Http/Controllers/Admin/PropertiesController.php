@@ -147,7 +147,7 @@ class PropertiesController extends Controller
                 $property_address->building = $request->building;
                 $property_address->flat_no = $request->flat_no;
                 $property_address->save();
-                
+
                 $property_price = new PropertyPrice;
                 $property_price->property_id = $property->id;
                 $property_price->currency_code = \Session::get('currency');
@@ -231,7 +231,7 @@ class PropertiesController extends Controller
             if ($request->isMethod('post')) {
                 $rules = array(
                     'name' => 'required|max:50',
-                    'summary' => 'required|max:1000',
+                    'summary' => 'nullable|max:1000',
                 );
 
                 $fieldNames = array(
@@ -278,16 +278,16 @@ class PropertiesController extends Controller
         } elseif ($step == 'location') {
             if ($request->isMethod('post')) {
                 $rules = array(
-                    'address_line_1' => 'required|max:250',
-                    'address_line_2' => 'max:250',
+                    // 'address_line_1' => 'required|max:250',
+                    // 'address_line_2' => 'max:250',
                     'country' => 'required',
                     'city' => 'required',
-                    'state' => 'required',
+                    'state' => 'nullable',
                     'area' => 'required',
                 );
 
                 $fieldNames = array(
-                    'address_line_1' => 'Address Line 1',
+                    // 'address_line_1' => 'Address Line 1',
                     'country' => 'Country',
                     'city' => 'City',
                     'state' => 'State',
@@ -348,7 +348,6 @@ class PropertiesController extends Controller
                     Common::one_time_message('error', __('Choose at least one item from the Common Amenities'));
                     return redirect('admin/listing/' . $property_id . '/amenities');
                 }
-
             } elseif ($request->isMethod('post') && empty($request->amenities)) {
                 Common::one_time_message('error', __('Choose at least one item from the Common Amenities'));
                 return redirect('admin/listing/' . $property_id . '/amenities');
@@ -357,7 +356,6 @@ class PropertiesController extends Controller
                 $data['amenities'] = Amenities::where('status', 'Active')->get();
                 $data['amenities_type'] = AmenityType::get();
             }
-
         } elseif ($step == 'photos') {
             if ($request->isMethod('post')) {
 
@@ -466,7 +464,6 @@ class PropertiesController extends Controller
                 if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
                 } else {
-                    // Initialize arrays to avoid null errors
                     $prices = $request->input('prices', []);
                     $pricingTypes = $request->input('pricing_type', []);
 
@@ -475,9 +472,23 @@ class PropertiesController extends Controller
                         return back()->with('error', __('Invalid data provided.'));
                     }
 
+                    // Get all existing price records for this property
+                    $existingPrices = PropertyPrice::where('property_id', $property_id)->get();
+
+                    // Keep track of processed pricing types
+                    $processedTypes = [];
+
                     // Iterate through the price array
                     foreach ($prices as $index => $price) {
-                        $property_type_id = $pricingTypes[$index]; // Get the corresponding property type ID
+                        $property_type_id = $pricingTypes[$index];
+
+                        // Skip if pricing type is empty
+                        if (empty($property_type_id)) {
+                            continue;
+                        }
+
+                        // Add to processed types
+                        $processedTypes[] = $property_type_id;
 
                         // Use updateOrCreate to either update an existing record or create a new one
                         PropertyPrice::updateOrCreate(
@@ -487,17 +498,22 @@ class PropertiesController extends Controller
                             ],
                             [
                                 'price' => $price,
-                                'weekly_discount' => $request->weekly_discount ?? 0, // Default to 0 if null
-                                'monthly_discount' => $request->monthly_discount ?? 0, // Default to 0 if null
+                                'weekly_discount' => $request->weekly_discount ?? 0,
+                                'monthly_discount' => $request->monthly_discount ?? 0,
                                 'currency_code' => $request->currency_code,
-                                'cleaning_fee' => $request->cleaning_fee ?? 0, // Default to 0 if null
-                                'guest_fee' => $request->guest_fee ?? 0, // Default to 0 if null
-                                'guest_after' => $request->guest_after ?? 0, // Default to 0 if null
-                                'security_fee' => $request->security_fee ?? 0, // Default to 0 if null
-                                'weekend_price' => $request->weekend_price ?? 0, // Default to 0 if null
+                                'cleaning_fee' => $request->cleaning_fee ?? 0,
+                                'guest_fee' => $request->guest_fee ?? 0,
+                                'guest_after' => $request->guest_after ?? 0,
+                                'security_fee' => $request->security_fee ?? 0,
+                                'weekend_price' => $request->weekend_price ?? 0,
                             ]
                         );
                     }
+
+                    // Delete any pricing types that weren't in the submitted form
+                    PropertyPrice::where('property_id', $property_id)
+                        ->whereNotIn('property_type_id', $processedTypes)
+                        ->delete();
 
                     // Update the PropertySteps model after processing all prices
                     $property_steps = PropertySteps::where('property_id', $property_id)->first();
@@ -510,8 +526,6 @@ class PropertiesController extends Controller
                     return redirect('admin/listing/' . $property_id . '/booking')->with('success', __('Pricing updated successfully.'));
                 }
             }
-
-
         } elseif ($step == 'booking') {
             if ($request->isMethod('post')) {
 
@@ -531,7 +545,6 @@ class PropertiesController extends Controller
         $pricing_types = PricingType::all();
         $propertyPricing = PropertyPrice::where('property_id', $property_id)->get();
         return view("admin.listing.$step", array_merge($data, compact('pricing_types', 'propertyPricing')));
-
     }
 
     public function update(Request $request)

@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use App\Models\User;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
@@ -13,8 +15,7 @@ class DocumentController extends Controller
     public function index()
     {
 
-        return view('admin.customers.addDocument', [ 'documentActive' =>'active',]);
-
+        return view('admin.customers.addDocument', ['documentActive' => 'active',]);
     }
 
 
@@ -23,9 +24,9 @@ class DocumentController extends Controller
     {
         $document = Document::where('id', $request->id)->first();
         $user = User::find($document->user_id);
-         return view('admin.customers.editDocument')->with([
+        return view('admin.customers.editDocument')->with([
             'documentActive' => 'active',
-            'user'=>$user,
+            'user' => $user,
             'document' => $document,
             'success' => 'Emergency contact information has been saved successfully.',
 
@@ -34,18 +35,12 @@ class DocumentController extends Controller
 
 
     public function store(Request $request)
-{
-    $request->validate([
-        'image' => 'required|image|mimes:jpeg,png,jpg',
-        'type' => 'required',
-        'expire' => 'required|date'
-    ]);
-
-    if ($request->hasFile('image')) {
-        $image = $request->file('image');
-        $filename = time() . '.' . $image->getClientOriginalExtension();
-        $path = $image->storeAs('documents', $filename, 'public');
-    }
+    {
+        $request->validate([
+            'image' => 'required',
+            'type' => 'required',
+            'expire' => 'required|date'
+        ]);
 
     $document = Document::create([
         'user_id' => $request->user_id,
@@ -70,8 +65,8 @@ class DocumentController extends Controller
     {
         $document = Document::where('user_id', $id)->get();
         $user = User::findOrFail($id);
-      if ($document) {
-        return view('admin.customers.viewDocument', ['document' => $document, 'user' => $user, 'documentActive' =>'active',]);
+        if ($document) {
+            return view('admin.customers.viewDocument', ['document' => $document, 'user' => $user, 'documentActive' => 'active',]);
         }
     }
 
@@ -80,17 +75,16 @@ class DocumentController extends Controller
     {
         $user = User::findOrFail($id);
 
-          return view('admin.customers.addDocument', [
-                'user' => $user,
-                'documentActive' => 'active',
-            ]);
-
+        return view('admin.customers.addDocument', [
+            'user' => $user,
+            'documentActive' => 'active',
+        ]);
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'image' => 'nullable|image|mimes:jpeg,png,jpg',
+            'image' => 'nullable',
             'type' => 'required',
             'expire' => 'required|date'
         ]);
@@ -111,10 +105,9 @@ class DocumentController extends Controller
         return redirect()->back()->with([
             'success' => 'Document updated successfully.',
             'user' => $user,
-            'document'=> $doc,
-            'documentActive' =>'active'
+            'document' => $doc,
+            'documentActive' => 'active'
         ]);
-
     }
 
 
@@ -127,7 +120,7 @@ class DocumentController extends Controller
 
         if ($document) {
             $user = User::find($document->user_id);
-           if ($document->image) {
+            if ($document->image) {
                 Storage::delete($document->image);
            }
 
@@ -142,7 +135,5 @@ class DocumentController extends Controller
             return redirect()->back()->with(['error'=> 'Document not found.',
         'user' => $user]);
         }
-
     }
-
 }

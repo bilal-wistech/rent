@@ -42,9 +42,9 @@ class BookingsController extends Controller
 
     public function index(BookingsDataTable $dataTable)
     {
+
         $data['from'] = isset(request()->from) ? request()->from : null;
         $data['to'] = isset(request()->to) ? request()->to : null;
-
         if (isset(request()->property)) {
             $data['properties'] = Properties::where('properties.id', request()->property)->select('id', 'name')->get();
         } else {
@@ -56,11 +56,12 @@ class BookingsController extends Controller
             $data['customers'] = null;
         }
 
-        if (!empty(request()->btn) || !empty(request()->status) || !empty(request()->from) || !empty(request()->property) || !empty(request()->customer)) {
+        if (!empty(request()->btn) || !empty(request()->status) || !empty(request()->from) || !empty(request()->property) || !empty(request()->customer) || !empty(request()->booking_property_status)) {
 
             $status = request()->status;
             $from = request()->from;
             $to = request()->to;
+            $booking_property_status = request()->booking_property_status;
             if (isset(request()->property)) {
                 $property = request()->property;
             } else {
@@ -78,12 +79,8 @@ class BookingsController extends Controller
             $customer = null;
             $from = null;
             $to = null;
+            $booking_property_status = null;
         }
-
-        // if (n_as_k_c()) {
-        //     Session::flush();
-        //     return view('vendor.installer.errors.admin');
-        // }
 
         //Calculating total customers, bookings and total amount in distinct currency
         $total_bookings_initial = $this->getAllBookings();
@@ -106,6 +103,7 @@ class BookingsController extends Controller
             $data['allstatus'] = null;
             $data['allproperties'] = null;
             $data['allcustomers'] = null;
+            $data['allbookingpropertystatus'] = null;
             return $dataTable->render('admin.bookings.view', $data);
         }
 
@@ -135,6 +133,11 @@ class BookingsController extends Controller
             $total_customers_initial = $total_customers_initial->where('bookings.status', '=', $status);
             $different_currency_total_initial = $different_currency_total_initial->where('bookings.status', '=', $status);
         }
+        if ($booking_property_status) {
+            $total_bookings_initial = $total_bookings_initial->where('bookings.booking_property_status', '=', $booking_property_status);
+            $total_customers_initial = $total_customers_initial->where('bookings.booking_property_status', '=', $booking_property_status);
+            $different_currency_total_initial = $different_currency_total_initial->where('bookings.booking_property_status', '=', $booking_property_status);
+        }
 
         $data['total_bookings'] = $total_bookings_initial->get()->count();
         $data['total_customers'] = $total_customers_initial->get()->count();
@@ -149,6 +152,7 @@ class BookingsController extends Controller
         isset(request()->property) ? $data['allproperties'] = request()->property : $data['allproperties'] = '';
         isset(request()->customer) ? $data['allcustomers'] = request()->customer : $data['allcustomers'] = '';
         isset(request()->status) ? $data['allstatus'] = request()->status : $data['allstatus'] = '';
+        isset(request()->booking_property_status) ? $data['allbookingpropertystatus'] = request()->booking_property_status : $data['allbookingpropertystatus'] = '';
         return $dataTable->render('admin.bookings.view', $data);
     }
     public function create(Request $request)
@@ -208,15 +212,15 @@ class BookingsController extends Controller
             $property_dates = $booking->properties->property_dates;
             return response()->json([
                 'exists' => true,
-                'message' => 'Booking from ' . Carbon::parse($booking->start_date)->format('d-m-Y') . ' to '.Carbon::parse($booking->end_date)->format('d-m-Y').' already exists',
+                'message' => 'Booking from ' . Carbon::parse($booking->start_date)->format('d-m-Y') . ' to ' . Carbon::parse($booking->end_date)->format('d-m-Y') . ' already exists',
                 'booking_id' => $booking->id,
-                // 'booking' => $booking,
-                // 'property_dates' => $property_dates,
-                // 'user' => [
-                //     'user_id' => $booking->users->id,
-                //     'user_name' => $booking->users->first_name . " " . $booking->users->last_name,
-                // ],
-                // 'property_price' => $property_price
+                'booking' => $booking,
+                'property_dates' => $property_dates,
+                'user' => [
+                    'user_id' => $booking->users->id,
+                    'user_name' => $booking->users->first_name . " " . $booking->users->last_name,
+                ],
+                'property_price' => $property_price
             ]);
         }
 
@@ -290,7 +294,20 @@ class BookingsController extends Controller
             $booking = '';
             // Check if we're updating an existing booking
             $bookingId = $request->booking_id ?? null;
-
+            $status = '';
+            $payment_status = '';
+            if ($request->payment_receipt == 1) {
+                if ($request->amount < $request->total_price_with_charges_and_fees) {
+                    $status = 'booked but not fully paid';
+                    $payment_status = 'partial paid';
+                } else {
+                    $status = 'booked paid';
+                    $payment_status = 'paid';
+                }
+            } else {
+                $status = 'booked not paid';
+                $payment_status = 'unpaid';
+            }
             // If booking ID exists, update the existing booking, else create a new one
             $bookingData = [
                 'property_id' => $request->property_id,
@@ -304,8 +321,8 @@ class BookingsController extends Controller
                 'service_charge' => Common::convert_currency('', $currencyDefault->code, $request->guest_service_charge ?? 0),
                 'host_fee' => Common::convert_currency('', $currencyDefault->code, $request->host_service_charge ?? 0),
                 'iva_tax' => Common::convert_currency('', $currencyDefault->code, $request->iva_tax ?? 0), // Default to 0 if not set
-                'accommodation_tax' => Common::convert_currency('', $currencyDefault->code, $request->accomodation_tax ?? 0), // Default to 0 if not set
-                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $request->additional_guest ?? 0), // Default to 0 if not set
+                'accomodation_tax' => Common::convert_currency('', $currencyDefault->code, $request->accomodation_tax ?? 0), // Default to 0 if not set
+                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $request->guest_fee ?? 0), // Default to 0 if not set
                 'security_money' => Common::convert_currency('', $currencyDefault->code, $request->security_fee ?? 0), // Default to 0 if not set
                 'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $request->cleaning_fee ?? 0), // Default to 0 if not set
                 'total' => Common::convert_currency('', $currencyDefault->code, $request->total_price_with_charges_and_fees ?? 0), // Default to 0 if not set
@@ -316,21 +333,15 @@ class BookingsController extends Controller
                 'status' => $request->status,
                 'cancellation' => $property->cancellation,
                 'per_night' => Common::convert_currency('', $currencyDefault->code, $request->per_day_price ?? 0), // Default to 0 if not set
-                // 'date_with_price' => json_encode($allData),
+                'booking_property_status' => $status,
                 'transaction_id' => '',
                 'payment_method_id' => '',
                 'pricing_type_id' => $request->pricing_type_id,
                 'buffer_days' => $request->buffer_days ?? 0
             ];
 
-            if ($bookingId) {
-                // Update existing booking
-                $booking = Bookings::findOrFail($bookingId);
-                $booking->update($bookingData);
-            } else {
-                // Create new booking
-                $booking = Bookings::create($bookingData);
-            }
+
+            $booking = Bookings::create($bookingData);
             $start_date = date('Y-m-d', strtotime($request->start_date));
             $end_date = date('Y-m-d', strtotime($request->end_date));
 
@@ -340,35 +351,11 @@ class BookingsController extends Controller
 
             // Calculate the difference in days
             $min_days = ($end_date_timestamp - $start_date_timestamp) / 86400;
-
-            // Retrieve all existing dates for the property
-            $existingDates = PropertyDates::where('property_id', $request->property_id)->get();
-
             // Create an array of booked dates
             $bookedDates = [];
             for ($i = $start_date_timestamp; $i <= $end_date_timestamp; $i += 86400) {
                 $bookedDates[] = date("Y-m-d", $i);
             }
-
-            // Loop through existing dates to update statuses accordingly
-            foreach ($existingDates as $existingDate) {
-                if (in_array($existingDate->date, $bookedDates)) {
-                    // If the date is in the booked range, update its status
-                    $existingDate->update([
-                        'status' => $request->property_date_status,
-                        'min_day' => $min_days,
-                        'min_stay' => ($request->min_stay) ? '1' : '0',
-                    ]);
-                } else {
-                    // If the date is not booked, retain the existing status and clear the price
-                    $existingDate->update([
-                        'price' => null, // Optional: clear the price if you want
-                        'min_day' => null, // Optional: clear min_day if you want
-                        'min_stay' => null, // Optional: clear min_stay if you want
-                    ]);
-                }
-            }
-
             // Create new entries for booked dates that may not already exist
             foreach ($bookedDates as $date) {
                 $status = '';
@@ -381,9 +368,11 @@ class BookingsController extends Controller
                 } else {
                     $status = 'booked not paid';
                 }
-                PropertyDates::updateOrCreate(
-                    ['property_id' => $request->property_id, 'date' => $date],
+                PropertyDates::create(
                     [
+                        'property_id' => $request->property_id,
+                        'booking_id' => $booking->id,
+                        'date' => $date,
                         'price' => ($request->per_day_price) ? $request->per_day_price : '0',
                         'status' => $status,
                         'min_day' => $min_days,
@@ -392,17 +381,10 @@ class BookingsController extends Controller
                 );
             }
             // dd($booking->id);
-            if ($request->payment_receipt == 1) {
-                PaymentReceipt::create([
-                    'booking_id' => $booking->id,
-                    'paid_through' => $request->paid_through,
-                    'payment_date' => $request->payment_date,
-                    'amount' => $request->amount
-                ]);
-            }
-            Invoice::updateOrCreate(
-                ['booking_id' => $booking->id], // Update existing invoice if booking ID matches
+
+            $invoice = Invoice::create(
                 [
+                    'booking_id' => $booking->id,
                     'property_id' => $property->id,
                     'customer_id' => $request->user_id,
                     'currency_code' => $currencyDefault->code,
@@ -412,9 +394,18 @@ class BookingsController extends Controller
                     'description' => 'Booking invoice for ' . $property->name,
                     'sub_total' => Common::convert_currency('', $currencyDefault->code, $request->total_price),
                     'grand_total' => Common::convert_currency('', $currencyDefault->code, $request->total_price_with_charges_and_fees),
+                    'payment_status' => $payment_status
                 ]
             );
-
+            if ($request->payment_receipt == 1) {
+                PaymentReceipt::create([
+                    'booking_id' => $booking->id,
+                    'invoice_id' => $invoice->id,
+                    'paid_through' => $request->paid_through,
+                    'payment_date' => $request->payment_date,
+                    'amount' => $request->amount
+                ]);
+            }
             DB::commit();
             if ($request->ajax()) {
                 return response()->json([
@@ -424,7 +415,7 @@ class BookingsController extends Controller
                         'id' => $booking->id,
                         'start_date' => $booking->start_date,
                         'end_date' => $booking->end_date,
-                        'status' => $request->property_date_status,
+                        'status' => $request->booking_property_status,
                         'property_id' => $booking->property_id
                     ]
                 ]);
@@ -488,45 +479,90 @@ class BookingsController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // dd($request);
         $currencyDefault = Currency::getAll()->where('default', 1)->first();
         $booking = Bookings::findOrFail($id);
-        $priceDetails = Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->number_of_guests);
-        $priceData = json_decode($priceDetails);
-        $property = Properties::findOrFail($request->property_id);
-        foreach ($priceData->date_with_price as $key => $value) {
-            $allData[$key]['price'] = Common::convert_currency('', $currencyDefault->code, $value->original_price);
-            $allData[$key]['date'] = setDateForDb($value->date);
+        $overlapBooking = Bookings::where('property_id', $request->property_id)
+            ->where('id', '!=', $id) // Exclude the current booking
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('start_date', [setDateForDb($request->start_date), setDateForDb($request->end_date)])
+                    ->orWhereBetween('end_date', [setDateForDb($request->start_date), setDateForDb($request->end_date)])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('start_date', '<=', setDateForDb($request->start_date))
+                            ->where('end_date', '>=', setDateForDb($request->end_date));
+                    });
+            })
+            ->first();
+
+        if ($overlapBooking) {
+            Common::one_time_message('error', 'The requested dates overlap with an existing booking.');
+            return redirect()->back()->withErrors(['error' => 'The requested dates overlap with an existing booking.']);
         }
+        $property = Properties::findOrFail($request->property_id);
         DB::beginTransaction();
         try {
-            $booking->update([
+            $bookingData = [
                 'property_id' => $request->property_id,
                 'user_id' => $request->user_id,
                 'host_id' => $property->host_id,
                 'booking_added_by' => $request->booking_added_by ?? 1,
-                'start_date' => setDateForDb($request->checkin),
-                'end_date' => setDateForDb($request->checkout),
+                'start_date' => setDateForDb($request->start_date),
+                'end_date' => setDateForDb($request->end_date),
                 'guest' => $request->number_of_guests,
-                'total_night' => $priceData->total_nights,
-                'service_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->service_fee),
-                'host_fee' => Common::convert_currency('', $currencyDefault->code, $priceData->host_fee),
-                'iva_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->iva_tax),
-                'accomodation_tax' => Common::convert_currency('', $currencyDefault->code, $priceData->accomodation_tax),
-                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->additional_guest),
-                'security_money' => Common::convert_currency('', $currencyDefault->code, $priceData->security_fee),
-                'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $priceData->cleaning_fee),
-                'total' => Common::convert_currency('', $currencyDefault->code, $priceData->total),
-                'base_price' => Common::convert_currency('', $currencyDefault->code, $priceData->subtotal),
+                'total_night' => $request->number_of_days,
+                'service_charge' => Common::convert_currency('', $currencyDefault->code, $request->guest_service_charge ?? 0),
+                'host_fee' => Common::convert_currency('', $currencyDefault->code, $request->host_service_charge ?? 0),
+                'iva_tax' => Common::convert_currency('', $currencyDefault->code, $request->iva_tax ?? 0), // Default to 0 if not set
+                'accomodation_tax' => Common::convert_currency('', $currencyDefault->code, $request->accomodation_tax ?? 0), // Default to 0 if not set
+                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $request->guest_charge ?? 0), // Default to 0 if not set
+                'security_money' => Common::convert_currency('', $currencyDefault->code, $request->security_fee ?? 0), // Default to 0 if not set
+                'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $request->cleaning_fee ?? 0), // Default to 0 if not set
+                'total' => Common::convert_currency('', $currencyDefault->code, $request->total_price_with_charges_and_fees ?? 0), // Default to 0 if not set
+                'base_price' => Common::convert_currency('', $currencyDefault->code, $request->total_price ?? 0), // Default to 0 if not set
                 'currency_code' => $currencyDefault->code,
                 'booking_type' => $request->booking_type,
                 'renewal_type' => $request->renewal_type ?? 'none',
                 'status' => $request->status,
                 'cancellation' => $property->cancellation,
-                'per_night' => Common::convert_currency('', $currencyDefault->code, $priceData->property_price),
-                'date_with_price' => json_encode($allData),
+                'per_night' => Common::convert_currency('', $currencyDefault->code, $request->per_day_price ?? 0), // Default to 0 if not set
+                'booking_property_status' => $request->booking_property_status,
                 'transaction_id' => '',
                 'payment_method_id' => '',
-            ]);
+                'pricing_type_id' => $request->pricing_type_id,
+                'buffer_days' => $request->buffer_days ?? 0
+            ];
+            $booking->update($bookingData);
+            $start_date = date('Y-m-d', strtotime($request->start_date));
+            $end_date = date('Y-m-d', strtotime($request->end_date));
+
+            // Convert the start and end dates to timestamps
+            $start_date_timestamp = strtotime($start_date);
+            $end_date_timestamp = strtotime($end_date);
+
+            // Calculate the difference in days
+            $min_days = ($end_date_timestamp - $start_date_timestamp) / 86400;
+            // Create an array of booked dates
+            $bookedDates = [];
+            for ($i = $start_date_timestamp; $i <= $end_date_timestamp; $i += 86400) {
+                $bookedDates[] = date("Y-m-d", $i);
+            }
+            // Create new entries for booked dates that may not already exist
+            PropertyDates::where('booking_id', $booking->id)
+                ->where('property_id', $request->property_id)
+                ->delete();
+
+            // Create new property dates entries
+            foreach ($bookedDates as $date) {
+                PropertyDates::create([
+                    'booking_id' => $booking->id,
+                    'property_id' => $request->property_id,
+                    'date' => $date,
+                    'price' => ($request->per_day_price) ? $request->per_day_price : '0',
+                    'status' => $request->booking_property_status,
+                    'min_day' => $min_days,
+                    'min_stay' => ($request->min_stay) ? '1' : '0',
+                ]);
+            }
             DB::commit();
             Common::one_time_message('success', 'Booking Updated Successfully');
             return redirect('admin/bookings');

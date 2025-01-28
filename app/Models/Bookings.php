@@ -64,7 +64,15 @@ class Bookings extends Model
         'transaction_id',
         'payment_method_id',
         'buffer_days',
-        'time_period_id'
+        'time_period_id',
+        'is_booking_renewed',
+        'renewal_booking_cancel_date',
+        'renewal_booking_cancel_by',
+        'renewed_booking_id',
+        'is_security_refunded',
+        'is_expired',
+        'pricing_type_id',
+        'booking_property_status'
     ];
 
     protected $table = 'bookings';
@@ -85,7 +93,10 @@ class Bookings extends Model
     {
         return $this->belongsTo('App\Models\Properties', 'property_id', 'id');
     }
-
+    public function property_dates()
+    {
+        return $this->hasMany('App\Models\PropertyDates', 'booking_id', 'id');
+    }
     public function payment_methods()
     {
         return $this->belongsTo('Modules\Gateway\Entities\Gateway', 'payment_method_id', 'id');
@@ -127,7 +138,7 @@ class Bookings extends Model
     }
     public function time_period()
     {
-        return $this->belongsTo('App\Models\TimePeriod', 'time_period_id', 'id');
+        return $this->belongsTo('App\Models\PricingType', 'pricing_type_id', 'id');
     }
 
     public function getHostPenaltyAmountAttribute()
