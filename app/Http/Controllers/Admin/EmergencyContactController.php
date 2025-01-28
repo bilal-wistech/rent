@@ -47,12 +47,13 @@ class EmergencyContactController extends Controller
           );
         $user = User::findOrFail($request->user_id);
         $emergencycontact = EmergencyContact::where('user_id', $user->id)->get();
-        return view('admin.customers.viewEmergencyDetail')->with([
+        return redirect()->route('admin.emergency.show', ['id' => $request->user_id])->with([
             'emergencyActive' => 'active',
             'emergencycontacts' => $emergencycontact,
             'success' => 'Emergency contact information has been saved successfully.',
             'user' => $user,
         ]);
+
 
     }
 
@@ -107,6 +108,7 @@ class EmergencyContactController extends Controller
 
 public function update(Request $request, $id=null)
 {
+
     $request->validate([
         'emergency_contact_name' => 'required|string|max:255',
         'emergency_contact_relation' => 'required|string|max:255',
@@ -122,12 +124,13 @@ public function update(Request $request, $id=null)
     $emergencyContact->contact_number = $request->emergency_contact_number;
     $emergencyContact->save();
     $emergencycontact = EmergencyContact::where('user_id', $request->user_id)->get();
-    $user = User::findOrFail($request->id);
-    return view('admin.customers.viewEmergencyDetail', [
-        'success' => "Emergency contact detail updated successfully",
+    $user = User::findOrFail($request->user_id);
+
+    return redirect()->route('admin.emergency.show', ['id' => $user->id])->with([
+        'emergencyActive' => 'active',
+        'emergencycontacts' => $emergencycontact,
+        'success' => 'Emergency contact information has been updated successfully.',
         'user' => $user,
-        'emergencycontacts' => $emergencycontact,  // Use the correct plural variable name here
-        'emergencyActive' => 'active'
     ]);
 
 }

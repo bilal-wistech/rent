@@ -64,6 +64,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
 
     Route::resource('document', DocumentController::class);
     Route::resource('emergencycontacts', EmergencyContactController::class);
+    Route::get('/emergencycontacts/{id}', [EmergencyContactController::class, 'show'])->name('admin.emergency.show');
     Route::resource('city', CityController::class);
     Route::resource('area', AreaController::class);
     Route::get('city/add/{countryId}', [CityController::class, 'add'])->name('city.add');
