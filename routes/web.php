@@ -63,6 +63,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('customers', 'CustomerController@index')->middleware(['permission:customers']);
 
     Route::resource('document', DocumentController::class);
+    Route::get('/document/{id}', [DocumentController::class, 'show'])->name('admin.document.show');
+
     Route::resource('emergencycontacts', EmergencyContactController::class);
     Route::resource('city', CityController::class);
     Route::resource('area', AreaController::class);

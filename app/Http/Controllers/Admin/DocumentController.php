@@ -33,7 +33,6 @@ class DocumentController extends Controller
         ]);
     }
 
-
     public function store(Request $request)
     {
         $request->validate([
@@ -70,7 +69,7 @@ class DocumentController extends Controller
 
             $documents = Document::where('user_id', $request->user_id)->get();
 
-            return view('admin.customers.viewDocument')->with([
+            return redirect()->route('admin.document.show', ['id' => $request->user_id])->with([
                 'success' => 'Document created successfully.',
                 'user' => User::findOrFail($request->user_id),
                 'document' => $documents,
@@ -80,6 +79,7 @@ class DocumentController extends Controller
             return back()->with('error', 'Error creating document: ' . $e->getMessage());
         }
     }
+
 
 
 
@@ -102,7 +102,6 @@ class DocumentController extends Controller
             'documentActive' => 'active',
         ]);
     }
-
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -124,7 +123,7 @@ class DocumentController extends Controller
         }
         $doc->save();
         $user = User::findOrFail($doc->user_id);
-        return redirect()->back()->with([
+        return redirect()()->with([
             'success' => 'Document updated successfully.',
             'user' => $user,
             'document' => $doc,
@@ -133,9 +132,9 @@ class DocumentController extends Controller
     }
 
 
-
     public function destroy($id)
     {
+
         $document = Document::find($id);
 
 
@@ -144,15 +143,19 @@ class DocumentController extends Controller
             if ($document->image) {
                 Storage::delete($document->image);
             }
+
             $document->delete();
 
             return redirect()->back()->with([
                 'success' => 'Document deleted successfully.',
-                // 'user' => $user
+                'user' => $user
             ]);
         } else {
-
-            return redirect()->back()->with('error', 'Document not found.');
+            $user = User::find($document->user_id);
+            return redirect()->back()->with([
+                'error' => 'Document not found.',
+                'user' => $user
+            ]);
         }
     }
 }
