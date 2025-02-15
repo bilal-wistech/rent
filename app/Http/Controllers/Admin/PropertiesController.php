@@ -194,9 +194,21 @@ class PropertiesController extends Controller
             ->get();
         return response()->json(['areas' => $areas]);
     }
+    public function showPricing($property_id) {
+
+        $data['result'] = Properties::findOrFail($property_id);
+        $data['details'] = PropertyDetails::pluck('value', 'field');
+
+        $pricing_types = PricingType::all();
+        $propertyPricing = PropertyPrice::where('property_id', $property_id)->get();
+        return view("admin.properties.showPricing", array_merge($data, compact('pricing_types', 'propertyPricing')));
+
+    }
 
     public function listing(Request $request, CalendarController $calendar)
     {
+
+
         $step = $request->step;
         $property_id = $request->id;
 
@@ -435,8 +447,15 @@ class PropertiesController extends Controller
             $data['photos'] = PropertyPhotos::where('property_id', $property_id)
                 ->orderBy('serial', 'asc')
                 ->get();
-        } elseif ($step == 'pricing') {
-            if ($request->isMethod('post')) {
+        }
+        elseif ($step == 'pricing')
+        {
+
+            if ($request->isMethod('post'))
+            {
+
+
+
                 // Check for existing bookings with a different currency
                 $bookings = Bookings::where('property_id', $property_id)
                     ->where('currency_code', '!=', $request->currency_code)
@@ -463,7 +482,13 @@ class PropertiesController extends Controller
 
                 if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
-                } else {
+                }
+
+
+                else {
+
+
+
                     $prices = $request->input('prices', []);
                     $pricingTypes = $request->input('pricing_type', []);
 
@@ -522,11 +547,20 @@ class PropertiesController extends Controller
                         $property_steps->save();
                     }
 
+                    if(isset($request->price)) {
+
+                        return redirect('admin/properties')->with('success', __('Pricing updated successfully.'));
+
+                    }
                     // Redirect to the booking page
                     return redirect('admin/listing/' . $property_id . '/booking')->with('success', __('Pricing updated successfully.'));
                 }
+
             }
+
+
         } elseif ($step == 'booking') {
+
             if ($request->isMethod('post')) {
 
                 $property_steps = PropertySteps::where('property_id', $property_id)->first();
