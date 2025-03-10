@@ -34,7 +34,7 @@ class RenewalBookingDataTable extends DataTable
                 return dateFormat($renewal_bookings->created_at);
             })
             ->addColumn('action', function ($renewal_bookings) {
-                return '<a href="' . url('admin/bookings/edit/' . $renewal_bookings->id) . '" class="btn btn-xs btn-primary" title="Renew Booking">Renew</a>&nbsp;' . '<button type="button" class="btn btn-xs btn-primary cancel_renewal_booking" title="Cancel Renewal Booking" id="cancel_renewal_booking-' . $renewal_bookings->id . '" data-cancel-renewal-booking="' . $renewal_bookings->id . '">Cancel</button>';
+                return '<a href="' . url('admin/renewal-bookings/renewal/' . $renewal_bookings->id) . '" class="btn btn-xs btn-primary" title="Renew Booking">Renew</a>&nbsp;' . '<button type="button" class="btn btn-xs btn-primary cancel_renewal_booking" title="Cancel Renewal Booking" id="cancel_renewal_booking-' . $renewal_bookings->id . '" data-cancel-renewal-booking="' . $renewal_bookings->id . '">Cancel</button>';
             })
             ->rawColumns(['DT_RowIndex', 'booking_id', 'property_id', 'user_id', 'payment_date', 'amount', 'total_amount', 'status', 'created', 'action'])
             ->make(true);
