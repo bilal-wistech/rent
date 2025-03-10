@@ -166,7 +166,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('reviews/review_search', 'ReviewsController@searchReview');
         Route::get('reviews/review_list_csv', 'ReviewsController@reviewCsv');
         Route::get('reviews/review_list_pdf', 'ReviewsController@reviewPdf');
-
     });
 
     // Route::get('reports', 'ReportsController@index')->middleware(['permission:manage_reports']);
@@ -191,7 +190,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::match(array('GET', 'POST'), 'add-page', 'PagesController@add');
         Route::match(array('GET', 'POST'), 'edit-page/{id}', 'PagesController@update');
         Route::get('delete-page/{id}', 'PagesController@delete');
-
     });
 
 
@@ -292,8 +290,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('settings/bank/delete/{bank}', 'BankController@deleteBank')->middleware(['permission:payment_settings']);
         Route::match(array('GET', 'POST'), 'settings/social-links', 'SettingsController@socialLinks')->middleware(['permission:social_links']);
 
-        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);
-        ;
+        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);;
 
         Route::group(['middleware' => 'permission:manage_roles'], function () {
             Route::get('settings/roles', 'RolesController@index');
@@ -354,8 +351,11 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('booking/booking_list_csv', 'BookingsController@bookingCsv');
     Route::get('booking/booking_list_pdf', 'BookingsController@bookingPdf');
     Route::get('renewal-bookings', 'RenewalBookingController@index')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.index');
-    Route::get('renewal-bookings/renew-bookings-form/{booking_id}', 'RenewalBookingController@renewBookingForm')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.renew-bookings-form');
-    Route::get('renewal-bookings/renew', 'RenewalBookingController@renew')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.renew');
+    Route::get('renewal-bookings/renewal/{id}', 'RenewalBookingController@renewal')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.renewal');
+
+    Route::post('renewal-bookings/renewal/check-booking-exists', 'RenewalBookingController@checkExistingPropertyBookingInRenewal')->middleware(['permission:manage_bookings'])->name('renewal-bookings.renewal.check-booking-exists');
+
+    Route::post('renewal-bookings/store-renewal-booking', 'RenewalBookingController@storeRenewalBooking')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.store-renewal-booking');
     Route::post('renewal-bookings/cancel-renewal-booking', 'RenewalBookingController@cancelRenewalBooking')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.cancel-renewal-booking');
     Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts']);
     Route::match(array('GET', 'POST'), 'payouts/edit/{id}', 'PayoutsController@edit');
@@ -368,7 +368,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('reviews/review_search', 'ReviewsController@searchReview');
         Route::get('reviews/review_list_csv', 'ReviewsController@reviewCsv');
         Route::get('reviews/review_list_pdf', 'ReviewsController@reviewPdf');
-
     });
     Route::get('securities', 'SecurityController@index')->middleware(['permission:manage_securities'])->name('securities.index');
     Route::get('securities/refund-form/{booking_id}', 'SecurityController@refundForm')->middleware(['permission:manage_securities'])->name('securities.refund-form');
@@ -395,7 +394,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::match(array('GET', 'POST'), 'add-page', 'PagesController@add');
         Route::match(array('GET', 'POST'), 'edit-page/{id}', 'PagesController@update');
         Route::get('delete-page/{id}', 'PagesController@delete');
-
     });
 
 
@@ -496,8 +494,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('settings/bank/delete/{bank}', 'BankController@deleteBank')->middleware(['permission:payment_settings']);
         Route::match(array('GET', 'POST'), 'settings/social-links', 'SettingsController@socialLinks')->middleware(['permission:social_links']);
 
-        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);
-        ;
+        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);;
 
         Route::group(['middleware' => 'permission:manage_roles'], function () {
             Route::get('settings/roles', 'RolesController@index');
