@@ -15,7 +15,7 @@ class AreaController extends Controller
     public function index()
     {
 
-      }
+    }
     public function create()
     {
 
@@ -26,72 +26,102 @@ class AreaController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'city_id' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'city_id' => 'required|exists:cities,id',
         ]);
 
         try {
             $city = City::findOrFail($request->city_id);
-    Area::create([
+            $imageName = null;
+
+            if ($request->file('image')) {
+
+                $image = $request->file('image');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $directory = public_path('front/images/front-areas');
+
+                if (!file_exists($directory)) {
+                    mkdir($directory, 0755, true);
+                }
+
+                $image->move($directory, $imageName);
+            }
+
+
+            Area::create([
                 'name' => $request->name,
-                'city_id' => $request->city_id,
+                'image' => $imageName,
+                'city_id' => $city->id,
                 'country_id' => $city->country_id,
             ]);
 
             return redirect()->back()
                 ->with('success', 'Area added successfully!')
-                ->with('cityId', $city->city_id);
+                ->with('cityId', $city->id);
+
         } catch (\Exception $e) {
-            \Log::error($e->getMessage());
+            \Log::error('Error adding area: ' . $e->getMessage());
             return redirect()->back()->with('error', 'An error occurred while adding the area.');
         }
     }
 
-     public function show($id)
-{
-    try {
-        $dataTable = new AreaDataTable($id);
-        return $dataTable->render('admin.area.view', ['cityId' => $id]);
-    } catch (\Exception $e) {
-        \Log::error($e->getMessage());
-        return response()->json(['error' => 'An error occurred.'], 500);
+
+    public function show($id)
+    {
+        try {
+            $dataTable = new AreaDataTable($id);
+            return $dataTable->render('admin.area.view', ['cityId' => $id]);
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            return response()->json(['error' => 'An error occurred.'], 500);
+        }
     }
-}
 
     public function add($cityId)
     {
- return view('admin.area.add', compact('cityId'));
+        return view('admin.area.add', compact('cityId'));
     }
     public function edit($id)
     {
 
         $area = Area::findOrFail($id);
-        if($area){
+        if ($area) {
             return view('admin.area.edit', compact('area'));
-        }
-        else{
+        } else {
             return redirect()->back()->with('error', 'An error occurred while deleting the area.');
 
         }
-      }
+    }
 
 
     public function update(Request $request, $id)
     {
-
         $request->validate([
             'name' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
+        $area = Area::findOrFail($id);
+        $area->name = $request->name;
 
-            $area= Area::find($id);
-            $area->name = $request->name;
-            $area->save();
-            return view('admin.area.edit', [
-                'area' =>$area,
-                'success', 'City updated successfully'
-            ]);
+        if ($request->hasFile('image')) {
+            if ($area->image) {
+                $oldImagePath = public_path('front/images/front-areas/' . $area->image);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('front/images/front-areas'), $imageName);
+            $area->image = $imageName;
+        }
 
+        $area->save();
+
+        return redirect()->back()->with('success', 'Area updated successfully');
     }
+
     public function addAjax(Request $request)
     {
         $validated = $request->validate([
@@ -124,13 +154,21 @@ class AreaController extends Controller
     {
         try {
             $area = Area::findOrFail($id);
-            $area->delete();
-          return redirect()->back()->with('success', 'Area deleted successfully.');
+        if ($area->image) {
+                $imagePath = public_path('front/images/front-areas/' . $area->image);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+      $area->delete();
+
+            return redirect()->back()->with('success', 'Area deleted successfully.');
         } catch (\Exception $e) {
-            \Log::error($e->getMessage());
-           return redirect()->back()->with('error', 'An error occurred while deleting the area.');
+            \Log::error('Error deleting area: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while deleting the area.');
         }
     }
+
 
 
 }
