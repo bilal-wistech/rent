@@ -19,7 +19,7 @@
 								<div class="row">
 									<div class="col-md-12">
 										<div class="input-group pt-4">
-											<input class="form-control p-3 text-14" id="front-search-field" placeholder="{{ __('Where do you want to go?') }}" autocomplete="off" name="location" type="text" required>
+											<input class="form-control p-3 text-14" id="front-search-field" placeholder="{{ __('In which area you want to go?') }}" autocomplete="off" name="location" type="text" required>
 										</div>
 									</div>
 
@@ -73,7 +73,7 @@
 		<div class="container-fluid container-fluid-90">
 			<div class="row">
 				<div class="section-intro text-center">
-					<p class="item animated fadeIn text-24 font-weight-700 m-0 text-capitalize">{{ __('Top Destination') }}</p>
+					<p class="item animated fadeIn text-24 font-weight-700 m-0 text-capitalize">{{ __('Top Areas in Dubai') }}</p>
 					<p class="mt-3">{{ __('Best places where to live in the world and enjoy your trip') }} </p>
 				</div>
 			</div>
