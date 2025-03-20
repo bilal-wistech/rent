@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\City;
 use App\Models\Country;
 use Illuminate\Http\Request;
-use App\DataTables\CityDataTAble;
+use App\DataTables\CityDataTable;
 use App\Http\Controllers\Controller;
 
 class CityController extends Controller
