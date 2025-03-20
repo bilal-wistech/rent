@@ -33,7 +33,9 @@ class HomeController extends Controller
     {
         // $data['starting_cities']     = StartingCities::getAll();
         $data['areas'] = Area::where('show_on_front',1)->get();
+        // \DB::enableQueryLog();
         $data['properties']          = Properties::recommendedHome();
+        // dd(\DB::getQueryLog());
         $data['testimonials']        = Testimonials::getAll();
         $sessionLanguage             = Session::get('language');
         $language                    = Settings::getAll()->where('name', 'default_language')->where('type', 'general')->first();

@@ -114,8 +114,7 @@
             <div class="container-fluid container-fluid-90">
                 <div class="row">
                     <div class="recommandedhead section-intro text-center mt-70">
-                        <p class="item animated fadeIn text-24 font-weight-700 m-0">{{ __('Recommended Home') }}</p>
-                        <p class="mt-2">{{ __('Alluring home where you can stay and enjoy a comfortable life.') }}</p>
+                        <p class="item animated fadeIn text-24 font-weight-700 m-0">{{ __('Recommended Areas') }}</p>
                     </div>
                 </div>
 
@@ -146,7 +145,7 @@
 
                                         <div class="p-2 text">
                                             <a class="text-color text-color-hover"
-                                                href="properties/{{ $property->slug }}">
+                                                href="properties/{{ $property->id }}">
                                                 <p class="text-16 font-weight-700 text"> {{ $property->name }}</p>
                                             </a>
                                             <p class="text-13 mt-2 mb-0 text"><i class="fas fa-map-marker-alt"></i>
