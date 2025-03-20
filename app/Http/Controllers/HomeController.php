@@ -59,7 +59,7 @@ class HomeController extends Controller
             Session::put($prefer);
         }
         $data['date_format'] = Settings::getAll()->firstWhere('name', 'date_format_type')->value;
-
+        // dd($data['properties']);
         return view('home.home', $data);
     }
 
