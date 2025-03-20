@@ -68,7 +68,7 @@
 		</div>
 	</section>
 
-	@if (!$starting_cities->isEmpty())
+	@if (!$areas->isEmpty())
 	<section class="bg-gray mt-70 pb-2">
 		<div class="container-fluid container-fluid-90">
 			<div class="row">
@@ -79,14 +79,14 @@
 			</div>
 
 			<div class="row mt-2">
-				@foreach ($starting_cities as $city)
+				@foreach ($areas as $area)
 				<div class="col-md-4 mt-5">
-				<a href="{{ url('search?location=' . $city->name . '&checkin=&checkout=&guest=1') }}">
+				<a href="{{ url('search?location=' . $area->name . '&checkin=&checkout=&guest=1') }}">
 						<div class="grid item animated zoomIn">
 							<figure class="effect-ming">
-								<img src="{{ $city->image_url }}" alt="city"/>
+								<img src="{{ $area->image }}" alt="area"/>
 									<figcaption>
-										<p class="text-18 font-weight-700 position-center">{{ $city->name }}</p>
+										<p class="text-18 font-weight-700 position-center">{{ $area->name }}</p>
 									</figcaption>
 							</figure>
 						</div>

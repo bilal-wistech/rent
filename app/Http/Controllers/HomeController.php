@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App, Session, Common;
 use App\Models\{
+    Area,
     Currency,
     Properties,
     Page,
@@ -30,7 +31,8 @@ class HomeController extends Controller
 
     public function index()
     {
-        $data['starting_cities']     = StartingCities::getAll();
+        // $data['starting_cities']     = StartingCities::getAll();
+        $data['areas'] = Area::where('show_on_front',1)->get();
         $data['properties']          = Properties::recommendedHome();
         $data['testimonials']        = Testimonials::getAll();
         $sessionLanguage             = Session::get('language');
