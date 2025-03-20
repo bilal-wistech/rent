@@ -29,18 +29,27 @@ class Properties extends Model
     protected $table = 'properties';
     use SoftDeletes;
 
-    protected $appends = ['steps_completed', 'space_type_name', 'property_type_name', 'property_photo', 'host_name', 'book_mark', 'reviews_count', 'overall_rating', 'cover_photo', 'avg_rating'];
+    protected $appends = ['steps_completed','space_type_name','property_type_name','property_photo','host_name','book_mark', 'reviews_count', 'overall_rating', 'cover_photo','avg_rating'];
 
 
     public static function recommendedHome()
     {
+        $data = parent::where('status', 'listed')
+                        ->with('users','property_price', 'property_address')
+                        ->where('recomended', '1')
+                        ->whereHas('users', function($query){
+                            $query->where('status', 'Active');
+                        })
+                        ->take(8)
+                        ->inRandomOrder()
+                        ->get();
+        return $data;
+    }
+    public static function vacantToday()
+    {
         $today = Carbon::today();
         $data = parent::where('status', 'listed')
             ->with('users', 'property_price', 'property_address', 'bookings')
-            ->where('recomended', '1')
-            ->whereHas('users', function ($query) {
-                $query->where('status', 'Active');
-            })
             ->whereDoesntHave('bookings', function ($query) use ($today) {
                 $query->where('start_date', '<=', $today->format('Y-m-d'))
                     ->where('end_date', '>=', $today->format('Y-m-d'));
@@ -50,7 +59,6 @@ class Properties extends Model
             ->get();
         return $data;
     }
-
 
     public function getHostNameAttribute()
     {
@@ -64,15 +72,14 @@ class Properties extends Model
         return $result->profile_image ?? '';
     }
 
-    public function space()
-    {
+    public function space() {
         return $this->belongsTo(SpaceType::class);
     }
 
     public function getPropertyPhotoAttribute()
     {
         $result = PropertyPhotos::where('property_id', $this->attributes['id'])->first();
-        return (isset($result->photo) ? $result->photo : '');
+        return (isset($result->photo) ? $result->photo : '') ;
     }
 
     public function getPropertyTypeNameAttribute()
@@ -101,7 +108,7 @@ class Properties extends Model
     public function getMissedStepAttribute()
     {
         $result = PropertySteps::where('property_id', $this->attributes['id'])->first()->toArray();
-        $discard = ['id', 'property_id'];
+        $discard = [ 'id', 'property_id'];
         $fl = '';
         foreach ($result as $key => $value) {
             if (!in_array($key, $discard) && $value == 0) {
@@ -196,7 +203,7 @@ class Properties extends Model
     {
         $cover = PropertyPhotos::where('property_id', $this->attributes['id'])->where('cover_photo', 1)->first();
         if (isset($cover->photo)) {
-            $url = url('/images/property/' . $this->attributes['id'] . '/' . $cover->photo);
+            $url = url('/images/property/'.$this->attributes['id'].'/'.$cover->photo);
         } else {
             $url = url('/images/default-image.png');
         }
@@ -206,19 +213,19 @@ class Properties extends Model
     public function getLatestProperties()
     {
         $query = Properties::join('users', function ($join) {
-            $join->on('users.id', '=', 'properties.host_id');
+                                $join->on('users.id', '=', 'properties.host_id');
         })
-            ->join('space_type', function ($join) {
-                $join->on('space_type.id', '=', 'properties.space_type');
-            })
-            ->join('property_type', function ($join) {
-                $join->on('property_type.id', '=', 'properties.property_type');
-            })
+                        ->join('space_type', function ($join) {
+                                $join->on('space_type.id', '=', 'properties.space_type');
+                        })
+                        ->join('property_type', function ($join) {
+                                $join->on('property_type.id', '=', 'properties.property_type');
+                        })
 
-            ->select(['properties.id as properties_id', 'properties.name as property_name', 'properties.status as property_status', 'properties.created_at as property_created_at', 'properties.updated_at as property_updated_at', 'properties.*', 'users.*', 'property_type.*', 'space_type.*'])
-            ->take(5)
-            ->orderBy('properties.created_at', 'desc')
-            ->get();
+                        ->select(['properties.id as properties_id', 'properties.name as property_name', 'properties.status as property_status', 'properties.created_at as property_created_at', 'properties.updated_at as property_updated_at', 'properties.*', 'users.*', 'property_type.*', 'space_type.*'])
+                        ->take(5)
+                        ->orderBy('properties.created_at', 'desc')
+                        ->get();
 
         return $query;
     }
@@ -230,7 +237,7 @@ class Properties extends Model
         return Reviews::where('property_id', $this->attributes['id'])->where('reviewer', 'guest')->count();
     }
 
-    public function getGuestReviewAttribute()
+     public function getGuestReviewAttribute()
     {
         return Reviews::where('property_id', $this->attributes['id'])->where('reviewer', 'guest')->count();
     }
@@ -240,14 +247,14 @@ class Properties extends Model
         return 0;
         $reviews = Reviews::where('property_id', $this->attributes['id'])->where('reviewer', 'guest')->get();
 
-        if (count($reviews) != 0) {
+        if (count($reviews) !=0){
             $avg     = @($reviews->sum('rating') / $reviews->count());
 
             if ($avg) {
                 $sum   = 0;
                 $whle  = floor($avg);
                 $fract = $avg - $whle;
-                for ($i = 0; $i < $whle; $i++) {
+                for ($i=0; $i<$whle; $i++) {
                     $sum += 25;
                 }
 
@@ -259,9 +266,11 @@ class Properties extends Model
             } else {
                 return 0;
             }
-        } else {
+        }
+        else {
             return 0;
         }
+
     }
 
     public function getAvgRatingAttribute()
@@ -282,7 +291,7 @@ class Properties extends Model
             $whle = floor($avg);
             $fract = $avg - $whle;
 
-            for ($i = 0; $i < $whle; $i++) {
+            for ($i=0; $i<$whle; $i++) {
                 $sum += 25;
             }
 
@@ -317,7 +326,7 @@ class Properties extends Model
             $whle  = floor($avg);
             $fract = $avg - $whle;
 
-            for ($i = 0; $i < $whle; $i++) {
+            for ($i=0; $i<$whle; $i++) {
                 $sum += 25;
             }
 
@@ -349,7 +358,7 @@ class Properties extends Model
             $whle = floor($avg);
             $fract = $avg - $whle;
 
-            for ($i = 0; $i < $whle; $i++) {
+            for ($i=0; $i<$whle; $i++) {
                 $sum += 25;
             }
 
@@ -381,7 +390,7 @@ class Properties extends Model
             $whle  = floor($avg);
             $fract = $avg - $whle;
 
-            for ($i = 0; $i < $whle; $i++) {
+            for ($i=0; $i<$whle; $i++) {
                 $sum += 25;
             }
 
@@ -411,7 +420,7 @@ class Properties extends Model
             $whle  = floor($avg);
             $fract = $avg - $whle;
 
-            for ($i = 0; $i < $whle; $i++) {
+            for ($i=0; $i<$whle; $i++) {
                 $sum += 25;
             }
 
@@ -442,7 +451,7 @@ class Properties extends Model
             $whle  = floor($avg);
             $fract = $avg - $whle;
 
-            for ($i = 0; $i < $whle; $i++) {
+            for ($i=0; $i<$whle; $i++) {
                 $sum += 25;
             }
 
@@ -459,7 +468,7 @@ class Properties extends Model
     public function getValueAvgRatingAttribute()
     {
         return Reviews::where('property_id', $this->attributes['id'])->where('reviewer', 'guest')
-            ->selectRaw('CAST(AVG(value) AS DECIMAL(10,2)) as avgRating')->first()->avgRating ?? 0;
+        ->selectRaw('CAST(AVG(value) AS DECIMAL(10,2)) as avgRating')->first()->avgRating ?? 0;
     }
 
     public function getBookMarkAttribute()
@@ -480,3 +489,4 @@ class Properties extends Model
         return $this->belongsTo(Properties::class, 'property_id');
     }
 }
+
