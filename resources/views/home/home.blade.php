@@ -114,7 +114,7 @@
             <div class="container-fluid container-fluid-90">
                 <div class="row">
                     <div class="recommandedhead section-intro text-center mt-70">
-                        <p class="item animated fadeIn text-24 font-weight-700 m-0">{{ __('Recommended Areas') }}</p>
+                        <p class="item animated fadeIn text-24 font-weight-700 m-0">{{ __('Vacant Properties Today') }}</p>
                     </div>
                 </div>
 
