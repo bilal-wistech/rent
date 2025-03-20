@@ -11,14 +11,8 @@ use App\Http\Controllers\Controller;
 class CityController extends Controller
 {
 
-    public function index()
-    {
-
-      }
-    public function create()
-    {
-
-    }
+    public function index() {}
+    public function create() {}
     public function addAjax(Request $request)
     {
         $validated = $request->validate([
@@ -27,7 +21,7 @@ class CityController extends Controller
         ]);
 
         $country = Country::where('short_name', $request->input('country'))->first();
-      if (!$country) {
+        if (!$country) {
             return response()->json(['status' => 'error', 'message' => 'Country not found.'], 404);
         }
 
@@ -59,31 +53,32 @@ class CityController extends Controller
             ]);
 
             return redirect()->back()
-            ->with('success', 'City added successfully!')
-            ->with('countryId', $request->country_id);
+                ->with('success', 'City added successfully!')
+                ->with('countryId', $request->country_id);
         } catch (\Exception $e) {
             \Log::error($e->getMessage());
             return redirect()->back()->with('error', 'An error occurred while adding the city.');
         }
     }
 
-     public function show($countryId)
-{
-    try {
-        $dataTable = new CityDataTAble($countryId);
-        return $dataTable->render('admin.city.view', ['countryId' => $countryId]);
-    } catch (\Exception $e) {
-        \Log::error($e->getMessage());
-        return response()->json(['error' => 'An error occurred.'], 500);
+    public function show($countryId)
+    {
+        try {
+            $dataTable = new CityDataTable($countryId);
+            return $dataTable->render('admin.city.view', ['countryId' => $countryId]);
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            return response()->json(['error' => 'An error occurred.'], 500);
+        }
     }
-}
 
     public function add($countryId)
     {
         return view('admin.city.add', compact('countryId'));
     }
     public function edit($countryId)
-    {      $city = City::find($countryId);
+    {
+        $city = City::find($countryId);
         return view('admin.city.edit', compact('city'));
     }
 
@@ -96,15 +91,14 @@ class CityController extends Controller
         ]);
 
 
-            $city = City::find($id);
-            $city->name = $request->name;
-            $city->save();
-            session()->flash('success', 'City updated successfully');
-            return view('admin.city.edit', [
-                'city' =>$city,
+        $city = City::find($id);
+        $city->name = $request->name;
+        $city->save();
+        session()->flash('success', 'City updated successfully');
+        return view('admin.city.edit', [
+            'city' => $city,
 
-            ]);
-
+        ]);
     }
     public function destroy($id)
     {
@@ -117,5 +111,4 @@ class CityController extends Controller
         }
         return redirect()->back()->with('error', 'City not found.');
     }
-
 }
