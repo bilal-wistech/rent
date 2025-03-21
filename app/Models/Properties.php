@@ -54,7 +54,7 @@ class Properties extends Model
                 $query->where('start_date', '<=', $today->format('Y-m-d'))
                     ->where('end_date', '>=', $today->format('Y-m-d'));
             })
-            ->take(8)
+            ->take(4)
             ->inRandomOrder()
             ->get();
         return $data;
