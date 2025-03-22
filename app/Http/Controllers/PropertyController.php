@@ -7,6 +7,7 @@ use App\Http\Controllers\{
     CalendarController,
     EmailController
 };
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\{
     Favourite,
@@ -25,7 +26,9 @@ use App\Models\{
     PropertySteps,
     Country,
     Amenities,
-    AmenityType
+    AmenityType,
+    PricingType,
+    PropertyFees
 };
 
 class PropertyController extends Controller
@@ -45,10 +48,10 @@ class PropertyController extends Controller
         $data['property_approval'] = Settings::getAll()->firstWhere('name', 'property_approval')->value;
         $data['status'] = $request->status;
         $data['properties'] = Properties::with('property_price', 'property_address')
-                                ->where('host_id', Auth::id())
-                                ->where($pram)
-                                ->orderBy('id', 'desc')
-                                ->paginate(Session::get('row_per_page'));
+            ->where('host_id', Auth::id())
+            ->where($pram)
+            ->orderBy('id', 'desc')
+            ->paginate(Session::get('row_per_page'));
         $data['currentCurrency'] =  Common::getCurrentCurrency();
         return view('property.listings', $data);
     }
@@ -84,7 +87,7 @@ class PropertyController extends Controller
                 $property->accommodates    = $request->accommodates;
                 $property->slug            = Common::pretty_url($property->name);
 
-                $adminPropertyApproval= Settings::getAll()->firstWhere('name', 'property_approval')->value;
+                $adminPropertyApproval = Settings::getAll()->firstWhere('name', 'property_approval')->value;
                 $property->is_verified  = ($adminPropertyApproval == 'Yes') ? 'Pending' : 'Approved';
 
                 $property->save();
@@ -138,8 +141,6 @@ class PropertyController extends Controller
 
                 $email_controller = new EmailController;
                 $email_controller->notifyAdminForPropertyApproval($data['result']);
-
-
             } catch (\Exception $e) {
                 Common::one_time_message('danger', __('Email was not sent due to :x', ['x' => __($e->getMessage())]));
                 return redirect('properties');
@@ -189,12 +190,9 @@ class PropertyController extends Controller
                 $validator = Validator::make($request->all(), $rules);
                 $validator->setAttributeNames($fieldNames);
 
-                if ($validator->fails())
-                {
+                if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
-                }
-                else
-                {
+                } else {
                     $property           = Properties::find($property_id);
                     $property->name     = $request->name;
                     $property->slug     = Common::pretty_url($request->name);
@@ -289,8 +287,8 @@ class PropertyController extends Controller
                     $baseText = explode(";base64,", $request->photos);
                     $name = explode(".", $request->img_name);
                     $convertedImage = base64_decode($baseText[1]);
-                    $request->request->add(['type'=>end($name)]);
-                    $request->request->add(['image'=>$convertedImage]);
+                    $request->request->add(['type' => end($name)]);
+                    $request->request->add(['image' => $convertedImage]);
 
 
                     $validate = Validator::make($request->all(), [
@@ -315,7 +313,7 @@ class PropertyController extends Controller
                 }
 
                 if ($request->crop == "crop") {
-                    $image = $name[0].uniqid() . '.' . end($name);
+                    $image = $name[0] . uniqid() . '.' . end($name);
                     $uploaded = file_put_contents($path . $image, $convertedImage);
                 } else {
                     if (isset($_FILES["file"]["name"])) {
@@ -353,13 +351,11 @@ class PropertyController extends Controller
                 }
 
                 return redirect('listing/' . $property_id . '/photos')->with('success', 'File Uploaded Successfully!');
-
             }
 
             $data['photos'] = PropertyPhotos::where('property_id', $property_id)
                 ->orderBy('serial', 'asc')
                 ->get();
-
         } elseif ($step == 'pricing') {
             if ($request->isMethod('post')) {
                 $bookings = Bookings::where('property_id', $property_id)->where('currency_code', '!=', $request->currency_code)->first();
@@ -413,7 +409,7 @@ class PropertyController extends Controller
 
                 $properties               = Properties::find($property_id);
                 $properties->booking_type = $request->booking_type;
-                $properties->status       = ( $properties->steps_completed == 0 ) ?  'Listed' : 'Unlisted';
+                $properties->status       = ($properties->steps_completed == 0) ?  'Listed' : 'Unlisted';
                 $properties->save();
 
 
@@ -442,13 +438,107 @@ class PropertyController extends Controller
         $properties->save();
         $properties->prop_status = __($status);
         return  response()->json($properties);
-
     }
-
     public function getPrice(Request $request)
     {
+        // dd($request->all());
+        $validated = $request->validate([
+            'property_id' => 'required|exists:properties,id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
 
-        return Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->guest_count);
+        $booking = Bookings::with([
+            'properties.property_dates' => function ($query) use ($validated) {
+                $query->whereBetween('date', [$validated['start_date'], $validated['end_date']]);
+            },
+            'users'
+        ])
+            ->where('property_id', $validated['property_id'])
+            ->where(function ($query) use ($validated) {
+                $query->where('start_date', '<=', $validated['end_date'])
+                    ->where('end_date', '>=', $validated['start_date']);
+            })
+            ->first();
+        $property_price = PropertyPrice::with('pricingType')->where('property_id', $validated['property_id'])->get();
+        // dd($property_price);
+        if ($booking) {
+
+            $property_dates = $booking->properties->property_dates;
+            return response()->json([
+                'exists' => true,
+                'message' => 'Booking from ' . Carbon::parse($booking->start_date)->format('d-m-Y') . ' to ' . Carbon::parse($booking->end_date)->format('d-m-Y') . ' already exists',
+                'booking_id' => $booking->id,
+                'booking' => $booking,
+                'property_dates' => $property_dates,
+                'user' => [
+                    'user_id' => $booking->users->id,
+                    'user_name' => $booking->users->first_name . " " . $booking->users->last_name,
+                ],
+                'property_price' => $property_price
+            ]);
+        }
+
+        $multiplierMapping = [
+            'daily' => 1,
+            'weekly' => 7,
+            'monthly' => 30,
+            'yearly' => 365,
+        ];
+        $pricingType = $request->get('pricingType');
+        $pricingTypeAmount = $request->get('pricingTypeAmount');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $property_id = $request->get('property_id');
+        // dd($pricingType,$pricingTypeAmount,$startDate,$endDate,$property_id);
+        $property = Properties::findOrFail($property_id);
+        // dd($property);
+        $pricingTypeDetail = PricingType::where('id', $pricingType)->first();
+        // Convert start and end dates to Carbon instances
+        $start = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+        $totalPrice = 0;
+        $perDayPrice = 0;
+        // Calculate the difference in days
+        $numberOfDays = $end->diffInDays($start);
+
+        $rateMultiplier = $multiplierMapping[strtolower($pricingTypeDetail->name)] ?? 1;
+        $perDayPrice = $pricingTypeAmount / $rateMultiplier;
+        // Calculate total price
+        $totalPrice = ($numberOfDays / $rateMultiplier) * $pricingTypeAmount;
+
+        // dd($property->property_prices);
+        $propertyPrice = PropertyPrice::where('property_id', $property_id)->where('property_type_id', $pricingTypeDetail->id)->first();
+        $totalPriceWithOtherCharges = $totalPrice + $propertyPrice->cleaning_fee + $propertyPrice->security_fee + ($propertyPrice->guest_fee * $property->accommodates);
+        $propertyFee = PropertyFees::pluck('value', 'field');
+        $host_service_charge = ($propertyFee['host_service_charge'] / 100) * $totalPrice;
+        $guest_service_charge = ($propertyFee['guest_service_charge'] / 100) * $totalPrice;
+        $iva_tax = ($propertyFee['iva_tax'] / 100) * $totalPrice;
+        $accomodation_tax = ($propertyFee['accomodation_tax'] / 100) * $totalPrice;
+        $totalPriceWithChargesAndFees = $totalPriceWithOtherCharges + $host_service_charge + $guest_service_charge + $iva_tax + $accomodation_tax;
+        return response()->json([
+            'exists' => false,
+            'property_price' => $property_price,
+            'pricingType' => $pricingType,
+            'numberOfDays' => $numberOfDays,
+            'rateMultiplier' => $rateMultiplier,
+            'totalPrice' => $totalPrice,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'totalPriceWithOtherCharges' => $totalPriceWithOtherCharges,
+            'totalPriceWithChargesAndFees' => $totalPriceWithChargesAndFees,
+            'host_service_charge' => $host_service_charge,
+            'guest_service_charge' => $guest_service_charge,
+            'iva_tax' => $iva_tax,
+            'accomodation_tax' => $accomodation_tax,
+            'cleaning_fee' => $propertyPrice->cleaning_fee,
+            'security_fee' => $propertyPrice->security_fee,
+            'guest_fee' => ($propertyPrice->guest_fee * $property->accommodates),
+            'perDayPrice' => $perDayPrice,
+            'basePrice' => $pricingTypeAmount
+        ]);
+
+        // return Common::getPrice($request->property_id, $request->checkin, $request->checkout, $request->guest_count);
     }
 
     public function single(Request $request)
@@ -460,24 +550,21 @@ class PropertyController extends Controller
 
         $userActive = $result->Users()->where('id', $result->host_id)->first();
 
-        if ($userActive->status == 'Inactive' ) {
+        if ($userActive->status == 'Inactive') {
             return view('property.host_inactive');
-
-        } elseif ($data['result']->status == 'Unlisted' ) {
+        } elseif ($data['result']->status == 'Unlisted') {
             return view('property.unlisted_property');
-
         } elseif ($data['result']->is_verified == 'Pending') {
 
             return view('property.pending_property');
-
         } else {
 
-            if ( empty($result) ) {
+            if (empty($result)) {
                 abort('404');
             }
 
             $data['property_id']      = $id = $result->id;
-            $data['booking_status']   = Bookings::where('property_id',$id)->select('status')->first();
+            $data['booking_status']   = Bookings::where('property_id', $id)->select('status')->first();
 
             $data['property_photos']  = PropertyPhotos::where('property_id', $id)->orderBy('serial', 'asc')
                 ->get();
@@ -486,13 +573,13 @@ class PropertyController extends Controller
             $data['safety_amenities'] = Amenities::security($id);
 
             $newAmenityTypes          = Amenities::newAmenitiesType();
-            $data['all_new_amenities']= [];
+            $data['all_new_amenities'] = [];
 
             foreach ($newAmenityTypes as $amenites) {
                 $data['all_new_amenities'][$amenites->name] = Amenities::newAmenities($id, $amenites->id);
             }
 
-            $data['all_new_amenities']= array_filter($data['all_new_amenities']);
+            $data['all_new_amenities'] = array_filter($data['all_new_amenities']);
 
             $property_address         = $data['result']->property_address;
 
@@ -500,20 +587,20 @@ class PropertyController extends Controller
 
             $longitude                = $property_address->longitude;
 
-            $data['checkin']          = (isset($request->checkin) && $request->checkin != '') ? $request->checkin:'';
-            $data['checkout']         = (isset($request->checkout) && $request->checkout != '') ? $request->checkout:'';
+            $data['checkin']          = (isset($request->checkin) && $request->checkin != '') ? $request->checkin : '';
+            $data['checkout']         = (isset($request->checkout) && $request->checkout != '') ? $request->checkout : '';
 
-            $data['guests']           = (isset($request->guests) && $request->guests != '')?$request->guests:'';
+            $data['guests']           = (isset($request->guests) && $request->guests != '') ? $request->guests : '';
 
-            $data['similar']  = Properties::join('property_address', function ($join) {
-                                            $join->on('properties.id', '=', 'property_address.property_id');
-            })
-                                        ->select(DB::raw('*, ( 3959 * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) as distance'))
-                                        ->having('distance', '<=', 30)
-                                        ->where('properties.host_id', '!=', Auth::id())
-                                        ->where('properties.id', '!=', $id)
-                                        ->where('properties.status', 'Listed')
-                                        ->get();
+            // $data['similar']  = Properties::join('property_address', function ($join) {
+            //                                 $join->on('properties.id', '=', 'property_address.property_id');
+            // })
+            //                             ->select(DB::raw('*, ( 3959 * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) as distance'))
+            //                             ->having('distance', '<=', 30)
+            //                             ->where('properties.host_id', '!=', Auth::id())
+            //                             ->where('properties.id', '!=', $id)
+            //                             ->where('properties.status', 'Listed')
+            //                             ->get();
 
             $data['title']    =   $data['result']->name . ' in ' . $data['result']->property_address->city;
             $data['symbol'] = Common::getCurrentCurrencySymbol();
@@ -522,9 +609,8 @@ class PropertyController extends Controller
             $data['date_format'] = Settings::getAll()->firstWhere('name', 'date_format_type')->value;
 
             $data['adminPropertyApproval'] = Settings::getAll()->firstWhere('name', 'property_approval')->value;
-
+            $data['propertyPrices'] = PropertyPrice::where('property_id',$result->id)->get();
             return view('property.single', $data);
-
         }
     }
 
@@ -546,7 +632,7 @@ class PropertyController extends Controller
             $photos->save();
         }
 
-        return json_encode(['success'=>'true']);
+        return json_encode(['success' => 'true']);
     }
 
     public function photoDelete(Request $request)
@@ -557,7 +643,7 @@ class PropertyController extends Controller
             $photos->delete();
         }
 
-        return json_encode(['success'=>'true']);
+        return json_encode(['success' => 'true']);
     }
 
     public function makeDefaultPhoto(Request $request)
@@ -565,13 +651,13 @@ class PropertyController extends Controller
 
         if ($request->option_value == 'Yes') {
             PropertyPhotos::where('property_id', '=', $request->property_id)
-            ->update(['cover_photo' => 0]);
+                ->update(['cover_photo' => 0]);
 
             $photos = PropertyPhotos::find($request->photo_id);
             $photos->cover_photo = 1;
             $photos->save();
         }
-        return json_encode(['success'=>'true']);
+        return json_encode(['success' => 'true']);
     }
 
     public function makePhotoSerial(Request $request)
@@ -581,21 +667,20 @@ class PropertyController extends Controller
         $photos->serial = $request->serial;
         $photos->save();
 
-        return json_encode(['success'=>'true']);
+        return json_encode(['success' => 'true']);
     }
 
 
     public function set_slug()
     {
 
-       $properties   = Properties::where('slug', NULL)->get();
-       foreach ($properties as $key => $property) {
+        $properties   = Properties::where('slug', NULL)->get();
+        foreach ($properties as $key => $property) {
 
-           $property->slug     = Common::pretty_url($property->name);
-           $property->save();
-       }
-       return redirect('/');
-
+            $property->slug     = Common::pretty_url($property->name);
+            $property->save();
+        }
+        return redirect('/');
     }
 
     public function userBookmark()
@@ -621,7 +706,6 @@ class PropertyController extends Controller
                 'user_id' => $user_id,
                 'status' => 'Active',
             ]);
-
         } else {
             $favourite->status = ($favourite->status == 'Active') ? 'Inactive' : 'Active';
             $favourite->save();
@@ -637,7 +721,5 @@ class PropertyController extends Controller
         Session::put('favourite_property', $id);
 
         return redirect('login');
-
     }
-
 }

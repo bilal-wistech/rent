@@ -131,10 +131,10 @@ function dateRangeBtn (startDate, endDate,dt=null, format) {
 							endDate = moment(endDate, customFormat.showDateFormat).format(customFormat.dateSep);
 							$("#startDate").val(startDate);
 							$("#endDate").val(endDate);
-							// $('#daterange-btn span').text(startDate + '-' + endDate );
-							if(df == 'single') {
-								price_calculation('', '', '');
-							}
+							$('#daterange-btn span').text(startDate + '-' + endDate );
+							// if(df == 'single') {
+							// 	price_calculation('', '', '');
+							// }
 					}
 			});
 	}

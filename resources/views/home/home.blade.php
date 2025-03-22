@@ -135,17 +135,17 @@
 
                                 <div class="card-body p-0 pl-1 pr-1">
                                     <div class="d-flex">
-                                        <div>
+                                        {{-- <div>
                                             <div class="profile-img pl-2">
                                                 <a href="{{ url('users/show/' . $property->host_id) }}"><img
                                                         src="{{ $property->users->profile_src }}"
                                                         alt="{{ $property->name }}" class="img-fluid"></a>
                                             </div>
-                                        </div>
+                                        </div> --}}
 
-                                        <div class="p-2 text">
+                                        <div class="p-4 text">
                                             <a class="text-color text-color-hover"
-                                                href="properties/{{ $property->id }}">
+                                                href="properties/{{ $property->slug }}">
                                                 <p class="text-16 font-weight-700 text"> {{ $property->name }}</p>
                                             </a>
                                             <p class="text-13 mt-2 mb-0 text"><i class="fas fa-map-marker-alt"></i>
@@ -191,8 +191,8 @@
 
 
                                             <div>
-                                                <span class="font-weight-700">{!! moneyFormat($property->property_price->default_symbol, $property->property_price->price) !!}</span> /
-                                                {{ __('night') }}
+                                                <span class="font-weight-700">{!! moneyFormat($property->property_price->default_symbol, $property->property_price->price) !!}</span> (
+                                                {{ __($property->property_price->pricingType->name) }})
                                             </div>
                                         </div>
                                     </div>
