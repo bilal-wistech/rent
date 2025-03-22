@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Session, Common;
 use Illuminate\Http\Request;
-use App\Models\{Properties,
+use App\Models\{
+    Properties,
     Settings,
     SpaceType,
     PropertyType,
@@ -13,6 +14,7 @@ use App\Models\{Properties,
     Currency,
     PropertyDates,
 };
+use Carbon\Carbon;
 
 class SearchController extends Controller
 {
@@ -26,19 +28,19 @@ class SearchController extends Controller
     public function index(Request $request)
     {
         $location = $request->input('location');
-        $address = str_replace(" ", "+", "$location");
-        $map_where = 'https://maps.google.com/maps/api/geocode/json?key=' . config("vrent.google_map_key") . '&address=' . $address . '&sensor=false';
-        $geocode = $this->content_read($map_where);
-        $json = json_decode($geocode);
+        // $address = str_replace(" ", "+", "$location");
+        // $map_where = 'https://maps.google.com/maps/api/geocode/json?key=' . config("vrent.google_map_key") . '&address=' . $address . '&sensor=false';
+        // $geocode = $this->content_read($map_where);
+        // $json = json_decode($geocode);
 
-        
-        if (isset($json->{'results'}) && $json->{'results'}) {
-            $data['lat'] = isset($json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'}) ? $json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'} : 0;
-            $data['long'] = isset($json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'}) ? $json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'} : 0;
-        } else {
-            $data['lat'] = 0;
-            $data['long'] = 0;
-        }
+
+        // if (isset($json->{'results'}) && $json->{'results'}) {
+        //     $data['lat'] = isset($json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'}) ? $json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'} : 0;
+        //     $data['long'] = isset($json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'}) ? $json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'} : 0;
+        // } else {
+        //     $data['lat'] = 0;
+        //     $data['long'] = 0;
+        // }
         $data['location'] = $request->input('location');
         $data['checkin'] = $request->input('checkin');
         $data['checkout'] = $request->input('checkout');
@@ -49,7 +51,7 @@ class SearchController extends Controller
         $data['min_price'] = $request->input('min_price');
         $data['max_price'] = $request->input('max_price');
         $data['location_types'] = isset($json?->results[0]) ? $json?->results[0]->address_components[0]->types[0] : null;
-        $data['viewport'] = isset($json?->results[0]) ? (($json?->results[0]?->geometry->viewport->southwest->lng + $json->results[0]->geometry->viewport->southwest->lat) - ($json->results[0]->geometry->viewport->northeast->lng + $json->results[0]->geometry->viewport->northeast->lat)) : null ;
+        // $data['viewport'] = isset($json?->results[0]) ? (($json?->results[0]?->geometry->viewport->southwest->lng + $json->results[0]->geometry->viewport->southwest->lat) - ($json->results[0]->geometry->viewport->northeast->lng + $json->results[0]->geometry->viewport->northeast->lat)) : null ;
         $data['space_type'] = SpaceType::getAll()->where('status', 'Active')->pluck('name', 'id');
         $data['property_type'] = PropertyType::getAll()->where('status', 'Active')->pluck('name', 'id');
         $data['amenities'] = Amenities::where('status', 'Active')->get();
@@ -70,13 +72,23 @@ class SearchController extends Controller
             $data['max_price'] = $data['default_max_price'];
         }
         $data['date_format'] = Settings::getAll()->firstWhere('name', 'date_format_type')->value;
+        $today = Carbon::today();
+        $data['properties'] = Properties::where('status', 'listed')
+            ->with('users', 'property_price', 'property_address', 'bookings')
+            ->whereHas('property_address', function ($query) use ($request) {
+                $query->where('area', $request->location);
+            })
+            ->whereDoesntHave('bookings', function ($query) use ($today) {
+                $query->where('start_date', '<=', $today->format('Y-m-d'))
+                    ->where('end_date', '>=', $today->format('Y-m-d'));
+            })
+            ->paginate(10);
         return view('search.view', $data);
-
-
     }
 
     function searchResult(Request $request)
     {
+        // dd($request);
         $full_address = $request->input('location');
         $checkin = $request->input('checkin');
         $checkout = $request->input('checkout');
@@ -129,36 +141,36 @@ class SearchController extends Controller
         $properties_whereIn = [];
         $space_type_val = [];
 
-        $address = str_replace([" ", "%2C"], ["+", ","], "$full_address");
-        $map_where = 'https://maps.google.com/maps/api/geocode/json?key=' . config("vrent.google_map_key") . '&address=' . $address . '&sensor=false&libraries=places';
-        $geocode = $this->content_read($map_where);
-        $json = json_decode($geocode);
+        // $address = str_replace([" ", "%2C"], ["+", ","], "$full_address");
+        // $map_where = 'https://maps.google.com/maps/api/geocode/json?key=' . config("vrent.google_map_key") . '&address=' . $address . '&sensor=false&libraries=places';
+        // $geocode = $this->content_read($map_where);
+        // $json = json_decode($geocode);
 
-        if ($map_details != '') {
-            $map_data = explode('~', $map_details);
-            $minLat = $map_data[2];
-            $minLong = $map_data[3];
-            $maxLat = $map_data[4];
-            $maxLong = $map_data[5];
-        } else {
-            if ($json->{'results'}) {
-                $data['lat'] = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'};
-                $data['long'] = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'};
+        // if ($map_details != '') {
+        //     $map_data = explode('~', $map_details);
+        //     $minLat = $map_data[2];
+        //     $minLong = $map_data[3];
+        //     $maxLat = $map_data[4];
+        //     $maxLong = $map_data[5];
+        // } else {
+        //     if ($json->{'results'}) {
+        //         $data['lat'] = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'};
+        //         $data['long'] = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'};
 
-                $minLat = $data['lat'] - 0.35;
-                $maxLat = $data['lat'] + 0.35;
-                $minLong = $data['long'] - 0.35;
-                $maxLong = $data['long'] + 0.35;
-            } else {
-                $data['lat'] = 0;
-                $data['long'] = 0;
+        //         $minLat = $data['lat'] - 0.35;
+        //         $maxLat = $data['lat'] + 0.35;
+        //         $minLong = $data['long'] - 0.35;
+        //         $maxLong = $data['long'] + 0.35;
+        //     } else {
+        //         $data['lat'] = 0;
+        //         $data['long'] = 0;
 
-                $minLat = -1100;
-                $maxLat = 1100;
-                $minLong = -1100;
-                $maxLong = 1100;
-            }
-        }
+        //         $minLat = -1100;
+        //         $maxLat = 1100;
+        //         $minLong = -1100;
+        //         $maxLong = 1100;
+        //     }
+        // }
 
         $users_where['users.status'] = 'Active';
 
@@ -239,9 +251,9 @@ class SearchController extends Controller
                 }
 
                 $properties = $properties->where(function ($query) use ($row, $operator, $value) {
-                                            $query->where($row, $operator, $value);
-                                            $query->orWhereNull('properties.is_verified');
-                                        });
+                    $query->where($row, $operator, $value);
+                    $query->orWhereNull('properties.is_verified');
+                });
             }
         }
 

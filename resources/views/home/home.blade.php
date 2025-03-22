@@ -91,7 +91,7 @@
                 <div class="row mt-2">
                     @foreach ($areas as $area)
                         <div class="col-md-4 mt-5">
-                            <a href="{{-- {{ url('search?location=' . $area->name . '&checkin=&checkout=&guest=1') }} --}}">
+                            <a href="{{ url('search?location=' . $area->name . '&checkin=&checkout=&guest=1') }}">
                                 <div class="grid item animated zoomIn">
                                     <figure class="effect-ming">
                                         <img src="{{ asset($area->image) }}" width="450px" height="250px"
