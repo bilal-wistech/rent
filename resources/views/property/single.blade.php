@@ -1843,7 +1843,7 @@
 
     {{-- <script type="text/javascript" src="{{ asset('js/single-property.min.js') }}"></script>
      --}}
-    <script type="text/javascript" src="{{ asset('js/single-property.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/single-property.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/front.min.js') }}"></script>
     <script>
         $(document).ready(function() {
