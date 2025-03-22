@@ -1829,96 +1829,104 @@
     <script type="text/javascript" src="{{ asset('js/front.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-    function sendAjaxRequest() {
-        let checkin = $("#start_Date").val();
-        let checkout = $("#end_Date").val();
-        let pricingType = $("#pricingType").val();
-        let propertyId = $('#property_id').val();
-        let pricingTypeAmount = $("#pricingType option:selected").data("pricingtypeamount");
+            function sendAjaxRequest() {
+                let checkin = $("#start_Date").val();
+                let checkout = $("#end_Date").val();
+                let pricingType = $("#pricingType").val();
+                let propertyId = $('#property_id').val();
+                let pricingTypeAmount = $("#pricingType option:selected").data("pricingtypeamount");
 
-        $.ajax({
-            url: "{{ url('property/get-price') }}",
-            method: "POST",
-            data: {
-                start_date: checkin,
-                end_date: checkout,
-                property_id: propertyId,
-                pricingType: pricingType,
-                pricingTypeAmount: pricingTypeAmount,
-                _token: "{{ csrf_token() }}"
-            },
-            beforeSend: function() {
-                // Show loading state
-                $("#save_btn").prop('disabled', true);
-                $("#save_btn .spinner").removeClass('d-none');
-                $("#loadingSpinner").removeClass('d-none'); // Show loader
-                $("#booking-exists").addClass("d-none"); // Reset error state
-                $("#book_it").addClass("d-none"); // Hide pricing table initially
-            },
-            success: function(response) {
-                // Reset button state
-                $("#save_btn").prop('disabled', false);
-                $("#save_btn .spinner").addClass('d-none');
-                $("#loadingSpinner").addClass('d-none'); // Hide loader
-
-                if (response) {
-                    if (response.exists) {
-                        $("#booking-exists").removeClass("d-none");
-                        $("#booking-exists small").text(response.message);
-                        $("#book_it").addClass("d-none");
+                $.ajax({
+                    url: "{{ url('property/get-price') }}",
+                    method: "POST",
+                    data: {
+                        start_date: checkin,
+                        end_date: checkout,
+                        property_id: propertyId,
+                        pricingType: pricingType,
+                        pricingTypeAmount: pricingTypeAmount,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    beforeSend: function() {
+                        // Show loading state
                         $("#save_btn").prop('disabled', true);
-                    } else {
-                        $("#booking-exists").addClass("d-none");
-                        $("#booking-exists small").text("");
-                        $("#book_it").removeClass("d-none");
+                        $("#save_btn .spinner").removeClass('d-none');
+                        $("#booking-exists").addClass("d-none"); // Reset error state
+                        $("#book_it").addClass("d-none"); // Hide pricing table initially
+                    },
+                    success: function(response) {
+                        // Reset button state
                         $("#save_btn").prop('disabled', false);
-                        updateTable(response);
+                        $("#save_btn .spinner").addClass('d-none');
+
+                        if (response) {
+                            // Check if booking exists
+                            if (response.exists) {
+                                // Show only booking exists message and disable button
+                                $("#booking-exists").removeClass("d-none");
+                                $("#booking-exists small").text(response.message);
+                                $("#book_it").addClass("d-none"); // Ensure pricing table stays hidden
+                                $("#save_btn").prop('disabled', true);
+                            } else {
+                                // Hide error message, show pricing table, and enable button
+                                $("#booking-exists").addClass("d-none");
+                                $("#booking-exists small").text("");
+                                $("#book_it").removeClass("d-none"); // Show pricing table
+                                $("#save_btn").prop('disabled', false);
+                                updateTable(response); // Update pricing table
+                            }
+                        }
+                    },
+                    error: function(xhr) {
+                        // Reset button state
+                        $("#save_btn").prop('disabled', false);
+                        $("#save_btn .spinner").addClass('d-none');
+
+                        // Show error message only
+                        let errorMsg = "An error occurred while checking availability";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+
+                        $("#booking-exists").removeClass("d-none");
+                        $("#booking-exists small").text(errorMsg);
+                        $("#book_it").addClass("d-none"); // Keep pricing table hidden
+
+                        console.error("Error:", xhr);
                     }
-                }
-            },
-            error: function(xhr) {
-                // Reset button state
-                $("#save_btn").prop('disabled', false);
-                $("#save_btn .spinner").addClass('d-none');
-                $("#loadingSpinner").addClass('d-none'); // Hide loader
-
-                let errorMsg = "An error occurred while checking availability";
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMsg = xhr.responseJSON.message;
-                }
-
-                $("#booking-exists").removeClass("d-none");
-                $("#booking-exists small").text(errorMsg);
-                $("#book_it").addClass("d-none");
-
-                console.error("Error:", xhr);
+                });
             }
+
+            function formatPrice(value) {
+                return !isNaN(parseFloat(value)) ? "AED " + parseFloat(value).toFixed(2) : "AED 0.00";
+            }
+
+            function formatPercentage(value) {
+                return !isNaN(parseFloat(value)) ? parseFloat(value).toFixed(2) + " %" : "0.00 %";
+            }
+
+            function updateTable(response) {
+                $('#basePrice').text(formatPrice(response.basePrice));
+                $('#displayPricingType').text(response.pricingType);
+                $('#perDayPrice').text(formatPrice(response.perDayPrice));
+                $('#displayNumberOfDays').text(response.numberOfDays + ' days');
+                $('#displayCleaningFee').text(formatPrice(response.cleaning_fee));
+                $('#displaySecurityFee').text(formatPrice(response.security_fee));
+                $('#displayGuestFee').text(formatPrice(response.guest_fee));
+                $('#displayHostServiceCharge').text(formatPercentage(response.host_service_charge));
+                $('#displayGuestServiceCharge').text(formatPercentage(response.guest_service_charge));
+                $('#displayIvaTax').text(formatPercentage(response.iva_tax));
+                $('#displayAccommodationTax').text(formatPercentage(response.accomodation_tax));
+                $('#displayTotalPriceWithAll').text(formatPrice(response.totalPriceWithChargesAndFees));
+            }
+
+            // Hide pricing table initially
+            $("#book_it").addClass("d-none");
+
+            // Trigger AJAX request only when inputs change
+            $("#start_Date, #end_Date, #pricingType").on("change", function() {
+                sendAjaxRequest();
+            });
         });
-    }
-
-    function updateTable(response) {
-        $('#basePrice').text(formatPrice(response.basePrice));
-        $('#displayPricingType').text(response.pricingType);
-        $('#perDayPrice').text(formatPrice(response.perDayPrice));
-        $('#displayNumberOfDays').text(response.numberOfDays + ' days');
-        $('#displayCleaningFee').text(formatPrice(response.cleaning_fee));
-        $('#displaySecurityFee').text(formatPrice(response.security_fee));
-        $('#displayGuestFee').text(formatPrice(response.guest_fee));
-        $('#displayHostServiceCharge').text(formatPercentage(response.host_service_charge));
-        $('#displayGuestServiceCharge').text(formatPercentage(response.guest_service_charge));
-        $('#displayIvaTax').text(formatPercentage(response.iva_tax));
-        $('#displayAccommodationTax').text(formatPercentage(response.accomodation_tax));
-        $('#displayTotalPriceWithAll').text(formatPrice(response.totalPriceWithChargesAndFees));
-    }
-
-    // Hide pricing table initially
-    $("#book_it").addClass("d-none");
-
-    // Trigger AJAX request only when inputs change
-    $("#start_Date, #end_Date, #pricingType").on("change", function() {
-        sendAjaxRequest();
-    });
-});
-
     </script>
 @endsection
