@@ -744,28 +744,21 @@
                         <div class="col-lg-12">
                             <div class="row justify-content-between p-3">
                                 <div class="text-white">
-                                    {{-- {!! moneyFormat($symbol, numberFormat($result->property_price->price, 2)) !!} --}}
                                     {{ __('Book the Property') }}
                                 </div>
-
-                                {{-- <div class="text-white text-14">
-                                    <div id="per_night" class="per-night">
-                                        {{ __($result->property_price->pricingType->name) }}
-                                    </div>
-                                    <div id="per_month" class="per-month display-off">
-                                        {{ __('Per Month') }}
-                                        <i id="price-info-tooltip" class="fa fa-question hide"
-                                            data-behavior="tooltip"></i>
-                                    </div>
-                                </div> --}}
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-4">
+                    <div id="booking-exists" class="d-none mt-3">
+                        <small class="text-body-alert" style="color: red;"></small>
+                    </div>
+
                     <form accept-charset="UTF-8" method="post" action="{{ url('payments/book/' . $property_id) }}"
                         id="booking_form">
+
                         {{ csrf_field() }} <input type="hidden" id="property_id" value="{{ $property_id }}">
                         <input type="hidden" id="room_blocked_dates" value="">
                         <input type="hidden" id="calendar_available_price" value="">
@@ -783,7 +776,6 @@
                                             <label>{{ __('Check In') }}</label>
                                             <div class="mr-2">
                                                 <input class="form-control" id="start_Date" name="checkin"
-                                                    value="{{ $checkin ? $checkin : date('Y-m-d') }}"
                                                     placeholder="dd-mm-yyyy" type="date" required>
                                             </div>
                                         </div>
@@ -793,7 +785,6 @@
                                             <label>{{ __('Check Out') }}</label>
                                             <div class="ml-2">
                                                 <input class="form-control" id="end_Date" name="checkout"
-                                                    value="{{ $checkout ? $checkout : date('Y-m-d', strtotime('+1 day')) }}"
                                                     placeholder="dd-mm-yyyy" type="date" required>
                                             </div>
                                         </div>
@@ -813,6 +804,9 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div id="loadingSpinner" class="d-none text-center">
+                                        <span class="spinner-border text-primary"></span> Loading...
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -820,9 +814,6 @@
 
                         <div id="book_it" class="mt-4">
                             <div class="js-subtotal-container booking-subtotal panel-padding-fit">
-                                <div id="loader" class="display-off single-load">
-                                    <img src="{{ asset('front/img/green-loader.gif') }}" alt="loader">
-                                </div>
                                 <div class="table-responsive price-table-scroll">
                                     <table class="table table-bordered price_table" id="booking_table">
                                         <tbody>
@@ -918,15 +909,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-                            <div id="book_it_disabled" class="text-center d-none">
-                                <p id="book_it_disabled_message" class="icon-rausch">
-                                    {{ __('Dates Not Available') }}
-                                </p>
-                                <a href="{{ url('search?location=' . $result->property_address->city) }}"
-                                    class="btn btn-large btn-block text-14" id="view_other_listings_button">
-                                    {{ __('View Other Listing') }}
-                                </a>
                             </div>
                             <div
                                 class="book_btn col-md-12 text-center {{ $result->host_id == Auth()->user()?->id || $result->status == 'Unlisted' ? 'display-off' : '' }}">
@@ -1847,66 +1829,96 @@
     <script type="text/javascript" src="{{ asset('js/front.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            function sendAjaxRequest() {
-                let checkin = $("#start_Date").val();
-                let checkout = $("#end_Date").val();
-                let pricingType = $("#pricingType").val();
-                let propertyId = $('#property_id').val();
-                let pricingTypeAmount = $("#pricingType option:selected").data("pricingtypeamount");
-                console.log(checkin, checkout, pricingType, pricingTypeAmount);
+    function sendAjaxRequest() {
+        let checkin = $("#start_Date").val();
+        let checkout = $("#end_Date").val();
+        let pricingType = $("#pricingType").val();
+        let propertyId = $('#property_id').val();
+        let pricingTypeAmount = $("#pricingType option:selected").data("pricingtypeamount");
 
-                $.ajax({
-                    url: "{{ url('property/get-price') }}",
-                    method: "POST",
-                    data: {
-                        start_date: checkin,
-                        end_date: checkout,
-                        property_id: propertyId,
-                        pricingType: pricingType,
-                        pricingTypeAmount: pricingTypeAmount,
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function(response) {
-                        if (response) {
-                            updateTable(response);
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error("Error:", xhr);
+        $.ajax({
+            url: "{{ url('property/get-price') }}",
+            method: "POST",
+            data: {
+                start_date: checkin,
+                end_date: checkout,
+                property_id: propertyId,
+                pricingType: pricingType,
+                pricingTypeAmount: pricingTypeAmount,
+                _token: "{{ csrf_token() }}"
+            },
+            beforeSend: function() {
+                // Show loading state
+                $("#save_btn").prop('disabled', true);
+                $("#save_btn .spinner").removeClass('d-none');
+                $("#loadingSpinner").removeClass('d-none'); // Show loader
+                $("#booking-exists").addClass("d-none"); // Reset error state
+                $("#book_it").addClass("d-none"); // Hide pricing table initially
+            },
+            success: function(response) {
+                // Reset button state
+                $("#save_btn").prop('disabled', false);
+                $("#save_btn .spinner").addClass('d-none');
+                $("#loadingSpinner").addClass('d-none'); // Hide loader
+
+                if (response) {
+                    if (response.exists) {
+                        $("#booking-exists").removeClass("d-none");
+                        $("#booking-exists small").text(response.message);
+                        $("#book_it").addClass("d-none");
+                        $("#save_btn").prop('disabled', true);
+                    } else {
+                        $("#booking-exists").addClass("d-none");
+                        $("#booking-exists small").text("");
+                        $("#book_it").removeClass("d-none");
+                        $("#save_btn").prop('disabled', false);
+                        updateTable(response);
                     }
-                });
+                }
+            },
+            error: function(xhr) {
+                // Reset button state
+                $("#save_btn").prop('disabled', false);
+                $("#save_btn .spinner").addClass('d-none');
+                $("#loadingSpinner").addClass('d-none'); // Hide loader
+
+                let errorMsg = "An error occurred while checking availability";
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+
+                $("#booking-exists").removeClass("d-none");
+                $("#booking-exists small").text(errorMsg);
+                $("#book_it").addClass("d-none");
+
+                console.error("Error:", xhr);
             }
-
-            function formatPrice(value) {
-                return !isNaN(parseFloat(value)) ? "AED " + parseFloat(value).toFixed(2) : "AED 0.00";
-            }
-
-            function formatPercentage(value) {
-                return !isNaN(parseFloat(value)) ? parseFloat(value).toFixed(2) + " %" : "0.00 %";
-            }
-
-            function updateTable(response) {
-                $('#basePrice').text(formatPrice(response.basePrice));
-                $('#displayPricingType').text(response.pricingType);
-                $('#perDayPrice').text((formatPrice(response.perDayPrice)));
-                $('#displayNumberOfDays').text(response.numberOfDays + ' days');
-
-                $('#displayCleaningFee').text((formatPrice(response.cleaning_fee)));
-                $('#displaySecurityFee').text((formatPrice(response.security_fee)));
-                $('#displayGuestFee').text((formatPrice(response.guest_fee)));
-                $('#displayHostServiceCharge').text((formatPercentage(response.host_service_charge)));
-                $('#displayGuestServiceCharge').text((formatPercentage(response.guest_service_charge)));
-                $('#displayIvaTax').text((formatPercentage(response.iva_tax)));
-                $('#displayAccommodationTax').text((formatPercentage(response.accomodation_tax)));
-                $('#displayTotalPriceWithAll').text((formatPrice(response.totalPriceWithChargesAndFees)));
-            }
-            // Trigger AJAX request on page load
-            sendAjaxRequest();
-
-            // Trigger AJAX request when inputs change
-            $("#start_Date, #end_Date, #pricingType").on("change", function() {
-                sendAjaxRequest();
-            });
         });
+    }
+
+    function updateTable(response) {
+        $('#basePrice').text(formatPrice(response.basePrice));
+        $('#displayPricingType').text(response.pricingType);
+        $('#perDayPrice').text(formatPrice(response.perDayPrice));
+        $('#displayNumberOfDays').text(response.numberOfDays + ' days');
+        $('#displayCleaningFee').text(formatPrice(response.cleaning_fee));
+        $('#displaySecurityFee').text(formatPrice(response.security_fee));
+        $('#displayGuestFee').text(formatPrice(response.guest_fee));
+        $('#displayHostServiceCharge').text(formatPercentage(response.host_service_charge));
+        $('#displayGuestServiceCharge').text(formatPercentage(response.guest_service_charge));
+        $('#displayIvaTax').text(formatPercentage(response.iva_tax));
+        $('#displayAccommodationTax').text(formatPercentage(response.accomodation_tax));
+        $('#displayTotalPriceWithAll').text(formatPrice(response.totalPriceWithChargesAndFees));
+    }
+
+    // Hide pricing table initially
+    $("#book_it").addClass("d-none");
+
+    // Trigger AJAX request only when inputs change
+    $("#start_Date, #end_Date, #pricingType").on("change", function() {
+        sendAjaxRequest();
+    });
+});
+
     </script>
 @endsection
