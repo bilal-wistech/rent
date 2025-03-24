@@ -804,6 +804,21 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-md-12 p-0">
+                                        <div class=" ml-2 mr-2 ">
+                                            <label>{{ __('Guests') }}</label>
+                                            <div class="">
+                                                <select id="number_of_guests" class="form-control"
+                                                    name="number_of_guests">
+                                                    @for ($i = 1; $i <= $result->accommodates; $i++)
+                                                        <option value="{{ $i }}"
+                                                            <?= $guests == $i ? 'selected' : '' ?>>{{ $i }}
+                                                        </option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div id="loadingSpinner" class="d-none text-center">
                                         <span class="spinner-border text-primary"></span> Loading...
                                     </div>
@@ -1835,7 +1850,7 @@
                 let pricingType = $("#pricingType").val();
                 let propertyId = $('#property_id').val();
                 let pricingTypeAmount = $("#pricingType option:selected").data("pricingtypeamount");
-
+                let numberOfGuests = $('#number_of_guests').val();
                 $.ajax({
                     url: "{{ url('property/get-price') }}",
                     method: "POST",
@@ -1845,6 +1860,7 @@
                         property_id: propertyId,
                         pricingType: pricingType,
                         pricingTypeAmount: pricingTypeAmount,
+                        numberOfGuests: numberOfGuests,
                         _token: "{{ csrf_token() }}"
                     },
                     beforeSend: function() {
@@ -1924,7 +1940,7 @@
             $("#book_it").addClass("d-none");
 
             // Trigger AJAX request only when inputs change
-            $("#start_Date, #end_Date, #pricingType").on("change", function() {
+            $("#start_Date, #end_Date, #pricingType, #number_of_guests").on("change", function() {
                 sendAjaxRequest();
             });
         });
