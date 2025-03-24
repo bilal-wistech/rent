@@ -16,7 +16,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <ul class="list-inline  pl-4">
-                            <li class="list-inline-item mt-4">
+                            {{-- <li class="list-inline-item mt-4">
                                 <div class="dropdown">
                                     <button class="btn text-16 border border-r-25 pl-4 pr-4 dropdown-toggle" type="button"
                                         id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
@@ -117,7 +117,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </li>
+                            </li> --}}
 
                             <li class="list-inline-item  mt-4">
                                 <button class="btn text-16 border border-r-25 pl-4 pr-4 dropdown-toggle" type="button"
@@ -150,55 +150,9 @@
                                     </div>
                                 </div>
                             </li>
-
                             <li class="list-inline-item  mt-4">
                                 <button class="btn text-16 border border-r-25 pl-4 pr-4 dropdown-toggle" type="button"
-                                    id="dropdownBookingType" data-toggle="dropdown" aria-haspopup="true"
-                                    aria-expanded="false">
-                                    {{ __('Booking Type') }}
-                                </button>
-
-                                <div class="dropdown-menu caed-raise dropdown-menu-room-type"
-                                    aria-labelledby="dropdownRoomType">
-                                    <div class="row p-3">
-                                        <div class="col-md-12">
-                                            <div class="d-flex justify-content-between pr-4">
-                                                <div>
-                                                    <p class="text-16"><i class="fa fa-clock text-beach"></i>
-                                                        {{ __('Request to Book') }}</p>
-                                                </div>
-                                                <div>
-                                                    <input type="checkbox" name="book_type[]" class="form-check-input"
-                                                        value="request">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-12">
-                                            <div class="d-flex justify-content-between pr-4">
-                                                <div>
-                                                    <p class="text-16"><i class="fa  fa-bolt text-beach"></i>
-                                                        {{ __('Instant Book') }}</p>
-                                                </div>
-                                                <div>
-                                                    <input type="checkbox" name="book_type[]" class="form-check-input"
-                                                        value="instant">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-12 text-right mt-4">
-                                            <button class="btn vbtn-success text-16 font-weight-700  rounded"
-                                                id="btnBook">{{ __('Submit') }}</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-
-                            <li class="list-inline-item  mt-4">
-                                <button class="btn text-16 border border-r-25 pl-4 pr-4 dropdown-toggle" type="button"
-                                    id="dropdownPrice" data-toggle="dropdown" aria-haspopup="true"
-                                    aria-expanded="false">
+                                    id="dropdownPrice" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     {{ __('Price Range') }}
                                 </button>
 
@@ -240,20 +194,7 @@
                             </li>
                         </ul>
                     </div>
-
-                    {{-- <div class="pr-5">
-                        <div class="show-map d-none" id="showMap">
-                            <a href="#" class="btn text-16 border"><i class="fas fa-map-marked-alt"></i> {{ __('Show Map') }}</a>
-                        </div>
-                    </div> --}}
                 </div>
-                <!-- No result found section start -->
-                {{-- <div class="row mt-4">
-                    <div id="loader" class="display-off loader-img position-center">
-                        <img src="{{ asset('front/img/green-loader.gif') }}" alt="loader">
-                    </div>
-                </div> --}}
-
                 <div class="row mt-3">
                     @foreach ($properties as $property)
                         <div class="col-md-6 col-lg-4 col-xl-3 pl-3 pr-3 pb-3 mt-4">
@@ -280,8 +221,7 @@
                                     </div> --}}
 
                                         <div class="p-4 text">
-                                            <a class="text-color text-color-hover"
-                                                href="properties/{{ $property->slug }}">
+                                            <a class="text-color text-color-hover" href="properties/{{ $property->slug }}">
                                                 <p class="text-16 font-weight-700 text"> {{ $property->name }}</p>
                                             </a>
                                             <p class="text-13 mt-2 mb-0 text"><i class="fas fa-map-marker-alt"></i>
@@ -379,25 +319,37 @@
                     <div id="pagination">
                         <ul class="pager ml-4 pagination" id="pager">
                             @if ($properties->onFirstPage())
-                                <li class="page-item disabled"><span class="page-link">&laquo; {{ __('Previous') }}</span></li>
+                                <li class="page-item disabled"><span class="page-link">&laquo;
+                                        {{ __('Previous') }}</span></li>
                             @else
-                                <li class="page-item"><a class="page-link pagination-ajax" href="{{ $properties->appends(request()->except('page'))->previousPageUrl() }}" data-page="{{ $properties->currentPage() - 1 }}">&laquo; {{ __('Previous') }}</a></li>
+                                <li class="page-item"><a class="page-link pagination-ajax"
+                                        href="{{ $properties->appends(request()->except('page'))->previousPageUrl() }}"
+                                        data-page="{{ $properties->currentPage() - 1 }}">&laquo; {{ __('Previous') }}</a>
+                                </li>
                             @endif
 
                             @for ($i = 1; $i <= $properties->lastPage(); $i++)
-                                <li class="page-item {{ ($properties->currentPage() == $i) ? 'active' : '' }}">
-                                    <a class="page-link pagination-ajax" href="{{ $properties->appends(request()->except('page'))->url($i) }}" data-page="{{ $i }}">{{ $i }}</a>
+                                <li class="page-item {{ $properties->currentPage() == $i ? 'active' : '' }}">
+                                    <a class="page-link pagination-ajax"
+                                        href="{{ $properties->appends(request()->except('page'))->url($i) }}"
+                                        data-page="{{ $i }}">{{ $i }}</a>
                                 </li>
                             @endfor
 
                             @if ($properties->hasMorePages())
-                                <li class="page-item"><a class="page-link pagination-ajax" href="{{ $properties->appends(request()->except('page'))->nextPageUrl() }}" data-page="{{ $properties->currentPage() + 1 }}">{{ __('Next') }} &raquo;</a></li>
+                                <li class="page-item"><a class="page-link pagination-ajax"
+                                        href="{{ $properties->appends(request()->except('page'))->nextPageUrl() }}"
+                                        data-page="{{ $properties->currentPage() + 1 }}">{{ __('Next') }} &raquo;</a>
+                                </li>
                             @else
-                                <li class="page-item disabled"><span class="page-link">{{ __('Next') }} &raquo;</span></li>
+                                <li class="page-item disabled"><span class="page-link">{{ __('Next') }} &raquo;</span>
+                                </li>
                             @endif
                         </ul>
                         <div class="pl-3 text-16 mt-4">
-                            {{ __('Showing') }} <span id="page-from">{{ $properties->firstItem() ?? 0 }}</span> – <span id="page-to">{{ $properties->lastItem() ?? 0 }}</span> {{ __('of') }} <span id="page-total">{{ $properties->total() }}</span> {{ __('Rentals') }}
+                            {{ __('Showing') }} <span id="page-from">{{ $properties->firstItem() ?? 0 }}</span> – <span
+                                id="page-to">{{ $properties->lastItem() ?? 0 }}</span> {{ __('of') }} <span
+                                id="page-total">{{ $properties->total() }}</span> {{ __('Rentals') }}
                         </div>
                     </div>
                 </div>
@@ -660,13 +612,13 @@
     <script type="text/javascript" src="{{ asset('js/front.min.js') }}"></script>
     <script>
         $('.pagination-ajax').on('click', function(e) {
-        e.preventDefault();
-        let url = $(this).attr('href');
+            e.preventDefault();
+            let url = $(this).attr('href');
 
-        $.get(url, function(data) {
-            $('#pagination').html($(data).find('#pagination').html());
-            $('.row.mt-3').html($(data).find('.row.mt-3').html());
+            $.get(url, function(data) {
+                $('#pagination').html($(data).find('#pagination').html());
+                $('.row.mt-3').html($(data).find('.row.mt-3').html());
+            });
         });
-    });
     </script>
 @endsection

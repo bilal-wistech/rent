@@ -28,19 +28,6 @@ class SearchController extends Controller
     public function index(Request $request)
     {
         $location = $request->input('location');
-        // $address = str_replace(" ", "+", "$location");
-        // $map_where = 'https://maps.google.com/maps/api/geocode/json?key=' . config("vrent.google_map_key") . '&address=' . $address . '&sensor=false';
-        // $geocode = $this->content_read($map_where);
-        // $json = json_decode($geocode);
-
-
-        // if (isset($json->{'results'}) && $json->{'results'}) {
-        //     $data['lat'] = isset($json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'}) ? $json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'} : 0;
-        //     $data['long'] = isset($json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'}) ? $json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'} : 0;
-        // } else {
-        //     $data['lat'] = 0;
-        //     $data['long'] = 0;
-        // }
         $data['location'] = $request->input('location');
         $data['checkin'] = $request->input('checkin');
         $data['checkout'] = $request->input('checkout');
@@ -51,7 +38,7 @@ class SearchController extends Controller
         $data['min_price'] = $request->input('min_price');
         $data['max_price'] = $request->input('max_price');
         $data['location_types'] = isset($json?->results[0]) ? $json?->results[0]->address_components[0]->types[0] : null;
-        // $data['viewport'] = isset($json?->results[0]) ? (($json?->results[0]?->geometry->viewport->southwest->lng + $json->results[0]->geometry->viewport->southwest->lat) - ($json->results[0]->geometry->viewport->northeast->lng + $json->results[0]->geometry->viewport->northeast->lat)) : null ;
+
         $data['space_type'] = SpaceType::getAll()->where('status', 'Active')->pluck('name', 'id');
         $data['property_type'] = PropertyType::getAll()->where('status', 'Active')->pluck('name', 'id');
         $data['amenities'] = Amenities::where('status', 'Active')->get();
@@ -140,37 +127,6 @@ class SearchController extends Controller
         $property_type_val = [];
         $properties_whereIn = [];
         $space_type_val = [];
-
-        // $address = str_replace([" ", "%2C"], ["+", ","], "$full_address");
-        // $map_where = 'https://maps.google.com/maps/api/geocode/json?key=' . config("vrent.google_map_key") . '&address=' . $address . '&sensor=false&libraries=places';
-        // $geocode = $this->content_read($map_where);
-        // $json = json_decode($geocode);
-
-        // if ($map_details != '') {
-        //     $map_data = explode('~', $map_details);
-        //     $minLat = $map_data[2];
-        //     $minLong = $map_data[3];
-        //     $maxLat = $map_data[4];
-        //     $maxLong = $map_data[5];
-        // } else {
-        //     if ($json->{'results'}) {
-        //         $data['lat'] = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'};
-        //         $data['long'] = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'};
-
-        //         $minLat = $data['lat'] - 0.35;
-        //         $maxLat = $data['lat'] + 0.35;
-        //         $minLong = $data['long'] - 0.35;
-        //         $maxLong = $data['long'] + 0.35;
-        //     } else {
-        //         $data['lat'] = 0;
-        //         $data['long'] = 0;
-
-        //         $minLat = -1100;
-        //         $maxLat = 1100;
-        //         $minLong = -1100;
-        //         $maxLong = 1100;
-        //     }
-        // }
 
         $users_where['users.status'] = 'Active';
 
