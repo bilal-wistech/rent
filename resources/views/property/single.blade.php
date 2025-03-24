@@ -819,15 +819,10 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="loadingSpinner" class="d-none text-center">
-                                        <span class="spinner-border text-primary"></span> Loading...
-                                    </div>
                                 </div>
                             </div>
                         </div>
-
-
-                        <div id="book_it" class="mt-4">
+                        <div id="book_it" class="mt-4 d-none">
                             <div class="js-subtotal-container booking-subtotal panel-padding-fit">
                                 <div class="table-responsive price-table-scroll">
                                     <table class="table table-bordered price_table" id="booking_table">
@@ -933,17 +928,15 @@
                                         id="save_btn">
                                         <i class="spinner fa fa-spinner fa-spin d-none"></i>
                                         <span class="{{ $result->booking_type != 'instant' ? '' : 'display-off' }}">
-                                            {{ __('Request to Book') }}
+                                            {{ __('Book Now Pay Later') }}
                                         </span>
                                         <span class="{{ $result->booking_type == 'instant' ? '' : 'display-off' }}">
                                             <i class="icon icon-bolt text-beach h4"></i>
-                                            {{ __('Instant Book') }}
+                                            {{ __('Book and Pay Now') }}
                                         </span>
                                     </button>
                                 @endif
                             </div>
-
-                            <p class="col-md-12 text-center mt-3">{{ __('You’ll be able to review before paying.') }}</p>
                         </div>
                         <input id="hosting_id" name="hosting_id" type="hidden" value="{{ $result->id }}">
                     </form>
@@ -1868,7 +1861,7 @@
                         $("#save_btn").prop('disabled', true);
                         $("#save_btn .spinner").removeClass('d-none');
                         $("#booking-exists").addClass("d-none"); // Reset error state
-                        $("#book_it").addClass("d-none"); // Hide pricing table initially
+                        // $("#book_it").addClass("d-none"); // Hide pricing table initially
                     },
                     success: function(response) {
                         // Reset button state
