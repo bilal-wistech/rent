@@ -319,13 +319,11 @@
                     <div id="pagination">
                         <ul class="pager ml-4 pagination" id="pager">
                             @if ($properties->onFirstPage())
-                                <li class="page-item disabled"><span class="page-link">&laquo;
-                                        {{ __('Previous') }}</span></li>
+                                <li class="page-item disabled"><span class="page-link">« {{ __('Previous') }}</span></li>
                             @else
                                 <li class="page-item"><a class="page-link pagination-ajax"
                                         href="{{ $properties->appends(request()->except('page'))->previousPageUrl() }}"
-                                        data-page="{{ $properties->currentPage() - 1 }}">&laquo; {{ __('Previous') }}</a>
-                                </li>
+                                        data-page="{{ $properties->currentPage() - 1 }}">« {{ __('Previous') }}</a></li>
                             @endif
 
                             @for ($i = 1; $i <= $properties->lastPage(); $i++)
@@ -339,11 +337,9 @@
                             @if ($properties->hasMorePages())
                                 <li class="page-item"><a class="page-link pagination-ajax"
                                         href="{{ $properties->appends(request()->except('page'))->nextPageUrl() }}"
-                                        data-page="{{ $properties->currentPage() + 1 }}">{{ __('Next') }} &raquo;</a>
-                                </li>
+                                        data-page="{{ $properties->currentPage() + 1 }}">{{ __('Next') }} »</a></li>
                             @else
-                                <li class="page-item disabled"><span class="page-link">{{ __('Next') }} &raquo;</span>
-                                </li>
+                                <li class="page-item disabled"><span class="page-link">{{ __('Next') }} »</span></li>
                             @endif
                         </ul>
                         <div class="pl-3 text-16 mt-4">
@@ -570,6 +566,7 @@
 @endsection
 
 @section('validation_script')
+@section('validation_script')
     <script type="text/javascript"
         src='https://maps.google.com/maps/api/js?key={{ config('vrent.google_map_key') }}&libraries=places'></script>
     <script type="text/javascript" src="{{ asset('js/jquery-ui.js') }}"></script>
@@ -608,17 +605,87 @@
         var removed = "{{ __('Removed from favourite list.') }}";
         const BaseURL = "{{ url('/') }}";
     </script>
-    {{-- <script type="text/javascript" src="{{ asset('js/map-search.min.js') }}"></script> --}}
     <script type="text/javascript" src="{{ asset('js/front.min.js') }}"></script>
     <script>
-        $('.pagination-ajax').on('click', function(e) {
-            e.preventDefault();
-            let url = $(this).attr('href');
+        $(document).ready(function() {
+            // Handle pagination clicks
+            $(document).on('click', '.pagination-ajax', function(e) {
+                e.preventDefault();
 
-            $.get(url, function(data) {
-                $('#pagination').html($(data).find('#pagination').html());
-                $('.row.mt-3').html($(data).find('.row.mt-3').html());
+                let url = $(this).attr('href');
+                let page = $(this).data('page');
+
+                loadProperties(url);
             });
+
+            // Function to load properties via AJAX
+            function loadProperties(url) {
+                // Create loader element
+                const $loader = $('<div class="loader-overlay"><div class="loader"></div></div>');
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'html',
+                    beforeSend: function() {
+                        // Add loader to the properties container
+                        $('#listCol').append($loader);
+                    },
+                    success: function(response) {
+                        // Parse the response HTML
+                        var $response = $(response);
+
+                        // Update properties list
+                        $('.row.mt-3').html($response.find('.row.mt-3').html());
+
+                        // Update pagination
+                        $('#pagination').html($response.find('#pagination').html());
+
+                        // Scroll to top of results
+                        $('html, body').animate({
+                            scrollTop: $("#listCol").offset().top - 100
+                        }, 500);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading properties:', error);
+                        swal("Error", "Failed to load properties. Please try again.", "error");
+                    },
+                    complete: function() {
+                        // Remove loader
+                        $loader.remove();
+                    }
+                });
+            }
+
+            // Add loader styles
+            var styles = `
+            .loader-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.8);
+                z-index: 1000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .loader {
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #1dbf73;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+            $('<style>').text(styles).appendTo('head');
         });
     </script>
+@endsection
 @endsection

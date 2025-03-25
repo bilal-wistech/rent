@@ -44,23 +44,29 @@ class SearchController extends Controller
         $data['amenities'] = Amenities::where('status', 'Active')->get();
         $data['amenities_type'] = AmenityType::pluck('name', 'id');
 
-        $data['property_type_selected'] = explode(',', $request->input('property_type'));
-        $data['space_type_selected'] = explode(',', $request->input('space_type'));
-        $data['amenities_selected'] = explode(',', $request->input('amenities'));
+        $data['property_type_selected'] = explode(',', $request->input('property_type', ''));
+        $data['space_type_selected'] = explode(',', $request->input('space_type', ''));
+        $data['amenities_selected'] = explode(',', $request->input('amenities', ''));
+
         $currency = Currency::getAll();
-        if (Session::get('currency')) $data['currency_symbol'] = $currency->firstWhere('code', Session::get('currency'))->symbol;
-        else $data['currency_symbol'] = $currency->firstWhere('default', 1)->symbol;
+        $data['currency_symbol'] = Session::get('currency')
+            ? $currency->firstWhere('code', Session::get('currency'))->symbol
+            : $currency->firstWhere('default', 1)->symbol;
+
         $minPrice = Settings::getAll()->where('name', 'min_search_price')->first()->value;
         $maxPrice = Settings::getAll()->where('name', 'max_search_price')->first()->value;
         $data['default_min_price'] = $this->helper->convert_currency(Currency::getAll()->firstWhere('default')->code, '', $minPrice);
         $data['default_max_price'] = $this->helper->convert_currency(Currency::getAll()->firstWhere('default')->code, '', $maxPrice);
+
         if (!$data['min_price']) {
             $data['min_price'] = $data['default_min_price'];
             $data['max_price'] = $data['default_max_price'];
         }
+
         $data['date_format'] = Settings::getAll()->firstWhere('name', 'date_format_type')->value;
         $today = Carbon::today();
-        $data['properties'] = Properties::where('status', 'listed')
+
+        $query = Properties::where('status', 'listed')
             ->with('users', 'property_price', 'property_address', 'bookings')
             ->whereHas('property_address', function ($query) use ($request) {
                 $query->where('area', $request->location);
@@ -68,8 +74,14 @@ class SearchController extends Controller
             ->whereDoesntHave('bookings', function ($query) use ($today) {
                 $query->where('start_date', '<=', $today->format('Y-m-d'))
                     ->where('end_date', '>=', $today->format('Y-m-d'));
-            })
-            ->paginate(10);
+            });
+
+        $data['properties'] = $query->orderBy('id', 'desc')->paginate(4);
+        // Handle AJAX request
+        if ($request->ajax()) {
+            return view('search.view', $data)->render();
+        }
+
         return view('search.view', $data);
     }
 
