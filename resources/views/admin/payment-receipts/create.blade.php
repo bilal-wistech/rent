@@ -107,38 +107,42 @@
 
             function fetchBookingDetails(bookingId) {
                 if (bookingId) {
-                    // Make the AJAX request
                     $.ajax({
                         url: "{{ route('payment-receipts.get-booking-details', '') }}/" + bookingId,
                         method: 'GET',
                         success: function(response) {
-                            // console.log(response);
-
-                            // Populate the amount input field with the remaining amount
                             const remainingAmount = response.totalBookingAmount - response.totalAmount;
-                            $('#amount').val(remainingAmount);
-                            $('#remaining_amount').val(remainingAmount);
-                            // Optionally display remaining payment details
-                            if (response.totalAmount < response.totalBookingAmount) {
-                                $('#amount_error')
-                                    .text(`Remaining payment is ${remainingAmount.toFixed(2)}`)
-                                    .removeClass('d-none');
-                            } else {
-                                $('#amount_error').addClass('d-none');
-                            }
-
-                            // Store remaining amount in a data attribute for validation
-                            $('#amount').data('remaining', remainingAmount);
+                            $('#remaining_amount').val(remainingAmount); // Hidden input for form submission
+                            $('#amount').data('remaining', remainingAmount); // Store for validation
+                            updateRemainingAmountMessage(remainingAmount, $('#amount').val());
                         },
                         error: function(xhr) {
-                            console.error(xhr.responseText); // Log the error for debugging
+                            console.error(xhr.responseText);
                             alert('Error fetching booking details. Please try again.');
                         }
                     });
                 } else {
-                    // Clear the amount field if no booking is selected
                     $('#amount').val('');
                     $('#amount_error').addClass('d-none');
+                }
+            }
+
+            // Function to update the remaining amount message
+            function updateRemainingAmountMessage(remainingAmount, enteredAmount) {
+                const entered = parseFloat(enteredAmount) || 0;
+                const updatedRemaining = remainingAmount - entered;
+                if (entered > 0 && updatedRemaining >= 0) {
+                    $('#amount_error')
+                        .text(`Remaining amount after payment: ${updatedRemaining.toFixed(2)}`)
+                        .removeClass('d-none');
+                } else if (entered > remainingAmount) {
+                    $('#amount_error')
+                        .text(`Entered amount (${entered}) exceeds remaining amount (${remainingAmount.toFixed(2)}).`)
+                        .removeClass('d-none');
+                } else {
+                    $('#amount_error')
+                        .text(`Remaining payment is ${remainingAmount.toFixed(2)}`)
+                        .removeClass('d-none');
                 }
             }
 
@@ -146,6 +150,13 @@
             $('#booking_id').change(function() {
                 const bookingId = $(this).val();
                 fetchBookingDetails(bookingId);
+            });
+
+            // Update remaining amount as user types
+            $('#amount').on('input', function() {
+                const remainingAmount = parseFloat($(this).data('remaining')) || 0;
+                const enteredAmount = $(this).val();
+                updateRemainingAmountMessage(remainingAmount, enteredAmount);
             });
 
             // Fetch details for default selected value on page load
@@ -156,13 +167,12 @@
 
             // Handle form submission
             $('#add_payment_receipt').on('submit', function(e) {
-                e.preventDefault(); // Prevent the default form submission
+                e.preventDefault();
 
                 const bookingId = $('#booking_id').val();
                 const enteredAmount = parseFloat($('#amount').val());
                 const remainingAmount = parseFloat($('#amount').data('remaining'));
 
-                // Reset error message
                 $('#amount_error').addClass('d-none').text('');
 
                 if (!enteredAmount || enteredAmount <= 0) {
@@ -181,7 +191,6 @@
                     return false;
                 }
 
-                // Validation passed, submit the form
                 this.submit();
             });
         });
