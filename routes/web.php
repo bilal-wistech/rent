@@ -603,6 +603,7 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
     Route::post('currency-symbol', 'PropertyController@currencySymbol');
     Route::match(['get', 'post'], 'payments/book/{id?}', 'PaymentController@index');
     Route::post('payments/create_booking', 'PaymentController@createBooking');
+    Route::post('payments/create-booked-unpaid', 'PaymentController@store')->name('payments.create-booked-unpaid');
     Route::get('payments/success', 'PaymentController@success');
     Route::get('payments/cancel', 'PaymentController@cancel');
     Route::get('payments/stripe', 'PaymentController@stripePayment');

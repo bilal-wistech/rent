@@ -755,190 +755,189 @@
                     <div id="booking-exists" class="d-none mt-3">
                         <small class="text-body-alert" style="color: red;"></small>
                     </div>
-
-                    <form accept-charset="UTF-8" method="post" action="{{ url('payments/book/' . $property_id) }}"
-                        id="booking_form">
-
-                        {{ csrf_field() }} <input type="hidden" id="property_id" value="{{ $property_id }}">
-                        <input type="hidden" id="room_blocked_dates" value="">
-                        <input type="hidden" id="calendar_available_price" value="">
-                        <input type="hidden" id="room_available_price" value="">
-                        <input type="hidden" id="price_tooltip" value="">
-                        <input type="hidden" id="url_checkin" value="{{ $checkin }}">
-                        <input type="hidden" id="url_checkout" value="{{ $checkout }}">
-                        <input type="hidden" name="booking_type" id="booking_type"
-                            value="{{ $result->booking_type }}">
-                        <div class="row">
-                            <div class="col-md-12  p-4 single-border border-r-10 ">
-                                <div class="row mt-4">
-                                    <div class="col-md-12 p-0">
-                                        <div class=" ml-2 mr-2 ">
-                                            <label>{{ __('Check In') }}</label>
-                                            <div class="mr-2">
-                                                <input class="form-control" id="start_Date" name="checkin"
-                                                    placeholder="dd-mm-yyyy" type="date" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12 p-0">
-                                        <div class=" ml-2 mr-2 ">
-                                            <label>{{ __('Check Out') }}</label>
-                                            <div class="ml-2">
-                                                <input class="form-control" id="end_Date" name="checkout"
-                                                    placeholder="dd-mm-yyyy" type="date" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12 p-0">
-                                        <div class=" ml-2 mr-2 ">
-                                            <label>{{ __('Pricing Type') }}</label>
-                                            <div class="">
-                                                <select id="pricingType" class="form-control" name="pricingType">
-                                                    @foreach ($propertyPrices as $propertyPrice)
-                                                        <option value="{{ $propertyPrice->pricingType->id }}"
-                                                            data-pricingTypeAmount="{{ $propertyPrice->price }}">
-                                                            {{ $propertyPrice->pricingType->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12 p-0">
-                                        <div class=" ml-2 mr-2 ">
-                                            <label>{{ __('Guests') }}</label>
-                                            <div class="">
-                                                <select id="number_of_guests" class="form-control"
-                                                    name="number_of_guests">
-                                                    @for ($i = 1; $i <= $result->accommodates; $i++)
-                                                        <option value="{{ $i }}"
-                                                            <?= $guests == $i ? 'selected' : '' ?>>{{ $i }}
-                                                        </option>
-                                                    @endfor
-                                                </select>
-                                            </div>
+                    @if ($result->booking_type === 'request')
+                        <form accept-charset="UTF-8" method="post"
+                            action="{{ route('payments.create-booked-unpaid') }}" id="booking_form">
+                        @else
+                            <form accept-charset="UTF-8" method="post"
+                                action="{{ url('payments/book/' . $property_id) }}" id="booking_form">
+                    @endif
+                    {{ csrf_field() }}
+                    <input type="hidden" name="booking_type" id="booking_type" value="{{ $result->booking_type }}">
+                    <input type="hidden" id="property_id" name="property_id" value="{{ $property_id }}">
+                    <input type="hidden" name="payment_receipt" value="0">
+                    <div class="row">
+                        <div class="col-md-12  p-4 single-border border-r-10 ">
+                            <div class="row mt-4">
+                                <div class="col-md-12 p-0">
+                                    <div class=" ml-2 mr-2 ">
+                                        <label>{{ __('Check In') }}</label>
+                                        <div class="mr-2">
+                                            <input class="form-control" id="start_Date" name="checkin"
+                                                placeholder="dd-mm-yyyy" type="date" required>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div id="book_it" class="mt-4 d-none">
-                            <div class="js-subtotal-container booking-subtotal panel-padding-fit">
-                                <div class="table-responsive price-table-scroll">
-                                    <table class="table table-bordered price_table" id="booking_table">
-                                        <tbody>
-                                            <tr>
-                                                <td class="pl-4">
-                                                    {{ __('Base Price') }}
-                                                </td>
-                                                <td class="pl-4 text-right"><span id="basePrice" value="">
-                                                        0
-                                                    </span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="pl-4">
-                                                    {{ __('Per Day Price') }}
-                                                </td>
-                                                <td class="pl-4 text-right"><span id="perDayPrice" value="">
-                                                        0
-                                                    </span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="pl-4">
-                                                    {{ __('Number of days') }}
-                                                </td>
-                                                <td class="pl-4 text-right"><span id="displayNumberOfDays"
-                                                        value=""> 0
-                                                    </span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="pl-4">
-                                                    {{ __('Cleaning Fee') }}
-                                                </td>
-                                                <td class="pl-4 text-right"><span id="displayCleaningFee" value="">
-                                                        0
-                                                    </span></td>
-                                            </tr>
+                                <div class="col-md-12 p-0">
+                                    <div class=" ml-2 mr-2 ">
+                                        <label>{{ __('Check Out') }}</label>
+                                        <div class="ml-2">
+                                            <input class="form-control" id="end_Date" name="checkout"
+                                                placeholder="dd-mm-yyyy" type="date" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 p-0">
+                                    <div class=" ml-2 mr-2 ">
+                                        <label>{{ __('Pricing Type') }}</label>
+                                        <div class="">
+                                            <select id="pricingType" class="form-control" name="pricingType">
+                                                @foreach ($propertyPrices as $propertyPrice)
+                                                    <option value="{{ $propertyPrice->pricingType->id }}"
+                                                        data-pricingTypeAmount="{{ $propertyPrice->price }}">
+                                                        {{ $propertyPrice->pricingType->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 p-0">
+                                    <div class=" ml-2 mr-2 ">
+                                        <label>{{ __('Guests') }}</label>
+                                        <div class="">
+                                            <select id="number_of_guests" class="form-control" name="number_of_guests">
+                                                @for ($i = 1; $i <= $result->accommodates; $i++)
+                                                    <option value="{{ $i }}"
+                                                        <?= $guests == $i ? 'selected' : '' ?>>{{ $i }}
+                                                    </option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="hiddenFieldsContainer">
 
-                                            <tr class="additional_price">
-                                                <td class="pl-4">
-                                                    {{ __('Security Fee') }}
-                                                </td>
-                                                <td class="pl-4 text-right"><span id="displaySecurityFee" value="">
-                                                        0
-                                                    </span>
-                                                </td>
-                                            </tr>
-
-                                            <tr class="security_price">
-                                                <td class="pl-4">
-                                                    {{ __('Guest Fee') }}
-                                                </td>
-                                                <td class="pl-4 text-right"><span id="displayGuestFee" value=""> 0
-                                                    </span></td>
-                                            </tr>
-
-                                            <tr class="cleaning_price">
-                                                <td class="pl-4">
-                                                    {{ __('Host Service Charge (%)') }}
-                                                </td>
-                                                <td class="pl-4 text-right"><span id="displayHostServiceCharge"
-                                                        value=""> 0
-                                                    </span></td>
-                                            </tr>
-
-                                            <tr class="iva_tax">
-                                                <td class="pl-4">
-                                                    {{ __('Guest Service Charge (%)') }}
-                                                </td>
-                                                <td class="pl-4 text-right"> <span id="displayGuestServiceCharge"
-                                                        value=""> 0
-                                                    </span></td>
-                                            </tr>
-
-                                            <tr class="accomodation_tax">
-                                                <td class="pl-4">
-                                                    {{ __('IVA Tax (%)') }}
-                                                </td>
-                                                <td class="pl-4 text-right"> <span id="displayIvaTax" value="">
-                                                        0 </span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="pl-4">{{ __('Accommodation Tax (%)') }}</td>
-                                                <td class="pl-4 text-right"><span id="displayAccommodationTax"
-                                                        value=""> 0
-                                                    </span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="pl-4">{{ __('Total Price') }}</td>
-                                                <td class="pl-4 text-right"><span id="displayTotalPriceWithAll"
-                                                        value=""> 0
-                                                    </span></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
                                 </div>
                             </div>
-                            <div
-                                class="book_btn col-md-12 text-center {{ $result->host_id == Auth()->user()?->id || $result->status == 'Unlisted' ? 'display-off' : '' }}">
-                                @if (($adminPropertyApproval == 'Yes' && $result->is_verified != 'Pending') || $adminPropertyApproval == 'No')
-                                    <button type="submit"
-                                        class="btn vbtn-outline-success text-14 font-weight-700 mt-3 pl-5 pr-5 pt-3 pb-3"
-                                        id="save_btn">
-                                        <i class="spinner fa fa-spinner fa-spin d-none"></i>
-                                        <span class="{{ $result->booking_type != 'instant' ? '' : 'display-off' }}">
-                                            {{ __('Book Now Pay Later') }}
-                                        </span>
-                                        <span class="{{ $result->booking_type == 'instant' ? '' : 'display-off' }}">
-                                            <i class="icon icon-bolt text-beach h4"></i>
-                                            {{ __('Book and Pay Now') }}
-                                        </span>
-                                    </button>
-                                @endif
+                        </div>
+                    </div>
+                    <div id="book_it" class="mt-4 d-none">
+                        <div class="js-subtotal-container booking-subtotal panel-padding-fit">
+                            <div class="table-responsive price-table-scroll">
+                                <table class="table table-bordered price_table" id="booking_table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="pl-4">
+                                                {{ __('Base Price') }}
+                                            </td>
+                                            <td class="pl-4 text-right"><span id="basePrice" value="">
+                                                    0
+                                                </span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pl-4">
+                                                {{ __('Per Day Price') }}
+                                            </td>
+                                            <td class="pl-4 text-right"><span id="perDayPrice" value="">
+                                                    0
+                                                </span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pl-4">
+                                                {{ __('Number of days') }}
+                                            </td>
+                                            <td class="pl-4 text-right"><span id="displayNumberOfDays" value=""> 0
+                                                </span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pl-4">
+                                                {{ __('Cleaning Fee') }}
+                                            </td>
+                                            <td class="pl-4 text-right"><span id="displayCleaningFee" value="">
+                                                    0
+                                                </span></td>
+                                        </tr>
+
+                                        <tr class="additional_price">
+                                            <td class="pl-4">
+                                                {{ __('Security Fee') }}
+                                            </td>
+                                            <td class="pl-4 text-right"><span id="displaySecurityFee" value="">
+                                                    0
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                        <tr class="security_price">
+                                            <td class="pl-4">
+                                                {{ __('Guest Fee') }}
+                                            </td>
+                                            <td class="pl-4 text-right"><span id="displayGuestFee" value=""> 0
+                                                </span></td>
+                                        </tr>
+
+                                        <tr class="cleaning_price">
+                                            <td class="pl-4">
+                                                {{ __('Host Service Charge (%)') }}
+                                            </td>
+                                            <td class="pl-4 text-right"><span id="displayHostServiceCharge"
+                                                    value=""> 0
+                                                </span></td>
+                                        </tr>
+
+                                        <tr class="iva_tax">
+                                            <td class="pl-4">
+                                                {{ __('Guest Service Charge (%)') }}
+                                            </td>
+                                            <td class="pl-4 text-right"> <span id="displayGuestServiceCharge"
+                                                    value=""> 0
+                                                </span></td>
+                                        </tr>
+
+                                        <tr class="accomodation_tax">
+                                            <td class="pl-4">
+                                                {{ __('IVA Tax (%)') }}
+                                            </td>
+                                            <td class="pl-4 text-right"> <span id="displayIvaTax" value="">
+                                                    0 </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pl-4">{{ __('Accommodation Tax (%)') }}</td>
+                                            <td class="pl-4 text-right"><span id="displayAccommodationTax"
+                                                    value=""> 0
+                                                </span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pl-4">{{ __('Total Price') }}</td>
+                                            <td class="pl-4 text-right"><span id="displayTotalPriceWithAll"
+                                                    value=""> 0
+                                                </span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <input id="hosting_id" name="hosting_id" type="hidden" value="{{ $result->id }}">
+                        <div
+                            class="book_btn col-md-12 text-center {{ $result->host_id == Auth()->user()?->id || $result->status == 'Unlisted' ? 'display-off' : '' }}">
+                            @if (($adminPropertyApproval == 'Yes' && $result->is_verified != 'Pending') || $adminPropertyApproval == 'No')
+                                <button type="submit"
+                                    class="btn vbtn-outline-success text-14 font-weight-700 mt-3 pl-5 pr-5 pt-3 pb-3"
+                                    id="save_btn">
+                                    <i class="spinner fa fa-spinner fa-spin d-none"></i>
+                                    <span class="{{ $result->booking_type != 'instant' ? '' : 'display-off' }}">
+                                        {{ __('Book Now Pay Later') }}
+                                    </span>
+                                    <span class="{{ $result->booking_type == 'instant' ? '' : 'display-off' }}">
+                                        <i class="icon icon-bolt text-beach h4"></i>
+                                        {{ __('Book and Pay Now') }}
+                                    </span>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                    <input id="hosting_id" name="hosting_id" type="hidden" value="{{ $result->id }}">
                     </form>
                 </div>
                 <div class="clearfix"></div>
@@ -1861,7 +1860,6 @@
                         $("#save_btn").prop('disabled', true);
                         $("#save_btn .spinner").removeClass('d-none');
                         $("#booking-exists").addClass("d-none"); // Reset error state
-                        // $("#book_it").addClass("d-none"); // Hide pricing table initially
                     },
                     success: function(response) {
                         // Reset button state
@@ -1927,6 +1925,20 @@
                 $('#displayIvaTax').text(formatPercentage(response.iva_tax));
                 $('#displayAccommodationTax').text(formatPercentage(response.accomodation_tax));
                 $('#displayTotalPriceWithAll').text(formatPrice(response.totalPriceWithChargesAndFees));
+                $('#hiddenFieldsContainer').html(`
+        <input type="hidden" name="basePrice" value="${response.basePrice}">
+        <input type="hidden" name="pricingType" value="${response.pricingType}">
+        <input type="hidden" name="perDayPrice" value="${response.perDayPrice}">
+        <input type="hidden" name="numberOfDays" value="${response.numberOfDays}">
+        <input type="hidden" name="cleaning_fee" value="${response.cleaning_fee}">
+        <input type="hidden" name="security_fee" value="${response.security_fee}">
+        <input type="hidden" name="guest_fee" value="${response.guest_fee}">
+        <input type="hidden" name="host_service_charge" value="${response.host_service_charge}">
+        <input type="hidden" name="guest_service_charge" value="${response.guest_service_charge}">
+        <input type="hidden" name="iva_tax" value="${response.iva_tax}">
+        <input type="hidden" name="accommodation_tax" value="${response.accomodation_tax}">
+        <input type="hidden" name="totalPriceWithAll" value="${response.totalPriceWithChargesAndFees}">
+    `);
             }
 
             // Hide pricing table initially
