@@ -827,14 +827,14 @@
                             <div class="table-responsive price-table-scroll">
                                 <table class="table table-bordered price_table" id="booking_table">
                                     <tbody>
-                                        <tr>
+                                        {{-- <tr>
                                             <td class="pl-4">
                                                 {{ __('Base Price') }}
                                             </td>
                                             <td class="pl-4 text-right"><span id="basePrice" value="">
                                                     0
                                                 </span></td>
-                                        </tr>
+                                        </tr> --}}
                                         <tr>
                                             <td class="pl-4">
                                                 {{ __('Per Day Price') }}
@@ -1913,7 +1913,7 @@
             }
 
             function updateTable(response) {
-                $('#basePrice').text(formatPrice(response.basePrice));
+                // $('#basePrice').text(formatPrice(response.basePrice));
                 $('#displayPricingType').text(response.pricingType);
                 $('#perDayPrice').text(formatPrice(response.perDayPrice));
                 $('#displayNumberOfDays').text(response.numberOfDays + ' days');
@@ -1926,7 +1926,7 @@
                 $('#displayAccommodationTax').text(formatPercentage(response.accomodation_tax));
                 $('#displayTotalPriceWithAll').text(formatPrice(response.totalPriceWithChargesAndFees));
                 $('#hiddenFieldsContainer').html(`
-        <input type="hidden" name="basePrice" value="${response.basePrice}">
+        <input type="hidden" name="basePrice" value="${response.totalPrice}">
         <input type="hidden" name="pricingType" value="${response.pricingType}">
         <input type="hidden" name="perDayPrice" value="${response.perDayPrice}">
         <input type="hidden" name="numberOfDays" value="${response.numberOfDays}">

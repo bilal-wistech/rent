@@ -183,7 +183,7 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
         \Log::info('Starting booking store process', ['request_data' => $request->all()]);
 
         $currencyDefault = Currency::getAll()->where('default', 1)->first();
@@ -205,7 +205,7 @@ class PaymentController extends Controller
             $bookingData = [
                 'property_id' => $request->property_id,
                 'user_id' => Auth::user()->id,
-                'host_id' => $request->hosting_id,
+                'host_id' => $property->host_id,
                 'booking_added_by' => Auth::user()->id,
                 'start_date' => setDateForDb($request->checkin),
                 'end_date' => setDateForDb($request->checkout),
@@ -219,7 +219,7 @@ class PaymentController extends Controller
                 'security_money' => Common::convert_currency('', $currencyDefault->code, $request->security_fee ?? 0),
                 'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $request->cleaning_fee ?? 0),
                 'total' => Common::convert_currency('', $currencyDefault->code, $request->totalPriceWithAll ?? 0),
-                'base_price' => Common::convert_currency('', $currencyDefault->code, $request->total_price ?? 0),
+                'base_price' => Common::convert_currency('', $currencyDefault->code, $request->basePrice ?? 0),
                 'currency_code' => $currencyDefault->code,
                 'booking_type' => $request->booking_type,
                 'renewal_type' => $request->renewal_type ?? 'none',
@@ -236,7 +236,8 @@ class PaymentController extends Controller
             $booking = Bookings::create($bookingData);
             \Log::info('Booking created successfully', [
                 'booking_id' => $booking->id,
-                'property_id' => $booking->property_id
+                'property_id' => $booking->property_id,
+                'booking' => $booking
             ]);
 
             $start_date = date('Y-m-d', strtotime($request->checkin));
@@ -261,7 +262,7 @@ class PaymentController extends Controller
                     'property_id' => $request->property_id,
                     'booking_id' => $booking->id,
                     'date' => $date,
-                    'price' => ($request->per_day_price) ? $request->per_day_price : '0',
+                    'price' => ($request->perDayPrice) ? Common::convert_currency('', $currencyDefault->code, $request->perDayPrice ?? 0) : '0',
                     'status' => $status,
                     'min_day' => $min_days,
                     'min_stay' => ($request->min_stay) ? '1' : '0',
@@ -282,7 +283,7 @@ class PaymentController extends Controller
                 'invoice_date' => Carbon::now(),
                 'due_date' => Carbon::now()->addDays(5),
                 'description' => 'Booking invoice for ' . $property->name,
-                'sub_total' => Common::convert_currency('', $currencyDefault->code, $request->total_price),
+                'sub_total' => Common::convert_currency('', $currencyDefault->code, $request->basePrice),
                 'grand_total' => Common::convert_currency('', $currencyDefault->code, $request->totalPriceWithAll),
                 'payment_status' => $payment_status
             ]);
