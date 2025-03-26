@@ -694,20 +694,24 @@
             tooltip: "always",
         });
 
-        $("#price-range").on("change", function(event) {
+        $("#price-range").on("change", function() {
             var values = $(this).val().split(",");
             $("#minPrice").text(values[0]);
             $("#maxPrice").text(values[1]);
         });
 
-        // Prevent dropdown from closing when interacting with slider
+        // Prevent dropdown from closing when interacting with the slider
         $(".dropdown-menu-price").on("click", function(event) {
             event.stopPropagation();
         });
 
+        // Close the dropdown when clicking the submit button
         $("#btnPrice").on("click", function() {
             var values = $("#price-range").val().split(",");
             console.log("Selected Price Range: " + values[0] + " - " + values[1]);
+
+            // Close the dropdown manually
+            $("#dropdownPrice").dropdown("toggle");
         });
     </script>
 @endsection
