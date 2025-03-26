@@ -565,10 +565,8 @@
     </div>
 @endsection
 
+
 @section('validation_script')
-@section('validation_script')
-    <script type="text/javascript"
-        src='https://maps.google.com/maps/api/js?key={{ config('vrent.google_map_key') }}&libraries=places'></script>
     <script type="text/javascript" src="{{ asset('js/jquery-ui.js') }}"></script>
     <script src="{{ asset('js/sweetalert.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/moment.min.js') }}"></script>
@@ -579,8 +577,6 @@
 
     <script type="text/javascript">
         'use strict'
-        $("#price-range").slider();
-
         var dateFormat = "{{ Session::get('front_date_format_type') }}";
         var loadPage = '{{ url('search/result') }}';
         var markers = [];
@@ -594,7 +590,8 @@
         var bathroomsText = "{{ __('Bathrooms') }}";
         var notFoundImage = "{{ url('/img/not-found.png') }}";
         var noResult = "{{ __('No Results Found') }}";
-
+        var minPrice = {{ $min_price }};
+        var maxPrice = {{ $max_price }};
         var user_id = "{{ Auth::id() }}";
         var success = "{{ __('Success') }}";
         var yes = "{{ __('Yes') }}";
@@ -686,6 +683,31 @@
         `;
             $('<style>').text(styles).appendTo('head');
         });
+
+
+        $("#price-range").slider({
+            range: true,
+            min: minPrice,
+            max: maxPrice,
+            value: [minPrice, maxPrice],
+            tooltip_split: true,
+            tooltip: "always",
+        });
+
+        $("#price-range").on("change", function(event) {
+            var values = $(this).val().split(",");
+            $("#minPrice").text(values[0]);
+            $("#maxPrice").text(values[1]);
+        });
+
+        // Prevent dropdown from closing when interacting with slider
+        $(".dropdown-menu-price").on("click", function(event) {
+            event.stopPropagation();
+        });
+
+        $("#btnPrice").on("click", function() {
+            var values = $("#price-range").val().split(",");
+            alert("Selected Price Range: " + values[0] + " - " + values[1]);
+        });
     </script>
-@endsection
 @endsection
