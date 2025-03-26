@@ -74,26 +74,30 @@ class SearchController extends Controller
         $checkoutDate = $request->input('checkout') ? Carbon::parse($request->input('checkout')) : $today;
 
         $query = Properties::where('status', 'listed')
-            ->with('users', 'property_price', 'property_address', 'bookings')
-            ->whereHas('property_address', function ($q) use ($location) {
-                $q->where('address_line_1', 'like', "%{$location}%")
-                    ->orWhere('address_line_2', 'like', "%{$location}%")
-                    ->orWhere('city', 'like', "%{$location}%")
-                    ->orWhere('state', 'like', "%{$location}%")
-                    ->orWhere('country', 'like', "%{$location}%")
-                    ->orWhere('area', 'like', "%{$location}%")
-                    ->orWhere('building', 'like', "%{$location}%")
-                    ->orWhere('flat_no', 'like', "%{$location}%");
+            ->where(function ($mainQuery) use ($location) {
+                $mainQuery->where('name', 'like', "%{$location}%")
+                    ->orWhereHas('property_address', function ($addressQuery) use ($location) {
+                        $addressQuery->where('address_line_1', 'like', "%{$location}%")
+                            ->orWhere('address_line_2', 'like', "%{$location}%")
+                            ->orWhere('city', 'like', "%{$location}%")
+                            ->orWhere('state', 'like', "%{$location}%")
+                            ->orWhere('country', 'like', "%{$location}%")
+                            ->orWhere('area', 'like', "%{$location}%")
+                            ->orWhere('building', 'like', "%{$location}%")
+                            ->orWhere('flat_no', 'like', "%{$location}%");
+                    });
             })
-            ->whereDoesntHave('bookings', function ($query) use ($checkinDate, $checkoutDate) {
-                $query->where(function ($q) use ($checkinDate, $checkoutDate) {
-                    $q->whereBetween('start_date', [$checkinDate, $checkoutDate])
-                        ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
-                        ->orWhere(function ($q) use ($checkinDate, $checkoutDate) {
-                            $q->where('start_date', '<=', $checkinDate)
-                                ->where('end_date', '>=', $checkoutDate);
-                        });
-                })->where('status', 'Accepted');
+            ->with(['users', 'property_price', 'property_address', 'bookings'])
+            ->whereDoesntHave('bookings', function ($bookingQuery) use ($checkinDate, $checkoutDate) {
+                $bookingQuery->where('status', 'Accepted')
+                    ->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
+                        $conflictQuery->whereBetween('start_date', [$checkinDate, $checkoutDate])
+                            ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
+                            ->orWhere(function ($overlapQuery) use ($checkinDate, $checkoutDate) {
+                                $overlapQuery->where('start_date', '<=', $checkinDate)
+                                    ->where('end_date', '>=', $checkoutDate);
+                            });
+                    });
             });
 
         // Apply filters
