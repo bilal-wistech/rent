@@ -294,7 +294,7 @@ class PaymentController extends Controller
             \Log::info('Booking transaction committed successfully', ['booking_id' => $booking->id]);
 
             Common::one_time_message('success', 'Booking ' . ($bookingId ? 'Updated' : 'Added') . ' Successfully');
-            return redirect()->back();
+            return redirect()->route('my-trips');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Booking creation failed', [

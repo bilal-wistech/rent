@@ -7,7 +7,11 @@
 @endpush
 
 @section('main')
-
+    @if (Session::has('message'))
+        <div class="alert alert-success text-center" role="alert" id="alert">
+            <span id="messages">{{ Session::get('message') }}</span>
+        </div>
+    @endif
     <input type="hidden" id="front_date_format_type" value="{{ Session::get('front_date_format_type') }}">
 
     <div class="carousel-inner" role="listbox">

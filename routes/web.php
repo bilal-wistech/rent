@@ -618,7 +618,7 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
     Route::get('booking/expire/{id}', 'BookingController@expire');
     Route::match(['get', 'post'], 'my-bookings', 'BookingController@myBookings');
     Route::post('booking/host_cancel', 'BookingController@hostCancel');
-    Route::match(['get', 'post'], 'trips/active', 'TripsController@myTrips');
+    Route::match(['get', 'post'], 'trips/active', 'TripsController@myTrips')->name('my-trips');
     Route::get('booking/receipt', 'TripsController@receipt');
     Route::post('trips/guest_cancel', 'TripsController@guestCancel');
 
