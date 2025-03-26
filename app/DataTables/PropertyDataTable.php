@@ -15,14 +15,15 @@ class PropertyDataTable extends DataTable
         return datatables()
             ->of($properties)
             ->addColumn('action', function ($properties) {
-                $edit = $delete = '';
+                $edit = $delete  = $pricing ='';
                 if (Common::has_permission(\Auth::guard('admin')->user()->id, 'edit_properties')) {
                     $edit = '<a href="' . url('admin/listing/' . $properties->id) . '/basics" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
                 }
                 if (Common::has_permission(\Auth::guard('admin')->user()->id, 'delete_property')) {
                     $delete = '<a href="' . url('admin/delete-property/' . $properties->id) . '" class="btn btn-xs btn-danger delete-warning"><i class="fa fa-trash"></i></a>';
                 }
-                return $edit . $delete;
+                $pricing= '<a href="' . url('admin/show-pricing/' . $properties->id) . '" class="btn btn-xs btn-success "><i class="fa fa-dollar"></i></a>';
+                return $edit . $delete .$pricing;
             })
             ->addColumn('id', function ($properties) {
                 return $properties->id;

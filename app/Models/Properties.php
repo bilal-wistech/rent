@@ -18,9 +18,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\{Model, SoftDeletes};
-use App\Models\PropertyPhotos;
 use Auth;
+use Carbon\Carbon;
+use App\Models\PropertyPhotos;
+use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 
 
 class Properties extends Model
@@ -44,7 +45,20 @@ class Properties extends Model
                         ->get();
         return $data;
     }
-
+    public static function vacantToday()
+    {
+        $today = Carbon::today();
+        $data = parent::where('status', 'listed')
+            ->with('users', 'property_price', 'property_address', 'bookings')
+            ->whereDoesntHave('bookings', function ($query) use ($today) {
+                $query->where('start_date', '<=', $today->format('Y-m-d'))
+                    ->where('end_date', '>=', $today->format('Y-m-d'));
+            })
+            ->take(4)
+            ->inRandomOrder()
+            ->get();
+        return $data;
+    }
 
     public function getHostNameAttribute()
     {

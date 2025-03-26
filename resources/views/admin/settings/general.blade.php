@@ -32,7 +32,7 @@
                                 <div class="form-group row mt-3 name">
                                     <label for="inputEmail3" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Name
                                         <span class="text-danger">*</span></label>
-                                    
+
                                     <div class="col-sm-6">
                                         <input type="text" name="name" class="form-control f-14" id="name" placeholder="Name"
                                         value="{{ $result['name'] }}">
@@ -44,7 +44,7 @@
                                     <label for="inputEmail3" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Email
                                         <span class="text-danger">*</span>
                                     </label>
-                                    
+
                                     <div class="col-sm-6">
                                         <input type="email" name="email" class="form-control f-14" id="email" placeholder="Email"
                                         value="{{ $result['email'] }}">
@@ -57,7 +57,7 @@
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Logo
                                        <span class="text-danger">*</span>
                                     </label>
-                            
+
                                     <div class="col-sm-6">
                                         <input type="file" name="photos[logo]" class="form-control f-14" id="photos[logo]" placeholder="Logo">
                                         <span class="text-danger">{{ $errors->first('photos[logo]') }}</span>
@@ -65,7 +65,7 @@
                                         <input id="hidden_company_logo" name="hidden_company_logo" data-rel="' {{ $result['logo'] }}'" type="hidden" >
                                         <span  name="mySpan" class="remove_logo_preview" id="mySpan"></span>
                                     </div>
-                            
+
                                     <div class="col-sm-3">
                                         <small>{{ $field['hint'] ?? '' }}</small>
                                     </div>
@@ -75,7 +75,7 @@
                                     <label for="inputEmail3"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Favicon<span
                                             class="text-danger">*</span></label>
-                            
+
                                     <div class="col-sm-6">
                                         <input type="file" name="photos[favicon]" class="form-control f-14" id="photos[favicon]" placeholder="Favicon">
                                         <span class="text-danger">{{ $errors->first('photos[favicon]') }}</span>
@@ -84,7 +84,7 @@
                                         <span  name="mySpan2" class="remove_favicon_preview" id="mySpan2"></span>
                                         <input id="hidden_company_favicon" name="hidden_company_favicon" data-rel="{{ $result['favicon'] }}" type="hidden" >
                                     </div>
-                            
+
                                     <div class="col-sm-3">
                                         <small>{{ $field['hint'] ?? '' }}</small>
                                     </div>
@@ -93,20 +93,20 @@
                                 <div class="form-group row mt-3">
                                         <label for="inputEmail3" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Head Code
                                             <span class="text-danger">*</span></label>
-                                
+
                                     <div class="col-sm-6">
                                         <textarea name="head_code" placeholder="Head Code" rows="3"
                                             class="form-control f-14 validate_field">{{ $result['head_code'] }}</textarea>
                                         <span class="text-danger">{{ $errors->first('head_code') }}</span>
                                     </div>
-                                
+
                                 </div>
-                                
+
 
                                 <div class="form-group row mt-3 default_currency">
 
                                     <label for="inputEmail3" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Default Currency</label>
-                                    
+
                                     <div class="col-sm-6">
                                         <select class="form-control f-14" id="default_currency" name="default_currency" aria-invalid="false">
                                             @foreach ($currency as $key => $item)
@@ -120,7 +120,7 @@
                                 <div class="form-group row mt-3 default_language">
 
                                     <label for="inputEmail3" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Default Language</label>
-                                    
+
                                     <div class="col-sm-6">
                                         <select class="form-control f-14" id="default_language" name="default_language" aria-invalid="false">
                                             @foreach ($language as $key => $item)
@@ -131,7 +131,7 @@
                                     </div>
                                 </div>
 
-                                
+
                             </div>
                             <div class="box-footer">
 
@@ -140,7 +140,7 @@
 
 								<a class="btn btn-danger f-14" href="{{ url('admin/settings') }}">Cancel</a>
 
-								
+
 							</div>
 						</form>
 					</div>
@@ -148,7 +148,7 @@
 			</div>
 		</section>
 	</div>
-    
+
   @endsection
 
   @section('validate_script')

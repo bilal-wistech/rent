@@ -134,9 +134,11 @@ if (!function_exists('image')) {
             return defaultImage($directoryName);
         }
 
-        $imageFullPath = getDirectory(strtolower($directoryName)) . $imageName;
-        if (file_exists(base_path($imageFullPath))) {
-            return asset($imageFullPath);
+        $directoryPath = public_path(getDirectory(strtolower($directoryName)));
+        $imageFullPath = $directoryPath . DIRECTORY_SEPARATOR . $imageName;
+
+        if (file_exists($imageFullPath)) {
+            return asset(getDirectory(strtolower($directoryName)) . '/' . $imageName);
         }
 
         return defaultImage($directoryName);

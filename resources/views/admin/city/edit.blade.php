@@ -19,7 +19,7 @@
                     </div>
 
                     @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: relative;">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: relative;" >
                         {{ session('success') }}
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="position: absolute; right: 10px; top: 10px;">
                             <span aria-hidden="true">&times;</span>
@@ -37,7 +37,7 @@
                     </div>
                 @endif
 
-                    <form id="add_country" method="post" action="{{ route('city.update',$city->id) }}" class="form-horizontal">
+                    <form id="add_country" method="post" action="{{ route('city.update',$city->id) }}" class="form-horizontal" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         {{ method_field('PUT') }}
                            <div class="box-body">
@@ -50,6 +50,22 @@
                                     <span class="text-danger">{{ $errors->first("name") }}</span>
                                 </div>
                             </div>
+                            <div class="form-group row mt-3">
+                                <label for="image" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                    Upload Image <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="col-sm-6">
+                                    <input type="file" name="image" class="form-control f-14" id="image" accept="image/*">
+                                    <span class="text-danger">{{ $errors->first("image") }}</span>
+                                    @if(isset($city->image))
+                                        <div class="mt-2">
+                                            <img src="{{ asset('front/images/front-cities/' . $city->image) }}" alt="City Image" width="100" height="100" style="border-radius: 5px;">
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
                             <input type="hidden" name="country_id" id="country_id" value="{{$city->country_id }}">
 
                         </div>

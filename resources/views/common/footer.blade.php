@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            <div class="col-6 col-sm-3 mt-4">
+            {{-- <div class="col-6 col-sm-3 mt-4">
                  @if (!top_destinations()->isEmpty())
                     <h2 class="font-weight-700">{{ __('Top Destination') }}</h2>
                     <div class="row">
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                 @endif
-            </div>
+            </div> --}}
 
 
             <div class="col-6 col-sm-3 mt-5">

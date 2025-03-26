@@ -42,7 +42,7 @@
                                         <span class="text-danger">{{ $errors->first('country') }}</span>
                                     </div>
                                 </div>
-                                <div class="row">
+                                {{-- <div class="row">
                                     <div class="col-md-8 mb20">
                                         <label class="label-large fw-bold">Address Line 1 <span
                                                 class="text-danger">*</span></label>
@@ -68,7 +68,7 @@
                                             value="{{ $result->property_address->address_line_2 }}"
                                             class="form-control f-14" placeholder="Apt., suite, building access code">
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="row">
                                     <div class="col-md-8 mb20">
                                         <label class="label-large fw-bold">Area</label>

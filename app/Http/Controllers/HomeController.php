@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App, Session, Common;
 use App\Models\{
+    Area,
     Currency,
     Properties,
     Page,
@@ -30,8 +31,11 @@ class HomeController extends Controller
 
     public function index()
     {
-        $data['starting_cities']     = StartingCities::getAll();
-        $data['properties']          = Properties::recommendedHome();
+        // $data['starting_cities']     = StartingCities::getAll();
+        $data['areas'] = Area::where('show_on_front',1)->get();
+        // \DB::enableQueryLog();
+        $data['properties']          = Properties::vacantToday();
+        // dd(\DB::getQueryLog());
         $data['testimonials']        = Testimonials::getAll();
         $sessionLanguage             = Session::get('language');
         $language                    = Settings::getAll()->where('name', 'default_language')->where('type', 'general')->first();
@@ -55,7 +59,7 @@ class HomeController extends Controller
             Session::put($prefer);
         }
         $data['date_format'] = Settings::getAll()->firstWhere('name', 'date_format_type')->value;
-
+        // dd($data['properties']);
         return view('home.home', $data);
     }
 

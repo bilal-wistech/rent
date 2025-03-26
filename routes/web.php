@@ -34,8 +34,8 @@ Route::get('cron/ical-synchronization', 'CronController@iCalendarSynchronization
 //user can view it anytime with or without logged in
 Route::group(['middleware' => ['locale']], function () {
     Route::get('/', 'HomeController@index');
-    Route::post('search/result', 'SearchController@searchResult');
-    Route::match(array('GET', 'POST'), 'search', 'SearchController@index');
+    Route::post('search/result', 'SearchController@searchResult')->name('suggestions');
+    Route::match(array('GET', 'POST'), 'search', 'SearchController@index')->name('search.result');
     Route::match(array('GET', 'POST'), 'properties/{slug}', 'PropertyController@single')->name('property.single');
     Route::match(array('GET', 'POST'), 'property/get-price', 'PropertyController@getPrice');
     Route::get('set-slug/', 'PropertyController@set_slug');
@@ -63,6 +63,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('customers', 'CustomerController@index')->middleware(['permission:customers']);
 
     Route::resource('document', DocumentController::class);
+    Route::get('/document/{id}', [DocumentController::class, 'show'])->name('admin.document.show');
+
     Route::resource('emergencycontacts', EmergencyContactController::class);
     Route::resource('city', CityController::class);
     Route::resource('area', AreaController::class);
@@ -132,6 +134,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     //iCalender routes end
     Route::match(array('GET', 'POST'), 'edit_property/{id}', 'PropertiesController@update')->middleware(['permission:edit_properties']);
     Route::get('delete-property/{id}', 'PropertiesController@delete')->middleware(['permission:delete_property']);
+    Route::get('show-pricing/{id}', 'PropertiesController@showPricing');
+
     Route::get('bookings', 'BookingsController@index')->middleware(['permission:manage_bookings']);
     Route::get('bookings/property_search', 'BookingsController@searchProperty')->middleware(['permission:manage_bookings']);
     Route::get('bookings/customer_search', 'BookingsController@searchCustomer')->middleware(['permission:manage_bookings']);
@@ -162,7 +166,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('reviews/review_search', 'ReviewsController@searchReview');
         Route::get('reviews/review_list_csv', 'ReviewsController@reviewCsv');
         Route::get('reviews/review_list_pdf', 'ReviewsController@reviewPdf');
-
     });
 
     // Route::get('reports', 'ReportsController@index')->middleware(['permission:manage_reports']);
@@ -187,7 +190,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::match(array('GET', 'POST'), 'add-page', 'PagesController@add');
         Route::match(array('GET', 'POST'), 'edit-page/{id}', 'PagesController@update');
         Route::get('delete-page/{id}', 'PagesController@delete');
-
     });
 
 
@@ -288,8 +290,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('settings/bank/delete/{bank}', 'BankController@deleteBank')->middleware(['permission:payment_settings']);
         Route::match(array('GET', 'POST'), 'settings/social-links', 'SettingsController@socialLinks')->middleware(['permission:social_links']);
 
-        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);
-        ;
+        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);;
 
         Route::group(['middleware' => 'permission:manage_roles'], function () {
             Route::get('settings/roles', 'RolesController@index');
@@ -327,8 +328,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
 
     Route::get('calculate-booking-price', 'BookingsController@calculateBookingPrice')->middleware(['permission:manage_bookings'])->name('calculate-booking-price');
     Route::get('payment-receipts', 'PaymentReceiptController@index')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.index');
+    Route::get('payment-receipts/create', 'PaymentReceiptController@create')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.create');
+    Route::post('payment-receipts/store', 'PaymentReceiptController@store')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.store');
+    Route::get('payment-receipts/edit/{payment_receipt}', 'PaymentReceiptController@edit')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.edit');
+    Route::put('payment-receipts/update/{payment_receipt}', 'PaymentReceiptController@update')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.update');
+    Route::get('payment-receipts/get-booking-details/{booking_id}', 'PaymentReceiptController@getBookingDetails')->middleware(['permission:manage_payment_receipts'])->name('payment-receipts.get-booking-details');
 
-    Route::match(['post', 'put'],'bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
+    Route::match(['post', 'put'], 'bookings/store', 'BookingsController@store')->middleware(['permission:manage_bookings'])->name('admin.bookings.store');
     Route::get('bookings/edit/{id}', 'BookingsController@edit')->middleware(['permission:manage_bookings'])->name('admin.bookings.edit');
 
     Route::put('bookings/update/{id}', 'BookingsController@update')->middleware(['permission:manage_bookings'])->name('admin.bookings.update');
@@ -344,6 +350,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('booking/need_pay_account/{id}/{type}', 'BookingsController@needPayAccount');
     Route::get('booking/booking_list_csv', 'BookingsController@bookingCsv');
     Route::get('booking/booking_list_pdf', 'BookingsController@bookingPdf');
+    Route::get('renewal-bookings', 'RenewalBookingController@index')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.index');
+    Route::get('renewal-bookings/renewal/{id}', 'RenewalBookingController@renewal')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.renewal');
+
+    Route::post('renewal-bookings/renewal/check-booking-exists', 'RenewalBookingController@checkExistingPropertyBookingInRenewal')->middleware(['permission:manage_bookings'])->name('renewal-bookings.renewal.check-booking-exists');
+
+    Route::post('renewal-bookings/store-renewal-booking', 'RenewalBookingController@storeRenewalBooking')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.store-renewal-booking');
+    Route::post('renewal-bookings/cancel-renewal-booking', 'RenewalBookingController@cancelRenewalBooking')->middleware(['permission:manage_renewal_bookings'])->name('renewal-bookings.cancel-renewal-booking');
     Route::get('payouts', 'PayoutsController@index')->middleware(['permission:view_payouts']);
     Route::match(array('GET', 'POST'), 'payouts/edit/{id}', 'PayoutsController@edit');
     Route::get('payouts/details/{id}', 'PayoutsController@details');
@@ -355,9 +368,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('reviews/review_search', 'ReviewsController@searchReview');
         Route::get('reviews/review_list_csv', 'ReviewsController@reviewCsv');
         Route::get('reviews/review_list_pdf', 'ReviewsController@reviewPdf');
-
     });
-
+    Route::get('securities', 'SecurityController@index')->middleware(['permission:manage_securities'])->name('securities.index');
+    Route::get('securities/refund-form/{booking_id}', 'SecurityController@refundForm')->middleware(['permission:manage_securities'])->name('securities.refund-form');
+    Route::post('securities/refund', 'SecurityController@refund')->middleware(['permission:manage_securities'])->name('securities.refund');
     // Route::get('reports', 'ReportsController@index')->middleware(['permission:manage_reports']);
 
     // For Reporting
@@ -380,7 +394,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::match(array('GET', 'POST'), 'add-page', 'PagesController@add');
         Route::match(array('GET', 'POST'), 'edit-page/{id}', 'PagesController@update');
         Route::get('delete-page/{id}', 'PagesController@delete');
-
     });
 
 
@@ -481,8 +494,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('settings/bank/delete/{bank}', 'BankController@deleteBank')->middleware(['permission:payment_settings']);
         Route::match(array('GET', 'POST'), 'settings/social-links', 'SettingsController@socialLinks')->middleware(['permission:social_links']);
 
-        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);
-        ;
+        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);;
 
         Route::group(['middleware' => 'permission:manage_roles'], function () {
             Route::get('settings/roles', 'RolesController@index');
@@ -591,6 +603,7 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
     Route::post('currency-symbol', 'PropertyController@currencySymbol');
     Route::match(['get', 'post'], 'payments/book/{id?}', 'PaymentController@index');
     Route::post('payments/create_booking', 'PaymentController@createBooking');
+    Route::post('payments/create-booked-unpaid', 'PaymentController@store')->name('payments.create-booked-unpaid');
     Route::get('payments/success', 'PaymentController@success');
     Route::get('payments/cancel', 'PaymentController@cancel');
     Route::get('payments/stripe', 'PaymentController@stripePayment');
@@ -605,7 +618,7 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
     Route::get('booking/expire/{id}', 'BookingController@expire');
     Route::match(['get', 'post'], 'my-bookings', 'BookingController@myBookings');
     Route::post('booking/host_cancel', 'BookingController@hostCancel');
-    Route::match(['get', 'post'], 'trips/active', 'TripsController@myTrips');
+    Route::match(['get', 'post'], 'trips/active', 'TripsController@myTrips')->name('my-trips');
     Route::get('booking/receipt', 'TripsController@receipt');
     Route::post('trips/guest_cancel', 'TripsController@guestCancel');
 

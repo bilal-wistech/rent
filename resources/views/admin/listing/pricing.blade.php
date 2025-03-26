@@ -459,6 +459,44 @@
                 pricingFields.append(newFields);
                 updateAddButtonState();
             }
+        }
+
+        // Add click event to add button
+        addButton.on('click', function() {
+            const currentCount = pricingFields.find('.pricing-item').length;
+
+            if (currentCount < totalPricingTypes) {
+                const newFields = createPricingFields();
+                pricingFields.append(newFields);
+                updateAddButtonState();
+            }
+        });
+
+        // Add remove buttons to existing fields if more than one
+        if (pricingFields.find('.pricing-item').length > 1) {
+            pricingFields.find('.pricing-item').each(function(index) {
+                if (index > 0) {
+                    $(this).append(createRemoveButton());
+                }
+            });
+        }
+
+        // Initialize existing selects
+        pricingFields.find('select[name="pricing_type[]"]').each(function() {
+            // Store original options
+            this.originalOptions = Array.from(this.options).map(opt => ({
+                value: opt.value,
+                text: opt.text
+            }));
+
+            // Add change event
+            $(this).on('change', function() {
+                removeErrorMessage(this);
+                if (!$(this).val()) {
+                    $(this).after(createErrorMessage('Please select a price type'));
+                }
+                updateAllSelects();
+            });
         });
 
         // Add remove buttons to existing fields if more than one
