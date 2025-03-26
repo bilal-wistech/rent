@@ -16,7 +16,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <ul class="list-inline  pl-4">
-                            {{-- <li class="list-inline-item mt-4">
+                            <li class="list-inline-item mt-4">
                                 <div class="dropdown">
                                     <button class="btn text-16 border border-r-25 pl-4 pr-4 dropdown-toggle" type="button"
                                         id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
@@ -45,12 +45,19 @@
                                                         <div class="col-md-12 p-0">
                                                             <div class="row">
                                                                 <div class="col-md-9">
-                                                                    <div class="d-flex" id="daterange-btn">
+                                                                    <div class="d-flex">
                                                                         <div class="pr-2">
                                                                             <h3 class="font-weight-700 mt-4 text-14">
                                                                                 {{ __('Check In') }}</h3>
                                                                             <div class="input-group mr-2">
                                                                                 <input
+                                                                                    class="form-control p-3 border-right-0 border text-14 checkinout"
+                                                                                    name="checkin" id="startDate"
+                                                                                    type="date"
+                                                                                    placeholder="{{ __('Check In') }}"
+                                                                                    value="{{ $checkin }}"
+                                                                                    autocomplete="off" required>
+                                                                                {{-- <input
                                                                                     class="form-control p-3 border-right-0 border text-14 checkinout"
                                                                                     name="checkin" id="startDate"
                                                                                     type="text"
@@ -63,7 +70,7 @@
                                                                                         <i
                                                                                             class="fa fa-calendar success-text text-14"></i>
                                                                                     </div>
-                                                                                </span>
+                                                                                </span> --}}
                                                                             </div>
                                                                         </div>
 
@@ -72,6 +79,12 @@
                                                                                 {{ __('Check Out') }}</h3>
                                                                             <div class="input-group ml-2">
                                                                                 <input
+                                                                                    class="form-control p-3 border-right-0 border text-14 checkinout"
+                                                                                    name="checkout" id="endDate"
+                                                                                    type="date"
+                                                                                    placeholder="{{ __('Check Out') }}"
+                                                                                    value="{{ $checkout }}" required>
+                                                                                {{-- <input
                                                                                     class="form-control p-3 border-right-0 border text-14 checkinout"
                                                                                     name="checkout" id="endDate"
                                                                                     type="text"
@@ -83,22 +96,10 @@
                                                                                         <i
                                                                                             class="fa fa-calendar success-text text-14"></i>
                                                                                     </div>
-                                                                                </span>
+                                                                                </span> --}}
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <h3 class="font-weight-700 mt-4 text-14">
-                                                                        {{ __('Guest') }}</h3>
-                                                                    <select class="form-control text-16"
-                                                                        id="front-search-guests" name="guests">
-                                                                        @for ($i = 1; $i <= 16; $i++)
-                                                                            <option value="{{ $i }}"
-                                                                                {{ $i == $guest ? 'selected' : '' }}>
-                                                                                {{ $i == '16' ? $i . '+ ' : $i }}</option>
-                                                                        @endfor
-                                                                    </select>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -117,7 +118,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </li> --}}
+                            </li>
 
                             <li class="list-inline-item  mt-4">
                                 <button class="btn text-16 border border-r-25 pl-4 pr-4 dropdown-toggle" type="button"
@@ -602,6 +603,133 @@
     <script type="text/javascript" src="{{ asset('js/front.min.js') }}"></script>
     <script>
         $(document).ready(function() {
+            $('#btnRoom').on('click', function(e) {
+                e.preventDefault();
+
+                let spaceTypes = [];
+                $('input[name="space_type[]"]:checked').each(function() {
+                    spaceTypes.push($(this).val());
+                });
+                // console.log(spaceTypes);
+
+                $.ajax({
+                    url: '{{ route('search.result') }}',
+                    method: 'POST',
+                    data: {
+                        _token: token,
+                        space_type: spaceTypes,
+                        location: $('#front-search-field').val(),
+                        checkin: $('#startDate').val(),
+                        checkout: $('#endDate').val(),
+                        guests: $('#front-search-guests').val()
+                    },
+                    beforeSend: function() {
+                        $('#listCol').append(
+                            '<div class="loader-overlay"><div class="loader"></div></div>');
+                    },
+                    success: function(response) {
+                        // Update the properties list
+                        $('.row.mt-3').html($(response).find('.row.mt-3').html());
+                        // Update pagination
+                        $('#pagination').html($(response).find('#pagination').html());
+                        // Close dropdown
+                        $('#dropdownRoomType').dropdown('toggle');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        swal("Error", "Failed to apply room type filter. Please try again.",
+                            "error");
+                    },
+                    complete: function() {
+                        $('.loader-overlay').remove();
+                    }
+                });
+            });
+
+            // Price Range Filter AJAX
+            $('#btnPrice').on('click', function(e) {
+                e.preventDefault();
+
+                let values = $("#price-range").val().split(",");
+                let minPrice = values[0];
+                let maxPrice = values[1];
+
+                $.ajax({
+                    url: '{{ route('search.result') }}',
+                    method: 'POST',
+                    data: {
+                        _token: token,
+                        min_price: minPrice,
+                        max_price: maxPrice,
+                        location: $('#front-search-field').val(),
+                        checkin: $('#startDate').val(),
+                        checkout: $('#endDate').val(),
+                        guests: $('#front-search-guests').val()
+                    },
+                    beforeSend: function() {
+                        $('#listCol').append(
+                            '<div class="loader-overlay"><div class="loader"></div></div>');
+                    },
+                    success: function(response) {
+                        $('.row.mt-3').html($(response).find('.row.mt-3').html());
+                        $('#pagination').html($(response).find('#pagination').html());
+                        $('#dropdownPrice').dropdown('toggle');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        swal("Error", "Failed to apply price filter. Please try again.",
+                            "error");
+                    },
+                    complete: function() {
+                        $('.loader-overlay').remove();
+                    }
+                });
+            });
+            $('.filter-apply').on('click', function(e) {
+                e.preventDefault();
+
+                let amenities = [];
+                $('.amenities_array:checked').each(function() {
+                    amenities.push($(this).val());
+                });
+
+                let propertyTypes = [];
+                $('input[name="property_type[]"]:checked').each(function() {
+                    propertyTypes.push($(this).val());
+                });
+
+                $.ajax({
+                    url: '{{ route('search.result') }}',
+                    method: 'POST',
+                    data: {
+                        _token: token,
+                        min_bedrooms: $('#map-search-min-bedrooms').val(),
+                        min_bathrooms: $('#map-search-min-bathrooms').val(),
+                        min_beds: $('#map-search-min-beds').val(),
+                        amenities: amenities,
+                        property_type: propertyTypes,
+                        location: $('#front-search-field').val(),
+                        checkin: $('#startDate').val(),
+                        checkout: $('#endDate').val(),
+                        guests: $('#front-search-guests').val()
+                    },
+                    beforeSend: function() {
+                        $('#listCol').append(
+                            '<div class="loader-overlay"><div class="loader"></div></div>');
+                    },
+                    success: function(response) {
+                        $('.row.mt-3').html($(response).find('.row.mt-3').html());
+                        $('#pagination').html($(response).find('#pagination').html());
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        swal("Error", "Failed to apply filters. Please try again.", "error");
+                    },
+                    complete: function() {
+                        $('.loader-overlay').remove();
+                    }
+                });
+            });
             // Handle pagination clicks
             $(document).on('click', '.pagination-ajax', function(e) {
                 e.preventDefault();

@@ -25,9 +25,12 @@
                                     </div>
 
                                     <div class="col-md-12 mt-5">
-                                        <div class="d-flex" id="daterange-btn">
+                                        <div class="d-flex" {{-- id="daterange-btn" --}}>
                                             <div class="input-group mr-2 pt-4">
                                                 <input class="form-control p-3 border-right-0 border text-14 checkinout"
+                                                    name="checkin" id="startDate" type="date"
+                                                    placeholder="{{ __('Check In') }}" autocomplete="off" required>
+                                                {{-- <input class="form-control p-3 border-right-0 border text-14 checkinout"
                                                     name="checkin" id="startDate" type="text"
                                                     placeholder="{{ __('Check In') }}" autocomplete="off"
                                                     readonly="readonly" required>
@@ -35,23 +38,26 @@
                                                     <div class="input-group-text">
                                                         <i class="fa fa-calendar success-text text-14"></i>
                                                     </div>
-                                                </span>
+                                                </span> --}}
                                             </div>
 
                                             <div class="input-group ml-2 pt-4">
                                                 <input class="form-control p-3 border-right-0 border text-14 checkinout"
+                                                    name="checkout" id="endDate" placeholder="{{ __('Check Out') }}"
+                                                    type="date" required>
+                                                {{-- <input class="form-control p-3 border-right-0 border text-14 checkinout"
                                                     name="checkout" id="endDate" placeholder="{{ __('Check Out') }}"
                                                     type="text" readonly="readonly" required>
                                                 <span class="input-group-append">
                                                     <div class="input-group-text">
                                                         <i class="fa fa-calendar success-text text-14"></i>
                                                     </div>
-                                                </span>
+                                                </span> --}}
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6 mt-5 pt-4">
+                                    {{-- <div class="col-md-6 mt-5 pt-4">
                                         <div class="input-group">
                                             <select id="front-search-guests" name="guest" class="form-control  text-14">
                                                 <option class="p-4 text-14" value="1">1 {{ __('Guest') }}</option>
@@ -62,7 +68,7 @@
                                                 @endfor
                                             </select>
                                         </div>
-                                    </div>
+                                    </div> --}}
 
                                     <div class="col-md-12 front-search mt-5 pb-3 pt-4">
                                         <button type="submit"
@@ -91,7 +97,7 @@
                 <div class="row mt-2">
                     @foreach ($areas as $area)
                         <div class="col-md-4 mt-5">
-                            <a href="{{ url('search?location=' . $area->name . '&checkin=&checkout=&guest=1') }}">
+                            <a href="{{ url('search?location=' . $area->name . '&checkin=&checkout=') }}">
                                 <div class="grid item animated zoomIn">
                                     <figure class="effect-ming">
                                         <img src="{{ asset($area->image) }}" width="450px" height="250px"
@@ -144,8 +150,7 @@
                                         </div> --}}
 
                                         <div class="p-4 text">
-                                            <a class="text-color text-color-hover"
-                                                href="properties/{{ $property->slug }}">
+                                            <a class="text-color text-color-hover" href="properties/{{ $property->slug }}">
                                                 <p class="text-16 font-weight-700 text"> {{ $property->name }}</p>
                                             </a>
                                             <p class="text-13 mt-2 mb-0 text"><i class="fas fa-map-marker-alt"></i>

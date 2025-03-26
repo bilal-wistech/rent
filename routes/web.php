@@ -35,7 +35,7 @@ Route::get('cron/ical-synchronization', 'CronController@iCalendarSynchronization
 Route::group(['middleware' => ['locale']], function () {
     Route::get('/', 'HomeController@index');
     Route::post('search/result', 'SearchController@searchResult');
-    Route::match(array('GET', 'POST'), 'search', 'SearchController@index');
+    Route::match(array('GET', 'POST'), 'search', 'SearchController@index')->name('search.result');
     Route::match(array('GET', 'POST'), 'properties/{slug}', 'PropertyController@single')->name('property.single');
     Route::match(array('GET', 'POST'), 'property/get-price', 'PropertyController@getPrice');
     Route::get('set-slug/', 'PropertyController@set_slug');
