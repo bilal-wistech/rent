@@ -196,23 +196,24 @@
                     </div>
                 </div>
                 <div class="row mt-3">
-                    @foreach ($properties as $property)
-                        <div class="col-md-6 col-lg-4 col-xl-3 pl-3 pr-3 pb-3 mt-4">
-                            <div class="card h-100 card-shadow card-1">
-                                <div class="grid">
-                                    <a href="properties/{{ $property->slug }}" aria-label="{{ $property->name }}">
-                                        <figure class="effect-milo">
-                                            <img src="{{ $property->cover_photo }}" class="room-image-container200"
-                                                alt="{{ $property->name }}" />
-                                            <figcaption>
-                                            </figcaption>
-                                        </figure>
-                                    </a>
-                                </div>
+                    @if ($properties->isNotEmpty())
+                        @foreach ($properties as $property)
+                            <div class="col-md-6 col-lg-4 col-xl-3 pl-3 pr-3 pb-3 mt-4">
+                                <div class="card h-100 card-shadow card-1">
+                                    <div class="grid">
+                                        <a href="properties/{{ $property->slug }}" aria-label="{{ $property->name }}">
+                                            <figure class="effect-milo">
+                                                <img src="{{ $property->cover_photo }}" class="room-image-container200"
+                                                    alt="{{ $property->name }}" />
+                                                <figcaption>
+                                                </figcaption>
+                                            </figure>
+                                        </a>
+                                    </div>
 
-                                <div class="card-body p-0 pl-1 pr-1">
-                                    <div class="d-flex">
-                                        {{-- <div>
+                                    <div class="card-body p-0 pl-1 pr-1">
+                                        <div class="d-flex">
+                                            {{-- <div>
                                         <div class="profile-img pl-2">
                                             <a href="{{ url('users/show/' . $property->host_id) }}"><img
                                                     src="{{ $property->users->profile_src }}"
@@ -220,97 +221,106 @@
                                         </div>
                                     </div> --}}
 
-                                        <div class="p-4 text">
-                                            <a class="text-color text-color-hover" href="properties/{{ $property->slug }}">
-                                                <p class="text-16 font-weight-700 text"> {{ $property->name }}</p>
-                                            </a>
-                                            <p class="text-13 mt-2 mb-0 text"><i class="fas fa-map-marker-alt"></i>
-                                                {{ $property->property_address->city }}</p>
+                                            <div class="p-4 text">
+                                                <a class="text-color text-color-hover"
+                                                    href="properties/{{ $property->slug }}">
+                                                    <p class="text-16 font-weight-700 text"> {{ $property->name }}</p>
+                                                </a>
+                                                <p class="text-13 mt-2 mb-0 text"><i class="fas fa-map-marker-alt"></i>
+                                                    {{ $property->property_address->city }}</p>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div class="review-0 p-3">
-                                        <div class="d-flex justify-content-between">
+                                        <div class="review-0 p-3">
+                                            <div class="d-flex justify-content-between">
 
-                                            <div class="d-flex">
-                                                <div class="d-flex align-items-center">
-                                                    <span><i class="fa fa-star text-14 secondary-text-color"></i>
-                                                        @if ($property->guest_review)
-                                                            {{ $property->avg_rating }}
+                                                <div class="d-flex">
+                                                    <div class="d-flex align-items-center">
+                                                        <span><i class="fa fa-star text-14 secondary-text-color"></i>
+                                                            @if ($property->guest_review)
+                                                                {{ $property->avg_rating }}
+                                                            @else
+                                                                0
+                                                            @endif
+                                                            ({{ $property->guest_review }})
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="">
+                                                        @auth
+                                                            <a class="btn btn-sm book_mark_change"
+                                                                data-status="{{ $property->book_mark }}"
+                                                                data-id="{{ $property->id }}"
+                                                                style="color:{{ $property->book_mark == true ? '#1dbf73' : '' }}; ">
+                                                                <span style="font-size: 22px;">
+                                                                    <i class="fas fa-heart pl-2"></i>
+                                                                </span>
+                                                            </a>
                                                         @else
-                                                            0
-                                                        @endif
-                                                        ({{ $property->guest_review }})
-                                                    </span>
+                                                            <a class="btn btn-sm book_mark_change"
+                                                                data-id="{{ $property->id }}" style="color:#1dbf73 }}; ">
+                                                                <span style="font-size: 22px;">
+                                                                    <i class="fas fa-heart pl-2"></i>
+                                                                </span>
+                                                            </a>
+                                                        @endauth
+                                                    </div>
                                                 </div>
 
-                                                <div class="">
-                                                    @auth
-                                                        <a class="btn btn-sm book_mark_change"
-                                                            data-status="{{ $property->book_mark }}"
-                                                            data-id="{{ $property->id }}"
-                                                            style="color:{{ $property->book_mark == true ? '#1dbf73' : '' }}; ">
-                                                            <span style="font-size: 22px;">
-                                                                <i class="fas fa-heart pl-2"></i>
-                                                            </span>
-                                                        </a>
-                                                    @else
-                                                        <a class="btn btn-sm book_mark_change" data-id="{{ $property->id }}"
-                                                            style="color:#1dbf73 }}; ">
-                                                            <span style="font-size: 22px;">
-                                                                <i class="fas fa-heart pl-2"></i>
-                                                            </span>
-                                                        </a>
-                                                    @endauth
+
+                                                <div>
+                                                    <span class="font-weight-700">{!! moneyFormat($property->property_price->default_symbol, $property->property_price->price) !!}</span> (
+                                                    {{ __($property->property_price->pricingType->name) }})
                                                 </div>
-                                            </div>
-
-
-                                            <div>
-                                                <span class="font-weight-700">{!! moneyFormat($property->property_price->default_symbol, $property->property_price->price) !!}</span> (
-                                                {{ __($property->property_price->pricingType->name) }})
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="card-footer text-muted p-0 border-0">
-                                        <div class="d-flex bg-white justify-content-between pl-2 pr-2 pt-2 mb-3">
-                                            <div>
-                                                <ul class="list-inline">
-                                                    <li
-                                                        class="list-inline-item  pl-4 pr-4 border rounded-3 mt-2 bg-light text-dark">
-                                                        <div class="vtooltip"> <i class="fas fa-user-friends"></i>
-                                                            {{ $property->accommodates }}
-                                                            <span
-                                                                class="vtooltiptext text-14">{{ $property->accommodates }}
-                                                                {{ __('Guests') }}</span>
-                                                        </div>
-                                                    </li>
+                                        <div class="card-footer text-muted p-0 border-0">
+                                            <div class="d-flex bg-white justify-content-between pl-2 pr-2 pt-2 mb-3">
+                                                <div>
+                                                    <ul class="list-inline">
+                                                        <li
+                                                            class="list-inline-item  pl-4 pr-4 border rounded-3 mt-2 bg-light text-dark">
+                                                            <div class="vtooltip"> <i class="fas fa-user-friends"></i>
+                                                                {{ $property->accommodates }}
+                                                                <span
+                                                                    class="vtooltiptext text-14">{{ $property->accommodates }}
+                                                                    {{ __('Guests') }}</span>
+                                                            </div>
+                                                        </li>
 
-                                                    <li class="list-inline-item pl-4 pr-4 border rounded-3 mt-2 bg-light">
-                                                        <div class="vtooltip"> <i class="fas fa-bed"></i>
-                                                            {{ $property->bedrooms }}
-                                                            <span class="vtooltiptext  text-14">{{ $property->bedrooms }}
-                                                                {{ __('Bedrooms') }}</span>
-                                                        </div>
-                                                    </li>
+                                                        <li
+                                                            class="list-inline-item pl-4 pr-4 border rounded-3 mt-2 bg-light">
+                                                            <div class="vtooltip"> <i class="fas fa-bed"></i>
+                                                                {{ $property->bedrooms }}
+                                                                <span
+                                                                    class="vtooltiptext  text-14">{{ $property->bedrooms }}
+                                                                    {{ __('Bedrooms') }}</span>
+                                                            </div>
+                                                        </li>
 
-                                                    <li class="list-inline-item pl-4 pr-4 border rounded-3 mt-2 bg-light">
-                                                        <div class="vtooltip"> <i class="fas fa-bath"></i>
-                                                            {{ $property->bathrooms }}
-                                                            <span
-                                                                class="vtooltiptext  text-14 p-2">{{ $property->bathrooms }}
-                                                                {{ __('Bathrooms') }}</span>
-                                                        </div>
-                                                    </li>
-                                                </ul>
+                                                        <li
+                                                            class="list-inline-item pl-4 pr-4 border rounded-3 mt-2 bg-light">
+                                                            <div class="vtooltip"> <i class="fas fa-bath"></i>
+                                                                {{ $property->bathrooms }}
+                                                                <span
+                                                                    class="vtooltiptext  text-14 p-2">{{ $property->bathrooms }}
+                                                                    {{ __('Bathrooms') }}</span>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        @endforeach
+                    @else
+                        <div class="col-12 text-center mt-4">
+                            <h4>No properties found</h4>
                         </div>
-                    @endforeach
+                    @endif
                 </div>
                 <!-- No result found section end -->
 
@@ -349,24 +359,11 @@
                         </div>
                     </div>
                 </div>
-                {{-- <div class="row mt-4 mb-5">
-                    <div id="pagination">
-                        <ul class="pager ml-4 pagination" id="pager">
-                        <!--Pagination -->
-                        pagination
-                        </ul>
-                        <div class="pl-3 text-16 mt-4"><span id="page-from">0</span> – <span id="page-to">0</span> {{ __('of') }} <span id="page-total">0</span> {{ __('Rentals') }}</div>
-                    </div>
-                </div> --}}
                 <!-- Pagination end -->
             </div>
             <!-- Filter section end -->
 
             <!--Map section start -->
-            {{-- <div class="col-md-5 p-0" id="mapCol">
-                <div class="map-close" id="closeMap"><i class="fas fa-times text-24 p-3 pl-4 text-center"></i></div>
-                <div id="map_view" class="map-view"></div>
-            </div> --}}
             <!--Map section end -->
         </div>
 
