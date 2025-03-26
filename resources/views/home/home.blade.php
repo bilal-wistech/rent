@@ -2,6 +2,25 @@
 @push('css')
     <link rel="stylesheet" type="text/css" href="{{ asset('css/daterangepicker.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('css/user-front.min.css') }}" />
+    <style>
+        #search-results {
+            position: absolute;
+            width: 100%;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .property-suggestion:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+
+        #results-container {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
 @endpush
 
 @section('main')
@@ -18,9 +37,17 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="input-group pt-4">
-                                            <input class="form-control p-3 text-14" id="front-search-field"
+                                            <input class="form-control p-3 text-14" id="search-field"
                                                 placeholder="{{ __('In which area you want to go?') }}" autocomplete="off"
                                                 name="location" type="text" required>
+                                            <input type="hidden" id="selected-property-id" name="property_id">
+                                            <div id="search-results" class="dropdown-menu" style="display: none;">
+                                                <div id="results-container"></div>
+                                                <div id="load-more-container" class="text-center" style="display: none;">
+                                                    <button id="load-more-btn"
+                                                        class="btn btn-sm btn-outline-primary my-2">Load More</button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -307,5 +334,103 @@
         const BaseURL = '{{ url('/') }}';
     </script>
     <script src="{{ asset('js/front.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            let timeout = null;
+            let page = 1;
+            let searchTerm = '';
+
+            function loadProperties(append = false) {
+                $.ajax({
+                    url: '{{ route('suggestions') }}',
+                    method: 'POST',
+                    data: {
+                        location: searchTerm,
+                        page: page,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        const $results = $('#results-container');
+                        const $loadMoreContainer = $('#load-more-container');
+
+                        if (!append) {
+                            $results.empty();
+                        }
+
+                        if (response.properties && response.properties.length > 0) {
+                            response.properties.forEach(property => {
+                                const suggestion = `
+                            <a href="#" class="dropdown-item property-suggestion"
+                               data-id="${property.id}"
+                               data-name="${property.name}">
+                                ${property.name}
+                            </a>
+                        `;
+                                $results.append(suggestion);
+                            });
+
+                            $('#search-results').show();
+
+                            hasMore = response.has_more;
+                            if (hasMore) {
+                                $loadMoreContainer.show();
+                            } else {
+                                $loadMoreContainer.hide();
+                            }
+                        } else if (!append) {
+                            $results.html('<div class="dropdown-item">No properties found</div>');
+                            $('#search-results').show();
+                            $loadMoreContainer.hide();
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log('Error:', xhr);
+                        $('#results-container').html(
+                            '<div class="dropdown-item">Error loading results</div>');
+                        $('#search-results').show();
+                        $('#load-more-container').hide();
+                    }
+                });
+            }
+
+            $('#search-field').on('keyup', function() {
+                clearTimeout(timeout);
+                searchTerm = $(this).val().trim();
+                page = 1;
+
+                if (searchTerm.length >= 3) {
+                    timeout = setTimeout(() => {
+                        loadProperties(false);
+                    }, 300);
+                } else {
+                    $('#search-results').hide();
+                    $('#load-more-container').hide();
+                    $('#selected-property-id').val(''); // Clear ID when search is cleared
+                }
+            });
+
+            $('#load-more-btn').on('click', function(e) {
+                e.preventDefault();
+                page++;
+                loadProperties(true);
+            });
+
+            $(document).on('click', '.property-suggestion', function(e) {
+                e.preventDefault();
+                const propertyName = $(this).data('name');
+                const propertyId = $(this).data('id');
+
+                $('#search-field').val(propertyName);
+                $('#selected-property-id').val(propertyId);
+                $('#search-results').hide();
+            });
+
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#search-field, #search-results').length) {
+                    $('#search-results').hide();
+                }
+            });
+        });
+    </script>
 
 @endsection

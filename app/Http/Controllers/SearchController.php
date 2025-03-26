@@ -148,109 +148,47 @@ class SearchController extends Controller
         return view('search.view', $data);
     }
 
-    // function searchResult(Request $request)
-    // {
-    //     // dd($request);
-    //     $full_address = $request->input('location');
-    //     $checkin = $request->input('checkin');
-    //     $checkout = $request->input('checkout');
-    //     $guest = $request->input('guest');
-    //     $bedrooms = $request->input('bedrooms');
-    //     $beds = $request->input('beds');
-    //     $bathrooms = $request->input('bathrooms');
-    //     $property_type = $request->input('property_type');
-    //     $space_type = $request->input('space_type');
-    //     $amenities = $request->input('amenities');
-    //     $min_price = $request->input('min_price');
-    //     $max_price = $request->input('max_price');
+    public function searchResult(Request $request)
+    {
+        $full_address = $request->input('location');
+        $today = Carbon::today();
+        $checkinDate = $request->input('checkin') ? Carbon::parse($request->input('checkin')) : $today;
+        $checkoutDate = $request->input('checkout') ? Carbon::parse($request->input('checkout')) : $today;
+        $perPage = 5; // Number of properties per page
+        $page = $request->input('page', 1);
 
-    //     // Handle array conversions
-    //     $property_type = is_array($property_type) ? $property_type : ($property_type ? explode(',', $property_type) : []);
-    //     $space_type = is_array($space_type) ? $space_type : ($space_type ? explode(',', $space_type) : []);
-    //     $amenities = is_array($amenities) ? $amenities : ($amenities ? explode(',', $amenities) : []);
-    //     $today = Carbon::today();
-    //     $checkinDate = $request->input('checkin') ? Carbon::parse($request->input('checkin')) : $today;
-    //     $checkoutDate = $request->input('checkout') ? Carbon::parse($request->input('checkout')) : $today;
+        $query = Properties::where('status', 'listed')
+            ->whereHas('property_address', function ($q) use ($full_address) {
+                $q->where('address_line_1', 'like', "%{$full_address}%")
+                    ->orWhere('address_line_2', 'like', "%{$full_address}%")
+                    ->orWhere('city', 'like', "%{$full_address}%")
+                    ->orWhere('state', 'like', "%{$full_address}%")
+                    ->orWhere('country', 'like', "%{$full_address}%")
+                    ->orWhere('area', 'like', "%{$full_address}%")
+                    ->orWhere('building', 'like', "%{$full_address}%")
+                    ->orWhere('flat_no', 'like', "%{$full_address}%");
+            })
+            ->whereDoesntHave('bookings', function ($query) use ($checkinDate, $checkoutDate) {
+                $query->where(function ($q) use ($checkinDate, $checkoutDate) {
+                    $q->whereBetween('start_date', [$checkinDate, $checkoutDate])
+                        ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
+                        ->orWhere(function ($q) use ($checkinDate, $checkoutDate) {
+                            $q->where('start_date', '<=', $checkinDate)
+                                ->where('end_date', '>=', $checkoutDate);
+                        });
+                })->where('status', 'Accepted');
+            });
 
-    //     $query = Properties::where('status', 'listed')
-    //         ->with('users', 'property_price', 'property_address', 'bookings')
-    //         ->whereHas('property_address', function ($q) use ($full_address) {
-    //             $q->where('address_line_1', 'like', "%{$full_address}%")
-    //                 ->orWhere('address_line_2', 'like', "%{$full_address}%")
-    //                 ->orWhere('city', 'like', "%{$full_address}%")
-    //                 ->orWhere('state', 'like', "%{$full_address}%")
-    //                 ->orWhere('country', 'like', "%{$full_address}%")
-    //                 ->orWhere('area', 'like', "%{$full_address}%")
-    //                 ->orWhere('building', 'like', "%{$full_address}%")
-    //                 ->orWhere('flat_no', 'like', "%{$full_address}%");
-    //         })
-    //         ->whereDoesntHave('bookings', function ($query) use ($checkinDate, $checkoutDate) {
-    //             $query->where(function ($q) use ($checkinDate, $checkoutDate) {
-    //                 $q->whereBetween('start_date', [$checkinDate, $checkoutDate])
-    //                     ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
-    //                     ->orWhere(function ($q) use ($checkinDate, $checkoutDate) {
-    //                         $q->where('start_date', '<=', $checkinDate)
-    //                             ->where('end_date', '>=', $checkoutDate);
-    //                     });
-    //             })->where('status', 'Accepted');
-    //         });
+        $total = $query->count();
+        $properties = $query->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
 
-    //     // Apply space type filter
-    //     if (!empty($space_type)) {
-    //         $query->whereIn('space_type', $space_type);
-    //     }
-
-    //     // Apply guest capacity filter
-    //     // if ($guest) {
-    //     //     $query->where('accommodates', '>=', $guest);
-    //     // }
-
-    //     // // Apply bedrooms filter
-    //     // if ($bedrooms) {
-    //     //     $query->where('bedrooms', '>=', $bedrooms);
-    //     // }
-
-    //     // // Apply beds filter
-    //     // if ($beds) {
-    //     //     $query->where('beds', '>=', $beds);
-    //     // }
-
-    //     // // Apply bathrooms filter
-    //     // if ($bathrooms) {
-    //     //     $query->where('bathrooms', '>=', $bathrooms);
-    //     // }
-
-    //     // // Apply property type filter
-    //     // if (!empty($property_type)) {
-    //     //     $query->whereIn('property_type', $property_type);
-    //     // }
-
-    //     // Apply amenities filter
-    //     // if (!empty($amenities)) {
-    //     //     $query->where(function ($q) use ($amenities) {
-    //     //         foreach ($amenities as $amenity) {
-    //     //             $q->where('amenities', 'like', "%{$amenity}%");
-    //     //         }
-    //     //     });
-    //     // }
-
-    //     // Apply price range filter
-    //     // if ($min_price !== null || $max_price !== null) {
-    //     //     $query->whereHas('property_price', function ($q) use ($min_price, $max_price) {
-    //     //         if ($min_price !== null) {
-    //     //             $q->where('price', '>=', $min_price);
-    //     //         }
-    //     //         if ($max_price !== null) {
-    //     //             $q->where('price', '<=', $max_price);
-    //     //         }
-    //     //     });
-    //     // }
-
-    //     // Pagination
-    //     $properties = $query->paginate(4);
-
-    //     echo $properties;
-    // }
+        return response()->json([
+            'properties' => $properties,
+            'has_more' => ($page * $perPage) < $total
+        ]);
+    }
 
     public function content_read($url)
     {

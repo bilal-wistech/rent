@@ -13,7 +13,7 @@ $(document).on('click', '#status', function(){
   var id = $(this).attr('data-id');
   var datastatus = $(this).attr('data-status');
   var dataURL = APP_URL+'/listing/update_status';
-  
+
   $('#messages').empty();
   $.ajax({
       url: dataURL,
@@ -61,7 +61,7 @@ $(document).on('click', '.book_mark_change', function(event){
   event.preventDefault();
   var property_id = $(this).data("id");
   var property_status = $(this).data("status");
-  
+
   var dataURL = APP_URL+'/add-edit-book-mark';
   var that = this;
   if (property_status == "1")
@@ -76,7 +76,7 @@ $(document).on('click', '.book_mark_change', function(event){
   if (user_id == '') {
 
     window.location.href = BaseURL + '/unauthentication-favourite/' + property_id;
-    
+
   } else {
       swal({
         title: title,
@@ -101,7 +101,7 @@ $(document).on('click', '.book_mark_change', function(event){
     })
         .then((willDelete) => {
             if (willDelete) {
-              
+
 
                 $.ajax({
                     url: dataURL,
@@ -134,7 +134,7 @@ $(document).on('click', '.book_mark_change', function(event){
         });
   }
 
-  
+
 });
 
 function print_receipt()
@@ -153,7 +153,7 @@ $('#decline_reason').on('change', function(){
 
 if (typeof(expireTime) == 'undefined') {
   var expireTime = '';
-} 
+}
 
 var expiration_time  = expireTime;
 var _second = 1e3;
@@ -165,7 +165,7 @@ if (expireTime != '') {
   function expirationTimeSet() {
     var date_ele = new Date;
     var present_time = new Date(date_ele.getUTCFullYear(), date_ele.getUTCMonth(), date_ele.getUTCDate(), date_ele.getUTCHours(), date_ele.getUTCMinutes(), date_ele.getUTCSeconds()).getTime();
-    
+
     var expiration_time = new Date(expireTime).getTime();
 
     var time_remaining = expiration_time - present_time;
@@ -344,7 +344,7 @@ $(document.body).on('submit', "#icalendar_form", function(e){
   if(url == '') $('#error-icalendar-url').html('This field is required.');
   if(name == '') $('#error-icalendar-name').html('This field is required.');
   if(color == '') $('#error-dtpc-color').html('This field is required.');
-  
+
   else
   $.ajax({
       type: "POST",
@@ -444,7 +444,7 @@ $(document.body).on('submit', "#dtpc_form", function(e){
         url: url,
         data: { "_token":  $('meta[name="csrf-token"]').attr('content'),'start_date':start_date, 'end_date':end_date, 'price':price, 'min_stay': min_stay, 'status':status},
         success: function(msg) {
-           
+
           var year_month = $('#calendar_dropdown').val();
           year_month = year_month.split('-');
           var year = year_month[0];
@@ -453,7 +453,7 @@ $(document.body).on('submit', "#dtpc_form", function(e){
           $('#model-message').append("Data save successfully");
           $('#model-message').removeClass('d-none');
 
-           
+
         },
         error: function(request, error) {
         }
