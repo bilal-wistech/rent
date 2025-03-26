@@ -707,7 +707,7 @@
 
         $("#btnPrice").on("click", function() {
             var values = $("#price-range").val().split(",");
-            alert("Selected Price Range: " + values[0] + " - " + values[1]);
+            console.log("Selected Price Range: " + values[0] + " - " + values[1]);
         });
     </script>
 @endsection
