@@ -127,8 +127,8 @@
                             <a href="{{ url('search?location=' . $area->name . '&checkin=&checkout=') }}">
                                 <div class="grid item animated zoomIn">
                                     <figure class="effect-ming">
-                                        <img src="{{ asset($area->image) }}" width="450px" height="250px"
-                                            alt="area" />
+                                        <img src="{{ asset('front/images/front-areas/' . $area->image) }}" width="450px"
+                                            height="250px" alt="area" />
                                         <figcaption>
                                             <p class="text-18 font-weight-700 position-center">{{ $area->name }}</p>
                                         </figcaption>
