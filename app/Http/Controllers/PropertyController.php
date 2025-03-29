@@ -391,47 +391,96 @@ class PropertyController extends Controller
                 ->orderBy('serial', 'asc')
                 ->get();
         } elseif ($step == 'pricing') {
-            if ($request->isMethod('post')) {
-                $bookings = Bookings::where('property_id', $property_id)->where('currency_code', '!=', $request->currency_code)->first();
+            if ($request->isMethod('post'))
+            {
+                // Check for existing bookings with a different currency
+                $bookings = Bookings::where('property_id', $property_id)
+                    ->where('currency_code', '!=', $request->currency_code)
+                    ->first();
+
                 if ($bookings) {
-                    return back()->withErrors(['currency' => __('Booking has been made using the current currency. It cannot be changed now')]);
+                    Common::one_time_message('error', __('Booking has been made using the current currency. It cannot be changed now'));
+                    return redirect()->back();
                 }
-                $rules = array(
-                    'price' => 'required|numeric|min:5',
-                    'weekly_discount' => 'nullable|numeric|max:99|min:0',
-                    'monthly_discount' => 'nullable|numeric|max:99|min:0'
-                );
 
-                $fieldNames = array(
-                    'price'  => 'Price',
-                    'weekly_discount' => 'Weekly Discount Percent',
-                    'monthly_discount' => 'Monthly Discount Percent'
-                );
+                $rules = [
+                    'prices' => 'required|array',
+                    'pricing_type' => 'required|array', // Ensure pricing_type is also required
+                ];
 
+                $fieldNames = [
+                    'prices' => 'Price',
+                    'pricing_type' => 'Pricing Type',
+                ];
+
+                // Validate the request
                 $validator = Validator::make($request->all(), $rules);
                 $validator->setAttributeNames($fieldNames);
 
                 if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
-                } else {
-                    $property_price                    = PropertyPrice::where('property_id', $property_id)->first();
-                    $property_price->price             = $request->price;
-                    $property_price->weekly_discount   = $request->weekly_discount;
-                    $property_price->monthly_discount  = $request->monthly_discount;
-                    $property_price->currency_code     = $request->currency_code;
-                    $property_price->cleaning_fee      = $request->cleaning_fee;
-                    $property_price->guest_fee         = $request->guest_fee;
-                    $property_price->guest_after       = $request->guest_after;
-                    $property_price->security_fee      = $request->security_fee;
-                    $property_price->weekend_price     = $request->weekend_price;
-                    $property_price->save();
+                }
 
+                else {
+                    $prices = $request->input('prices', []);
+                    $pricingTypes = $request->input('pricing_type', []);
+                    // Ensure both arrays are valid
+                    if (!is_array($prices) || !is_array($pricingTypes)) {
+                        return back()->with('error', __('Invalid data provided.'));
+                    }
+
+                    // Get all existing price records for this property
+                    $existingPrices = PropertyPrice::where('property_id', $property_id)->get();
+
+                    // Keep track of processed pricing types
+                    $processedTypes = [];
+
+                    // Iterate through the price array
+                    foreach ($prices as $index => $price) {
+                        $property_type_id = $pricingTypes[$index];
+
+                        // Skip if pricing type is empty
+                        if (empty($property_type_id)) {
+                            continue;
+                        }
+
+                        // Add to processed types
+                        $processedTypes[] = $property_type_id;
+
+                        // Use updateOrCreate to either update an existing record or create a new one
+                        PropertyPrice::updateOrCreate(
+                            [
+                                'property_id' => $property_id,
+                                'property_type_id' => $property_type_id,
+                            ],
+                            [
+                                'price' => $price,
+                                'weekly_discount' => $request->weekly_discount ?? 0,
+                                'monthly_discount' => $request->monthly_discount ?? 0,
+                                'currency_code' => $request->currency_code,
+                                'cleaning_fee' => $request->cleaning_fee ?? 0,
+                                'guest_fee' => $request->guest_fee ?? 0,
+                                'guest_after' => $request->guest_after ?? 0,
+                                'security_fee' => $request->security_fee ?? 0,
+                                'weekend_price' => $request->weekend_price ?? 0,
+                            ]
+                        );
+                    }
+
+                    // Delete any pricing types that weren't in the submitted form
+                    PropertyPrice::where('property_id', $property_id)
+                        ->whereNotIn('property_type_id', $processedTypes)
+                        ->delete();
+
+                    // Update the PropertySteps model after processing all prices
                     $property_steps = PropertySteps::where('property_id', $property_id)->first();
-                    $property_steps->pricing = 1;
-                    $property_steps->save();
-
+                    if ($property_steps) {
+                        $property_steps->pricing = 1;
+                        $property_steps->save();
+                    }
                     return redirect('listing/' . $property_id . '/booking');
                 }
+
             }
         } elseif ($step == 'booking') {
             if ($request->isMethod('post')) {
@@ -449,10 +498,11 @@ class PropertyController extends Controller
 
                 return redirect('listing/' . $property_id . '/calendar');
             }
-        } elseif ($step == 'calendar') {
+        } /* elseif ($step == 'calendar') {
             $data['calendar'] = $calendar->generate($request->id);
-        }
-
+        } */
+        $data['pricing_types'] = PricingType::all();
+        $data['propertyPricing'] = PropertyPrice::where('property_id', $property_id)->get();
 
         return view("listing.$step", $data);
     }

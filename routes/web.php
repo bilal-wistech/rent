@@ -578,7 +578,7 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
     Route::match(['get', 'post'], 'reviews/edit/{id}', 'UserController@editReviews');
     Route::match(['get', 'post'], 'reviews/details', 'UserController@reviewDetails');
 
-    Route::match(array('GET', 'POST'), 'properties', 'PropertyController@userProperties');
+    Route::match(array('GET', 'POST'), 'properties', 'PropertyController@userProperties')->name('properties');
     Route::match(array('GET', 'POST'), 'property/create', 'PropertyController@create');
     Route::match(array('GET', 'POST'), 'listing/{id}/photo_message', 'PropertyController@photoMessage')->middleware(['checkUserRoutesPermissions']);
     Route::match(array('GET', 'POST'), 'listing/{id}/photo_delete', 'PropertyController@photoDelete')->middleware(['checkUserRoutesPermissions']);
