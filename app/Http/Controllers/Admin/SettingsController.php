@@ -278,14 +278,14 @@ class SettingsController extends Controller
             return view('admin.settings.email', $data);
         } elseif ($request->isMethod('post')) {
             $rules = array(
-                'driver' => 'required',
-                'host' => 'required',
-                'port' => 'required',
-                'from_address' => 'required',
-                'from_name' => 'required',
-                'encryption' => 'required',
-                'username' => 'required',
-                'password' => 'required',
+                'driver' => 'nullable',
+                'host' => 'nullable',
+                'port' => 'nullable',
+                'from_address' => 'nullable',
+                'from_name' => 'nullable',
+                'encryption' => 'nullable',
+                'username' => 'nullable',
+                'password' => 'nullable',
             );
 
             $fieldNames = array(
