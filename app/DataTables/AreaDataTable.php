@@ -21,8 +21,7 @@ class AreaDataTable extends DataTable
         return datatables()
             ->eloquent($this->query())
             ->addColumn('action', function ($area) {
-
-                $edit = '<a href="' . route('area.edit', $area->id) . '" class="btn btn-xs btn-primary" onclick="editCity(' . $area->id . ')"><i class="fa fa-edit"></i></a>&nbsp;';
+                $edit = '<a href="' . route('area.edit', $area->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
                 $delete = '
                 <form action="' . route('area.destroy', $area->id) . '" method="POST" style="display:inline;">
                     ' . csrf_field() . '
@@ -31,19 +30,22 @@ class AreaDataTable extends DataTable
                         <i class="fa fa-trash"></i>
                     </button>
                 </form>';
-
                 return  $edit . ' ' . $delete;
             })
-
-
-            ->rawColumns(['action'])
+            ->editColumn('image', function ($area) {
+                if ($area->image) {
+                    return '<img src="' . asset('front/images/front-areas/' . $area->image) . '" width="50" height="50" style="border-radius:5px;">';
+                }
+                return '<span>No Image</span>';
+            })
+            ->rawColumns(['action', 'image'])
             ->make(true);
-        }
+    }
         public function query()
         {
             $query = Area::query();
-         if ($this->countryId) {
-                $query->where('country_id', $this->countryId);
+         if ($this->cityId) {
+                $query->where('city_id', $this->cityId);
             }
          $query->orderBy('id', 'asc');
           return $this->applyScopes($query);
@@ -54,6 +56,7 @@ class AreaDataTable extends DataTable
             return $this->builder()
                 ->addColumn(['data' => 'id', 'name' => 'areas.id', 'title' => 'ID', 'orderable' => true])
                 ->addColumn(['data' => 'name', 'name' => 'areas.name', 'title' => 'Name', 'orderable' => true])
+                ->addColumn(['data' => 'image', 'name' => 'areas.image', 'title' => 'Image', 'orderable' => false, 'searchable' => false])
                 ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
                 ->parameters(dataTableOptions());
         }
