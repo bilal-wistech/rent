@@ -126,7 +126,7 @@ class PropertiesController extends Controller
 
                 $property = new Properties;
                 $property->host_id = $request->host_id;
-                $property->name = $address;
+                $property->name            = ($address) ? $address : SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->area;
                 $property->property_type = $request->property_type_id;
                 $property->space_type = $request->space_type;
                 $property->accommodates = $request->accommodates;

@@ -25,6 +25,8 @@ use App\Models\{
     BedType,
     PropertySteps,
     Country,
+    City,
+    Area,
     Amenities,
     AmenityType,
     PricingType,
@@ -63,14 +65,25 @@ class PropertyController extends Controller
                 'property_type_id'  => 'required',
                 'space_type'        => 'required',
                 'accommodates'      => 'required',
-                'map_address'       => 'required',
+                // 'map_address'       => 'required',
+                'country' => 'required',
+                'area' => 'required',
+                'city' => 'required',
             );
-
+            if ($request->property_type_id == 1) {
+                $rules['building'] = 'required';
+                $rules['flat_no'] = 'required';
+            }
             $fieldNames = array(
                 'property_type_id'  => 'Home Type',
                 'space_type'        => 'Room Type',
                 'accommodates'      => 'Accommodates',
-                'map_address'       => 'City',
+                // 'map_address'       => 'City',
+                'building' => 'Building',
+                'flat_no' => 'Flat Number',
+                'country' => 'Country',
+                'area' => 'Area',
+                'city' => 'City',
             );
 
             $validator = Validator::make($request->all(), $rules);
@@ -79,9 +92,24 @@ class PropertyController extends Controller
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput();
             } else {
+                $country = Country::where('short_name', $request->country)->first();
+                $city = City::findOrFail($request->city);
+                // $area = Area::findOrFail($request->area);
+                $addressParts = [$request->area];
+
+                if (!empty($request->building)) {
+                    $addressParts[] = $request->building;
+                }
+
+                if (!empty($request->flat_no)) {
+                    $addressParts[] = 'Flat ' . $request->flat_no;
+                }
+
+                $address = implode(', ', $addressParts);
                 $property                  = new Properties;
                 $property->host_id         = Auth::id();
-                $property->name            = SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->city;
+                // $property->name            = SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->city;
+                $property->name            = ($address) ? $address : SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->area;
                 $property->property_type   = $request->property_type_id;
                 $property->space_type      = $request->space_type;
                 $property->accommodates    = $request->accommodates;
@@ -92,15 +120,18 @@ class PropertyController extends Controller
 
                 $property->save();
 
-                $property_address                 = new PropertyAddress;
-                $property_address->property_id    = $property->id;
+                $property_address = new PropertyAddress;
+                $property_address->property_id = $property->id;
                 $property_address->address_line_1 = $request->route;
-                $property_address->city           = $request->city;
-                $property_address->state          = $request->state;
-                $property_address->country        = $request->country;
-                $property_address->postal_code    = $request->postal_code;
-                $property_address->latitude       = $request->latitude;
-                $property_address->longitude      = $request->longitude;
+                $property_address->city = $city->name;
+                $property_address->state = $country->short_name;
+                $property_address->country = $country->short_name;
+                $property_address->postal_code = $request->postal_code;
+                $property_address->latitude = $request->latitude;
+                $property_address->longitude = $request->longitude;
+                $property_address->area = $request->area;
+                $property_address->building = $request->building;
+                $property_address->flat_no = $request->flat_no;
                 $property_address->save();
 
                 $property_price                 = new PropertyPrice;
@@ -122,7 +153,7 @@ class PropertyController extends Controller
 
         $data['property_type'] = PropertyType::getAll()->where('status', 'Active')->pluck('name', 'id');
         $data['space_type']    = SpaceType::getAll()->where('status', 'Active')->pluck('name', 'id');
-
+        $data['countries'] = Country::orderBy('name', 'ASC')->pluck('name', 'short_name');
         return view('property.create', $data);
     }
 
@@ -179,7 +210,7 @@ class PropertyController extends Controller
 
                 $rules = array(
                     'name'     => 'required|max:50',
-                    'summary'  => 'required|max:1000'
+                    'summary'  => 'nullable|max:1000'
                 );
 
                 $fieldNames = array(
@@ -226,20 +257,20 @@ class PropertyController extends Controller
         } elseif ($step == 'location') {
             if ($request->isMethod('post')) {
                 $rules = array(
-                    'address_line_1'    => 'required|max:250',
-                    'address_line_2'    => 'max:250',
-                    'country'           => 'required',
-                    'city'              => 'required',
-                    'state'             => 'required',
-                    'latitude'          => 'required|not_in:0',
+                    // 'address_line_1' => 'required|max:250',
+                    // 'address_line_2' => 'max:250',
+                    'country' => 'required',
+                    'city' => 'required',
+                    'state' => 'nullable',
+                    'area' => 'required',
                 );
 
                 $fieldNames = array(
-                    'address_line_1' => 'Address Line 1',
-                    'country'        => 'Country',
-                    'city'           => 'City',
-                    'state'          => 'State',
-                    'latitude'       => 'Map',
+                    // 'address_line_1' => 'Address Line 1',
+                    'country' => 'Country',
+                    'city' => 'City',
+                    'state' => 'State',
+                    'area' => 'Area',
                 );
 
                 $messages = [
@@ -252,15 +283,18 @@ class PropertyController extends Controller
                 if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
                 } else {
-                    $property_address                 = PropertyAddress::where('property_id', $property_id)->first();
+                    $property_address = PropertyAddress::where('property_id', $property_id)->first();
                     $property_address->address_line_1 = $request->address_line_1;
                     $property_address->address_line_2 = $request->address_line_2;
-                    $property_address->latitude       = $request->latitude;
-                    $property_address->longitude      = $request->longitude;
-                    $property_address->city           = $request->city;
-                    $property_address->state          = $request->state;
-                    $property_address->country        = $request->country;
-                    $property_address->postal_code    = $request->postal_code;
+                    $property_address->latitude = $request->latitude;
+                    $property_address->longitude = $request->longitude;
+                    $property_address->city = $request->city;
+                    $property_address->state = $request->state;
+                    $property_address->country = $request->country;
+                    $property_address->postal_code = $request->postal_code;
+                    $property_address->area = $request->area;
+                    $property_address->building = $request->building;
+                    $property_address->flat_no = $request->flat_no;
                     $property_address->save();
 
                     $property_steps           = PropertySteps::where('property_id', $property_id)->first();
