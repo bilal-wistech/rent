@@ -44,8 +44,8 @@ class AreaDataTable extends DataTable
         public function query()
         {
             $query = Area::query();
-         if ($this->countryId) {
-                $query->where('country_id', $this->countryId);
+         if ($this->cityId) {
+                $query->where('city_id', $this->cityId);
             }
          $query->orderBy('id', 'asc');
           return $this->applyScopes($query);
