@@ -38,7 +38,7 @@
                         </div>
                     @endif
 
-                    <form id="add_country" method="post" action="{{ route('city.store') }}" class="form-horizontal">
+                    <form id="add_country" method="post" action="{{ route('city.store') }}" class="form-horizontal" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="box-body">
                             <div class="form-group row mt-3 short_name">
@@ -50,8 +50,21 @@
                                     <span class="text-danger">{{ $errors->first("name") }}</span>
                                 </div>
                             </div>
+                            <div class="form-group row mt-3 image">
+                                <label for="image" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0"> Image
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="col-sm-6">
+                                    <input type="file" name="image" class="form-control f-14" id="image" accept="image/*" onchange="previewImage(event)" >
+                                    <span class="text-danger">{{ $errors->first("image") }}</span>
+                                    <br>
+                                    <img id="imagePreview" src="#" alt="Selected Image" style="display: none; width:360px;height:360px; margin-top: 10px;">
+                                </div>
+                            </div>
                             <input type="hidden" name="country_id" id="country_id" value="{{ $countryId }}">
                         </div>
+
 
                         <div class="box-footer">
                             <button type="submit" class="btn btn-info btn-space f-14 text-white me-2">Submit</button>
@@ -63,9 +76,25 @@
         </div>
     </section>
 </div>
+
+
+<script>
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function(){
+            var output = document.getElementById('imagePreview');
+            output.src = reader.result;
+            output.style.display = "block";
+            output.style.border = "2px solid #ddd";
+
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
 @endsection
 
 @section('validate_script')
+
 <script type="text/javascript" src="{{ asset('backend/dist/js/validate.min.js') }}"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>

@@ -10,6 +10,8 @@ class Area extends Model
     use HasFactory;
     protected $fillable = [
         'name',
+        'image',
+        'show_on_front',
         'city_id',
         'country_id',
     ];
