@@ -55,7 +55,7 @@
                                 <div class="form-group row mt-3 host">
                                     <label for="inputEmail3"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Host
-                                        <span class="text-danger">*</span></label>
+                                    </label>
 
                                     <div class="col-sm-6">
                                         <input type="text" name="host" class="form-control f-14" id="host"
@@ -67,7 +67,7 @@
 
                                     <label for="inputEmail3"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Port
-                                        <span class="text-danger">*</span>
+
                                     </label>
 
                                     <div class="col-sm-6">
@@ -80,7 +80,7 @@
                                 <div class="form-group row mt-3 from_address">
                                     <label for="inputEmail3"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">From Address
-                                        <span class="text-danger">*</span></label>
+                                    </label>
 
                                     <div class="col-sm-6">
                                         <input type="text" name="from_address" class="form-control f-14"
@@ -93,7 +93,7 @@
 
                                     <label for="inputEmail3"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">From Name
-                                        <span class="text-danger">*</span>
+
                                     </label>
 
                                     <div class="col-sm-6">
@@ -106,7 +106,7 @@
                                 <div class="form-group row mt-3 encryption">
                                     <label for="inputEmail3"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Encryption
-                                        <span class="text-danger">*</span></label>
+                                    </label>
 
                                     <div class="col-sm-6">
                                         <input type="text" name="encryption" class="form-control f-14"
@@ -118,7 +118,7 @@
                                 <div class="form-group row mt-3 username">
                                     <label for="inputEmail3"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Username
-                                        <span class="text-danger">*</span></label>
+                                    </label>
 
                                     <div class="col-sm-6">
                                         <input type="text" name="username" class="form-control f-14"
@@ -130,7 +130,7 @@
                                 <div class="form-group row mt-3 password">
                                     <label for="inputEmail3"
                                         class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">Password
-                                        <span class="text-danger">*</span></label>
+                                    </label>
 
                                     <div class="col-sm-6">
                                         <input type="text" name="password" class="form-control f-14"
