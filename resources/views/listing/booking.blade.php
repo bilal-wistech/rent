@@ -14,7 +14,8 @@
                         </div>
 
                         <div class="col-md-9 mt-sm-0 pl-4 pr-4">
-                            <form id="booking_id" method="post" action="{{ route('properties') }}" accept-charset='UTF-8'>
+                            <form id="booking_id" method="post" action="{{ url('listing/' . $result->id . '/' . $step) }}"
+                                accept-charset='UTF-8'>
                                 {{ csrf_field() }}
                                 <div class="col-md-12 p-0 mt-4 border rounded pb-4 m-0">
                                     <div class="form-group col-md-12 main-panelbg pb-3 pt-3 pl-4">

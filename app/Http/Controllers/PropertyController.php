@@ -496,7 +496,7 @@ class PropertyController extends Controller
                 $properties->save();
 
 
-                return redirect('listing/' . $property_id . '/calendar');
+                return redirect('properties')->with('message','Listing Added Successfully');
             }
         } /* elseif ($step == 'calendar') {
             $data['calendar'] = $calendar->generate($request->id);
