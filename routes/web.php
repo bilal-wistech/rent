@@ -589,7 +589,8 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
 
     Route::match(array('GET', 'POST'), 'listing/update_status', 'PropertyController@updateStatus');
     Route::match(array('GET', 'POST'), 'listing/{id}/{step}', 'PropertyController@listing')->where(['id' => '[0-9]+', 'page' => 'basics|description|location|amenities|photos|pricing|calendar|details|booking']);
-
+    Route::get('cities-by-country/{country}', 'PropertyController@getCitiesByCountry');
+    Route::get('get-areas/{country}/{city}', 'PropertyController@getAreas');
     // Favourites routes
     Route::get('user/favourite', 'PropertyController@userBookmark');
     Route::post('add-edit-book-mark', 'PropertyController@addEditBookMark');

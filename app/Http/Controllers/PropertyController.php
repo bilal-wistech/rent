@@ -106,6 +106,7 @@ class PropertyController extends Controller
                 }
 
                 $address = implode(', ', $addressParts);
+                dd($address);
                 $property                  = new Properties;
                 $property->host_id         = Auth::id();
                 // $property->name            = SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->city;
@@ -805,5 +806,27 @@ class PropertyController extends Controller
         Session::put('favourite_property', $id);
 
         return redirect('login');
+    }
+    public function getCitiesByCountry($country)
+    {
+        $country = Country::where('short_name', $country)->first();
+        $cities = City::where('country_id', $country->id)->get();
+        return response()->json(['cities' => $cities]);
+    }
+    public function getAreas($country, $city)
+    {
+        // dd($country,$city);
+        $country = Country::where('short_name', $country)->first();
+        if (!$country) {
+            return response()->json(['error' => 'Country not found'], 404);
+        }
+        $city = City::findOrFail($city);
+        if (!$city) {
+            return response()->json(['error' => 'City not found'], 404);
+        }
+        $areas = Area::where('country_id', $country->id)
+            ->where('city_id', $city->id)
+            ->get();
+        return response()->json(['areas' => $areas]);
     }
 }
