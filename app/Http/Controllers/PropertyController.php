@@ -96,21 +96,16 @@ class PropertyController extends Controller
                 $city = City::findOrFail($request->city);
                 // $area = Area::findOrFail($request->area);
                 $addressParts = [$request->area];
-
-                if (!empty($request->building)) {
-                    $addressParts[] = $request->building;
-                }
-
-                if (!empty($request->flat_no)) {
-                    $addressParts[] = 'Flat ' . $request->flat_no;
-                }
-
-                $address = implode(', ', $addressParts);
-                dd($address);
+                !empty($request->building) && ($addressParts[] = $request->building);
+                !empty($request->flat_no) && ($addressParts[] = 'Flat ' . $request->flat_no);
                 $property                  = new Properties;
                 $property->host_id         = Auth::id();
                 // $property->name            = SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->city;
-                $property->name            = ($address) ? $address : SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->area;
+                // $property->name = (!empty($request->building) && !empty($request->flat_no))
+                // ? implode(', ', $addressParts). ' in ' . $request->area
+                // : SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->area;
+                // $property->name = SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->area;
+                $property->name = $request->area;
                 $property->property_type   = $request->property_type_id;
                 $property->space_type      = $request->space_type;
                 $property->accommodates    = $request->accommodates;
@@ -118,7 +113,6 @@ class PropertyController extends Controller
 
                 $adminPropertyApproval = Settings::getAll()->firstWhere('name', 'property_approval')->value;
                 $property->is_verified  = ($adminPropertyApproval == 'Yes') ? 'Pending' : 'Approved';
-
                 $property->save();
 
                 $property_address = new PropertyAddress;
@@ -190,6 +184,9 @@ class PropertyController extends Controller
                 $property->property_type      = $request->property_type;
                 $property->space_type         = $request->space_type;
                 $property->accommodates       = $request->accommodates;
+                // $property->name = $request->bedrooms . ' ' . BedType::getAll()->find($request->bed_type)->name . ' Bedroom ' . $property->name;
+                $property->name = $request->bedrooms . ' ' . BedType::getAll()->find($request->bed_type)->name . ' Bedroom ' . PropertyType::getAll()->find($request->property_type)->name . ' , ' . $property->name;
+                $property->slug            = Common::pretty_url($property->name);
                 $property->save();
 
                 $property_steps         = PropertySteps::where('property_id', $property_id)->first();
@@ -392,8 +389,7 @@ class PropertyController extends Controller
                 ->orderBy('serial', 'asc')
                 ->get();
         } elseif ($step == 'pricing') {
-            if ($request->isMethod('post'))
-            {
+            if ($request->isMethod('post')) {
                 // Check for existing bookings with a different currency
                 $bookings = Bookings::where('property_id', $property_id)
                     ->where('currency_code', '!=', $request->currency_code)
@@ -420,9 +416,7 @@ class PropertyController extends Controller
 
                 if ($validator->fails()) {
                     return back()->withErrors($validator)->withInput();
-                }
-
-                else {
+                } else {
                     $prices = $request->input('prices', []);
                     $pricingTypes = $request->input('pricing_type', []);
                     // Ensure both arrays are valid
@@ -481,7 +475,6 @@ class PropertyController extends Controller
                     }
                     return redirect('listing/' . $property_id . '/booking');
                 }
-
             }
         } elseif ($step == 'booking') {
             if ($request->isMethod('post')) {
@@ -497,7 +490,7 @@ class PropertyController extends Controller
                 $properties->save();
 
 
-                return redirect('properties')->with('message','Listing Added Successfully');
+                return redirect('properties')->with('message', 'Listing Added Successfully');
             }
         } /* elseif ($step == 'calendar') {
             $data['calendar'] = $calendar->generate($request->id);
@@ -694,7 +687,7 @@ class PropertyController extends Controller
             $data['date_format'] = Settings::getAll()->firstWhere('name', 'date_format_type')->value;
 
             $data['adminPropertyApproval'] = Settings::getAll()->firstWhere('name', 'property_approval')->value;
-            $data['propertyPrices'] = PropertyPrice::where('property_id',$result->id)->get();
+            $data['propertyPrices'] = PropertyPrice::where('property_id', $result->id)->get();
             return view('property.single', $data);
         }
     }
