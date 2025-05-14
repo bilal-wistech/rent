@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\BedType;
 use App\Models\Properties;
 use App\Models\PropertyType;
+use App\Models\SpaceType;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -85,9 +86,10 @@ class PropertyNameFixCommand extends Command
             // Cache bed types and property types for 1 hour
             $bedTypes = Cache::remember('bed_types', 3600, fn() => BedType::all()->keyBy('id'));
             $propertyTypes = Cache::remember('property_types', 3600, fn() => PropertyType::all()->keyBy('id'));
+            $spaceTypes = Cache::remember('space_types', 3600, fn() => SpaceType::all()->keyBy('id'));
 
             // Fetch properties
-            $allProperties = Properties::with('property_address')->select(['id', 'bedrooms', 'bed_type', 'property_type', 'name', 'slug'])->get();
+            $allProperties = Properties::with('property_address')->select(['id', 'bedrooms', 'bed_type', 'property_type', 'space_type', 'name', 'slug'])->get();
 
             // Track slugs to avoid duplicates
             $slugsInUse = [];
@@ -99,34 +101,62 @@ class PropertyNameFixCommand extends Command
             }
 
             // Prepare batch updates
-            $updates = $allProperties->map(function ($property) use ($bedTypes, $propertyTypes, &$slugsInUse) {
-                // Validate bedrooms
-                if (!is_numeric($property->bedrooms) || $property->bedrooms < 0 || !is_int($property->bedrooms + 0)) {
-                    Log::warning("Invalid bedroom count for property ID {$property->id}: {$property->bedrooms}");
+            $updates = $allProperties->map(function ($property) use ($bedTypes, $propertyTypes, $spaceTypes, &$slugsInUse) {
+                // Check if property address exists first
+                if (!$property->property_address) {
+                    Log::warning("Missing address for property ID {$property->id}");
                     return null;
                 }
 
-                // Get related data
-                $bedType = $bedTypes->get($property->bed_type);
-                $propertyType = $propertyTypes->get($property->property_type);
+                // Get related data - initialize variables with null to avoid undefined variable errors
+                $bedType = null;
+                $propertyType = null;
+                $spaceType = null;
 
-                // Check if related records exist
-                if (!$bedType || !$propertyType || !$property->property_address) {
-                    Log::warning("Missing bed type, property type, or address for property ID {$property->id}");
-                    return null;
+                // Get bed type if it exists
+                if ($property->bed_type && isset($bedTypes[$property->bed_type])) {
+                    $bedType = $bedTypes[$property->bed_type];
                 }
 
-                // Convert bedroom count to word
-                $bedroomWord = $this->numberToWord($property->bedrooms);
+                // Get property type if it exists
+                if ($property->property_type && isset($propertyTypes[$property->property_type])) {
+                    $propertyType = $propertyTypes[$property->property_type];
+                }
 
-                // Generate new name with bedroom count as word
-                $newName = sprintf(
-                    '%s %s Bedroom %s, %s',
-                    $bedroomWord,
-                    $bedType->name,
-                    $propertyType->name,
-                    $property->property_address->area
-                );
+                // Get space type if it exists
+                if ($property->space_type && isset($spaceTypes[$property->space_type])) {
+                    $spaceType = $spaceTypes[$property->space_type];
+                }
+
+                // Generate new name
+                if ($bedType && $propertyType) {
+                    // Validate bedrooms for standard format
+                    if (!is_numeric($property->bedrooms) || $property->bedrooms < 0 || !is_int($property->bedrooms + 0)) {
+                        Log::warning("Invalid bedroom count for property ID {$property->id}: {$property->bedrooms}");
+                        return null;
+                    }
+
+                    // Use standard format with bedroom count as word
+                    $bedroomWord = $this->numberToWord($property->bedrooms);
+                    $newName = sprintf(
+                        '%s %s Bedroom %s, %s',
+                        $bedroomWord,
+                        $bedType->name,
+                        $propertyType->name,
+                        $property->property_address->area
+                    );
+                } elseif ($spaceType) {
+                    // Use only space type and area if bed type or property type is missing
+                    $newName = sprintf(
+                        '%s, %s',
+                        $spaceType->name,
+                        $property->property_address->area
+                    );
+                } else {
+                    // Log warning if no valid type information is available
+                    Log::warning("No valid type information (bed, property, or space) for property ID {$property->id}");
+                    return null;
+                }
 
                 // Generate unique slug for this property
                 $newSlug = $this->generateUniqueSlug($newName, $property->id, $slugsInUse);
