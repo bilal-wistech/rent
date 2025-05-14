@@ -215,7 +215,7 @@
                             <div class="col-md-9 col-sm-9">
                                 <div class="row">
                                     <div class="col-md-6 col-sm-6">
-                                        <div> <i class="fa fa-users text-13 mr-2" style="color: #5d717fa2"></i>
+                                        {{-- <div> <i class="fa fa-users text-13 mr-2" style="color: #5d717fa2"></i>
                                             {{ __('Extra people') }}:
                                             <strong>
                                                 @if ($result->property_price->guest_fee != 0)
@@ -226,10 +226,16 @@
                                                     <span>{{ __('No Charge') }}</span>
                                                 @endif
                                             </strong>
-                                        </div>
+                                        </div> --}}
 
                                         <div>
-                                            <i class="fa fa-arrow-down mr-2 text-13" style="color: #5d717fa2"
+                                            @if (count($propertyPrices) > 0)
+                                                @foreach ($propertyPrices as $price)
+                                                    <strong> <span id="pricing">{!! moneyFormat($symbol, $price->price) !!}</span>
+                                                        /{{ __($price->pricingType->name) }}</strong><br>
+                                                @endforeach
+                                            @endif
+                                            {{-- <i class="fa fa-arrow-down mr-2 text-13" style="color: #5d717fa2"
                                                 aria-hidden="true"></i> {{ __('Weekly discount') }} (%):
                                             @if ($result->property_price->weekly_discount != 0)
                                                 <strong> <span id="weekly_price_string">{!! moneyFormat($symbol, $result->property_price->weekly_discount) !!}</span>
@@ -237,12 +243,12 @@
                                             @else
                                                 <strong><span id="weekly_price_string">{!! moneyFormat($symbol, $result->property_price->weekly_discount) !!}</span>
                                                     /{{ __('week') }}</strong>
-                                            @endif
+                                            @endif --}}
                                         </div>
 
                                     </div>
 
-                                    <div class="col-md-6 col-sm-6">
+                                    {{-- <div class="col-md-6 col-sm-6">
                                         <div>
                                             <i class="fa fa-arrow-down mr-2 text-13" style="color: #5d717fa2"
                                                 aria-hidden="true"></i>
@@ -272,7 +278,7 @@
                                             </div>
                                         @endif
                                         <!-- end weekend price -->
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                         </div>
@@ -854,16 +860,16 @@
                                             <td class="pl-4 text-right"><span id="displayNumberOfDays" value=""> 0
                                                 </span></td>
                                         </tr>
-                                        <tr>
+                                        {{-- <tr>
                                             <td class="pl-4">
                                                 {{ __('Cleaning Fee') }}
                                             </td>
                                             <td class="pl-4 text-right"><span id="displayCleaningFee" value="">
                                                     0
                                                 </span></td>
-                                        </tr>
+                                        </tr> --}}
 
-                                        <tr class="additional_price">
+                                        {{-- <tr class="additional_price">
                                             <td class="pl-4">
                                                 {{ __('Security Fee') }}
                                             </td>
@@ -871,35 +877,40 @@
                                                     0
                                                 </span>
                                             </td>
-                                        </tr>
+                                        </tr> --}}
 
-                                        <tr class="security_price">
+                                        {{-- <tr class="security_price">
                                             <td class="pl-4">
                                                 {{ __('Guest Fee') }}
                                             </td>
                                             <td class="pl-4 text-right"><span id="displayGuestFee" value=""> 0
                                                 </span></td>
-                                        </tr>
+                                        </tr> --}}
 
-                                        <tr class="cleaning_price">
+                                        {{-- <tr class="cleaning_price">
                                             <td class="pl-4">
                                                 {{ __('Host Service Charge (%)') }}
                                             </td>
                                             <td class="pl-4 text-right"><span id="displayHostServiceCharge"
                                                     value=""> 0
                                                 </span></td>
-                                        </tr>
+                                        </tr> --}}
 
                                         <tr class="iva_tax">
                                             <td class="pl-4">
-                                                {{ __('Guest Service Charge (%)') }}
+                                                {{ __('Service Charge (%)') }}
                                             </td>
                                             <td class="pl-4 text-right"> <span id="displayGuestServiceCharge"
                                                     value=""> 0
                                                 </span></td>
                                         </tr>
-
-                                        <tr class="accomodation_tax">
+                                        <tr>
+                                            <td class="pl-4">{{ __('VAT (%)') }}</td>
+                                            <td class="pl-4 text-right"><span id="displayAccommodationTax"
+                                                    value=""> 0
+                                                </span></td>
+                                        </tr>
+                                        {{-- <tr class="accomodation_tax">
                                             <td class="pl-4">
                                                 {{ __('IVA Tax (%)') }}
                                             </td>
@@ -912,7 +923,7 @@
                                             <td class="pl-4 text-right"><span id="displayAccommodationTax"
                                                     value=""> 0
                                                 </span></td>
-                                        </tr>
+                                        </tr> --}}
                                         <tr>
                                             <td class="pl-4">{{ __('Total Price') }}</td>
                                             <td class="pl-4 text-right"><span id="displayTotalPriceWithAll"
