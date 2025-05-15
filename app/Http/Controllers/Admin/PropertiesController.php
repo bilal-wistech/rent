@@ -194,7 +194,7 @@ class PropertiesController extends Controller
             ->get();
         return response()->json(['areas' => $areas]);
     }
-     public function getbuildings($country, $city,$area)
+    public function getbuildings($country, $city, $area)
     {
         // dd($country,$city);
         $country = Country::where('short_name', $country)->first();
@@ -211,7 +211,7 @@ class PropertiesController extends Controller
         }
         $buildings = Building::where('country_id', $country->id)
             ->where('city_id', $city->id)
-            ->where('area_id',$area->id)
+            ->where('area_id', $area->id)
             ->get();
         return response()->json(['buildings' => $buildings]);
     }
@@ -771,5 +771,18 @@ class PropertiesController extends Controller
             ->select(['properties.id as properties_id', 'properties.name as property_name', 'properties.status as property_status', 'properties.created_at as property_created_at', 'properties.updated_at as property_updated_at', 'space_type.name as Space_type_name', 'properties.*', 'users.*', 'space_type.*'])
             ->orderBy('properties.id', 'desc');
         return $query;
+    }
+    public function changeListStatus(Request $request, $property_id)
+    {
+        $property = Properties::find($property_id);
+
+        if ($property) {
+            $newStatus = $property->status === 'Listed' ? 'Unlisted' : 'Listed';
+
+            $property->update([
+                'status' => $newStatus,
+            ]);
+        }
+        return redirect()->back()->with('success', 'Property status updated successfully.');
     }
 }

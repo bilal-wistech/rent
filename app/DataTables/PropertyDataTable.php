@@ -15,7 +15,7 @@ class PropertyDataTable extends DataTable
         return datatables()
             ->of($properties)
             ->addColumn('action', function ($properties) {
-                $edit = $delete  = $pricing ='';
+                $edit = $delete = $pricing = $status = '';
                 if (Common::has_permission(\Auth::guard('admin')->user()->id, 'edit_properties')) {
                     $edit = '<a href="' . url('admin/listing/' . $properties->id) . '/basics" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
                 }
@@ -23,7 +23,8 @@ class PropertyDataTable extends DataTable
                     $delete = '<a href="' . url('admin/delete-property/' . $properties->id) . '" class="btn btn-xs btn-danger delete-warning"><i class="fa fa-trash"></i></a>';
                 }
                 $pricing= '<a href="' . url('admin/show-pricing/' . $properties->id) . '" class="btn btn-xs btn-success "><i class="fa fa-dollar"></i></a>';
-                return $edit . $delete .$pricing;
+                $status ='<a href="' . url('admin/update-list-status/' . $properties->id) . '" class="btn btn-xs btn-info "><i class="fa fa-dollar"></i></a>';
+                return $edit . $delete .$pricing. $status;
             })
             ->addColumn('id', function ($properties) {
                 return $properties->id;

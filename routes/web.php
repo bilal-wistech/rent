@@ -117,7 +117,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::match(array('GET', 'POST'), 'add-properties', 'PropertiesController@add')->middleware(['permission:add_properties']);
     Route::get('properties/cities-by-country/{country}', 'PropertiesController@getCitiesByCountry')->name('cities-by-country');
     Route::get('properties/get-areas/{country}/{city}', 'PropertiesController@getAreas')->name('get-areas');
-     Route::get('properties/get-buildings/{country}/{city}/{area}', 'PropertiesController@getbuildings')->name('get-buildings');
+    Route::get('properties/get-buildings/{country}/{city}/{area}', 'PropertiesController@getbuildings')->name('get-buildings');
     Route::get('properties/property_list_csv', 'PropertiesController@propertyCsv');
     Route::get('properties/property_list_pdf', 'PropertiesController@propertyPdf');
 
@@ -139,7 +139,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::match(array('GET', 'POST'), 'edit_property/{id}', 'PropertiesController@update')->middleware(['permission:edit_properties']);
     Route::get('delete-property/{id}', 'PropertiesController@delete')->middleware(['permission:delete_property']);
     Route::get('show-pricing/{id}', 'PropertiesController@showPricing');
-
+    Route::get('update-list-status/{id}', 'PropertiesController@changeListStatus');
     Route::get('bookings', 'BookingsController@index')->middleware(['permission:manage_bookings']);
     Route::get('bookings/property_search', 'BookingsController@searchProperty')->middleware(['permission:manage_bookings']);
     Route::get('bookings/customer_search', 'BookingsController@searchCustomer')->middleware(['permission:manage_bookings']);
