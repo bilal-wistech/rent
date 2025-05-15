@@ -163,11 +163,23 @@
                                 <div class="form-group row mt-3 building d-none">
                                     <label class="control-label col-sm-3 fw-bold">Building <span
                                             class="text-danger">*</span></label>
-                                    <div class="col-sm-6">
+                                    {{-- <div class="col-sm-6">
                                         <input type="text" class="form-control f-14" id="building" name="building">
                                         @if ($errors->has('building'))
                                             <p class="error-tag">{{ $errors->first('building') }}</p>
                                         @endif
+                                    </div> --}}
+                                    <div class="col-sm-6">
+                                        <select class="form-control select2" name="building" id="building">
+                                            <option value="">Select a building</option>
+                                        </select>
+                                        @if ($errors->has('building'))
+                                            <p class="error-tag">{{ $errors->first('building') }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a href="#" id="buildingIcon" class="btn btn-primary btn-sm"><span
+                                                class="fa fa-home"></span></a>
                                     </div>
                                 </div>
 
@@ -254,6 +266,38 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="submit" class="btn btn-primary">Add Area</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="buildingModal" tabindex="-1" role="dialog" aria-labelledby="buildingModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="buildingModalLabel">Add Building Form</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="add_building_form" method="POST" action="{{ route('building.addAjax') }}"
+                            class="form-horizontal">
+                            {{ csrf_field() }}
+                            <div class="box-body">
+                                <div class="form-group row">
+                                    <label for="area_name" class="col-sm-3 col-form-label">Building</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" id="building_name" name="building"
+                                            placeholder="Building Name" required>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="modal_area" name="area" value="">
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Add Building</button>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </div>
                         </form>
@@ -361,7 +405,7 @@
         let baseURL = "{{ url('/') }}";
         let duplicateNumberCheckURL = "{{ url('duplicate-phone-number-check') }}";
     </script>
-    <script src="{{ asset('backend/js/add_customer_for_properties.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('backend/js/add_customer_for_properties.js') }}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
             // Initialize select2 for country and city
@@ -446,7 +490,7 @@
                                 $('#area').empty();
                                 $('#area').append('<option value="">Select a Area</option>');
                                 $.each(response.areas, function(key, area) {
-                                    $('#area').append('<option value="' + area.name +
+                                    $('#area').append('<option value="' + area.id +
                                         '">' + area.name + '</option>');
                                 });
                             }
@@ -459,7 +503,37 @@
                     $('#area').empty().append('<option value="">Select a Area</option>');
                 }
             });
+            $('#area').on('change', function() {
+                var selectedCountry = $('#country').val();
+                var selectedCity = $('#city').val();
+                var selectedArea = $('#area').val();
 
+                if (selectedCountry && selectedCity && selectedArea) {
+                    $.ajax({
+                        url: '/admin/properties/get-buildings/' + selectedCountry + '/' +
+                            selectedCity + '/' + selectedArea,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.buildings) {
+                                $('#building').empty();
+                                $('#building').append(
+                                    '<option value="">Select a Building</option>');
+                                $.each(response.buildings, function(key, building) {
+                                    $('#building').append('<option value="' + building
+                                        .id +
+                                        '">' + building.name + '</option>');
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Error: ', error);
+                        }
+                    });
+                } else {
+                    $('#building').empty().append('<option value="">Select a building</option>');
+                }
+            });
 
             $('#cityIcon').on('click', function(event) {
                 event.preventDefault();
@@ -504,6 +578,39 @@
 
                 // Show modal
                 $('#areaModal').modal('show');
+            });
+            $('#buildingIcon').on('click', function(event) {
+                event.preventDefault();
+
+                $('#errorCountry').text('').removeClass('text-danger');
+                $('#errorCity').text('').removeClass('text-danger');
+                $('#errorArea').text('').removeClass('text-danger');
+
+                var selectedCountry = $('#country').val();
+                if (!selectedCountry) {
+                    $('#errorCountry').text('Please select a country first.').addClass('text-danger');
+                    return;
+                }
+
+                var selectedCity = $('#city').val();
+                if (!selectedCity) {
+                    $('#errorCity').text('Please select a city first.').addClass('text-danger');
+                    return;
+                }
+
+                var selectedArea = $('#area').val();
+                if (!selectedArea) {
+                    $('#errorArea').text('Please select an area first.').addClass('text-danger');
+                    return;
+                }
+
+                // Populate hidden fields in the modal
+                $('#modal_country').val(selectedCountry);
+                $('#modal_city').val(selectedCity);
+                $('#modal_area').val(selectedArea); // Use selectedArea, not selectedCity
+
+                // Show modal
+                $('#buildingModal').modal('show');
             });
         });
     </script>

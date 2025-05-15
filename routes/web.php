@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Admin\AreaController;
 use App\Http\Controllers\AddonController;
+use App\Http\Controllers\Admin\BuildingController;
 use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\DocumentController;
@@ -72,6 +73,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('area/add/{cityId}', [AreaController::class, 'add'])->name('area.add');
     Route::post('admin/add-ajax-city', [CityController::class, 'addAjax'])->name('city.addAjax');
     Route::post('admin/add-ajax-area', [AreaController::class, 'addAjax'])->name('area.addAjax');
+    Route::post('admin/add-ajax-building', [BuildingController::class, 'addAjax'])->name('building.addAjax');
+
 
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
     Route::post('add-ajax-customer', 'CustomerController@ajaxCustomerAdd')->middleware(['permission:add_customer']);
@@ -114,6 +117,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::match(array('GET', 'POST'), 'add-properties', 'PropertiesController@add')->middleware(['permission:add_properties']);
     Route::get('properties/cities-by-country/{country}', 'PropertiesController@getCitiesByCountry')->name('cities-by-country');
     Route::get('properties/get-areas/{country}/{city}', 'PropertiesController@getAreas')->name('get-areas');
+     Route::get('properties/get-buildings/{country}/{city}/{area}', 'PropertiesController@getbuildings')->name('get-buildings');
     Route::get('properties/property_list_csv', 'PropertiesController@propertyCsv');
     Route::get('properties/property_list_pdf', 'PropertiesController@propertyPdf');
 

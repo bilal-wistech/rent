@@ -46,6 +46,7 @@ use App\Models\{
     Currency,
     City,
     PricingType,
+    Building
 };
 
 class PropertiesController extends Controller
@@ -109,10 +110,12 @@ class PropertiesController extends Controller
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput();
             } else {
+                // dd($request->area);
                 $country = Country::where('short_name', $request->country)->first();
                 $city = City::findOrFail($request->city);
-                // $area = Area::findOrFail($request->area);
-                $addressParts = [$request->area];
+                $area = Area::findOrFail($request->area);
+
+                $addressParts = [$area->name];
                 !empty($request->building) && ($addressParts[] = $request->building);
                 !empty($request->flat_no) && ($addressParts[] = 'Flat ' . $request->flat_no);
 
@@ -123,7 +126,7 @@ class PropertiesController extends Controller
                 // ? implode(', ', $addressParts). ' in ' . $request->area
                 // : SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->area;
                 // $property->name = SpaceType::getAll()->find($request->space_type)->name . ' in ' . $request->area;
-                $property->name = $request->area;
+                $property->name = $area->name;
                 $property->property_type = $request->property_type_id;
                 $property->space_type = $request->space_type;
                 $property->accommodates = $request->accommodates;
@@ -140,7 +143,7 @@ class PropertiesController extends Controller
                 $property_address->postal_code = $request->postal_code;
                 $property_address->latitude = $request->latitude;
                 $property_address->longitude = $request->longitude;
-                $property_address->area = $request->area;
+                $property_address->area = $area->name;
                 $property_address->building = $request->building;
                 $property_address->flat_no = $request->flat_no;
                 $property_address->save();
@@ -190,6 +193,27 @@ class PropertiesController extends Controller
             ->where('city_id', $city->id)
             ->get();
         return response()->json(['areas' => $areas]);
+    }
+     public function getbuildings($country, $city,$area)
+    {
+        // dd($country,$city);
+        $country = Country::where('short_name', $country)->first();
+        if (!$country) {
+            return response()->json(['error' => 'Country not found'], 404);
+        }
+        $city = City::findOrFail($city);
+        if (!$city) {
+            return response()->json(['error' => 'City not found'], 404);
+        }
+        $area = Area::findOrFail($area);
+        if (!$area) {
+            return response()->json(['error' => 'Area not found'], 404);
+        }
+        $buildings = Building::where('country_id', $country->id)
+            ->where('city_id', $city->id)
+            ->where('area_id',$area->id)
+            ->get();
+        return response()->json(['buildings' => $buildings]);
     }
     public function showPricing($property_id)
     {
