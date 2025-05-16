@@ -31,8 +31,7 @@
                                     <div class="col-md-8 mb20">
                                         <label class="label-large fw-bold">Country <span
                                                 class="text-danger">*</span></label>
-                                        <select id="basics-select-bed_type" name="country" class="form-control f-14"
-                                            id='country'>
+                                        <select id="country" name="country" class="form-control f-14 select2">
                                             @foreach ($country as $key => $value)
                                                 <option value="{{ $key }}"
                                                     {{ $key == $result->property_address->country ? 'selected' : '' }}>
@@ -42,73 +41,69 @@
                                         <span class="text-danger">{{ $errors->first('country') }}</span>
                                     </div>
                                 </div>
-                                {{-- <div class="row">
-                                    <div class="col-md-8 mb20">
-                                        <label class="label-large fw-bold">Address Line 1 <span
-                                                class="text-danger">*</span></label>
-                                        <input type="text" name="address_line_1" id="address_line_1"
-                                            value="{{ $result->property_address->address_line_1 }}"
-                                            class="form-control f-14" placeholder="House name/number + street/road">
-                                        <span class="text-danger">{{ $errors->first('address_line_1') }}</span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-8 mb20">
-                                        <div id="map_view" style="width:100%; height:400px;"></div>
-                                    </div>
-                                    <div class="col-md-8 mb20">
-                                        <p>You can move the pointer to set the correct map position</p>
-                                        <span class="text-danger">{{ $errors->first('latitude') }}</span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-8 mb20">
-                                        <label class="label-large fw-bold">Address Line 2</label>
-                                        <input type="text" name="address_line_2" id="address_line_2"
-                                            value="{{ $result->property_address->address_line_2 }}"
-                                            class="form-control f-14" placeholder="Apt., suite, building access code">
-                                    </div>
-                                </div> --}}
-                                <div class="row">
-                                    <div class="col-md-8 mb20">
-                                        <label class="label-large fw-bold">Area</label>
-                                        <input type="text" name="area" id="area"
-                                            value="{{ $result->property_address->area }}" class="form-control f-14">
-                                        <span class="text-danger">{{ $errors->first('area') }}</span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-8 mb20">
-                                        <label class="label-large fw-bold">Building</label>
-                                        <input type="text" name="building" id="building"
-                                            value="{{ $result->property_address->building }}" class="form-control f-14">
-                                        <span class="text-danger">{{ $errors->first('building') }}</span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-8 mb20">
-                                        <label class="label-large fw-bold">Flat No</label>
-                                        <input type="text" name="flat_no" id="flat_no"
-                                            value="{{ $result->property_address->flat_no }}" class="form-control f-14">
-                                        <span class="text-danger">{{ $errors->first('flat_no') }}</span>
-                                    </div>
-                                </div>
                                 <div class="row">
                                     <div class="col-md-8 mb20">
                                         <label class="label-large fw-bold">City / Town / District <span
                                                 class="text-danger">*</span></label>
-                                        <input type="text" name="city" id="city"
-                                            value="{{ $result->property_address->city }}" class="form-control f-14">
+                                        <select name="city" class="form-control f-14 select2" id='city'>
+                                            @foreach ($city as $key => $value)
+                                                <option value="{{ $value }}"
+                                                    {{ $value == $result->property_address->city ? 'selected' : '' }}>
+                                                    {{ $value }}</option>
+                                            @endforeach
+                                        </select>
                                         <span class="text-danger">{{ $errors->first('city') }}</span>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-8 mb20">
+                                        <label class="label-large fw-bold">Area</label>
+                                        <select name="area" class="form-control f-14 select2" id='area'>
+                                            @foreach ($area as $key => $value)
+                                                <option value="{{ $value }}"
+                                                    {{ $value == $result->property_address->area ? 'selected' : '' }}>
+                                                    {{ $value }}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="text-danger">{{ $errors->first('area') }}</span>
+                                    </div>
+                                </div>
+                                @if ($result->property_type_id != 1)
+                                    <div class="row">
+                                        <div class="col-md-8 mb20">
+                                            <label class="label-large fw-bold">Building</label>
+                                            <select name="building" class="form-control f-14 select2" id='building'>
+                                                @foreach ($building as $key => $value)
+                                                    <option value="{{ $value }}"
+                                                        {{ $value == $result->property_address->building ? 'selected' : '' }}>
+                                                        {{ $value }}</option>
+                                                @endforeach
+                                            </select>
+                                            <span class="text-danger">{{ $errors->first('building') }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-8 mb20">
+                                            <label class="label-large fw-bold">Flat No</label>
+                                            <input type="text" name="flat_no" id="flat_no"
+                                                value="{{ $result->property_address->flat_no }}" class="form-control f-14">
+                                            <span class="text-danger">{{ $errors->first('flat_no') }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                                <div class="row">
+                                    <div class="col-md-8 mb20">
                                         <label class="label-large fw-bold">State / Province / Country / Region <span
                                                 class="text-danger">*</span></label>
-                                        <input type="text" name="state" id=""
-                                            value="{{ $result->property_address->state ?? ($result->property_address->country ?? '') }}"
-                                            class="form-control f-14">
+
+                                        <select name="state" class="form-control f-14 select2" id='state'>
+                                            @foreach ($country as $key => $value)
+                                                <option value="{{ $key }}"
+                                                    @if ($key == ($result->property_address->state ?? ($result->property_address->country ?? ''))) selected @endif>
+                                                    {{ $key }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                         <span class="text-danger">{{ $errors->first('state') }}</span>
                                     </div>
                                 </div>
@@ -152,6 +147,11 @@
         let maxlengthText = "{{ __('Please enter no more than 255 characters.') }}";
         let latitude = "{{ $result->property_address->latitude != '' ? $result->property_address->latitude : 0 }}";
         let longitude = "{{ $result->property_address->longitude != '' ? $result->property_address->longitude : 0 }}";
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('#country, #city, #area, #building, #state').select2();
+        });
     </script>
     <script type="text/javascript" src="{{ asset('backend/dist/js/validate.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/listings.min.js') }}"></script>

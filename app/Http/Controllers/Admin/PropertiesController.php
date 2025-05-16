@@ -362,6 +362,9 @@ class PropertiesController extends Controller
                 }
             }
             $data['country'] = Country::pluck('name', 'short_name');
+            $data['area'] = Area::pluck('name');
+            $data['building'] = Building::pluck('name');
+            $data['city'] = City::pluck('name');
         } elseif ($step == 'amenities') {
             if ($request->isMethod('post') && is_array($request->amenities)) {
                 $rooms = Properties::find($request->id);
