@@ -776,13 +776,26 @@ class PropertiesController extends Controller
     {
         $property = Properties::find($property_id);
 
-        if ($property) {
-            $newStatus = $property->status === 'Listed' ? 'Unlisted' : 'Listed';
-
-            $property->update([
-                'status' => $newStatus,
-            ]);
+        if (!$property) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Property not found.'
+            ], 404);
         }
-        return redirect()->back()->with('success', 'Property status updated successfully.');
+
+        $newStatus = $property->status === 'Listed' ? 'Unlisted' : 'Listed';
+
+        $property->update([
+            'status' => $newStatus,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Property status updated successfully.',
+            'new_status' => $newStatus,
+            'new_icon' => $newStatus === 'Listed' ? 'fa-arrow-up' : 'fa-arrow-down',
+            'new_btn_class' => $newStatus === 'Listed' ? 'btn-success' : 'btn-danger',
+            'new_title' => $newStatus === 'Listed' ? 'Unlist Property' : 'List Property',
+        ]);
     }
 }
