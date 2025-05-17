@@ -27,6 +27,31 @@ class SecurityDataTable extends DataTable
             ->addColumn('property_id', function ($securities) {
                 return $securities->properties->name;
             })
+            ->addColumn('location', function ($securities) {
+                $parts = [];
+
+                if (!empty($securities->properties->property_address->flat_no)) {
+                    $parts[] = 'Flat '.$securities->properties->property_address->flat_no;
+                }
+
+                if (!empty($securities->properties->property_address->building)) {
+                    $parts[] = $securities->properties->property_address->building;
+                }
+
+                if (!empty($securities->properties->property_address->area)) {
+                    $parts[] = $securities->properties->property_address->area;
+                }
+
+                if (!empty($securities->properties->property_address->city)) {
+                    $parts[] = $securities->properties->property_address->city;
+                }
+
+                if (!empty($securities->properties->property_address->country)) {
+                    $parts[] = $securities->properties->property_address->country;
+                }
+
+                return implode(', ', $parts);
+            })
             ->addColumn('user_id', function ($securities) {
                 return $securities->users->first_name . ' ' . $securities->users->last_name;
             })
@@ -64,7 +89,7 @@ class SecurityDataTable extends DataTable
         $status = isset(request()->status) ? request()->status : null;
         $from = isset(request()->from) ? setDateForDb(request()->from) : null;
         $to = isset(request()->to) ? setDateForDb(request()->to) : null;
-        $securities = Bookings::with(['properties', 'users'])->where('security_money', '>', 0)->where('is_security_refunded', 0);
+        $securities = Bookings::with(['properties.property_address', 'users'])->where('security_money', '>', 0)->where('is_security_refunded', 0);
 
         if (!empty($from)) {
             $securities->whereDate('securities.created_at', '>=', $from);
@@ -81,6 +106,7 @@ class SecurityDataTable extends DataTable
             ->addColumn(['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'title' => '#', 'orderable' => false, 'searchable' => false])
             ->addColumn(['data' => 'booking_id', 'name' => 'booking_id', 'title' => 'Booking ID', 'orderable' => true, 'searchable' => false])
             ->addColumn(['data' => 'property_id', 'name' => 'property_id', 'title' => 'Property', 'orderable' => true, 'searchable' => true])
+            ->addColumn(['data' => 'location', 'name' => 'location', 'title' => 'Location', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'user_id', 'name' => 'user_id', 'title' => 'Tenant', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'security_money', 'name' => 'security_money', 'title' => 'Security Amount', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'is_expired', 'name' => 'is_expired', 'title' => 'Expired', 'orderable' => true, 'searchable' => true])

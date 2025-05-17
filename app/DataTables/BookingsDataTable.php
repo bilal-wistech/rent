@@ -23,6 +23,31 @@ class BookingsDataTable extends DataTable
             ->addColumn('property_name', function ($bookings) {
                 return '<a href="' . url('admin/listing/' . $bookings->property_id . '/basics') . '">' . ucfirst($bookings->property_name) . '</a>';
             })
+            ->addColumn('location', function ($bookings) {
+                $parts = [];
+
+                if (!empty($bookings->flat_no)) {
+                    $parts[] = 'Flat '.$bookings->flat_no;
+                }
+
+                if (!empty($bookings->building)) {
+                    $parts[] = $bookings->building;
+                }
+
+                if (!empty($bookings->area)) {
+                    $parts[] = $bookings->area;
+                }
+
+                if (!empty($bookings->city)) {
+                    $parts[] = $bookings->city;
+                }
+
+                if (!empty($bookings->country)) {
+                    $parts[] = $bookings->country;
+                }
+
+                return implode(', ', $parts);
+            })
             ->addColumn('start_date', function ($bookings) {
                 return setDateForDb($bookings->start_date);
             })
@@ -52,7 +77,7 @@ class BookingsDataTable extends DataTable
                     '<a href="' . url('admin/bookings/edit/' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Edit"><i class="fa fa-edit"></i></a>&nbsp;';
 
                 if ($status !== 'booked paid') {
-                $actions .= '<a href="' . url('admin/payment-receipts/create?booking_id=' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Payment Receipt">Payment Receipt</a>&nbsp;';
+                    $actions .= '<a href="' . url('admin/payment-receipts/create?booking_id=' . $bookings->id) . '" class="btn btn-xs btn-primary" title="Payment Receipt">Payment Receipt</a>&nbsp;';
                 }
 
                 return $actions;
@@ -82,6 +107,9 @@ class BookingsDataTable extends DataTable
             ->join('users as u', function ($join) {
                 $join->on('u.id', '=', 'bookings.host_id');
             })
+            ->join('property_address as pa', function ($join) {
+                $join->on('properties.id', '=', 'pa.property_id');
+            })
             ->select([
                 'bookings.id as id',
                 'u.first_name as host_name',
@@ -105,7 +133,14 @@ class BookingsDataTable extends DataTable
                 'bookings.iva_tax',
                 'bookings.accomodation_tax',
                 'bookings.booking_property_status as booking_property_status',
+                'pa.city as city',
+                'pa.state as state',
+                'pa.country as country',
+                'pa.area as area',
+                'pa.building as building',
+                'pa.flat_no as flat_no',
             ]);
+
         if (isset($user_id)) {
             $bookings->where('bookings.user_id', '=', $user_id);
         }
@@ -138,6 +173,7 @@ class BookingsDataTable extends DataTable
             ->addColumn(['data' => 'host_name', 'name' => 'u.first_name', 'title' => 'Host Name'])
             ->addColumn(['data' => 'guest_name', 'name' => 'users.first_name', 'title' => 'Guest Name'])
             ->addColumn(['data' => 'property_name', 'name' => 'properties.name', 'title' => 'Property Name'])
+            ->addColumn(['data' => 'location', 'name' => 'location', 'title' => 'Location'])
             ->addColumn(['data' => 'start_date', 'name' => 'bookings.start_date', 'title' => 'Start Date'])
             ->addColumn(['data' => 'end_date', 'name' => 'bookings.end_date', 'title' => 'End Date'])
             ->addColumn(['data' => 'total_amount', 'name' => 'bookings.total', 'title' => 'Total Amount'])

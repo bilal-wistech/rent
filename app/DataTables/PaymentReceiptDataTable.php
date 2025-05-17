@@ -27,6 +27,31 @@ class PaymentReceiptDataTable extends DataTable
             ->addColumn('property_id', function ($payment_receipts) {
                 return $payment_receipts->booking->properties->name;
             })
+           ->addColumn('location', function ($payment_receipts) {
+                $parts = [];
+
+                if (!empty($payment_receipts->booking->properties->property_address->flat_no)) {
+                    $parts[] = 'Flat '.$payment_receipts->booking->properties->property_address->flat_no;
+                }
+
+                if (!empty($payment_receipts->booking->properties->property_address->building)) {
+                    $parts[] = $payment_receipts->booking->properties->property_address->building;
+                }
+
+                if (!empty($payment_receipts->booking->properties->property_address->area)) {
+                    $parts[] = $payment_receipts->booking->properties->property_address->area;
+                }
+
+                if (!empty($payment_receipts->booking->properties->property_address->city)) {
+                    $parts[] = $payment_receipts->booking->properties->property_address->city;
+                }
+
+                if (!empty($payment_receipts->booking->properties->property_address->country)) {
+                    $parts[] = $payment_receipts->booking->properties->property_address->country;
+                }
+
+                return implode(', ', $parts);
+            })
             ->addColumn('user_id', function ($payment_receipts) {
                 return $payment_receipts->booking->users->first_name . ' ' . $payment_receipts->booking->users->last_name;
             })
@@ -64,8 +89,7 @@ class PaymentReceiptDataTable extends DataTable
         $status = isset(request()->status) ? request()->status : null;
         $from = isset(request()->from) ? setDateForDb(request()->from) : null;
         $to = isset(request()->to) ? setDateForDb(request()->to) : null;
-        $payment_receipts = PaymentReceipt::with(['booking.properties', 'booking.users']);
-
+        $payment_receipts = PaymentReceipt::with(['booking.properties.property_address', 'booking.users']);
         if (!empty($from)) {
             $payment_receipts->whereDate('payment_receipts.created_at', '>=', $from);
         }
@@ -81,6 +105,7 @@ class PaymentReceiptDataTable extends DataTable
             ->addColumn(['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'title' => '#', 'orderable' => false, 'searchable' => false])
             ->addColumn(['data' => 'booking_id', 'name' => 'booking_id', 'title' => 'Booking ID', 'orderable' => true, 'searchable' => false])
             ->addColumn(['data' => 'property_id', 'name' => 'property_id', 'title' => 'Property', 'orderable' => true, 'searchable' => true])
+            ->addColumn(['data' => 'location', 'name' => 'location', 'title' => 'Location', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'user_id', 'name' => 'user_id', 'title' => 'Tenant', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'paid_through', 'name' => 'paid_through', 'title' => 'Paid Through', 'orderable' => true, 'searchable' => true])
             ->addColumn(['data' => 'payment_date', 'name' => 'payment_date', 'title' => 'Payment Date', 'orderable' => true, 'searchable' => true])
