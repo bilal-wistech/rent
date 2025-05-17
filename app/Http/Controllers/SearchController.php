@@ -87,18 +87,18 @@ class SearchController extends Controller
                             ->orWhere('flat_no', 'like', "%{$location}%");
                     });
             })
-            ->with(['users', 'property_price', 'property_address', 'bookings'])
-            ->whereDoesntHave('bookings', function ($bookingQuery) use ($checkinDate, $checkoutDate) {
-                //$bookingQuery->where('status', 'Accepted')
-                    $bookingQuery->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
-                        $conflictQuery->whereBetween('start_date', [$checkinDate, $checkoutDate])
-                            ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
-                            ->orWhere(function ($overlapQuery) use ($checkinDate, $checkoutDate) {
-                                $overlapQuery->where('start_date', '<=', $checkinDate)
-                                    ->where('end_date', '>=', $checkoutDate);
-                            });
-                    });
-            });
+            ->with(['users', 'property_price', 'property_address', 'bookings']);
+            // ->whereDoesntHave('bookings', function ($bookingQuery) use ($checkinDate, $checkoutDate) {
+            //     //$bookingQuery->where('status', 'Accepted')
+            //         $bookingQuery->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
+            //             $conflictQuery->whereBetween('start_date', [$checkinDate, $checkoutDate])
+            //                 ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
+            //                 ->orWhere(function ($overlapQuery) use ($checkinDate, $checkoutDate) {
+            //                     $overlapQuery->where('start_date', '<=', $checkinDate)
+            //                         ->where('end_date', '>=', $checkoutDate);
+            //                 });
+            //         });
+            // });
 
         // Apply filters
         if ($request->has('space_type') && !empty($data['space_type_selected']) && $data['space_type_selected'][0] !== '') {
@@ -171,17 +171,17 @@ class SearchController extends Controller
                     ->orWhere('area', 'like', "%{$full_address}%")
                     ->orWhere('building', 'like', "%{$full_address}%")
                     ->orWhere('flat_no', 'like', "%{$full_address}%");
-            })
-            ->whereDoesntHave('bookings', function ($query) use ($checkinDate, $checkoutDate) {
-                $query->where(function ($q) use ($checkinDate, $checkoutDate) {
-                    $q->whereBetween('start_date', [$checkinDate, $checkoutDate])
-                        ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
-                        ->orWhere(function ($q) use ($checkinDate, $checkoutDate) {
-                            $q->where('start_date', '<=', $checkinDate)
-                                ->where('end_date', '>=', $checkoutDate);
-                        });
-                })/* ->where('status', 'Accepted') */;
             });
+            // ->whereDoesntHave('bookings', function ($query) use ($checkinDate, $checkoutDate) {
+            //     $query->where(function ($q) use ($checkinDate, $checkoutDate) {
+            //         $q->whereBetween('start_date', [$checkinDate, $checkoutDate])
+            //             ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
+            //             ->orWhere(function ($q) use ($checkinDate, $checkoutDate) {
+            //                 $q->where('start_date', '<=', $checkinDate)
+            //                     ->where('end_date', '>=', $checkoutDate);
+            //             });
+            //     })/* ->where('status', 'Accepted') */;
+            // });
 
         $total = $query->count();
         $properties = $query->skip(($page - 1) * $perPage)
