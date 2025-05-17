@@ -180,7 +180,7 @@ class SearchController extends Controller
                             $q->where('start_date', '<=', $checkinDate)
                                 ->where('end_date', '>=', $checkoutDate);
                         });
-                })->where('status', 'Accepted');
+                })/* ->where('status', 'Accepted') */;
             });
 
         $total = $query->count();
