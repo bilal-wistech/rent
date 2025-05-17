@@ -161,7 +161,7 @@ class SearchController extends Controller
         $perPage = 5; // Number of properties per page
         $page = $request->input('page', 1);
 
-        $query = Properties::where('status', 'listed')
+        $query = Properties::where('status', 'Listed')
             ->whereHas('property_address', function ($q) use ($full_address) {
                 $q->where('address_line_1', 'like', "%{$full_address}%")
                     ->orWhere('address_line_2', 'like', "%{$full_address}%")
