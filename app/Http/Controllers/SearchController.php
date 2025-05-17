@@ -73,7 +73,7 @@ class SearchController extends Controller
         $checkinDate = $request->input('checkin') ? Carbon::parse($request->input('checkin')) : $today;
         $checkoutDate = $request->input('checkout') ? Carbon::parse($request->input('checkout')) : $today;
 
-        $query = Properties::where('status', 'Listed')
+        $query = Properties::where('status', 'listed')
             ->where(function ($mainQuery) use ($location) {
                 $mainQuery->where('name', 'like', "%{$location}%")
                     ->orWhereHas('property_address', function ($addressQuery) use ($location) {
@@ -89,8 +89,8 @@ class SearchController extends Controller
             })
             ->with(['users', 'property_price', 'property_address', 'bookings'])
             ->whereDoesntHave('bookings', function ($bookingQuery) use ($checkinDate, $checkoutDate) {
-                //$bookingQuery->where('status', 'Accepted')
-                    $bookingQuery->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
+                $bookingQuery->where('status', 'Accepted')
+                    ->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
                         $conflictQuery->whereBetween('start_date', [$checkinDate, $checkoutDate])
                             ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
                             ->orWhere(function ($overlapQuery) use ($checkinDate, $checkoutDate) {
@@ -180,7 +180,7 @@ class SearchController extends Controller
                             $q->where('start_date', '<=', $checkinDate)
                                 ->where('end_date', '>=', $checkoutDate);
                         });
-                })/* ->where('status', 'Accepted') */;
+                })->where('status', 'Accepted');
             });
 
         $total = $query->count();
