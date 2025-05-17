@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\EmailController;
-use App\Http\Controllers\UserController;
+use App\Models\Language;
 use Illuminate\Http\Request;
-use App\Models\{Favourite, PasswordResets, Settings, User, UserDetails, UsersVerification};
 use App\Rules\GoogleReCaptcha;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\EmailController;
 use Auth, DateTime, Session, Socialite, Validator, DB, Common;
+use App\Models\{Favourite, PasswordResets, Settings, User, UserDetails, UsersVerification};
 
 
 class LoginController extends Controller
@@ -24,6 +25,10 @@ class LoginController extends Controller
         }
 
         $data['social'] = Settings::getAll()->where('type','social')->pluck('value','name');
+
+        $data['default_language'] = Language::where('status', '=', 'Active')->where('default', '=', '1')->first();
+
+
         return view('login.view', $data);
     }
 

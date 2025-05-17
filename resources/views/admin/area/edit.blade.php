@@ -37,7 +37,7 @@
                     </div>
                 @endif
 
-                    <form id="add_country" method="post" action="{{ route('area.update',$area->id) }}" class="form-horizontal">
+                    <form id="add_country" method="post" action="{{ route('area.update',$area->id) }}" class="form-horizontal" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         {{ method_field('PUT') }}
                            <div class="box-body">
@@ -48,6 +48,21 @@
                                 <div class="col-sm-6">
                                     <input type="text" name="name" class="form-control f-14" id="short_name" value="{{ $area->name }}">
                                     <span class="text-danger">{{ $errors->first("name") }}</span>
+                                </div>
+                            </div>
+                            <div class="form-group row mt-3">
+                                <label for="image" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                    Upload Image <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="col-sm-6">
+                                    <input type="file" name="image" class="form-control f-14" id="image" accept="image/*">
+                                    <span class="text-danger">{{ $errors->first("image") }}</span>
+                                    @if(isset($area->image))
+                                        <div class="mt-2">
+                                            <img src="{{ asset('front/images/front-areas/' . $area->image) }}" alt="Area Image" width="100" height="100" style="border-radius: 5px;">
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                             <input type="hidden" name="country_id" id="country_id" value="{{$area->city_id }}">

@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\{
     Controllers\Controller,
     Controllers\EmailController,
-
 };
 use App\Rules\GoogleReCaptcha;
 use Illuminate\Support\Facades\Cache;
@@ -41,7 +40,7 @@ class UserController extends Controller
 
     public function create(Request $request, EmailController $email_controller)
     {
-        
+
         $rules = array(
             'first_name'      => 'required|max:255',
             'last_name'       => 'required|max:255',
@@ -66,7 +65,7 @@ class UserController extends Controller
             'email'           => 'Email',
             'password'        => 'Password',
         );
-        
+
         if (!empty(settings('recaptcha_preference')) && !empty(settings('recaptcha_key'))) {
             if (str_contains(settings('recaptcha_preference'), 'user_reg')) {
                 $captchaRule = array('g-recaptcha-response' => ['required', new GoogleReCaptcha]);
@@ -76,11 +75,9 @@ class UserController extends Controller
                 $rules = array_merge($rules, $captchaRule);
                 $messages = array_merge($messages, $captchaMessage);
                 $fieldNames = array_merge($fieldNames, $captchaFieldname);
-
-            
             }
         }
-        
+
 
         $validator = Validator::make($request->all(), $rules, $messages);
         $validator->setAttributeNames($fieldNames);
@@ -94,8 +91,9 @@ class UserController extends Controller
             $user->email        =   $request->email;
             $user->password     =   bcrypt($request->password);
             $user->status       =   'Active';
-            $formattedPhone        = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
-            $user->phone           = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
+            // $formattedPhone        = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
+            // $user->phone           = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
+            $user->phone = $request->phone;
             $user->default_country = isset($request->default_country) ? $request->default_country : NULL;
             $user->carrier_code    = isset($request->carrier_code) ? $request->carrier_code : NULL;
             $user->formatted_phone = isset($request->formatted_phone) ? $request->formatted_phone : NULL;
@@ -104,7 +102,7 @@ class UserController extends Controller
             $user_details             = new UserDetails;
             $user_details->user_id    = $user->id;
             $user_details->field      = 'date_of_birth';
-            $user_details->value      = $request->birthday_year.'-'.$request->birthday_month.'-'.$request->birthday_day;
+            $user_details->value      = $request->birthday_year . '-' . $request->birthday_month . '-' . $request->birthday_day;
             $user_details->save();
 
             $user_verification  = new UsersVerification;
@@ -116,20 +114,18 @@ class UserController extends Controller
             try {
 
                 $email_controller->welcome_email($user);
-
             } catch (\Exception $e) {
 
-                $errorMessage = ' Email was not sent due to '.$e->getMessage();
+                $errorMessage = ' Email was not sent due to ' . $e->getMessage();
             }
 
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-                $this->helper->one_time_message('success', __('You have registered successfully.').''.$errorMessage);
+                $this->helper->one_time_message('success', __('You have registered successfully.') . '' . $errorMessage);
                 return redirect()->intended('dashboard');
             } else {
                 $this->helper->one_time_message('danger', __('Log In Failed. Please Check Your Email/Password.'));
                 return redirect('login');
             }
-
         }
     }
 
@@ -142,25 +138,31 @@ class UserController extends Controller
         $data['list'] = Properties::where('host_id', $user_id)->count();
         $data['trip'] = Bookings::where(['user_id' => $user_id, 'status' => 'Accepted'])->count();
 
-        $bookings = Bookings::select('payment_method_id','gateways.name as p_method', 'currency_code',
-            DB::raw('(total - service_charge - iva_tax - accomodation_tax) as total'), 'bookings.created_at', DB::raw('1 as type'))
+        $bookings = Bookings::select(
+            'payment_method_id',
+            'gateways.name as p_method',
+            'currency_code',
+            DB::raw('(total - service_charge - iva_tax - accomodation_tax) as total'),
+            'bookings.created_at',
+            DB::raw('1 as type')
+        )
             ->join('gateways', function ($join) {
                 $join->on('bookings.payment_method_id', '=', 'gateways.id');
             })
             ->where(['host_id' => $user_id, 'bookings.status' => 'Accepted']);
 
-        $trips = Bookings::select('payment_method_id','gateways.name as p_method', 'currency_code', 'total', 'bookings.created_at', DB::raw('-1 as type'))
+        $trips = Bookings::select('payment_method_id', 'gateways.name as p_method', 'currency_code', 'total', 'bookings.created_at', DB::raw('-1 as type'))
             ->join('gateways', function ($join) {
                 $join->on('bookings.payment_method_id', '=', 'gateways.id');
             })
             ->where(['user_id' => $user_id, 'bookings.status' => 'Accepted']);
 
         $data['transactions'] = Withdrawal::join('currency', function ($join) {
-                    $join->on('withdrawals.currency_id', '=', 'currency.id');
-                })->join('payment_methods', function ($join) {
-                    $join->on('withdrawals.payment_method_id', '=', 'payment_methods.id');
-                })
-            ->select('payment_method_id','payment_methods.name as p_method', 'currency_id', 'amount', 'withdrawals.created_at', DB::raw('0 as type'))
+            $join->on('withdrawals.currency_id', '=', 'currency.id');
+        })->join('payment_methods', function ($join) {
+            $join->on('withdrawals.payment_method_id', '=', 'payment_methods.id');
+        })
+            ->select('payment_method_id', 'payment_methods.name as p_method', 'currency_id', 'amount', 'withdrawals.created_at', DB::raw('0 as type'))
             ->where(['user_id' => $user_id, 'withdrawals.status' => 'Success'])->union($bookings)->union($trips)
             ->orderBy('created_at', 'desc')->take(9)->get();
 
@@ -169,7 +171,6 @@ class UserController extends Controller
             ->orderBy('id', 'desc')->take(5)->get();
         $data['currentCurrency'] = $this->helper->getCurrentCurrency();
         return view('users.dashboard', $data);
-
     }
 
     public function profile(Request $request, EmailController $email_controller)
@@ -181,7 +182,7 @@ class UserController extends Controller
             $rules = array(
                 'first_name'      => 'required|max:255',
                 'last_name'       => 'required|max:255',
-                'email'           => 'required|max:255|email|unique:users,email,'.Auth::user()->id,
+                'email'           => 'required|max:255|email|unique:users,email,' . Auth::user()->id,
                 'birthday_day'    => 'required',
                 'birthday_month'  => 'required',
                 'birthday_year'   => 'required',
@@ -212,8 +213,9 @@ class UserController extends Controller
                 $user->first_name      = $request->first_name;
                 $user->last_name       = $request->last_name;
                 $user->email           = $request->email;
-                $formattedPhone        = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
-                $user->phone           = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
+                // $formattedPhone        = str_replace('+' . $request->carrier_code, "", $request->formatted_phone);
+                // $user->phone           = !empty($request->phone) ? preg_replace("/[\s-]+/", "", $formattedPhone) : NULL;
+                $user->phone           = $request->phone;
                 $user->default_country = isset($request->default_country) ? $request->default_country : NULL;
                 $user->carrier_code    = isset($request->carrier_code) ? $request->carrier_code : NULL;
                 $user->formatted_phone = isset($request->formatted_phone) ? $request->formatted_phone : NULL;
@@ -224,7 +226,7 @@ class UserController extends Controller
                 $user_verification->save();
 
                 $temp_details = $request->details;
-                $temp_details['date_of_birth'] = $request->birthday_year.'-'.$request->birthday_month.'-'.$request->birthday_day;
+                $temp_details['date_of_birth'] = $request->birthday_year . '-' . $request->birthday_month . '-' . $request->birthday_day;
                 foreach ($temp_details as $key => $value) {
                     if (!is_null($value) && $value != '') {
                         UserDetails::updateOrCreate(['user_id' => Auth::user()->id, 'field' => $key], ['value' => $value]);
@@ -245,11 +247,11 @@ class UserController extends Controller
 
         $data['timezone'] = Cache::remember('timezone', 86400, function () {
             return Timezone::get()->pluck('zone', 'value');
-            });
+        });
 
         $data['country'] = Cache::remember('country', 86400, function () {
             return Country::get()->pluck('name', 'short_name');
-            });
+        });
 
 
         $data['details']   = $details = UserDetails::where('user_id', Auth::user()->id)->pluck('value', 'field')->toArray();
@@ -266,31 +268,48 @@ class UserController extends Controller
     public function media()
     {
         $data['result'] = $user = User::find(Auth::user()->id);
+
         if (isset($_FILES["photos"]["name"])) {
             foreach ($_FILES["photos"]["error"] as $key => $error) {
-                $tmp_name     = $_FILES["photos"]["tmp_name"][$key];
-                $name         = str_replace(' ', '_', $_FILES["photos"]["name"][$key]);
-                $ext          = pathinfo($name, PATHINFO_EXTENSION);
-                $name         = 'profile_'.time().'.'.$ext;
-                $path         = 'public/images/profile/'.Auth::user()->id;
-                $oldImagePath =  public_path('images/profile').'/'.Auth::user()->id.'/'.$data['result']->profile_image;
-                if (!file_exists($path)) {
-                    mkdir($path, 0777, true);
-                }
+                if ($error == UPLOAD_ERR_OK) { // Check if the file was uploaded without errors
+                    $tmp_name = $_FILES["photos"]["tmp_name"][$key];
+                    $name = str_replace(' ', '_', $_FILES["photos"]["name"][$key]);
+                    $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION)); // Ensure lowercase extension
+                    $name = 'profile_' . time() . '.' . $ext;
 
-                if ($ext == 'png' || $ext == 'jpg' || $ext == 'jpeg' || $ext == 'gif') {
-                    if (!empty($user->profile_image) && file_exists($oldImagePath)) {
-                        unlink($oldImagePath);
-                    }
-                    if (move_uploaded_file($tmp_name, $path."/".$name)) {
-                        $user->profile_image  = $name;
-                        $user->save();
-                        $this->helper->one_time_message('success', __('Profile picture changed successfully.'));
-                    }
-                }
+                    // Define the path relative to the `public` directory
+                    $relativePath = 'images/profile/' . Auth::user()->id;
+                    $fullPath = public_path($relativePath);
 
+                    // Ensure the directory exists
+                    if (!file_exists($fullPath)) {
+                        mkdir($fullPath, 0755, true); // Use 0755 for better security
+                    }
+
+                    // Validate file extension
+                    $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif'];
+                    if (in_array($ext, $allowedExtensions)) {
+                        // Delete the old image if it exists
+                        $oldImagePath = $fullPath . '/' . $user->profile_image;
+                        if (!empty($user->profile_image) && file_exists($oldImagePath)) {
+                            unlink($oldImagePath);
+                        }
+
+                        // Move the uploaded file to the desired location
+                        if (move_uploaded_file($tmp_name, $fullPath . '/' . $name)) {
+                            $user->profile_image = $name;
+                            $user->save();
+                            $this->helper->one_time_message('success', __('Profile picture changed successfully.'));
+                        }
+                    } else {
+                        $this->helper->one_time_message('error', __('Invalid file type. Only PNG, JPG, JPEG, and GIF are allowed.'));
+                    }
+                } else {
+                    $this->helper->one_time_message('error', __('Error uploading file.'));
+                }
             }
         }
+
         return view('users.media', $data);
     }
 
@@ -329,7 +348,7 @@ class UserController extends Controller
             $updateTime = dateFormat($account->updated_at);
 
 
-            $email_controller->account_preferences($account->id,$type = "update", $updateTime);
+            $email_controller->account_preferences($account->id, $type = "update", $updateTime);
 
             $this->helper->one_time_message('success', __('Payout Method has been updated successfully.'));
             return redirect('users/account-preferences');
@@ -357,17 +376,17 @@ class UserController extends Controller
     public function accountDefault(Request $request, EmailController $email_controller)
     {
         $account = Accounts::find($request->id);
-        
+
         if ($account->selected == 'Yes') {
             $this->helper->one_time_message('success', __('Payount account is set to default'));
             return redirect('users/account-preferences');
         } else {
-            $account_all       = Accounts::where('user_id', \Auth::user()->id)->update(['selected'=>'No']);
+            $account_all       = Accounts::where('user_id', \Auth::user()->id)->update(['selected' => 'No']);
             $account->selected = 'Yes';
             $account->save();
             $updateTime = dateFormat($account->updated_at);
 
-            $email_controller->account_preferences($account->id, 'default_update', $updateTime );
+            $email_controller->account_preferences($account->id, 'default_update', $updateTime);
 
             $this->helper->one_time_message('success', __('Selected payout method is set to default'));
             return redirect('users/account-preferences');
@@ -417,12 +436,12 @@ class UserController extends Controller
         $data['result'] = User::findOrFail($request->id);
         $data['details'] = UserDetails::where('user_id', $request->id)->pluck('value', 'field')->toArray();
 
-        $data['reviews_from_guests'] = Reviews::with('users', 'properties')->where(['receiver_id'=>$request->id, 'reviewer'=>'guest'])->orderBy('id', 'desc')->get();
-        $data['reviews_from_hosts'] = Reviews::with('users', 'properties')->where(['receiver_id'=>$request->id, 'reviewer'=>'host'])->orderBy('id', 'desc')->get();
+        $data['reviews_from_guests'] = Reviews::with('users', 'properties')->where(['receiver_id' => $request->id, 'reviewer' => 'guest'])->orderBy('id', 'desc')->get();
+        $data['reviews_from_hosts'] = Reviews::with('users', 'properties')->where(['receiver_id' => $request->id, 'reviewer' => 'host'])->orderBy('id', 'desc')->get();
 
         $data['reviews_count'] = $data['reviews_from_guests']->count() + $data['reviews_from_hosts']->count();
 
-        $data['title'] = $data['result']->first_name."'s Profile ";
+        $data['title'] = $data['result']->first_name . "'s Profile ";
 
         return view('users.show', $data);
     }
@@ -434,7 +453,7 @@ class UserController extends Controller
         $data['to']   = isset(request()->to) ? request()->to : null;
 
         $data['title']  = 'Transaction History';
-        return $dataTable->render('account.transaction_history',$data);
+        return $dataTable->render('account.transaction_history', $data);
     }
 
     public function getCompletedTransaction(Request $request)
@@ -462,9 +481,9 @@ class UserController extends Controller
         $transaction        = Payouts::join('properties', function ($join) {
             $join->on('properties.id', '=', 'payouts.property_id');
         })
-        ->select('payouts.*', 'properties.name as property_name')
-        ->where($where)
-        ->orderBy('updated_at', 'DESC');
+            ->select('payouts.*', 'properties.name as property_name')
+            ->where($where)
+            ->orderBy('updated_at', 'DESC');
 
         return $transaction;
     }
@@ -524,7 +543,7 @@ class UserController extends Controller
         if ($errorMessage != '') {
             $this->helper->one_time_message('danger', $errorMessage);
         } else {
-            $this->helper->one_time_message('success', __('A new link to confirm your email has been sent to :email.', ['email'=>$userInfo->email]));
+            $this->helper->one_time_message('success', __('A new link to confirm your email has been sent to :email.', ['email' => $userInfo->email]));
         }
 
         if ($request->redirect == 'verification') {
@@ -548,7 +567,7 @@ class UserController extends Controller
         $verification->facebook = 'yes';
         $verification->fb_id = $facebook_id;
         $verification->save();
-        $this->helper->one_time_message('success', __(':social Connected Successfully', ['social'=>'Facebook']));
+        $this->helper->one_time_message('success', __(':social Connected Successfully', ['social' => 'Facebook']));
         return redirect('users/edit-verification');
     }
 
@@ -558,7 +577,7 @@ class UserController extends Controller
         $verification->facebook = 'no';
         $verification->fb_id = '';
         $verification->save();
-        $this->helper->one_time_message('success', __(':social Disconnected Successfully', ['social'=>'Facebook']));
+        $this->helper->one_time_message('success', __(':social Disconnected Successfully', ['social' => 'Facebook']));
         return redirect('users/edit-verification');
     }
 
@@ -579,7 +598,7 @@ class UserController extends Controller
 
         $verification->save();
 
-        $this->helper->one_time_message('success', __(':social Connected Successfully', ['social'=>'Google']));
+        $this->helper->one_time_message('success', __(':social Connected Successfully', ['social' => 'Google']));
         return redirect('users/edit-verification');
     }
 
@@ -592,7 +611,7 @@ class UserController extends Controller
 
         $verification->save();
 
-        $this->helper->one_time_message('success', __(':social Disconnected Successfully', ['social'=>'Google']));
+        $this->helper->one_time_message('success', __(':social Disconnected Successfully', ['social' => 'Google']));
         return redirect('users/edit-verification');
     }
 
@@ -601,19 +620,19 @@ class UserController extends Controller
     {
         $data['title'] = "Reviews";
         $data['reviewsAboutYou'] = Reviews::where('receiver_id', Auth::user()->id)
-        ->orderBy('id', 'desc')
-        ->get();
+            ->orderBy('id', 'desc')
+            ->get();
         return view('users.reviews_tpl', $data);
     }
 
     public function reviewsByYou(Request $request)
     {
         $data['title'] = "Reviews";
-        $data['reviewsByYou'] = Reviews::with('properties','bookings')->where('sender_id', Auth::user()->id)
-                                ->orderBy('id', 'desc')
-                                ->paginate(Session::get('row_per_page'), ['*'], 'you');
+        $data['reviewsByYou'] = Reviews::with('properties', 'bookings')->where('sender_id', Auth::user()->id)
+            ->orderBy('id', 'desc')
+            ->paginate(Session::get('row_per_page'), ['*'], 'you');
 
-        $data['reviewsToWrite'] = Bookings::with('properties','host','users')->whereRaw('DATEDIFF(now(),end_date) <= 14')
+        $data['reviewsToWrite'] = Bookings::with('properties', 'host', 'users')->whereRaw('DATEDIFF(now(),end_date) <= 14')
             ->whereRaw('DATEDIFF(now(),end_date)>=1')
             ->where('status', 'Accepted')
             ->where(function ($query) {
@@ -642,10 +661,10 @@ class UserController extends Controller
         $data['result'] = $reservationDetails = Bookings::findOrFail($request->id);
 
         if (Auth::user()->id == $reservationDetails->user_id) {
-            $reviewsChecking = Reviews::where(['booking_id'=>$request->id, 'reviewer'=>'guest'])->get();
+            $reviewsChecking = Reviews::where(['booking_id' => $request->id, 'reviewer' => 'guest'])->get();
             $data['review_id'] = ($reviewsChecking->count()) ? $reviewsChecking[0]->id : '';
         } else {
-            $reviewsChecking = Reviews::where(['booking_id'=>$request->id, 'reviewer'=>'host'])->get();
+            $reviewsChecking = Reviews::where(['booking_id' => $request->id, 'reviewer' => 'host'])->get();
             $data['review_id'] = ($reviewsChecking->count()) ? $reviewsChecking[0]->id : '';
         }
 
@@ -687,7 +706,7 @@ class UserController extends Controller
 
             $reviews->save();
 
-            return json_encode(['success'=>true, 'review_id'=>$reviews->id]);
+            return json_encode(['success' => true, 'review_id' => $reviews->id]);
         }
     }
 
@@ -695,7 +714,7 @@ class UserController extends Controller
     public function reviewDetails(Request $request)
     {
         $review_id = $request->id;
-        $data['reviewDetails'] = Reviews::where('id', '=', $review_id)->where(function($query) {
+        $data['reviewDetails'] = Reviews::where('id', '=', $review_id)->where(function ($query) {
             return $query->where('sender_id', Auth::id())->orWhere('receiver_id', Auth::id());
             return $query;
         })->firstOrFail();
@@ -718,8 +737,7 @@ class UserController extends Controller
         $req_id = $request->id;
 
         if (isset($req_id)) {
-            $user = User::where(['phone' => preg_replace("/[\s-]+/", "", $request->phone), 'carrier_code' => $request->carrier_code])->where(function ($query) use ($req_id)
-            {
+            $user = User::where(['phone' => preg_replace("/[\s-]+/", "", $request->phone), 'carrier_code' => $request->carrier_code])->where(function ($query) use ($req_id) {
                 $query->where('id', '!=', $req_id);
             })->first(['phone', 'carrier_code']);
         } else {
@@ -750,8 +768,7 @@ class UserController extends Controller
         $req_id = isset($request->id) ? $request->id : $request->customer_id;
 
         if (isset($req_id)) {
-            $user = User::where(['phone' => preg_replace("/[\s-]+/", "", $request->phone), 'carrier_code' => $request->carrier_code])->where(function ($query) use ($req_id)
-            {
+            $user = User::where(['phone' => preg_replace("/[\s-]+/", "", $request->phone), 'carrier_code' => $request->carrier_code])->where(function ($query) use ($req_id) {
                 $query->where('id', '!=', $req_id);
             })->first(['phone', 'carrier_code']);
         } else {
@@ -767,21 +784,19 @@ class UserController extends Controller
         }
         return json_encode($data);
     }
-       /**
+    /**
      * Add for user wallet info
      *
      * @param string Request as $request
      *
      * @return  user info
      */
-       public function wallet($userId)
-       {
-           $defaultCurrencyId    = Settings::getAll()->where('name', 'default_currency')->first();
-           $wallet               = new Wallet();
-           $wallet->user_id      = $userId;
-           $wallet->currency_id  = (int)$defaultCurrencyId->value;
-           $wallet->save();
-
-       }
-   }
-
+    public function wallet($userId)
+    {
+        $defaultCurrencyId    = Settings::getAll()->where('name', 'default_currency')->first();
+        $wallet               = new Wallet();
+        $wallet->user_id      = $userId;
+        $wallet->currency_id  = (int)$defaultCurrencyId->value;
+        $wallet->save();
+    }
+}

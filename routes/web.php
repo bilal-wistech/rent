@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Admin\AreaController;
 use App\Http\Controllers\AddonController;
+use App\Http\Controllers\Admin\BuildingController;
 use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\DocumentController;
@@ -34,8 +35,8 @@ Route::get('cron/ical-synchronization', 'CronController@iCalendarSynchronization
 //user can view it anytime with or without logged in
 Route::group(['middleware' => ['locale']], function () {
     Route::get('/', 'HomeController@index');
-    Route::post('search/result', 'SearchController@searchResult');
-    Route::match(array('GET', 'POST'), 'search', 'SearchController@index');
+    Route::post('search/result', 'SearchController@searchResult')->name('suggestions');
+    Route::match(array('GET', 'POST'), 'search', 'SearchController@index')->name('search.result');
     Route::match(array('GET', 'POST'), 'properties/{slug}', 'PropertyController@single')->name('property.single');
     Route::match(array('GET', 'POST'), 'property/get-price', 'PropertyController@getPrice');
     Route::get('set-slug/', 'PropertyController@set_slug');
@@ -72,6 +73,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('area/add/{cityId}', [AreaController::class, 'add'])->name('area.add');
     Route::post('admin/add-ajax-city', [CityController::class, 'addAjax'])->name('city.addAjax');
     Route::post('admin/add-ajax-area', [AreaController::class, 'addAjax'])->name('area.addAjax');
+    Route::post('admin/add-ajax-building', [BuildingController::class, 'addAjax'])->name('building.addAjax');
+
 
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
     Route::post('add-ajax-customer', 'CustomerController@ajaxCustomerAdd')->middleware(['permission:add_customer']);
@@ -114,6 +117,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::match(array('GET', 'POST'), 'add-properties', 'PropertiesController@add')->middleware(['permission:add_properties']);
     Route::get('properties/cities-by-country/{country}', 'PropertiesController@getCitiesByCountry')->name('cities-by-country');
     Route::get('properties/get-areas/{country}/{city}', 'PropertiesController@getAreas')->name('get-areas');
+    Route::get('properties/get-buildings/{country}/{city}/{area}', 'PropertiesController@getbuildings')->name('get-buildings');
     Route::get('properties/property_list_csv', 'PropertiesController@propertyCsv');
     Route::get('properties/property_list_pdf', 'PropertiesController@propertyPdf');
 
@@ -135,7 +139,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::match(array('GET', 'POST'), 'edit_property/{id}', 'PropertiesController@update')->middleware(['permission:edit_properties']);
     Route::get('delete-property/{id}', 'PropertiesController@delete')->middleware(['permission:delete_property']);
     Route::get('show-pricing/{id}', 'PropertiesController@showPricing');
-
+    Route::match(['get', 'post'], 'update-list-status/{id}', 'PropertiesController@changeListStatus')->name('admin.update-list-status');
     Route::get('bookings', 'BookingsController@index')->middleware(['permission:manage_bookings']);
     Route::get('bookings/property_search', 'BookingsController@searchProperty')->middleware(['permission:manage_bookings']);
     Route::get('bookings/customer_search', 'BookingsController@searchCustomer')->middleware(['permission:manage_bookings']);
@@ -578,7 +582,7 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
     Route::match(['get', 'post'], 'reviews/edit/{id}', 'UserController@editReviews');
     Route::match(['get', 'post'], 'reviews/details', 'UserController@reviewDetails');
 
-    Route::match(array('GET', 'POST'), 'properties', 'PropertyController@userProperties');
+    Route::match(array('GET', 'POST'), 'properties', 'PropertyController@userProperties')->name('properties');
     Route::match(array('GET', 'POST'), 'property/create', 'PropertyController@create');
     Route::match(array('GET', 'POST'), 'listing/{id}/photo_message', 'PropertyController@photoMessage')->middleware(['checkUserRoutesPermissions']);
     Route::match(array('GET', 'POST'), 'listing/{id}/photo_delete', 'PropertyController@photoDelete')->middleware(['checkUserRoutesPermissions']);
@@ -589,7 +593,8 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
 
     Route::match(array('GET', 'POST'), 'listing/update_status', 'PropertyController@updateStatus');
     Route::match(array('GET', 'POST'), 'listing/{id}/{step}', 'PropertyController@listing')->where(['id' => '[0-9]+', 'page' => 'basics|description|location|amenities|photos|pricing|calendar|details|booking']);
-
+    Route::get('cities-by-country/{country}', 'PropertyController@getCitiesByCountry');
+    Route::get('get-areas/{country}/{city}', 'PropertyController@getAreas');
     // Favourites routes
     Route::get('user/favourite', 'PropertyController@userBookmark');
     Route::post('add-edit-book-mark', 'PropertyController@addEditBookMark');
@@ -603,6 +608,7 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
     Route::post('currency-symbol', 'PropertyController@currencySymbol');
     Route::match(['get', 'post'], 'payments/book/{id?}', 'PaymentController@index');
     Route::post('payments/create_booking', 'PaymentController@createBooking');
+    Route::post('payments/create-booked-unpaid', 'PaymentController@store')->name('payments.create-booked-unpaid');
     Route::get('payments/success', 'PaymentController@success');
     Route::get('payments/cancel', 'PaymentController@cancel');
     Route::get('payments/stripe', 'PaymentController@stripePayment');
@@ -617,7 +623,7 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
     Route::get('booking/expire/{id}', 'BookingController@expire');
     Route::match(['get', 'post'], 'my-bookings', 'BookingController@myBookings');
     Route::post('booking/host_cancel', 'BookingController@hostCancel');
-    Route::match(['get', 'post'], 'trips/active', 'TripsController@myTrips');
+    Route::match(['get', 'post'], 'trips/active', 'TripsController@myTrips')->name('my-trips');
     Route::get('booking/receipt', 'TripsController@receipt');
     Route::post('trips/guest_cancel', 'TripsController@guestCancel');
 

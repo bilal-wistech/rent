@@ -18,7 +18,7 @@
             </div>
 			<div class="container-fluid min-height">
 				<div class="row mt-4">
-					<div class="col-md-4">
+					<div class="col-md-6">
 						<div class="card card-default p-3 mt-3">
 							<div class="card-body">
 								<p class="text-center font-weight-bold m-0"><i class="far fa-list-alt mr-2 text-16 align-middle badge-dark rounded-circle p-3 vbadge-success"></i> {{ __('My Lists') }}</p>
@@ -27,7 +27,7 @@
 						</div>
 					</div>
 
-					<div class="col-md-4">
+					<div class="col-md-6">
 						<div class="card card-default p-3 mt-3">
 							<div class="card-body">
 								<p class="text-center font-weight-bold m-0"><i class="fa fa-suitcase mr-2 text-16 align-middle badge-dark rounded-circle p-3 vbadge-success" aria-hidden="true"></i>{{ __('Trips') }}</p>
@@ -36,19 +36,19 @@
 						</div>
 					</div>
 
-					<div class="col-md-4">
+					{{-- <div class="col-md-4">
 						<div class="card card-default p-3 mt-3">
 							<div class="card-body">
 								<p class="text-center font-weight-bold m-0"><i class="fas fa-wallet mr-2 text-16 align-middle badge-dark rounded-circle p-3 vbadge-success"></i> {{ __('My Wallet') }}</p>
 								<p class="text-center font-weight-bold m-0">  {!! moneyFormat( $currentCurrency->symbol, number_format($wallet->total, 2)) !!}  </p>
 							</div>
 						</div>
-					</div>
+					</div> --}}
 				</div>
 
 				<div class="row mb-5">
 					<!-- Content Column -->
-					<div class="col-lg-5 mb-4 mt-5">
+					<div class="col-lg-6 mb-4 mt-5">
 						<!-- Project Card Example -->
 						<div class="card card-default">
 							<div class="card-header py-3">
@@ -114,7 +114,7 @@
 						</div>
 					</div>
 
-					<div class="col-lg-7 mb-4 mt-5">
+					<div class="col-lg-6 mb-4 mt-5">
 						<!-- Illustrations -->
 						<div class="card card-default h-100">
 							<div class="card-header py-3">
