@@ -829,7 +829,10 @@
                     processResults: function(data, params) {
                         params.page = params.page || 1;
                         return {
-                            results: data.results,
+                            results: data.results.map(item => ({
+                                id: item.id,
+                                text: `${item.text} (${item.property_address})` // Format as "1 bed studio (flat 49)"
+                            })),
                             pagination: {
                                 more: data.pagination.more
                             }

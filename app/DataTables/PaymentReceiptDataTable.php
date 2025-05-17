@@ -42,14 +42,6 @@ class PaymentReceiptDataTable extends DataTable
                     $parts[] = $payment_receipts->booking->properties->property_address->area;
                 }
 
-                if (!empty($payment_receipts->booking->properties->property_address->city)) {
-                    $parts[] = $payment_receipts->booking->properties->property_address->city;
-                }
-
-                if (!empty($payment_receipts->booking->properties->property_address->country)) {
-                    $parts[] = $payment_receipts->booking->properties->property_address->country;
-                }
-
                 return implode(', ', $parts);
             })
             ->addColumn('user_id', function ($payment_receipts) {

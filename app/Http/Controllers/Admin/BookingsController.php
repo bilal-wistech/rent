@@ -884,21 +884,39 @@ class BookingsController extends Controller
             $myArr[] = $arr2;
 
             foreach ($myresult as $result) {
+                $parts = [];
+
+                if (!empty($result->property_address->flat_no)) {
+                    $parts[] = 'Flat ' . $result->property_address->flat_no;
+                }
+
+                if (!empty($result->property_address->building)) {
+                    $parts[] = $result->property_address->building;
+                }
+
+                if (!empty($result->property_address->area)) {
+                    $parts[] = $result->property_address->area;
+                }
+
+                if (!empty($result->property_address->city)) {
+                    $parts[] = $result->property_address->city;
+                }
+
+                if (!empty($result->property_address->country)) {
+                    $parts[] = $result->property_address->country;
+                }
+
+                $address = implode(', ', $parts);
+
                 $arr = array(
                     "id" => $result->id,
                     "text" => $result->text,
-                    "property_address" => [
-                        'address_line_1' => $result->property_address->address_line_1 ?? '',
-                        'address_line_2' => $result->property_address->address_line_2 ?? '',
-                        'city' => $result->property_address->city ?? '',
-                        'state' => $result->property_address->state ?? '',
-                        'country' => $result->property_address->country ?? '',
-                        'postal_code' => $result->property_address->postal_code ?? '',
-                    ],
+                    "property_address" => $address,
                 );
                 $myArr[] = $arr;
             }
         }
+
         return response()->json([
             'results' => $myArr,
             'pagination' => [

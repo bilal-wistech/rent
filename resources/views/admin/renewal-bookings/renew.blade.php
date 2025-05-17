@@ -87,6 +87,32 @@
                                                 <label for="property_id" class="col-sm-3 col-form-label fw-bold">Property
                                                     <span class="text-danger">*</span>
                                                 </label>
+                                                @php
+
+                                                    $parts = [];
+
+                                                    if (!empty($booking->properties->property_address->flat_no)) {
+                                                        $parts[] = 'Flat ' . $booking->properties->property_address->flat_no;
+                                                    }
+
+                                                    if (!empty($booking->properties->property_address->building)) {
+                                                        $parts[] = $booking->properties->property_address->building;
+                                                    }
+
+                                                    if (!empty($booking->properties->property_address->area)) {
+                                                        $parts[] = $booking->properties->property_address->area;
+                                                    }
+
+                                                    if (!empty($booking->properties->property_address->city)) {
+                                                        $parts[] = $booking->properties->property_address->city;
+                                                    }
+
+                                                    if (!empty($booking->properties->property_address->country)) {
+                                                        $parts[] = $booking->properties->property_address->country;
+                                                    }
+
+                                                    $address = implode(', ', $parts);
+                                                @endphp
 
                                                 <div class="col-sm-9">
                                                     <select class="form-control select2-ajax" name="property_id"
@@ -94,7 +120,7 @@
                                                         <option value="">Select a Property</option>
                                                         <option value="{{ $booking->property_id ?? old('property_id') }}"
                                                             selected>
-                                                            {{ $booking->properties->name ?? old('property_name') }}
+                                                            {{ $booking->properties->name . ' (' . $address . ')' ?? old('property_name') }}
                                                         </option>
                                                     </select>
                                                     <span class="text-danger">{{ $errors->first('property_id') }}</span>
@@ -471,7 +497,10 @@
                     processResults: function(data, params) {
                         params.page = params.page || 1;
                         return {
-                            results: data.results,
+                            results: data.results.map(item => ({
+                                id: item.id,
+                                text: `${item.text} (${item.property_address})` // Format as "1 bed studio (flat 49)"
+                            })),
                             pagination: {
                                 more: data.pagination.more
                             }
