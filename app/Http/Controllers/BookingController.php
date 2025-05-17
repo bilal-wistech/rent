@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Auth, DB, Session, DateTime, Common;
@@ -38,14 +39,14 @@ class BookingController extends Controller
      * Booking Details Show By Host
      * For request to book Accept & Decline
      *
-    */
+     */
     public function index(Request $request)
     {
         $data['title']      = 'Booking Details';
         $data['booking_id'] = $request->id;
         $data['result']     = Bookings::find($request->id);
 
-        if (! $data['result'] || $data['result']->host_id != Auth::user()->id ) {
+        if (! $data['result'] || $data['result']->host_id != Auth::user()->id) {
 
             abort('404');
         }
@@ -55,13 +56,13 @@ class BookingController extends Controller
         return view('booking.detail', $data);
     }
 
-
     /**
      * Request to Book
      * From email link redirect to payment page
      *
-    */
-    public function requestPayment(Request $request){
+     */
+    public function requestPayment(Request $request)
+    {
 
         $data['gateways'] = (new GatewayModule)->payableGateways();
 
@@ -108,7 +109,7 @@ class BookingController extends Controller
         }
 
         $data['currencyDefault']  = $currencyDefault = Currency::where('default', 1)
-                                    ->first();
+            ->first();
         $data['currentCurrency'] = Common::getCurrentCurrency();
         $data['price_eur']        = Common::convert_currency($data['result']->property_price->code, $currencyDefault->code, $data['price_list']->total);
         $data['price_rate']       = Common::currency_rate($data['result']->property_price->currency_code, $data['currentCurrency']->code);
@@ -121,7 +122,7 @@ class BookingController extends Controller
     /**
      * Booking Complete redirect here
      *
-    */
+     */
     public function requested(Request $request)
     {
         $data['booking_details'] = Bookings::with('currency')->where('code', $request->code)->first();
@@ -138,7 +139,7 @@ class BookingController extends Controller
     /**
      *  Requst to Booking accept
      *
-    */
+     */
     public function accept(Request $request, EmailController $email)
     {
         $booking = Bookings::find($request->id);
@@ -164,7 +165,7 @@ class BookingController extends Controller
         $panalty_ids = explode(',', $penalty_result['penalty_ids']);
         $panalty_amounts = explode(',', $penalty_result['panalty_amounts']);
 
-        for ($i=0; $i < count($panalty_ids); $i++) {
+        for ($i = 0; $i < count($panalty_ids); $i++) {
             if ($panalty_ids[$i] != '' && $panalty_amounts[$i] != '') {
                 $payout_penalties = new PayoutPenalties;
                 $payout_penalties->payout_id  = $payouts->id;
@@ -190,23 +191,23 @@ class BookingController extends Controller
         try {
             $email->bookingAcceptedOrDeclined($request->id, $status);
         } catch (\Exception $e) {
-           $errorMessage = ' Email was not sent due to'.' '.$e->getMessage();
+            $errorMessage = ' Email was not sent due to' . ' ' . $e->getMessage();
         }
 
 
         $companyName = Settings::getAll()->where('type', 'general')->where('name', 'name')->first()->value;
-        $requestBookingConfirm = ($companyName.': ' .'Your booking request for'.' '.$booking->properties->name .' '.'is Accepted, Please Payment for booking.');
+        $requestBookingConfirm = ($companyName . ': ' . 'Your booking request for' . ' ' . $booking->properties->name . ' ' . 'is Accepted, Please Payment for booking.');
 
         twilioSendSms($booking->users->formatted_phone, $requestBookingConfirm);
 
-        Common::one_time_message('success', __('Booking Request has been Accepted').'.'.$errorMessage);
+        Common::one_time_message('success', __('Booking Request has been Accepted') . '.' . $errorMessage);
         return redirect('my-bookings');
     }
 
     /**
      *  Requst to Booking decline
      *
-    */
+     */
     public function decline(Request $request, EmailController $email)
     {
 
@@ -235,24 +236,24 @@ class BookingController extends Controller
         if ($request->block_calendar == 'yes') {
             $days = Common::get_days($booking->start_date, $booking->end_date);
 
-            for ($i=0; $i<count($days)-1; $i++) {
+            for ($i = 0; $i < count($days) - 1; $i++) {
                 $property_date = [
-                                'property_id' => $booking->property_id,
-                                'date'        => $days[$i],
-                                'status'      => 'Not available'
-                                ];
+                    'property_id' => $booking->property_id,
+                    'date'        => $days[$i],
+                    'status'      => 'Not available'
+                ];
 
                 PropertyDates::updateOrCreate(['property_id' => $booking->property_id, 'date' => $days[$i]], $property_date);
             }
         } else {
             $days = Common::get_days($booking->start_date, $booking->end_date);
 
-            for ($i=0; $i<count($days)-1; $i++) {
+            for ($i = 0; $i < count($days) - 1; $i++) {
                 $property_date = [
-                                'property_id' => $booking->property_id,
-                                'date'        => $days[$i],
-                                'status'  => 'Available'
-                                ];
+                    'property_id' => $booking->property_id,
+                    'date'        => $days[$i],
+                    'status'  => 'Available'
+                ];
 
                 PropertyDates::updateOrCreate(['property_id' => $booking->property_id, 'date' => $days[$i]], $property_date);
             }
@@ -274,14 +275,14 @@ class BookingController extends Controller
         try {
             $email->bookingAcceptedOrDeclined($request->id, $status);
         } catch (\Exception $e) {
-            $errorMessage = ' Email was not sent due to'.' '.$e->getMessage();
+            $errorMessage = ' Email was not sent due to' . ' ' . $e->getMessage();
         }
 
         $companyName = Settings::getAll()->where('type', 'general')->where('name', 'name')->first()->value;
-        $requestBookingDecline = ($companyName.': ' .'Your booking request for'.' '.$booking->properties->name .' '.'is Declined.');
+        $requestBookingDecline = ($companyName . ': ' . 'Your booking request for' . ' ' . $booking->properties->name . ' ' . 'is Declined.');
         twilioSendSms($booking->users->formatted_phone, $requestBookingDecline);
         clearCache('.calc.property_price');
-        Common::one_time_message('success', __('Booking Request has been Declined').'.'.$errorMessage);
+        Common::one_time_message('success', __('Booking Request has been Declined') . '.' . $errorMessage);
         return redirect('my-bookings');
     }
 
@@ -326,7 +327,7 @@ class BookingController extends Controller
             $booking->save();
 
             $days = Common::get_days($booking->start_date, $booking->end_date);
-            for ($j=0; $j<count($days)-1; $j++) {
+            for ($j = 0; $j < count($days) - 1; $j++) {
                 PropertyDates::where('property_id', $booking->property_id)->where('date', $days[$j])->where('status', 'Not available')->delete();
             }
 
@@ -352,10 +353,10 @@ class BookingController extends Controller
 
             Common::one_time_message('success', __('Booking Request has been Expired'));
             clearCache('.calc.property_price');
-            return redirect('booking/'.$request->id);
+            return redirect('booking/' . $request->id);
         } else {
             Common::one_time_message('error', __('Booking request has been Expired'));
-            return redirect('booking/'.$request->id);
+            return redirect('booking/' . $request->id);
         }
     }
 
@@ -363,7 +364,7 @@ class BookingController extends Controller
      * User Booking List
      * User Booking Sort
      *
-    */
+     */
 
     public function myBookings(Request $request)
     {
@@ -372,13 +373,13 @@ class BookingController extends Controller
                 $params  = [['created_at', '<', Carbon::yesterday()], ['status', '!=', 'Accepted']];
                 break;
             case 'Current':
-                $params  = [['start_date', '<=', date('Y-m-d')], ['end_date', '>=', date('Y-m-d')],['status', 'Accepted']];
+                $params  = [['start_date', '<=', date('Y-m-d')], ['end_date', '>=', date('Y-m-d')], ['status', 'Accepted']];
                 break;
             case 'Upcoming':
                 $params  = [['start_date', '>', date('Y-m-d')], ['status', 'Accepted']];
                 break;
             case 'Completed':
-                $params  = [['end_date', '<', date('Y-m-d')],['status', 'Accepted']];
+                $params  = [['end_date', '<', date('Y-m-d')], ['status', 'Accepted']];
                 break;
             case 'Pending':
                 $params           = [['created_at', '>', Carbon::yesterday()], ['status', $request->status]];
@@ -393,7 +394,7 @@ class BookingController extends Controller
         $data['yesterday'] = Carbon::yesterday();
         $data['status']  = $request->status;
         $data['title']   = "Bookings";
-        $data['bookings'] = Bookings::with(['users','properties'])
+        $data['bookings'] = Bookings::with(['users', 'properties'])
             ->where('host_id', Auth::user()->id)
             ->where($params)->orderBy('id', 'desc')
             ->paginate(Session::get('row_per_page'));
@@ -410,14 +411,14 @@ class BookingController extends Controller
         if ($now < $booking_end) {
 
             $properties = Properties::find($bookings->property_id);
-            $payount    = Payouts::where(['user_id'=>$bookings->host_id,'booking_id'=> $request->id])->first();
+            $payount    = Payouts::where(['user_id' => $bookings->host_id, 'booking_id' => $request->id])->first();
 
             if (isset($payount->id)) {
                 $payout_penalties = PayoutPenalties::where('payout_id', $payount->id)->get();
                 if (!empty($payout_penalties)) {
                     foreach ($payout_penalties as $key => $payout_penalty) {
                         $prv_penalty = Penalty::where('id', $payout_penalty->penalty_id)->first();
-                        $update_amount = $prv_penalty->remaining_penalty+$payout_penalty->amount;
+                        $update_amount = $prv_penalty->remaining_penalty + $payout_penalty->amount;
                         Penalty::where('id', $payout_penalty->penalty_id)->update(['remaining_penalty' => $update_amount, 'status' => 'Pending']);
                     }
                 }
@@ -441,7 +442,7 @@ class BookingController extends Controller
                 $panalty_date = new DateTime(date('Y-m-d H:i:s', strtotime('-7 days')));
                 $fees = PropertyFees::pluck('value', 'field')->toArray();
                 if ($start_date >= $panalty_date) {
-                  //more then 7 days
+                    //more then 7 days
                     $panalty = new Penalty;
                     $panalty->booking_id        = $request->id;
                     $panalty->property_id       = $bookings->property_id;
@@ -453,7 +454,7 @@ class BookingController extends Controller
                     $panalty->reason            = 'cancelation';
                     $panalty->save();
                 } else {
-                  //less then 7 days
+                    //less then 7 days
                     $panalty = new Penalty;
                     $panalty->booking_id        = $request->id;
                     $panalty->property_id       = $bookings->property_id;
@@ -468,12 +469,12 @@ class BookingController extends Controller
             } else {
                 $days = Common::get_days($bookings->start_date, $bookings->end_date);
 
-                for ($j=0; $j<count($days)-1; $j++) {
+                for ($j = 0; $j < count($days) - 1; $j++) {
                     PropertyDates::where('property_id', $bookings->property_id)->where('date', $days[$j])->where('status', 'Not available')->delete();
                 }
             }
 
-            Payouts::where(['user_id'=>$bookings->host_id,'booking_id'=> $request->id])->delete();
+            Payouts::where(['user_id' => $bookings->host_id, 'booking_id' => $request->id])->delete();
 
             $messages                 = new Messages;
             $messages->property_id    = $bookings->property_id;

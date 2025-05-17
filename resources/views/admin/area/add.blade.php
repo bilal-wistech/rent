@@ -38,19 +38,36 @@
                         </div>
                     @endif
 
-                    <form id="add_country" method="post" action="{{ route('area.store') }}" class="form-horizontal">
+                    <form id="add_country" method="post" action="{{ route('area.store') }}" class="form-horizontal"  enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="box-body">
-                            <div class="form-group row mt-3 short_name">
-                                <label for="short_name" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0"> Name
-                                    <span class="text-danger">*</span></label>
-
-                                <div class="col-sm-6">
-                                    <input type="text" name="name" class="form-control f-14" id="short_name" placeholder="Area Name" >
+                            <div class="row mt-3">
+                                <div class="col-md-3 text-md-end">
+                                    <label for="short_name" class="fw-bold"> Name <span class="text-danger">*</span></label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" name="name" class="form-control f-14" id="short_name" placeholder="Area Name">
                                     <span class="text-danger">{{ $errors->first("name") }}</span>
                                 </div>
                             </div>
-                            <input type="hidden" name="city_id" id="country_id" value="{{ $cityId }}">
+                            <div class="row mt-3">
+                                <div class="col-md-3 text-md-end">
+                                    <label for="image" class="fw-bold"> Upload Image <span class="text-danger">*</span></label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="file" name="image" class="form-control f-14" id="image" accept="image/*"     onchange="previewImage(event)">
+                                    <span class="text-danger">{{ $errors->first('image') }}</span>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-3"></div>
+                                <div class="col-md-6">
+                                    <img id="imagePreview" src="#" alt="Selected Image" class="img-thumbnail" style="display: none; width: 100%; max-width: 360px; height: auto; margin-top: 10px;">
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="city_id" id="city_id" value="{{ $cityId }}">
                         </div>
 
                         <div class="box-footer">
@@ -63,6 +80,19 @@
         </div>
     </section>
 </div>
+<script>
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function(){
+            var output = document.getElementById('imagePreview');
+            output.src = reader.result;
+            output.style.display = "block";
+            output.style.border = "2px solid #ddd";
+
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
 @endsection
 
 @section('validate_script')

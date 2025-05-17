@@ -9,7 +9,7 @@
 					</li>
 				</a>
 
-				<a class="text-color font-weight-500 mt-1" href="{{ url('inbox') }}">
+				{{-- <a class="text-color font-weight-500 mt-1" href="{{ url('inbox') }}">
                     <li class="list-group-item vbg-default-hover pl-25 border-0 text-15 p-4 d-flex align-items-center justify-content-between {{ (request()->is('inbox')) ? 'active-sidebar' : '' }}">
                         <div class="item">
                             <i class="fas fa-inbox mr-3 text-18 align-middle"></i>
@@ -22,7 +22,7 @@
                             <span class="badge badge-danger rounded-circle mr-2 text-12">{{ $count }}</span>
                         @endif
                     </li>
-                </a>
+                </a> --}}
 
 				<a class="text-color font-weight-500 mt-1" href="{{ url('properties') }}">
 					<li class="list-group-item vbg-default-hover pl-25 border-0 text-15 p-4  {{ (request()->is('properties')) ? 'active-sidebar' : '' }}">

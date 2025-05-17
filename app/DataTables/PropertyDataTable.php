@@ -15,15 +15,30 @@ class PropertyDataTable extends DataTable
         return datatables()
             ->of($properties)
             ->addColumn('action', function ($properties) {
-                $edit = $delete  = $pricing ='';
+                $edit = $delete = $pricing = $status = '';
                 if (Common::has_permission(\Auth::guard('admin')->user()->id, 'edit_properties')) {
                     $edit = '<a href="' . url('admin/listing/' . $properties->id) . '/basics" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
                 }
                 if (Common::has_permission(\Auth::guard('admin')->user()->id, 'delete_property')) {
-                    $delete = '<a href="' . url('admin/delete-property/' . $properties->id) . '" class="btn btn-xs btn-danger delete-warning"><i class="fa fa-trash"></i></a>';
+                    $delete = '<a href="' . url('admin/delete-property/' . $properties->id) . '" class="btn btn-xs btn-info delete-warning"><i class="fa fa-trash"></i></a>';
                 }
-                $pricing= '<a href="' . url('admin/show-pricing/' . $properties->id) . '" class="btn btn-xs btn-success "><i class="fa fa-dollar"></i></a>';
-                return $edit . $delete .$pricing;
+                $pricing = '<a href="' . url('admin/show-pricing/' . $properties->id) . '" class="btn btn-xs btn-secondary "><i class="fa fa-dollar"></i></a>';
+                if ($properties->status === 'Listed') {
+                    $icon = 'fa-arrow-up';
+                    $btnClass = 'btn-success';
+                } else {
+                    $icon = 'fa-arrow-down';
+                    $btnClass = 'btn-danger';
+                }
+
+                $status = '<a href="#"
+             class="btn btn-xs ' . $btnClass . ' toggle-status"
+             data-property-id="' . $properties->id . '"
+             data-toggle="tooltip"
+             title="' . ($properties->status === 'Listed' ? 'Unlist Property' : 'List Property') . '">
+             <i class="fa ' . $icon . '"></i>
+           </a>';
+                return $edit . $delete . $pricing . $status;
             })
             ->addColumn('id', function ($properties) {
                 return $properties->id;
@@ -43,12 +58,10 @@ class PropertyDataTable extends DataTable
                     return 'Yes';
                 }
                 return 'No';
-
             })
             ->addColumn('verified', function ($properties) {
 
                 return ($properties->is_verified == 'Approved' || $properties->is_verified == '') ? 'Approved' : 'Pending';
-
             })
             ->rawColumns(['host_name', 'name', 'action'])
             ->make(true);
@@ -69,10 +82,10 @@ class PropertyDataTable extends DataTable
 
 
         if ($from) {
-             $query->whereDate('created_at', '>=', $from);
+            $query->whereDate('created_at', '>=', $from);
         }
         if ($to) {
-             $query->whereDate('created_at', '<=', $to);
+            $query->whereDate('created_at', '<=', $to);
         }
         if ($status) {
             $query->where('status', '=', $status);

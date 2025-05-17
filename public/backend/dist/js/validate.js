@@ -538,25 +538,25 @@ $(document).ready(function () {
     $('#email_setting').validate({
         rules: {
             host: {
-                required: true
+                required: false
             },
             port: {
-                required: true
+                required: false
             },
             from_address: {
-                required: true
+                required: false
             },
             from_name: {
-                required: true
+                required: false
             },
             encryption: {
-                required: true
+                required: false
             },
             username: {
-                required: true
+                required: false
             },
             password: {
-                required: true
+                required: false
             }
         }
     });
