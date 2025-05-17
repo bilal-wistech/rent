@@ -89,8 +89,8 @@ class SearchController extends Controller
             })
             ->with(['users', 'property_price', 'property_address', 'bookings'])
             ->whereDoesntHave('bookings', function ($bookingQuery) use ($checkinDate, $checkoutDate) {
-                //$bookingQuery->where('status', 'Accepted')
-                    $bookingQuery->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
+                $bookingQuery->where('status', 'Accepted')
+                    ->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
                         $conflictQuery->whereBetween('start_date', [$checkinDate, $checkoutDate])
                             ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
                             ->orWhere(function ($overlapQuery) use ($checkinDate, $checkoutDate) {
@@ -161,7 +161,7 @@ class SearchController extends Controller
         $perPage = 5; // Number of properties per page
         $page = $request->input('page', 1);
 
-        $query = Properties::where('status', 'Listed')
+        $query = Properties::where('status', 'listed')
             ->whereHas('property_address', function ($q) use ($full_address) {
                 $q->where('address_line_1', 'like', "%{$full_address}%")
                     ->orWhere('address_line_2', 'like', "%{$full_address}%")
