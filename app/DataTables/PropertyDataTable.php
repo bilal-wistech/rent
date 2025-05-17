@@ -49,6 +49,34 @@ class PropertyDataTable extends DataTable
             ->addColumn('name', function ($properties) {
                 return '<a href="' . url('admin/listing/' . $properties->id . '/basics') . '">' . ucfirst($properties->name) . '</a>';
             })
+            ->addColumn('location', function ($properties) {
+                $address = $properties->property_address;
+
+                $parts = [];
+
+                if (!empty($address->flat_no)) {
+                    $parts[] = 'Flat '.$address->flat_no;
+                }
+
+                if (!empty($address->building)) {
+                    $parts[] = $address->building;
+                }
+
+                if (!empty($address->area)) {
+                    $parts[] = $address->area;
+                }
+
+                if (!empty($address->city)) {
+                    $parts[] = $address->city;
+                }
+
+                if (!empty($address->country)) {
+                    $parts[] = $address->country;
+                }
+
+                return ucfirst(implode(', ', $parts));
+            })
+
             ->addColumn('created_at', function ($properties) {
                 return dateFormat($properties->created_at);
             })
@@ -75,7 +103,7 @@ class PropertyDataTable extends DataTable
         $to = isset(request()->to) ? setDateForDb(request()->to) : null;
         $property_type = isset(request()->property_type) ? request()->property_type : null;
 
-        $query = Properties::with(['users:id,first_name,profile_image']);
+        $query = Properties::with(['users:id,first_name,profile_image', 'property_address']);
         if (isset($user_id)) {
             $query->where('host_id', '=', $user_id);
         }
@@ -101,6 +129,7 @@ class PropertyDataTable extends DataTable
         return $this->builder()
             ->addColumn(['data' => 'id', 'name' => 'properties.id', 'title' => 'Id'])
             ->addColumn(['data' => 'name', 'name' => 'properties.name', 'title' => 'Name'])
+            ->addColumn(['data' => 'location', 'name' => 'location', 'Location'])
             ->addColumn(['data' => 'host_name', 'name' => 'users.first_name', 'title' => 'Host Name'])
             ->addColumn(['data' => 'property_type_name', 'name' => 'property_type', 'title' => 'Property Type'])
             ->addColumn(['data' => 'status', 'name' => 'status', 'title' => 'Status'])
