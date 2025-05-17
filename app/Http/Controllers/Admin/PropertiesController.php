@@ -266,7 +266,7 @@ class PropertiesController extends Controller
         } elseif ($step == 'description') {
             if ($request->isMethod('post')) {
                 $rules = array(
-                    'name' => 'required|max:50',
+                    'name' => 'required|min:5',
                     'summary' => 'nullable|max:1000',
                 );
 
