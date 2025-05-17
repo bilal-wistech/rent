@@ -73,7 +73,7 @@ class SearchController extends Controller
         $checkinDate = $request->input('checkin') ? Carbon::parse($request->input('checkin')) : $today;
         $checkoutDate = $request->input('checkout') ? Carbon::parse($request->input('checkout')) : $today;
 
-        $query = Properties::where('status', 'listed')
+        $query = Properties::where('status', 'Listed')
             ->where(function ($mainQuery) use ($location) {
                 $mainQuery->where('name', 'like', "%{$location}%")
                     ->orWhereHas('property_address', function ($addressQuery) use ($location) {
