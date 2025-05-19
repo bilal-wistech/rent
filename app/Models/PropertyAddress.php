@@ -45,4 +45,17 @@ class PropertyAddress extends Model
         }
         return $name;
     }
+    public static function countByArea()
+    {
+        $today = \Carbon\Carbon::today();
+        return self::join('properties', 'property_address.property_id', '=', 'properties.id')
+            ->where('properties.status', 'listed')
+            ->whereDoesntHave('properties.bookings', function ($query) use ($today) {
+                $query->where('start_date', '<=', $today->format('Y-m-d'))
+                    ->where('end_date', '>=', $today->format('Y-m-d'));
+            })
+            ->groupBy('property_address.area')
+            ->select('property_address.area', \DB::raw('count(*) as count'))
+            ->get();
+    }
 }
