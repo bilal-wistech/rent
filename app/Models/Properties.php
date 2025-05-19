@@ -49,7 +49,7 @@ class Properties extends Model
     {
         $today = Carbon::today();
         $data = parent::where('status', 'listed')
-            ->with('users', 'property_price', 'property_address', 'bookings')
+            ->with('users', 'property_price.pricingType', 'property_address', 'bookings')
             ->whereDoesntHave('bookings', function ($query) use ($today) {
                 $query->where('start_date', '<=', $today->format('Y-m-d'))
                     ->where('end_date', '>=', $today->format('Y-m-d'));

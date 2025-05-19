@@ -10,6 +10,7 @@ use App\Models\PropertyAddress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Amenities;
 
 class HomeController extends Controller
 {
@@ -21,7 +22,7 @@ class HomeController extends Controller
     public function areas(): JsonResponse
     {
         try {
-            $areas = Area::select('id','country_id','city_id','name','image')->where('show_on_front', 1)->get();
+            $areas = Area::select('id', 'country_id', 'city_id', 'name', 'image')->where('show_on_front', 1)->get();
             $propertyCount = PropertyAddress::countByArea();
 
             // Add property_count to each area
@@ -77,7 +78,14 @@ class HomeController extends Controller
     public static function vacantProperties(): JsonResponse
     {
         try {
-            $properties = Properties::vacantToday();
+            $properties = Properties::vacantToday()->map(function ($property) {
+                $amenityIds = $property->amenities ? array_filter(explode(',', $property->amenities), 'is_numeric') : [];
+                $property->amenities = $amenityIds
+                    ? Amenities::whereIn('id', $amenityIds)->select('id', 'title')->get()->toArray()
+                    : [];
+                return $property;
+            });
+
             return response()->json([
                 'success' => true,
                 'message' => 'Vacant Properties fetched successfully',
@@ -93,7 +101,7 @@ class HomeController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Something went wrong while Vacant Properties.',
+                'message' => 'Something went wrong while fetching Vacant Properties.',
             ], 500);
         }
     }
