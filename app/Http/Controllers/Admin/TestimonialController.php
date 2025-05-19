@@ -65,7 +65,7 @@ class TestimonialController extends Controller
                 $extension =   $image->getClientOriginalExtension();
                 $filename  =   'testimonial_'.time() . '.' . $extension;
 
-                $success   = $image->move('front/images/testimonial', $filename);
+                $success   = $image->move('public/front/images/testimonial', $filename);
                 
                 if (!isset($success)) {
                     return back()->withError('Could not upload Image');
@@ -133,7 +133,7 @@ class TestimonialController extends Controller
                     $extension =   $image->getClientOriginalExtension();
                     $filename  =   'testimonial_'.time() . '.' . $extension;
     
-                    $success = $image->move('front/images/testimonial', $filename);
+                    $success = $image->move('public/front/images/testimonial', $filename);
         
                     if (! isset($success)) {
                          return back()->withError('Could not upload Image');
