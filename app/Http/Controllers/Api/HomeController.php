@@ -74,4 +74,27 @@ class HomeController extends Controller
             ], 500);
         }
     }
+    public static function vacantProperties(): JsonResponse
+    {
+        try {
+            $properties = Properties::vacantToday();
+            return response()->json([
+                'success' => true,
+                'message' => 'Vacant Properties fetched successfully',
+                'data' => [
+                    'properties' => $properties,
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error fetching Vacant Properties', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while Vacant Properties.',
+            ], 500);
+        }
+    }
 }

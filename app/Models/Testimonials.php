@@ -36,7 +36,7 @@ class Testimonials extends Model
 
     public function getImageUrlAttribute()
     {
-        return url('/public/front/images/testimonial/' . $this->attributes['image']);
+        return asset('front/images/testimonial/' . $this->attributes['image']);
     }
 }
 

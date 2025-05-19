@@ -16,3 +16,4 @@ use App\Http\Controllers\Api\HomeController;
 */
 Route::get('areas', [HomeController::class, 'areas']);
 Route::get('testimonials', [HomeController::class, 'testimonials']);
+Route::get('vacant-properties', [HomeController::class, 'vacantProperties']);
