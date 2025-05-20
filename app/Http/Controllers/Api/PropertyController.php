@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
+use App\Models\Bookings;
 use App\Models\Currency;
 use App\Models\Settings;
 use App\Models\Amenities;
@@ -12,11 +13,13 @@ use App\Models\AmenityType;
 use App\Http\Helpers\Common;
 use App\Models\PropertyType;
 use Illuminate\Http\Request;
-use App\Http\Resources\PropertyResource;
+use App\Models\PropertyPrice;
+use App\Models\PropertyPhotos;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
+use App\Http\Resources\PropertyResource;
 use App\Http\Requests\PropertySearchRequest;
 
 class PropertyController extends Controller
@@ -170,7 +173,7 @@ class PropertyController extends Controller
                             ->orWhere('flat_no', 'like', "%{$filters['location']}%");
                     });
             })
-            ->with(['users', 'property_price.pricingType', 'property_address', 'bookings','bed_types'])
+            ->with(['users', 'property_price.pricingType', 'property_address', 'bookings', 'bed_types'])
             ->whereDoesntHave('bookings', function ($bookingQuery) use ($checkinDate, $checkoutDate) {
                 $bookingQuery->where('status', 'Accepted')
                     ->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
@@ -228,5 +231,123 @@ class PropertyController extends Controller
         }
 
         return $query;
+    }
+    /**
+     * Get a single property by slug
+     *
+     * @param Request $request
+     * @param string $slug
+     * @return JsonResponse
+     */
+    public function show(Request $request, string $slug): JsonResponse
+    {
+        try {
+            // Find property by slug
+            $property = Properties::where('slug', $slug)
+                ->with(['property_address'])
+                ->first();
+            $userActive = $property->Users()->where('id', $property->host_id)->first();
+            // Check if property exists
+            if (!$property) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Property not found'
+                ], 404);
+            }
+
+            // Check host status
+            if ($userActive->status === 'Inactive') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Host is inactive'
+                ], 403);
+            }
+
+            // Check property status
+            if ($property->status === 'Unlisted') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Property is unlisted'
+                ], 403);
+            }
+
+            // Check verification status
+            if ($property->is_verified === 'Pending') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Property verification pending'
+                ], 403);
+            }
+
+            // Prepare response data
+            $responseData = [
+                'property' => [
+                    'id' => $property->id,
+                    'slug' => $property->slug,
+                    'name' => $property->name,
+                    'address' => [
+                        'city' => $property->property_address->city,
+                    ],
+                    'booking_status' => Bookings::where('property_id', $property->id)
+                        ->select('status')
+                        ->first()?->status,
+                    'photos' => PropertyPhotos::where('property_id', $property->id)
+                        ->orderBy('serial', 'asc')
+                        ->get()
+                        ->map(function ($photo) {
+                            return [
+                                'id' => $photo->id,
+                                'url' => $photo->url, // Assuming url field exists
+                                'serial' => $photo->serial
+                            ];
+                        }),
+                    'amenities' => [
+                        'normal' => Amenities::normal($property->id),
+                        'security' => Amenities::security($property->id),
+                        'categories' => []
+                    ],
+                    'prices' => PropertyPrice::with('pricingType')->where('property_id', $property->id)
+                        ->get()
+                        ->map(function ($price) {
+                            return [
+                                'data' => $price,
+                            ];
+                        }),
+                    
+                    'share_link' => url('properties/' . $property->slug)
+                ]
+            ];
+
+            // Add new amenity types
+            $newAmenityTypes = Amenities::newAmenitiesType();
+            foreach ($newAmenityTypes as $amenityType) {
+                $amenities = Amenities::newAmenities($property->id, $amenityType->id);
+                if (!empty($amenities)) {
+                    $responseData['property']['amenities']['categories'][$amenityType->name] = $amenities;
+                }
+            }
+
+            // Add query parameters if provided
+            if ($request->has('checkin')) {
+                $responseData['property']['checkin'] = $request->checkin;
+            }
+            if ($request->has('checkout')) {
+                $responseData['property']['checkout'] = $request->checkout;
+            }
+            if ($request->has('guests')) {
+                $responseData['property']['guests'] = $request->guests;
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $responseData
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while fetching property details',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
