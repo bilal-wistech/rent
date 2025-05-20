@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Amenities;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class PropertyResource extends JsonResource
@@ -22,6 +23,11 @@ class PropertyResource extends JsonResource
             'bedrooms' => $this->bedrooms,
             'beds' => $this->beds,
             'bathrooms' => $this->bathrooms,
+            'space_type_name' => $this->space_type_name,
+            'property_type_name' => $this->property_type_name,
+            'overall_rating'=> $this->overall_rating,
+            'cover_photo'=> $this->cover_photo,
+            'bedType' => $this->whenLoaded('bed_types', fn() => $this->bed_types ? $this->bed_types : null),
             'price' => $this->whenLoaded('property_price', fn() => $this->property_price ? $this->property_price->price : null),
             'priceType' => $this->whenLoaded('property_price', fn() => $this->property_price && $this->property_price->pricingType ? [
                 'id' => $this->property_price->pricingType->id,
@@ -41,6 +47,11 @@ class PropertyResource extends JsonResource
                 'name' => $this->users->name,
                 'email' => $this->users->email
             ]),
+            'amenities' => Amenities::select('id', 'title', 'type_id')->with(['amenityType' => function ($query) {
+                $query->select('id', 'name');
+            }])
+                ->whereIn('id', explode(',', $this->amenities))
+                ->get(),
             'created_at' => $this->when($this->created_at, fn() => $this->created_at->toIso8601String(), null),
             'updated_at' => $this->when($this->updated_at, fn() => $this->updated_at->toIso8601String(), null),
         ];

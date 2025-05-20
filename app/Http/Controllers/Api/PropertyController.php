@@ -44,7 +44,7 @@ class PropertyController extends Controller
             $query = $this->buildPropertyQuery($filters);
 
             // Execute query with pagination
-            $properties = $query->orderBy('id', 'desc')->paginate(5);
+            $properties = $query->orderBy('id', 'desc')->paginate(2);
 
             return response()->json([
                 'success' => true,
@@ -60,7 +60,6 @@ class PropertyController extends Controller
                     ]
                 ]
             ], 200);
-
         } catch (\Exception $e) {
             Log::error('Error searching properties', [
                 'error' => $e->getMessage(),
@@ -95,8 +94,10 @@ class PropertyController extends Controller
             'max_price' => $request->input('max_price'),
             'space_type' => SpaceType::where('status', 'Active')->pluck('name', 'id'),
             'property_type' => PropertyType::where('status', 'Active')->pluck('name', 'id'),
-            'amenities' => Amenities::where('status', 'Active')->get(),
-            'amenities_type' => AmenityType::pluck('name', 'id'),
+            'amenities' => Amenities::with('amenityType')
+                ->where('status', 'Active')
+                ->select('id', 'title', 'type_id')
+                ->get(),
         ];
 
         // Handle selected filters
@@ -169,7 +170,7 @@ class PropertyController extends Controller
                             ->orWhere('flat_no', 'like', "%{$filters['location']}%");
                     });
             })
-            ->with(['users', 'property_price.pricingType', 'property_address', 'bookings'])
+            ->with(['users', 'property_price.pricingType', 'property_address', 'bookings','bed_types'])
             ->whereDoesntHave('bookings', function ($bookingQuery) use ($checkinDate, $checkoutDate) {
                 $bookingQuery->where('status', 'Accepted')
                     ->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
