@@ -244,7 +244,7 @@ class PropertyController extends Controller
         try {
             // Find property by slug
             $property = Properties::where('slug', $slug)
-                ->with(['property_address'])
+                ->with(['property_address','bed_types'])
                 ->first();
             $userActive = $property->Users()->where('id', $property->host_id)->first();
             // Check if property exists
@@ -287,6 +287,11 @@ class PropertyController extends Controller
                     'name' => $property->name,
                     'address' => [
                         'city' => $property->property_address->city,
+                        'state' => $property->property_address->state,
+                        'country' => $property->property_address->country,
+                        'area' => $property->property_address->area,
+                        'building' => $property->property_address->building,
+                        'flat_no' => $property->property_address->flat_no,
                     ],
                     'booking_status' => Bookings::where('property_id', $property->id)
                         ->select('status')
@@ -297,15 +302,18 @@ class PropertyController extends Controller
                         ->map(function ($photo) {
                             return [
                                 'id' => $photo->id,
-                                'url' => $photo->url, // Assuming url field exists
-                                'serial' => $photo->serial
+                                'property_id'=> $photo->property_id,
+                                'photo' => $photo && $photo->photo ? asset('images/property/' . $photo->property_id.'/'.$photo->photo) : null,
+                                'message'=> $photo->message,
+                                'cover_photo'=> $photo->cover_photo,
+                                'serial'=> $photo->serial
                             ];
                         }),
-                    'amenities' => [
-                        'normal' => Amenities::normal($property->id),
-                        'security' => Amenities::security($property->id),
-                        'categories' => []
-                    ],
+                    'amenities' => Amenities::select('id', 'title', 'type_id')->with(['amenityType' => function ($query) {
+                        $query->select('id', 'name');
+                    }])
+                        ->whereIn('id', explode(',', $property->amenities))
+                        ->get(),
                     'prices' => PropertyPrice::with('pricingType')->where('property_id', $property->id)
                         ->get()
                         ->map(function ($price) {
@@ -313,8 +321,15 @@ class PropertyController extends Controller
                                 'data' => $price,
                             ];
                         }),
-                    
-                    'share_link' => url('properties/' . $property->slug)
+
+                    'accommodates' => $property->accommodates,
+                    'bedrooms' => $property->bedrooms,
+                    'beds' => $property->beds,
+                    'bathrooms' => $property->bathrooms,
+                    'space_type_name' => $property->space_type_name,
+                    'property_type_name' => $property->property_type_name,
+                    'overall_rating' => $property->overall_rating,
+                    'bedType' => $property->relationLoaded('bed_types') ? $property->bed_types : null,
                 ]
             ];
 
