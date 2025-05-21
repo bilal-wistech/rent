@@ -45,7 +45,7 @@ class Properties extends Model
                         ->get();
         return $data;
     }
-    public static function vacantToday()
+     public static function vacantToday()
     {
         $today = Carbon::today();
         $data = parent::where('status', 'listed')
