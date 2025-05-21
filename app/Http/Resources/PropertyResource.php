@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Amenities;
+use App\Models\PropertyPrice;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class PropertyResource extends JsonResource
@@ -28,11 +29,13 @@ class PropertyResource extends JsonResource
             'overall_rating'=> $this->overall_rating,
             'cover_photo'=> $this->cover_photo,
             'bedType' => $this->whenLoaded('bed_types', fn() => $this->bed_types ? $this->bed_types : null),
-            'price' => $this->whenLoaded('property_price', fn() => $this->property_price ? $this->property_price->price : null),
-            'priceType' => $this->whenLoaded('property_price', fn() => $this->property_price && $this->property_price->pricingType ? [
-                'id' => $this->property_price->pricingType->id,
-                'name' => $this->property_price->pricingType->name
-            ] : null),
+            'prices' => PropertyPrice::with('pricingType')->where('property_id', $this->id)
+                        ->get()
+                        ->map(function ($price) {
+                            return [
+                                'data' => $price,
+                            ];
+                        }),
             'currency' => $this->whenLoaded('property_price', fn() => $this->property_price->currency),
             'address' => $this->whenLoaded('property_address', fn() => [
                 'city' => $this->property_address->city,
