@@ -26,4 +26,10 @@ class Area extends Model
 
         return asset('front/images/front-areas/' . $image);
     }
+
+    public function buildings()
+    {
+        return $this->hasMany(Building::class);
+    }
+
 }

@@ -21,6 +21,8 @@ class AreaDataTable extends DataTable
         return datatables()
             ->eloquent($this->query())
             ->addColumn('action', function ($area) {
+                $view = '<a href="' . route('building.view', $area->id) . '" class="btn btn-xs btn-info">
+                    <i class="fa fa-home" style="color: white;"></i></a>';
                 $edit = '<a href="' . route('area.edit', $area->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
                 $delete = '
                 <form action="' . route('area.destroy', $area->id) . '" method="POST" style="display:inline;">
@@ -30,7 +32,7 @@ class AreaDataTable extends DataTable
                         <i class="fa fa-trash"></i>
                     </button>
                 </form>';
-                return  $edit . ' ' . $delete;
+                return  $view . ' ' .  $edit . ' ' . $delete;
             })
             ->editColumn('image', function ($area) {
                 if ($area->image) {
