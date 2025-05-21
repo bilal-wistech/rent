@@ -55,9 +55,11 @@ class AreaController extends Controller
                 'country_id' => $city->country_id,
             ]);
 
-            return redirect()->back()
-                ->with('success', 'Area added successfully!')
-                ->with('cityId', $city->id);
+            // return redirect()->back()
+            //     ->with('success', 'Area added successfully!')
+            //     ->with('cityId', $city->id);
+            return redirect()->route('area.show', $city->id)->with('success', 'Area added successfully!');
+
 
         } catch (\Exception $e) {
             \Log::error('Error adding area: ' . $e->getMessage());
