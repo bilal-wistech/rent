@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Amenities;
+use App\Models\PricingType;
 use App\Models\PropertyPrice;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -55,6 +56,7 @@ class PropertyResource extends JsonResource
             }])
                 ->whereIn('id', explode(',', $this->amenities))
                 ->get(),
+            'pricingTypes' => PricingType::where('status',1)->get(),
             'created_at' => $this->when($this->created_at, fn() => $this->created_at->toIso8601String(), null),
             'updated_at' => $this->when($this->updated_at, fn() => $this->updated_at->toIso8601String(), null),
         ];

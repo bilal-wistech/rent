@@ -10,6 +10,7 @@ use App\Models\Amenities;
 use App\Models\SpaceType;
 use App\Models\Properties;
 use App\Models\AmenityType;
+use App\Models\PricingType;
 use App\Http\Helpers\Common;
 use App\Models\PropertyType;
 use Illuminate\Http\Request;
@@ -330,6 +331,7 @@ class PropertyController extends Controller
                     'property_type_name' => $property->property_type_name,
                     'overall_rating' => $property->overall_rating,
                     'bedType' => $property->relationLoaded('bed_types') ? $property->bed_types : null,
+                    'pricingTypes' => PricingType::where('status',1)->get(),
                 ]
             ];
 
