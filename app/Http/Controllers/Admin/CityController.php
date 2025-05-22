@@ -72,10 +72,6 @@ class CityController extends Controller
                 return redirect()->back()->with('error', 'Failed to add city. Please try again.');
             }
 
-            // return redirect()->back()
-            //     ->with('success', 'City added successfully!')
-            //     ->with('countryId', $request->country_id);
-
             return redirect()->route('city.show', $request->country_id)
                 ->with('success', 'City added successfully!');
 
@@ -135,7 +131,6 @@ class CityController extends Controller
 
         $city->save();
 
-        //return redirect()->route('city.edit', $city->id)->with('success', 'City updated successfully');
         return redirect()->route('city.show', $request->country_id)
             ->with('success', 'City updated successfully!');
 
