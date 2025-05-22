@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
+use App\Models\Country;
 use App\Models\Bookings;
 use App\Models\Currency;
 use App\Models\Settings;
@@ -363,6 +364,48 @@ class PropertyController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while fetching property details',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function getLocations()
+    {
+        try {
+            $countries = Country::where('short_name','AE')
+            ->where('name','United Arab Emirates')
+            ->with(['cities' => function ($query) {
+                $query->where('show_on_front', 1)
+                    ->select('id', 'name', 'country_id')
+                    ->with(['areas' => function ($query) {
+                        $query->where('show_on_front', 1)
+                            ->select('id', 'name', 'city_id');
+                    }]);
+            }])
+            ->select('id', 'name', 'short_name')
+            ->get()
+            ->map(function ($country) {
+                return [
+                    'country' => $country->name,
+                    'short_name' => $country->short_name,
+                    'cities' => $country->cities->map(function ($city) {
+                        return [
+                            'name' => $city->name,
+                            'id' => $city->id,
+                            'areas' => $city->areas->pluck('name')->toArray()
+                        ];
+                    })->toArray()
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $countries
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching locations',
                 'error' => $e->getMessage()
             ], 500);
         }

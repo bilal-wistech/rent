@@ -41,4 +41,8 @@ class Country extends Model
     {
         return $this->hasMany('App\Models\PropertyAddress', 'country', 'short_name');
     }
+    public function cities()
+    {
+        return $this->hasMany('App\Models\City', 'country_id', 'id');
+    }
 }
