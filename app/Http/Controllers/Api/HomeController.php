@@ -12,6 +12,7 @@ use App\Models\PropertyAddress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\PricingType;
 
 class HomeController extends Controller
 {
@@ -189,6 +190,7 @@ class HomeController extends Controller
                         'flat_no' => $property->property_address->flat_no,
                     ] : null,
                     'bookings' => $property->bookings ? $property->bookings->toArray() : [],
+                    'pricingTypes' => PricingType::where('status',1)->get(),
                 ];
             });
 
