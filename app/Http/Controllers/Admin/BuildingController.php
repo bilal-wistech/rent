@@ -61,9 +61,9 @@ class BuildingController extends Controller
             'country_id' => $area->country_id,
         ]);
 
-        return redirect()
-            ->route('building.view.area', $area->id)
-            ->with('success', 'Building added successfully.');
+        return redirect()->route('building.view', $request->area_id)
+            ->with('success', 'Building added successfully!');
+
     }
 
 
@@ -93,7 +93,7 @@ class BuildingController extends Controller
         $building->name = $request->name;
         $building->save();
 
-        return redirect()->route('building.view.area', $building->area_id)->with('success', 'Building updated successfully.');
+        return redirect()->route('building.view', $building->area_id)->with('success', 'Building updated successfully.');
     }
 
     public function destroy($id)
