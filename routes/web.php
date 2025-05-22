@@ -74,6 +74,12 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::post('admin/add-ajax-city', [CityController::class, 'addAjax'])->name('city.addAjax');
     Route::post('admin/add-ajax-area', [AreaController::class, 'addAjax'])->name('area.addAjax');
     Route::post('admin/add-ajax-building', [BuildingController::class, 'addAjax'])->name('building.addAjax');
+    Route::get('admin/building/view/{area}', [BuildingController::class, 'view'])->name('building.view');
+    Route::get('admin/building/edit/{id}', [BuildingController::class, 'edit'])->name('building.edit');
+    Route::put('admin/building/update/{id}', [BuildingController::class, 'update'])->name('building.update');
+    Route::delete('admin/building/delete/{id}', [BuildingController::class, 'destroy'])->name('building.destroy');
+    Route::get('admin/building/add/{areaId}', [BuildingController::class, 'add'])->name('building.add');
+    Route::post('admin/building/store', [BuildingController::class, 'store'])->name('building.store');
 
 
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
@@ -294,7 +300,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('settings/bank/delete/{bank}', 'BankController@deleteBank')->middleware(['permission:payment_settings']);
         Route::match(array('GET', 'POST'), 'settings/social-links', 'SettingsController@socialLinks')->middleware(['permission:social_links']);
 
-        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);;
+        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);
+        ;
 
         Route::group(['middleware' => 'permission:manage_roles'], function () {
             Route::get('settings/roles', 'RolesController@index');
@@ -498,7 +505,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::get('settings/bank/delete/{bank}', 'BankController@deleteBank')->middleware(['permission:payment_settings']);
         Route::match(array('GET', 'POST'), 'settings/social-links', 'SettingsController@socialLinks')->middleware(['permission:social_links']);
 
-        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);;
+        Route::match(array('GET', 'POST'), 'settings/social-logins', 'SettingsController@socialLogin')->middleware(['permission:social_logins']);
+        ;
 
         Route::group(['middleware' => 'permission:manage_roles'], function () {
             Route::get('settings/roles', 'RolesController@index');
