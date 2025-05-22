@@ -20,3 +20,4 @@ Route::get('testimonials', [HomeController::class, 'testimonials']);
 Route::get('vacant-properties', [HomeController::class, 'vacantProperties']);
 Route::get('properties', [PropertyController::class, 'searchProperties']);
 Route::get('properties/{slug}', [PropertyController::class, 'show']);
+Route::get('locations', [PropertyController::class, 'getLocations']);
