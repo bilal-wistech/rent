@@ -55,9 +55,6 @@ class AreaController extends Controller
                 'country_id' => $city->country_id,
             ]);
 
-            // return redirect()->back()
-            //     ->with('success', 'Area added successfully!')
-            //     ->with('cityId', $city->id);
             return redirect()->route('area.show', $city->id)->with('success', 'Area added successfully!');
 
 
@@ -121,7 +118,8 @@ class AreaController extends Controller
 
         $area->save();
 
-        return redirect()->back()->with('success', 'Area updated successfully');
+         return redirect()->route('area.show', $area->city_id)
+        ->with('success', 'Area updated successfully');
     }
 
     public function addAjax(Request $request)
