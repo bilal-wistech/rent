@@ -122,8 +122,8 @@ class AreaController extends Controller
 
         $area->save();
 
-         return redirect()->route('area.show', $area->city_id)
-        ->with('success', 'Area updated successfully');
+        return redirect()->route('area.show', $area->city_id)
+            ->with('success', 'Area updated successfully');
     }
 
     public function addAjax(Request $request)
@@ -154,17 +154,27 @@ class AreaController extends Controller
         ]);
     }
 
+    public function toggleShowOnFront($id)
+    {
+        $area = Area::findOrFail($id);
+        $area->show_on_front = !$area->show_on_front;
+        $area->save();
+
+        return redirect()->back()->with('success', 'Show on Front status updated successfully.');
+    }
+
+
     public function destroy($id)
     {
         try {
             $area = Area::findOrFail($id);
-        if ($area->image) {
+            if ($area->image) {
                 $imagePath = public_path('front/images/front-areas/' . $area->image);
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
             }
-      $area->delete();
+            $area->delete();
 
             return redirect()->back()->with('success', 'Area deleted successfully.');
         } catch (\Exception $e) {
