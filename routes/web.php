@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\EmergencyContactController;
+use App\Http\Controllers\Admin\PricingTypeController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -80,6 +81,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::delete('admin/building/delete/{id}', [BuildingController::class, 'destroy'])->name('building.destroy');
     Route::get('admin/building/add/{areaId}', [BuildingController::class, 'add'])->name('building.add');
     Route::post('admin/building/store', [BuildingController::class, 'store'])->name('building.store');
+    // PricingType routes
+    Route::get('pricing-type', [PricingTypeController::class, 'index'])->name('pricing-type.index');
+    Route::get('pricing-type/add', [PricingTypeController::class, 'add'])->name('pricing-type.add');
+    Route::post('pricing-type/store', [PricingTypeController::class, 'store'])->name('pricing-type.store');
+    Route::get('pricing-type/edit/{id}', [PricingTypeController::class, 'edit'])->name('pricing-type.edit');
+    Route::put('pricing-type/update/{id}', [PricingTypeController::class, 'update'])->name('pricing-type.update');
+    Route::delete('pricing-type/delete/{id}', [PricingTypeController::class, 'destroy'])->name('pricing-type.destroy');
 
 
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
