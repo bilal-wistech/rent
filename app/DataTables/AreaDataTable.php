@@ -32,7 +32,7 @@ class AreaDataTable extends DataTable
                         <i class="fa fa-trash"></i>
                     </button>
                 </form>';
-                return  $view . ' ' .  $edit . ' ' . $delete;
+                return $view . ' ' . $edit . ' ' . $delete;
             })
             ->editColumn('image', function ($area) {
                 if ($area->image) {
@@ -40,28 +40,34 @@ class AreaDataTable extends DataTable
                 }
                 return '<span>No Image</span>';
             })
-            ->rawColumns(['action', 'image'])
+            ->editColumn('show_on_front', function ($area) {
+                return $area->show_on_front
+                    ? '<span style="color: green; font-weight: bold;">Yes</span>'
+                    : '<span style="color: red; font-weight: bold;">No</span>';
+            })
+            ->rawColumns(['action', 'image', 'show_on_front'])
             ->make(true);
     }
-        public function query()
-        {
-            $query = Area::query();
-         if ($this->cityId) {
-                $query->where('city_id', $this->cityId);
-            }
-         $query->orderBy('id', 'asc');
-          return $this->applyScopes($query);
+    public function query()
+    {
+        $query = Area::query();
+        if ($this->cityId) {
+            $query->where('city_id', $this->cityId);
         }
+        $query->orderBy('id', 'asc');
+        return $this->applyScopes($query);
+    }
 
-        public function html()
-        {
-            return $this->builder()
-                ->addColumn(['data' => 'id', 'name' => 'areas.id', 'title' => 'ID', 'orderable' => true])
-                ->addColumn(['data' => 'name', 'name' => 'areas.name', 'title' => 'Name', 'orderable' => true])
-                ->addColumn(['data' => 'image', 'name' => 'areas.image', 'title' => 'Image', 'orderable' => false, 'searchable' => false])
-                ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
-                ->parameters(dataTableOptions());
-        }
+    public function html()
+    {
+        return $this->builder()
+            ->addColumn(['data' => 'id', 'name' => 'areas.id', 'title' => 'ID', 'orderable' => true])
+            ->addColumn(['data' => 'name', 'name' => 'areas.name', 'title' => 'Name', 'orderable' => true])
+            ->addColumn(['data' => 'show_on_front', 'name' => 'areas.show_on_front', 'title' => 'Show on Front', 'orderable' => true])
+            ->addColumn(['data' => 'image', 'name' => 'areas.image', 'title' => 'Image', 'orderable' => false, 'searchable' => false])
+            ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
+            ->parameters(dataTableOptions());
+    }
 
 
 
