@@ -28,6 +28,7 @@ class AreaController extends Controller
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'city_id' => 'required|exists:cities,id',
+            'show_on_front' => 'required|in:0,1',
         ]);
 
         try {
@@ -53,6 +54,7 @@ class AreaController extends Controller
                 'image' => $imageName,
                 'city_id' => $city->id,
                 'country_id' => $city->country_id,
+                'show_on_front' => $request->input('show_on_front'),
             ]);
 
             return redirect()->route('area.show', $city->id)->with('success', 'Area added successfully!');
@@ -98,10 +100,12 @@ class AreaController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'show_on_front' => 'required|in:0,1',
         ]);
 
         $area = Area::findOrFail($id);
         $area->name = $request->name;
+        $area->show_on_front = $request->show_on_front;
 
         if ($request->hasFile('image')) {
             if ($area->image) {

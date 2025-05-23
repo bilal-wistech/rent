@@ -25,48 +25,64 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                @endif
+                    @endif
 
-                {{-- Error Alert --}}
-                @if (session('error'))
+                    @if (session('error'))
                     <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: relative;">
                         {{ session('error') }}
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="position: absolute; right: 10px; top: 10px;">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                @endif
+                    @endif
 
-                    <form id="add_country" method="post" action="{{ route('area.update',$area->id) }}" class="form-horizontal" enctype="multipart/form-data">
-                        {{ csrf_field() }}
-                        {{ method_field('PUT') }}
-                           <div class="box-body">
+                    <form method="POST" action="{{ route('area.update', $area->id) }}" class="form-horizontal" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <div class="box-body">
+                            {{-- Name Field --}}
                             <div class="form-group row mt-3 short_name">
-                                <label for="short_name" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0"> Name
-                                    <span class="text-danger">*</span></label>
-
+                                <label for="short_name" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                    Name <span class="text-danger">*</span>
+                                </label>
                                 <div class="col-sm-6">
                                     <input type="text" name="name" class="form-control f-14" id="short_name" value="{{ $area->name }}">
                                     <span class="text-danger">{{ $errors->first("name") }}</span>
                                 </div>
                             </div>
+
+                            {{-- Show on Front Field --}}
+                            <div class="form-group row mt-3">
+                                <label for="show_on_front" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
+                                    Show on Front
+                                </label>
+                                <div class="col-sm-6">
+                                    <select name="show_on_front" id="show_on_front" class="form-control f-14">
+                                        <option value="1" {{ $area->show_on_front == 1 ? 'selected' : '' }}>Active</option>
+                                        <option value="0" {{ $area->show_on_front == 0 ? 'selected' : '' }}>Inactive</option>
+                                    </select>
+                                    <span class="text-danger">{{ $errors->first('show_on_front') }}</span>
+                                </div>
+                            </div>
+
+                            {{-- Image Field --}}
                             <div class="form-group row mt-3">
                                 <label for="image" class="control-label col-sm-3 fw-bold text-md-end mb-2 mb-md-0">
                                     Upload Image <span class="text-danger">*</span>
                                 </label>
-
                                 <div class="col-sm-6">
                                     <input type="file" name="image" class="form-control f-14" id="image" accept="image/*">
                                     <span class="text-danger">{{ $errors->first("image") }}</span>
-                                    @if(isset($area->image))
+                                    @if (isset($area->image))
                                         <div class="mt-2">
-                                            <img src="{{ asset('front/images/front-areas/' . $area->image) }}" alt="Area Image" width="100" height="100" style="border-radius: 5px;">
+                                            <img src="{{ asset('front/images/front-areas/' . $area->image) }}" alt="Area Image"
+                                                width="100" height="100" style="border-radius: 5px;">
                                         </div>
                                     @endif
                                 </div>
                             </div>
-                            <input type="hidden" name="country_id" id="country_id" value="{{$area->city_id }}">
 
+                            <input type="hidden" name="country_id" value="{{ $area->city_id }}">
                         </div>
 
                         <div class="box-footer">
