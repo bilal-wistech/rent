@@ -70,6 +70,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::resource('emergencycontacts', EmergencyContactController::class);
     Route::resource('city', CityController::class);
     Route::resource('area', AreaController::class);
+    Route::post('admin/area/toggle-show-on-front/{id}', [AreaController::class, 'toggleShowOnFront'])
+    ->name('area.toggleShowOnFront');
+
     Route::get('city/add/{countryId}', [CityController::class, 'add'])->name('city.add');
     Route::get('area/add/{cityId}', [AreaController::class, 'add'])->name('area.add');
     Route::post('admin/add-ajax-city', [CityController::class, 'addAjax'])->name('city.addAjax');

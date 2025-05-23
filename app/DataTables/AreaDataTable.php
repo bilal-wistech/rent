@@ -21,6 +21,18 @@ class AreaDataTable extends DataTable
         return datatables()
             ->eloquent($this->query())
             ->addColumn('action', function ($area) {
+                $toggleFrontUrl = route('area.toggleShowOnFront', $area->id);
+                $eyeIcon = $area->show_on_front
+                    ? '<i class="fa fa-eye"></i>'  // Means it's visible, so icon suggests "hide"
+                    : '<i class="fa fa-eye-slash"></i>';       // Means it's hidden, so icon suggests "show"
+
+                $toggleFront = '
+                <form action="' . $toggleFrontUrl . '" method="POST" style="display:inline;">
+                    ' . csrf_field() . '
+                    <button type="submit" class="btn btn-xs btn-warning" title="Toggle Show on Front">
+                        ' . $eyeIcon . '
+                    </button>
+                </form>';
                 $view = '<a href="' . route('building.view', $area->id) . '" class="btn btn-xs btn-info">
                     <i class="fa fa-home" style="color: white;"></i></a>';
                 $edit = '<a href="' . route('area.edit', $area->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
@@ -32,7 +44,7 @@ class AreaDataTable extends DataTable
                         <i class="fa fa-trash"></i>
                     </button>
                 </form>';
-                return $view . ' ' . $edit . ' ' . $delete;
+                return $toggleFront . ' ' .$view . ' ' . $edit . ' ' . $delete;
             })
             ->editColumn('image', function ($area) {
                 if ($area->image) {
