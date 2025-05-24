@@ -72,23 +72,39 @@ class BookingController extends Controller
                     ]
                 ], 200);
             }
-            $pricingType = PricingType::select('name', 'days')->where('status', 1)->get();
 
+            $pricingType = PricingType::select('name', 'days')->where('status', 1)->get();
             $multiplierMapping = $pricingType->pluck('days', 'name')->toArray();
 
-            $pricingType = $validated['pricing_type'];
+            $requestedPricingType = $validated['pricing_type'];
             $start = Carbon::parse($validated['checkin']);
             $end = Carbon::parse($validated['checkout']);
             $numberOfDays = $end->diffInDays($start);
 
-            // Validate pricing type
-            $pricingTypeDetail = PricingType::where('name', $pricingType)->firstOrFail();
+            // Fetch pricing type details
+            $pricingTypeDetail = PricingType::where('name', $requestedPricingType)->firstOrFail();
+            $minimumDays = $multiplierMapping[ucfirst($requestedPricingType)];
+
+            // Determine applicable pricing type based on stay duration
+            $effectivePricingType = $requestedPricingType;
+            if ($numberOfDays >= 30) {
+                // Use Monthly pricing for stays of 30 days or more
+                $effectivePricingType = 'Monthly';
+                $pricingTypeDetail = PricingType::where('name', 'Monthly')->firstOrFail();
+            } elseif ($numberOfDays < $minimumDays) {
+                // Fallback to Daily pricing if stay is shorter than required for the pricing type
+                $effectivePricingType = 'Daily';
+                $pricingTypeDetail = PricingType::where('name', 'Daily')->firstOrFail();
+            }
+
+            // Fetch property price for the effective pricing type
             $propertyPriceSingle = PropertyPrice::where('property_id', $property->id)
                 ->where('property_type_id', $pricingTypeDetail->id)
                 ->firstOrFail();
-            $rateMultiplier = $multiplierMapping[ucfirst($pricingType)];
-            $perDayPrice = $propertyPriceSingle->amount / $rateMultiplier;
-            $totalPrice = ($numberOfDays / $rateMultiplier) * $propertyPriceSingle->amount;
+
+            $rateMultiplier = $multiplierMapping[ucfirst($effectivePricingType)];
+            $perDayPrice = $propertyPriceSingle->price / $rateMultiplier;
+            $totalPrice = $effectivePricingType === 'Monthly' ? $propertyPriceSingle->price : ($numberOfDays / $rateMultiplier) * $propertyPriceSingle->price;
 
             // Calculate additional fees
             $propertyFees = PropertyFees::pluck('value', 'field');
@@ -112,7 +128,7 @@ class BookingController extends Controller
                 'exists' => false,
                 'data' => [
                     'property_price' => $propertyPrice,
-                    'pricing_type' => $pricingType,
+                    'pricing_type' => $effectivePricingType,
                     'number_of_days' => $numberOfDays,
                     'rate_multiplier' => $rateMultiplier,
                     'total_price' => round($totalPrice, 2),
@@ -130,7 +146,6 @@ class BookingController extends Controller
                     'per_day_price' => round($perDayPrice, 2),
                 ]
             ], 200);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'exists' => false,
@@ -146,7 +161,7 @@ class BookingController extends Controller
             return response()->json([
                 'exists' => false,
                 'message' => 'An error occurred while processing the request',
-                'exception' => $e->getMessage().' on line '.$e->getLine()
+                'exception' => $e->getMessage() . ' on line ' . $e->getLine()
             ], 500);
         }
     }
