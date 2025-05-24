@@ -94,27 +94,20 @@
 
 @section('validate_script')
     <script src="{{ asset('backend/js/backend.min.js') }}"></script>
-    {{-- <script>
-        // Toggle visibility based on checkbox status
-        document.querySelectorAll('.pricing_checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const target = document.querySelector(this.dataset.target);
-                if (this.checked) {
-                    target.classList.remove('d-none');
-                } else {
-                    target.classList.add('d-none');
-                }
-            });
-        });
-    </script> --}}
 @endsection
 
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Get the total number of pricing types for validation
     const totalPricingTypes = @json($pricing_types->count());
+    const pricingTypesData = @json($pricing_types->map(function($type) {
+    return [
+        'id' => $type->id,
+        'name' => $type->name,
+        'days' => $type->days
+    ];
+})->toArray());
 
     $(document).ready(function() {
         const pricingFields = $('#pricing-fields');
@@ -239,6 +232,45 @@
             });
         }
 
+        // Function to get days for a pricing type ID
+        function getDays(typeId) {
+            const typeData = pricingTypesData.find(type => type.id == typeId);
+            return typeData ? parseFloat(typeData.days) : 1; // Default to 1 if not found
+        }
+
+        // Function to calculate price based on previous pricing type
+        function calculatePrice(lastPrice, lastTypeId, newTypeId) {
+            if (!lastPrice || isNaN(lastPrice) || parseFloat(lastPrice) < 0) {
+                return '';
+            }
+
+            const price = parseFloat(lastPrice);
+            const lastDays = getDays(lastTypeId);
+            const newDays = getDays(newTypeId);
+
+            // Convert last price to Daily (base unit), then to new type
+            const priceInDaily = price / lastDays;
+            const newPrice = priceInDaily * newDays;
+            return newPrice.toFixed(2);
+        }
+
+        // Function to get the last valid pricing field
+        function getLastValidPricingField() {
+            const pricingItems = pricingFields.find('.pricing-item');
+            for (let i = pricingItems.length - 1; i >= 0; i--) {
+                const item = pricingItems.eq(i);
+                const select = item.find('select[name="pricing_type[]"]');
+                const priceInput = item.find('input[name="prices[]"]');
+                if (select.val() && priceInput.val() && !isNaN(priceInput.val()) && parseFloat(priceInput.val()) >= 0) {
+                    return {
+                        type: select.val(),
+                        price: priceInput.val()
+                    };
+                }
+            }
+            return null;
+        }
+
         // Function to create new pricing fields
         function createPricingFields() {
             const pricingItem = $('<div>', {
@@ -252,12 +284,24 @@
             // Add change event to select
             select.on('change', function() {
                 removeErrorMessage(this);
+                const priceInput = $(this).parent().find('input[name="prices[]"]');
                 if (!$(this).val()) {
                     $(this).after(createErrorMessage('Please select a price type'));
+                    priceInput.val(''); // Clear price if no type selected
+                } else {
+                    // Update price based on selected type
+                    const lastValidField = getLastValidPricingField();
+                    if (lastValidField) {
+                        const calculatedPrice = calculatePrice(lastValidField.price, lastValidField.type, $(this).val());
+                        priceInput.val(calculatedPrice);
+                    } else {
+                        priceInput.val(''); // Clear price if no valid previous field
+                    }
                 }
                 updateAllSelects();
             });
 
+            // Create price input (empty by default)
             const input = $('<input>', {
                 type: 'text',
                 name: 'prices[]',
@@ -272,8 +316,7 @@
 
             // Add keypress event to allow only numbers and decimal point
             input.on('keypress', function(e) {
-                if (e.which !== 46 && e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which >
-                        57)) {
+                if (e.which !== 46 && e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) {
                     return false;
                 }
             });
@@ -291,8 +334,7 @@
 
             if (maxReached) {
                 if (!$('#max-types-error').length) {
-                    addButton.after(createErrorMessage('Maximum number of pricing types reached').attr('id',
-                        'max-types-error'));
+                    addButton.after(createErrorMessage('Maximum number of pricing types reached').attr('id', 'max-types-error'));
                     setTimeout(() => {
                         $('#max-types-error').fadeOut('slow', function() {
                             $(this).remove();
@@ -347,8 +389,7 @@
             });
 
             $(this).on('keypress', function(e) {
-                if (e.which !== 46 && e.which !== 8 && e.which !== 0 && (e.which < 48 || e
-                        .which > 57)) {
+                if (e.which !== 46 && e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) {
                     return false;
                 }
             });
@@ -388,81 +429,4 @@
         updateAllSelects();
         updateAddButtonState();
     });
-    // $(document).ready(function() {
-    //     // Maximum number of pricing fields allowed
-    //     const maxPricingFields = {{ count($pricing_types) }};
-    //     const pricingFieldsContainer = $('#pricing-fields');
-    //     const addPricingButton = $('#add-pricing-button');
-
-    //     // Function to update the state of the add button
-    //     function updateAddButtonState() {
-    //         const currentCount = pricingFieldsContainer.find('.pricing-item').length;
-    //         addPricingButton.prop('disabled', currentCount >= maxPricingFields);
-    //     }
-
-    //     // Initial check to set the add button state
-    //     updateAddButtonState();
-
-    //     // Add pricing fields
-    //     addPricingButton.on('click', function() {
-    //         // Create a new div for the pricing item
-    //         const newPricingItem = $('<div class="mt-2 mb-2 pricing-item"></div>');
-
-    //         // Create the select element
-    //         const select = $('<select name="pricing_type[]" class="form-control"></select>');
-
-    //         // Populate select options with existing pricing types
-    //         @foreach ($pricing_types as $pricingType)
-    //             select.append(
-    //                 '<option value="{{ $pricingType->id }}">{{ $pricingType->name }}</option>');
-    //         @endforeach
-
-    //         // Create the input element with placeholder
-    //         const input = $(
-    //             '<input type="text" name="prices[]" class="form-control mt-1" placeholder="Enter price">'
-    //         );
-
-    //         // Create a remove button
-    //         const removeButton = $(
-    //             '<button type="button" class="btn btn-danger btn-sm mt-1 remove-pricing-button">Remove</button>'
-    //         );
-
-    //         // Append select, input, and remove button to the new pricing item
-    //         newPricingItem.append(select).append(input).append(removeButton);
-
-    //         // Append the new pricing item to the container
-    //         pricingFieldsContainer.append(newPricingItem);
-
-    //         // Update the add button state
-    //         updateAddButtonState();
-    //     });
-
-    //     // Remove pricing fields
-    //     $(document).on('click', '.remove-pricing-button', function() {
-    //         // Confirm removal of pricing item
-    //         if (confirm('Are you sure you want to remove this pricing item?')) {
-    //             // Remove the pricing item only if it's not the last one
-    //             if (pricingFieldsContainer.find('.pricing-item').length > 1) {
-    //                 $(this).closest('.pricing-item').remove();
-    //                 // Update the add button state
-    //                 updateAddButtonState();
-    //             } else {
-    //                 alert('At least one pricing field must remain.');
-    //             }
-    //         }
-    //     });
-
-    //     // Validate price input on keyup
-    //     $(document).on('keyup', 'input[name="prices[]"]', function() {
-    //         const priceInput = $(this);
-    //         const priceValue = parseFloat(priceInput.val());
-
-    //         // Validate that the price is a positive number
-    //         if (priceValue < 0) {
-    //             priceInput.addClass('is-invalid'); // Add invalid class for feedback
-    //         } else {
-    //             priceInput.removeClass('is-invalid'); // Remove invalid class
-    //         }
-    //     });
-    // });
 </script>
