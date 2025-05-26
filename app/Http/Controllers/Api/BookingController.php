@@ -83,20 +83,8 @@ class BookingController extends Controller
 
             // Fetch pricing type details
             $pricingTypeDetail = PricingType::where('name', $requestedPricingType)->firstOrFail();
-            $minimumDays = $multiplierMapping[ucfirst($requestedPricingType)];
-
             // Determine applicable pricing type based on stay duration
             $effectivePricingType = $requestedPricingType;
-            if ($numberOfDays >= 30) {
-                // Use Monthly pricing for stays of 30 days or more
-                $effectivePricingType = 'Monthly';
-                $pricingTypeDetail = PricingType::where('name', 'Monthly')->firstOrFail();
-            } elseif ($numberOfDays < $minimumDays) {
-                // Fallback to Daily pricing if stay is shorter than required for the pricing type
-                $effectivePricingType = 'Daily';
-                $pricingTypeDetail = PricingType::where('name', 'Daily')->firstOrFail();
-            }
-
             // Fetch property price for the effective pricing type
             $propertyPriceSingle = PropertyPrice::where('property_id', $property->id)
                 ->where('property_type_id', $pricingTypeDetail->id)
