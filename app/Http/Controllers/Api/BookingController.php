@@ -92,7 +92,7 @@ class BookingController extends Controller
 
             $rateMultiplier = $multiplierMapping[ucfirst($effectivePricingType)];
             $perDayPrice = $propertyPriceSingle->price / $rateMultiplier;
-            $totalPrice = $effectivePricingType === 'Monthly' ? $propertyPriceSingle->price : ($numberOfDays / $rateMultiplier) * $propertyPriceSingle->price;
+            $totalPrice =  ($numberOfDays / $rateMultiplier) * $propertyPriceSingle->price;
 
             // Calculate additional fees
             $propertyFees = PropertyFees::pluck('value', 'field');
