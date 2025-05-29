@@ -18,30 +18,36 @@
 
 namespace App\Models;
 
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\UserDetails;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use Notifiable, SoftDeletes;
+    use Notifiable, SoftDeletes, HasApiTokens;
 
     protected $fillable = [
-        'name', 'email', 'password',
+        'first_name',
+        'last_name',
+        'email',
+        'password',
+        'phone'
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
     public function document()
     {
         return $this->hasOne(Document::class);
     }
     public function emergencyContacts()
-{
-    return $this->hasMany(EmergencyContact::class);
-}
+    {
+        return $this->hasMany(EmergencyContact::class);
+    }
 
     protected $appends = ['profile_src'];
 
@@ -106,7 +112,7 @@ class User extends Authenticatable
         if ($this->attributes['profile_image'] == '') {
             $src = asset('images/default-profile.png');
         } else {
-            $src = url('images/profile/'.$this->attributes['id'].'/'.$this->attributes['profile_image']);
+            $src = url('images/profile/' . $this->attributes['id'] . '/' . $this->attributes['profile_image']);
         }
 
         return $src;
@@ -126,7 +132,7 @@ class User extends Authenticatable
 
     public function getFullNameAttribute()
     {
-        $full_name = ucfirst($this->attributes['first_name']).' '.ucfirst($this->attributes['last_name']);
+        $full_name = ucfirst($this->attributes['first_name']) . ' ' . ucfirst($this->attributes['last_name']);
         return $full_name;
     }
 }
