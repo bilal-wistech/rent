@@ -2,15 +2,23 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Models\Properties;
-use App\Models\Bookings;
-use App\Models\PropertyPrice;
-use App\Models\PricingType;
-use App\Models\PropertyFees;
 use Carbon\Carbon;
+use App\Models\Invoice;
+use App\Models\Bookings;
+use App\Models\Currency;
+use App\Models\Properties;
+use App\Models\PricingType;
+use App\Http\Helpers\Common;
+use App\Models\PropertyFees;
 use Illuminate\Http\Request;
+use App\Models\PropertyDates;
+use App\Models\PropertyPrice;
+use App\Models\PaymentReceipt;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Api\AddBookingRequest;
 
 class BookingController extends Controller
 {
@@ -150,6 +158,128 @@ class BookingController extends Controller
                 'exists' => false,
                 'message' => 'An error occurred while processing the request',
                 'exception' => $e->getMessage() . ' on line ' . $e->getLine()
+            ], 500);
+        }
+    }
+    public function addBooking(AddBookingRequest $request): JsonResponse
+    {
+        $authenticatedUserId = Auth::id();
+
+        if (!$authenticatedUserId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ], 401);
+        }
+
+        $currencyDefault = Currency::getAll()->where('default', 1)->first();
+        $property = Properties::where('slug', $request->slug)->first();
+
+        if (!$property) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Property not found'
+            ], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            $status = 'booked not paid';
+            $payment_status = 'unpaid';
+            $start_date = date('Y-m-d', strtotime($request->check_in));
+            $end_date = date('Y-m-d', strtotime($request->check_out));
+
+            // Convert the start and end dates to timestamps
+            $start_date_timestamp = strtotime($start_date);
+            $end_date_timestamp = strtotime($end_date);
+            $pricingType = PricingType::where('name', $request->pricing_type)->first();
+
+            // Calculate the difference in days
+            $min_days = ($end_date_timestamp - $start_date_timestamp) / 86400;
+
+            $bookingData = [
+                'property_id' => $property->id,
+
+                'user_id' => $request->user_id ?? $authenticatedUserId,
+                'host_id' => $property->host_id,
+
+                'booking_added_by' => $authenticatedUserId,
+                'start_date' => $request->check_in,
+                'end_date' => $request->check_out,
+                'guest' => $request->guests,
+                'total_night' => $min_days,
+                'service_charge' => Common::convert_currency('', $currencyDefault->code, $request->service_fee ?? 0),
+                'host_fee' => Common::convert_currency('', $currencyDefault->code, $request->host_service_charge ?? 0),
+                'iva_tax' => Common::convert_currency('', $currencyDefault->code, $request->iva_tax ?? 0),
+                'accomodation_tax' => Common::convert_currency('', $currencyDefault->code, $request->accomodation_tax ?? 0),
+                'guest_charge' => Common::convert_currency('', $currencyDefault->code, $request->guest_fee ?? 0),
+                'security_money' => Common::convert_currency('', $currencyDefault->code, $request->security_fee ?? 0),
+                'cleaning_charge' => Common::convert_currency('', $currencyDefault->code, $request->cleaning_fee ?? 0),
+                'total' => Common::convert_currency('', $currencyDefault->code, $request->total_price ?? 0),
+                'base_price' => Common::convert_currency('', $currencyDefault->code, $request->property_price ?? 0),
+                'currency_code' => $currencyDefault->code,
+                'booking_type' => 'request',
+                'renewal_type' => 'none',
+                'status' => 'pending',
+                'cancellation' => $property->cancellation,
+                'per_night' => Common::convert_currency('', $currencyDefault->code, $request->per_day_price ?? 0),
+                'booking_property_status' => $status,
+                'transaction_id' => '',
+                'payment_method_id' => '',
+                'pricing_type_id' => $pricingType->id,
+                'buffer_days' => 0
+            ];
+
+            $booking = Bookings::create($bookingData);
+
+            // Create an array of booked dates
+            $bookedDates = [];
+            for ($i = $start_date_timestamp; $i <= $end_date_timestamp; $i += 86400) {
+                $bookedDates[] = date("Y-m-d", $i);
+            }
+
+            // Create new entries for booked dates
+            foreach ($bookedDates as $date) {
+                PropertyDates::create([
+                    'property_id' => $property->id,
+                    'booking_id' => $booking->id,
+                    'date' => $date,
+                    'price' => $request->per_day_price ?? 0,
+                    'status' => 'booked not paid',
+                    'min_day' => $min_days,
+                    'min_stay' => $request->min_stay ? 1 : 0,
+                ]);
+            }
+
+            $invoice = Invoice::create([
+                'booking_id' => $booking->id,
+                'property_id' => $property->id,
+                // Use the same user for customer as for booking
+                'customer_id' => $request->user_id ?? $authenticatedUserId,
+                'currency_code' => $currencyDefault->code,
+                // Always use authenticated user as creator
+                'created_by' => $authenticatedUserId,
+                'invoice_date' => Carbon::now(),
+                'due_date' => Carbon::now()->addDays(5),
+                'description' => 'Booking invoice for ' . $property->name,
+                'sub_total' => Common::convert_currency('', $currencyDefault->code, $request->total_price),
+                'grand_total' => Common::convert_currency('', $currencyDefault->code, $request->total_price),
+                'payment_status' => $payment_status
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking created successfully',
+                'booking' => $booking,
+                'invoice' => $invoice
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not created: ' . $e->getMessage()
             ], 500);
         }
     }

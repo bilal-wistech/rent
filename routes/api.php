@@ -25,11 +25,12 @@ Route::get('properties/{slug}', [PropertyController::class, 'show']);
 Route::get('locations', [PropertyController::class, 'getLocations']);
 Route::get('get-bookings', [BookingController::class, 'getBookings']);
 
-Route::get('/sanctum/csrf-cookie', [\Laravel\Sanctum\Http\Controllers\CsrfCookieController::class, 'show']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('throttle:10,1');
+Route::get('sanctum/csrf-cookie', [\Laravel\Sanctum\Http\Controllers\CsrfCookieController::class, 'show']);
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);
+Route::post('refresh', [AuthController::class, 'refresh'])->middleware('throttle:10,1');
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', [AuthController::class, 'user']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('user', [AuthController::class, 'user']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('add-booking',[BookingController::class,'addBooking']);
 });
