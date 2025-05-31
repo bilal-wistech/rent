@@ -19,11 +19,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173', 'https://wisdomskt-dev-com.stackstaging.com/backend'],
+    'allowed_origins' => ['http://localhost:5173','https://wisdomskt-dev-com.stackstaging.com/backend'],
 
-    'allowed_origins_patterns' => [
-        'chrome-extension://*',
-    ],
+    'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
