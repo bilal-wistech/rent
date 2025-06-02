@@ -177,15 +177,14 @@ class PropertyController extends Controller
             })
             ->with(['users', 'property_price.pricingType', 'property_address', 'bookings', 'bed_types'])
             ->whereDoesntHave('bookings', function ($bookingQuery) use ($checkinDate, $checkoutDate) {
-                $bookingQuery->where('status', 'Accepted')
-                    ->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
-                        $conflictQuery->whereBetween('start_date', [$checkinDate, $checkoutDate])
-                            ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
-                            ->orWhere(function ($overlapQuery) use ($checkinDate, $checkoutDate) {
-                                $overlapQuery->where('start_date', '<=', $checkinDate)
-                                    ->where('end_date', '>=', $checkoutDate);
-                            });
-                    });
+                $bookingQuery->where(function ($conflictQuery) use ($checkinDate, $checkoutDate) {
+                    $conflictQuery->whereBetween('start_date', [$checkinDate, $checkoutDate])
+                        ->orWhereBetween('end_date', [$checkinDate, $checkoutDate])
+                        ->orWhere(function ($overlapQuery) use ($checkinDate, $checkoutDate) {
+                            $overlapQuery->where('start_date', '<=', $checkinDate)
+                                ->where('end_date', '>=', $checkoutDate);
+                        });
+                });
             });
 
         // Apply filters
@@ -246,7 +245,7 @@ class PropertyController extends Controller
         try {
             // Find property by slug
             $property = Properties::where('slug', $slug)
-                ->with(['property_address','bed_types'])
+                ->with(['property_address', 'bed_types'])
                 ->first();
             $userActive = $property->Users()->where('id', $property->host_id)->first();
             // Check if property exists
@@ -304,11 +303,11 @@ class PropertyController extends Controller
                         ->map(function ($photo) {
                             return [
                                 'id' => $photo->id,
-                                'property_id'=> $photo->property_id,
-                                'photo' => $photo && $photo->photo ? asset('images/property/' . $photo->property_id.'/'.$photo->photo) : null,
-                                'message'=> $photo->message,
-                                'cover_photo'=> $photo->cover_photo,
-                                'serial'=> $photo->serial
+                                'property_id' => $photo->property_id,
+                                'photo' => $photo && $photo->photo ? asset('images/property/' . $photo->property_id . '/' . $photo->photo) : null,
+                                'message' => $photo->message,
+                                'cover_photo' => $photo->cover_photo,
+                                'serial' => $photo->serial
                             ];
                         }),
                     'amenities' => Amenities::select('id', 'title', 'type_id')->with(['amenityType' => function ($query) {
@@ -332,7 +331,7 @@ class PropertyController extends Controller
                     'property_type_name' => $property->property_type_name,
                     'overall_rating' => $property->overall_rating,
                     'bedType' => $property->relationLoaded('bed_types') ? $property->bed_types : null,
-                    'pricingTypes' => PricingType::where('status',1)->get(),
+                    'pricingTypes' => PricingType::where('status', 1)->get(),
                 ]
             ];
 
@@ -371,37 +370,36 @@ class PropertyController extends Controller
     public function getLocations()
     {
         try {
-            $countries = Country::where('short_name','AE')
-            ->where('name','United Arab Emirates')
-            ->with(['cities' => function ($query) {
-                $query->where('show_on_front', 1)
-                    ->select('id', 'name', 'country_id')
-                    ->with(['areas' => function ($query) {
-                        $query->where('show_on_front', 1)
-                            ->select('id', 'name', 'city_id');
-                    }]);
-            }])
-            ->select('id', 'name', 'short_name')
-            ->get()
-            ->map(function ($country) {
-                return [
-                    'country' => $country->name,
-                    'short_name' => $country->short_name,
-                    'cities' => $country->cities->map(function ($city) {
-                        return [
-                            'name' => $city->name,
-                            'id' => $city->id,
-                            'areas' => $city->areas->pluck('name')->toArray()
-                        ];
-                    })->toArray()
-                ];
-            });
+            $countries = Country::where('short_name', 'AE')
+                ->where('name', 'United Arab Emirates')
+                ->with(['cities' => function ($query) {
+                    $query->where('show_on_front', 1)
+                        ->select('id', 'name', 'country_id')
+                        ->with(['areas' => function ($query) {
+                            $query->where('show_on_front', 1)
+                                ->select('id', 'name', 'city_id');
+                        }]);
+                }])
+                ->select('id', 'name', 'short_name')
+                ->get()
+                ->map(function ($country) {
+                    return [
+                        'country' => $country->name,
+                        'short_name' => $country->short_name,
+                        'cities' => $country->cities->map(function ($city) {
+                            return [
+                                'name' => $city->name,
+                                'id' => $city->id,
+                                'areas' => $city->areas->pluck('name')->toArray()
+                            ];
+                        })->toArray()
+                    ];
+                });
 
             return response()->json([
                 'success' => true,
                 'data' => $countries
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
