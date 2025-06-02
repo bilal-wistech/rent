@@ -13,6 +13,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         //
-        'gateway/pay/razorpay/callback'
+        'gateway/pay/razorpay/callback',
+        'backend/api/*'
     ];
 }
