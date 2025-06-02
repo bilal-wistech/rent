@@ -20,12 +20,11 @@ use Exception;
 
 class AuthController extends Controller
 {
-    // Token expiration times
+    // Token expiration time
     protected const ACCESS_TOKEN_EXPIRATION = 60; // minutes
-    protected const REFRESH_TOKEN_EXPIRATION = 7; // days
 
     /**
-     * Register a new user and issue tokens
+     * Register a new user without issuing a token
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -38,17 +37,9 @@ class AuthController extends Controller
                 'phone' => $request->phone ?? null
             ]);
 
-            // Create tokens
-            $accessToken = $this->createAccessToken($user);
-            $refreshToken = $this->createRefreshToken($user);
-
             return response()->json([
                 'status' => 'success',
                 'data' => [
-                    'access_token' => $accessToken,
-                    'token_type' => 'Bearer',
-                    'refresh_token' => $refreshToken,
-                    'expires_at' => Carbon::now()->addMinutes(self::ACCESS_TOKEN_EXPIRATION)->toIso8601String(),
                     'user' => $this->getUserData($user)
                 ],
                 'message' => 'User registered successfully'
@@ -77,7 +68,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Authenticate user and issue tokens
+     * Authenticate user and issue token
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -90,19 +81,17 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            // Revoke all existing tokens (optional, for strict security)
+            // Revoke all existing tokens
             $user->tokens()->delete();
 
-            // Create new tokens
+            // Create new access token
             $accessToken = $this->createAccessToken($user);
-            $refreshToken = $this->createRefreshToken($user);
 
             return response()->json([
                 'status' => 'success',
                 'data' => [
                     'access_token' => $accessToken,
                     'token_type' => 'Bearer',
-                    'refresh_token' => $refreshToken,
                     'expires_at' => Carbon::now()->addMinutes(self::ACCESS_TOKEN_EXPIRATION)->toIso8601String(),
                     'user' => $this->getUserData($user)
                 ],
@@ -123,68 +112,6 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An unexpected error occurred during login'
-            ], 500);
-        }
-    }
-
-    /**
-     * Refresh access token using refresh token
-     */
-    public function refresh(Request $request): JsonResponse
-    {
-        try {
-            $refreshTokenString = $request->bearerToken();
-            $token = PersonalAccessToken::findToken($refreshTokenString);
-
-            if (!$token || $token->name !== 'refresh_token') {
-                throw new AuthenticationException('Invalid refresh token');
-            }
-
-            if ($token->expires_at && $token->expires_at < Carbon::now()) {
-                throw new AuthenticationException('Refresh token expired');
-            }
-
-            $user = $token->tokenable;
-
-            if (!$user instanceof User) {
-                throw new AuthenticationException('Invalid token owner');
-            }
-
-            // Revoke the old access token if exists
-            $user->tokens()->where('name', 'auth_token')->delete();
-
-            // Create new access token
-            $accessToken = $this->createAccessToken($user);
-
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'access_token' => $accessToken,
-                    'token_type' => 'Bearer',
-                    'expires_at' => Carbon::now()->addMinutes(self::ACCESS_TOKEN_EXPIRATION)->toIso8601String(),
-                    'user' => $this->getUserData($user)
-                ],
-                'message' => 'Token refreshed successfully'
-            ], 200);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (AuthenticationException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 401);
-        } catch (Exception $e) {
-            Log::error('Token refresh failed', [
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'An unexpected error occurred during token refresh'
             ], 500);
         }
     }
@@ -277,18 +204,6 @@ class AuthController extends Controller
             'auth_token',
             ['*'],
             Carbon::now()->addMinutes(self::ACCESS_TOKEN_EXPIRATION)
-        )->plainTextToken;
-    }
-
-    /**
-     * Create refresh token for user
-     */
-    protected function createRefreshToken(User $user): string
-    {
-        return $user->createToken(
-            'refresh_token',
-            ['refresh'],
-            Carbon::now()->addDays(self::REFRESH_TOKEN_EXPIRATION)
         )->plainTextToken;
     }
 
