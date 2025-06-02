@@ -454,7 +454,7 @@
 
                 if (selectedCountry) {
                     $.ajax({
-                        url: '/admin/properties/cities-by-country/' + selectedCountry,
+                        url: "{{ url('admin/properties/cities-by-country') }}/" + selectedCountry,
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
@@ -482,7 +482,8 @@
 
                 if (selectedCountry && selectedCity) {
                     $.ajax({
-                        url: '/admin/properties/get-areas/' + selectedCountry + '/' + selectedCity,
+                        url: "{{ url('admin/properties/get-areas') }}/" + selectedCountry + '/' +
+                            selectedCity,
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
@@ -510,8 +511,8 @@
 
                 if (selectedCountry && selectedCity && selectedArea) {
                     $.ajax({
-                        url: '/admin/properties/get-buildings/' + selectedCountry + '/' +
-                            selectedCity + '/' + selectedArea,
+                        url: "{{ url('admin/properties/get-buildings') }}/" + selectedCountry +
+                            '/' + selectedCity + '/' + selectedArea,
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
