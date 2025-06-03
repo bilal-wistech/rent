@@ -15,6 +15,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
+use Laravel\Sanctum\TransientToken;
 use Carbon\Carbon;
 use Exception;
 
@@ -81,8 +82,8 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            // Revoke all existing tokens
-            $user->tokens()->delete();
+            // Revoke all existing tokens (only PersonalAccessTokens can be deleted)
+            $this->revokeUserTokens($user);
 
             // Create new access token
             $accessToken = $this->createAccessToken($user);
@@ -132,23 +133,23 @@ class AuthController extends Controller
             $currentToken = $user->currentAccessToken();
             $tokenExpiresAt = null;
 
-            // Check if it's a PersonalAccessToken (not TransientToken)
-            if ($currentToken && $currentToken instanceof PersonalAccessToken) {
+            // Check token type and handle accordingly
+            if ($currentToken instanceof PersonalAccessToken) {
                 $tokenExpiresAt = $currentToken->expires_at ? $currentToken->expires_at->toIso8601String() : null;
+            } elseif ($currentToken instanceof TransientToken) {
+                // TransientToken doesn't have expires_at, calculate from session
+                $tokenExpiresAt = Carbon::now()->addMinutes(self::ACCESS_TOKEN_EXPIRATION)->toIso8601String();
             } else {
-                // For TransientToken or when expires_at is not available, calculate from creation time + expiration
-                if ($currentToken && isset($currentToken->created_at)) {
-                    $tokenExpiresAt = Carbon::parse($currentToken->created_at)
-                        ->addMinutes(self::ACCESS_TOKEN_EXPIRATION)
-                        ->toIso8601String();
-                }
+                // Fallback for any other token type
+                $tokenExpiresAt = Carbon::now()->addMinutes(self::ACCESS_TOKEN_EXPIRATION)->toIso8601String();
             }
 
             return response()->json([
                 'status' => 'success',
                 'data' => [
                     'user' => $this->getUserData($user),
-                    'token_expires_at' => $tokenExpiresAt
+                    'token_expires_at' => $tokenExpiresAt,
+                    'token_type' => $currentToken ? get_class($currentToken) : 'unknown'
                 ],
                 'message' => 'User details retrieved successfully'
             ], 200);
@@ -183,14 +184,34 @@ class AuthController extends Controller
                 throw new AuthenticationException('Unauthenticated');
             }
 
-            // Revoke current token only (or all tokens if you prefer)
+            Log::info('Logout attempt', [
+                'user_id' => $user->id,
+                'token_type' => $user->currentAccessToken() ? get_class($user->currentAccessToken()) : 'none'
+            ]);
+
+            // Handle different token types
             $currentToken = $user->currentAccessToken();
-            if ($currentToken) {
+
+            if ($currentToken instanceof PersonalAccessToken) {
+                // For PersonalAccessToken, we can delete it
                 $currentToken->delete();
+                Log::info('PersonalAccessToken deleted', ['user_id' => $user->id]);
+            } elseif ($currentToken instanceof TransientToken) {
+                // For TransientToken, we need to revoke all tokens via the user model
+                // TransientToken doesn't have a delete method, so we revoke all user tokens
+                $this->revokeUserTokens($user);
+                Log::info('User tokens revoked via TransientToken logout', ['user_id' => $user->id]);
+            } else {
+                // Fallback: revoke all tokens
+                $this->revokeUserTokens($user);
+                Log::info('All user tokens revoked (fallback)', ['user_id' => $user->id]);
             }
 
-            // Alternative: Revoke all tokens
-            // $user->tokens()->delete();
+            // For stateful requests, also invalidate the session
+            if ($request->hasCookie(config('session.cookie'))) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
 
             return response()->json([
                 'status' => 'success',
@@ -204,13 +225,30 @@ class AuthController extends Controller
         } catch (Exception $e) {
             Log::error('Logout failed', [
                 'error' => $e->getMessage(),
-                'user_id' => $request->user()?->id
+                'user_id' => $request->user()?->id,
+                'token_type' => $request->user()?->currentAccessToken() ? get_class($request->user()->currentAccessToken()) : 'none'
             ]);
 
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to logout'
             ], 500);
+        }
+    }
+
+    /**
+     * Revoke all user tokens (only PersonalAccessTokens)
+     */
+    protected function revokeUserTokens(User $user): void
+    {
+        try {
+            // This will only delete PersonalAccessTokens, not TransientTokens
+            $user->tokens()->delete();
+        } catch (Exception $e) {
+            Log::warning('Failed to revoke some user tokens', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -239,5 +277,66 @@ class AuthController extends Controller
             'phone' => $user->phone,
             'created_at' => $user->created_at->toIso8601String(),
         ];
+    }
+
+    /**
+     * Refresh the current access token
+     */
+    public function refresh(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                throw new AuthenticationException('Unauthenticated');
+            }
+
+            $currentToken = $user->currentAccessToken();
+
+            // Only refresh PersonalAccessTokens
+            if ($currentToken instanceof PersonalAccessToken) {
+                // Delete the current token
+                $currentToken->delete();
+
+                // Create a new token
+                $accessToken = $this->createAccessToken($user);
+
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [
+                        'access_token' => $accessToken,
+                        'token_type' => 'Bearer',
+                        'expires_at' => Carbon::now()->addMinutes(self::ACCESS_TOKEN_EXPIRATION)->toIso8601String(),
+                        'user' => $this->getUserData($user)
+                    ],
+                    'message' => 'Token refreshed successfully'
+                ], 200);
+            } else {
+                // For TransientTokens or other types, just return current user data
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [
+                        'user' => $this->getUserData($user),
+                        'message' => 'Session-based authentication - no token refresh needed'
+                    ],
+                    'message' => 'User authenticated'
+                ], 200);
+            }
+        } catch (AuthenticationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 401);
+        } catch (Exception $e) {
+            Log::error('Token refresh failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $request->user()?->id
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to refresh token'
+            ], 500);
+        }
     }
 }
