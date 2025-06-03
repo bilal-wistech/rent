@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\EmergencyContactController;
 use App\Http\Controllers\Admin\PricingTypeController;
+use App\Http\Controllers\Admin\SectionContentController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -55,6 +57,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         return Redirect::to('admin/dashboard');
     });
 
+    // routes/api.php or web.php
+
+    Route::resource('section-contents', SectionContentController::class);
+    
     Route::get('cache-clear', 'AdminController@cacheClear');
     Route::get('addons', [AddonController::class, 'index'])->name('addon.index');
     Route::match(['GET', 'POST'], 'settings/sms', 'SettingsController@smsSettings');
