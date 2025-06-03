@@ -128,15 +128,27 @@ class AuthController extends Controller
                 throw new AuthenticationException('Unauthenticated');
             }
 
-            $token = $user->currentAccessToken();
+            // Get the current access token
+            $currentToken = $user->currentAccessToken();
+            $tokenExpiresAt = null;
+
+            // Check if it's a PersonalAccessToken (not TransientToken)
+            if ($currentToken && $currentToken instanceof PersonalAccessToken) {
+                $tokenExpiresAt = $currentToken->expires_at ? $currentToken->expires_at->toIso8601String() : null;
+            } else {
+                // For TransientToken or when expires_at is not available, calculate from creation time + expiration
+                if ($currentToken && isset($currentToken->created_at)) {
+                    $tokenExpiresAt = Carbon::parse($currentToken->created_at)
+                        ->addMinutes(self::ACCESS_TOKEN_EXPIRATION)
+                        ->toIso8601String();
+                }
+            }
 
             return response()->json([
                 'status' => 'success',
                 'data' => [
                     'user' => $this->getUserData($user),
-                    'token_expires_at' => $token && $token->expires_at
-                        ? $token->expires_at->toIso8601String()
-                        : null
+                    'token_expires_at' => $tokenExpiresAt
                 ],
                 'message' => 'User details retrieved successfully'
             ], 200);
@@ -148,7 +160,8 @@ class AuthController extends Controller
         } catch (Exception $e) {
             Log::error('User details fetch failed', [
                 'error' => $e->getMessage(),
-                'user_id' => $request->user()?->id
+                'user_id' => $request->user()?->id,
+                'token_type' => $request->user()?->currentAccessToken() ? get_class($request->user()->currentAccessToken()) : 'none'
             ]);
 
             return response()->json([
@@ -170,8 +183,14 @@ class AuthController extends Controller
                 throw new AuthenticationException('Unauthenticated');
             }
 
-            // Revoke all tokens
-            $user->tokens()->delete();
+            // Revoke current token only (or all tokens if you prefer)
+            $currentToken = $user->currentAccessToken();
+            if ($currentToken) {
+                $currentToken->delete();
+            }
+
+            // Alternative: Revoke all tokens
+            // $user->tokens()->delete();
 
             return response()->json([
                 'status' => 'success',
