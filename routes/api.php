@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\SectionContentApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -24,6 +25,7 @@ Route::get('properties', [PropertyController::class, 'searchProperties']);
 Route::get('properties/{slug}', [PropertyController::class, 'show']);
 Route::get('locations', [PropertyController::class, 'getLocations']);
 Route::get('get-bookings', [BookingController::class, 'getBookings']);
+Route::apiResource('section-contents', SectionContentApiController::class);
 
 Route::get('sanctum/csrf-cookie', [\Laravel\Sanctum\Http\Controllers\CsrfCookieController::class, 'show']);
 Route::post('register', [AuthController::class, 'register']);
