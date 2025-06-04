@@ -36,48 +36,23 @@ class SectionContentController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'desc' => 'nullable|string',
-            'icon' => 'nullable|file|mimes:ico,png,svg|max:1024', // max 1MB
+            'icon' => 'nullable|string|max:255', // now it's just a string
             'type' => 'required|in:features,services,additionalServices',
-            'parent_id' => 'nullable|integer', // validate parent_id if passed
+            'parent_id' => 'nullable|integer',
         ]);
-
-        // Get parent_id from request or default to 0
-        $parentId = $request->input('parent_id', 0);
-
-        $iconPath = null;
-
-        if ($request->hasFile('icon')) {
-            $iconPath = $request->file('icon')->store('icons', 'public');
-
-            // If a parent_id was not selected or is 0, try to find the parent record automatically
-            if ($parentId == 0) {
-                $parent = SectionContent::where('type', $request->type)
-                    ->where(function ($query) {
-                        $query->whereNull('icon')->orWhere('icon', '');
-                    })
-                    ->where('parent_id', 0)
-                    ->first();
-
-                if ($parent) {
-                    $parentId = $parent->id;
-                }
-            }
-        } else {
-            // No icon uploaded -> parent record itself (parent_id should be 0)
-            $parentId = 0;
-        }
 
         SectionContent::create([
             'name' => $request->name,
             'decsription' => $request->desc,
-            'icon' => $iconPath,
+            'icon' => $request->icon, // use string directly
             'type' => $request->type,
-            'parent_id' => $parentId,
+            'parent_id' => $request->input('parent_id', 0),
             'status' => 1,
         ]);
 
         return redirect()->route('section-contents.index')->with('success', 'Section content created successfully.');
     }
+
 
 
 
@@ -106,7 +81,7 @@ class SectionContentController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'desc' => 'nullable|string',
-            'icon' => 'nullable|file|mimes:ico,png,svg|max:1024', // max 1MB
+            'icon' => 'nullable|string|max:255', // treat icon as plain string
             'type' => 'required|in:features,services,additionalServices',
             'parent_id' => 'nullable|integer',
             'status' => 'required|in:0,1',
@@ -114,44 +89,19 @@ class SectionContentController extends Controller
 
         $sectionContent = SectionContent::findOrFail($id);
 
-        // Determine parent_id similarly as in store
-        $parentId = $request->input('parent_id', 0);
-        $iconPath = $sectionContent->icon; // Keep old icon by default
-
-        if ($request->hasFile('icon')) {
-            // Store new icon
-            $iconPath = $request->file('icon')->store('icons', 'public');
-
-            if ($parentId == 0) {
-                $parent = SectionContent::where('type', $request->type)
-                    ->where(function ($query) {
-                        $query->whereNull('icon')->orWhere('icon', '');
-                    })
-                    ->where('parent_id', 0)
-                    ->first();
-
-                if ($parent) {
-                    $parentId = $parent->id;
-                }
-            }
-        } else {
-            // No new icon uploaded, if parent_id was 0, keep it 0 or existing
-            if ($parentId == 0) {
-                $parentId = 0;
-            }
-        }
-
         $sectionContent->update([
             'name' => $request->name,
             'decsription' => $request->desc,
-            'icon' => $iconPath,
+            'icon' => $request->icon, // directly use the string value
             'type' => $request->type,
-            'parent_id' => $parentId,
-            'status' => $request->status, // keep status as-is or modify if needed
+            'parent_id' => $request->input('parent_id', 0),
+            'status' => $request->status,
         ]);
 
         return redirect()->route('section-contents.index')->with('success', 'Section content updated successfully.');
     }
+
+
 
     /**
      * Remove the specified resource from storage.

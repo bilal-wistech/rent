@@ -24,20 +24,18 @@
 
                                 <div class="form-group">
                                     <label>Description</label>
-                                    <textarea name="desc" class="form-control"></textarea>
+                                    <textarea name="desc" id="desc"  class="form-control"></textarea>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="icon">Icon (Only .ico, .png, .svg files allowed)</label>
-                                    <input type="file" name="icon" id="icon" class="form-control"
-                                        accept=".ico,.png,.svg">
+                                    <label for="icon">Icon</label>
+                                    <input type="text" name="icon" id="icon" class="form-control"
+                                        placeholder="Enter icon text or class">
+
                                     @error('icon')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
-
-
-
 
                                 <div class="form-group">
                                     <label>Type</label>
@@ -69,3 +67,22 @@
         </section>
     </div>
 @endsection
+
+@section('validate_script')
+    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('desc', {
+            toolbar: [
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
+                { name: 'links', items: ['Link', 'Unlink'] },
+                { name: 'clipboard', items: ['Undo', 'Redo'] },
+                { name: 'styles', items: ['Format'] },
+                { name: 'tools', items: ['Maximize'] }
+            ],
+            removePlugins: 'elementspath',
+            resize_enabled: true
+        });
+    </script>
+@endsection
+

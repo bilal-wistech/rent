@@ -16,7 +16,7 @@ class SectionContentDataTable extends DataTable
             ->eloquent($this->query())
             ->editColumn('icon', function ($section) {
                 if ($section->icon) {
-                    return '<img src="' . asset('storage/' . $section->icon) . '" alt="Icon" width="40">';
+                    return '<i class="' . e($section->icon) . '" style="font-size: 20px;"></i> ' . e($section->icon);
                 }
                 return '—';
             })
@@ -25,7 +25,6 @@ class SectionContentDataTable extends DataTable
                 return '<span style="background-color: #e0e0e0; color: black; padding: 4px 8px; border-radius: 4px;">' . $text . '</span>';
             })
             ->addColumn('action', function ($section) {
-                //$view = '<a href="' . route('section-contents.show', $section->id) . '" class="btn btn-xs btn-info"><i class="fa fa-eye" style="color: white;"></i></a>';
                 $edit = '<a href="' . route('section-contents.edit', $section->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
                 $delete = '<form action="' . route('section-contents.destroy', $section->id) . '" method="POST" style="display:inline-block;" onsubmit="return confirm(\'Are you sure you want to delete this?\')">'
                     . csrf_field() . method_field('DELETE') . '
