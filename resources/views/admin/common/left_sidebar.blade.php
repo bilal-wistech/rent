@@ -30,15 +30,15 @@
                 </li>
             @endif
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_payment_receipts'))
-                <li
-                    class="{{ Route::current()->uri() == 'admin/payment-receipts' ? 'active' : '' }}">
-                    <a href="{{ url('admin/payment-receipts') }}"><i class="fa fa-shopping-cart"></i><span>Payment Receipts</span></a>
+                <li class="{{ Route::current()->uri() == 'admin/payment-receipts' ? 'active' : '' }}">
+                    <a href="{{ url('admin/payment-receipts') }}"><i class="fa fa-shopping-cart"></i><span>Payment
+                            Receipts</span></a>
                 </li>
             @endif
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_securities'))
-                <li
-                    class="{{ Route::current()->uri() == 'admin/securities' ? 'active' : '' }}">
-                    <a href="{{ url('admin/securities') }}"><i class="fa fa-shopping-cart"></i><span>Securities</span></a>
+                <li class="{{ Route::current()->uri() == 'admin/securities' ? 'active' : '' }}">
+                    <a href="{{ url('admin/securities') }}"><i
+                            class="fa fa-shopping-cart"></i><span>Securities</span></a>
                 </li>
             @endif
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'view_payouts'))
@@ -49,9 +49,9 @@
             @endif
 
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_renewal_bookings'))
-                <li
-                    class="{{ Route::current()->uri() == 'admin/renewal-bookings' ? 'active' : '' }}">
-                    <a href="{{ url('admin/renewal-bookings') }}"><i class="fa fa-paypal"></i><span>Renewal Bookings</span></a>
+                <li class="{{ Route::current()->uri() == 'admin/renewal-bookings' ? 'active' : '' }}">
+                    <a href="{{ url('admin/renewal-bookings') }}"><i class="fa fa-paypal"></i><span>Renewal
+                            Bookings</span></a>
                 </li>
             @endif
 
@@ -140,6 +140,15 @@
                 <li class="{{ Request::segment(2) == 'settings' ? 'active' : '' }}"><a
                         href="{{ url('admin/settings') }}"><i class="fa fa-gears"></i><span>Settings</span></a></li>
             @endif
+
+            {{-- Add Content Section menu item here --}}
+
+            <li class="{{ Request::segment(2) == 'section-contents' ? 'active' : '' }}">
+                <a href="{{ url('admin/section-contents') }}">
+                    <i class="fa fa-th-large"></i><span>Content Sections</span>
+                </a>
+            </li>
+
         </ul>
     </section>
 </aside>
