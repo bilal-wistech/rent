@@ -42,7 +42,7 @@ class User extends Authenticatable
     ];
     public function document()
     {
-        return $this->hasOne(Document::class);
+        return $this->hasMany(Document::class);
     }
     public function emergencyContacts()
     {
@@ -135,4 +135,5 @@ class User extends Authenticatable
         $full_name = ucfirst($this->attributes['first_name']) . ' ' . ucfirst($this->attributes['last_name']);
         return $full_name;
     }
+
 }

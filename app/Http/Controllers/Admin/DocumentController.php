@@ -123,12 +123,19 @@ class DocumentController extends Controller
         }
         $doc->save();
         $user = User::findOrFail($doc->user_id);
-        return redirect()->with([
+        // return redirect()->with([
+        //     'success' => 'Document updated successfully.',
+        //     'user' => $user,
+        //     'document' => $doc,
+        //     'documentActive' => 'active'
+        // ]);
+        return view('admin.customers.viewDocument', [
             'success' => 'Document updated successfully.',
             'user' => $user,
-            'document' => $doc,
+            'document' => $user->document,
             'documentActive' => 'active'
         ]);
+
     }
 
 
