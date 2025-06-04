@@ -283,4 +283,133 @@ class BookingController extends Controller
             ], 500);
         }
     }
+    public function myBookings(Request $request): JsonResponse
+    {
+        try {
+            // Get the authenticated user
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: User not authenticated',
+                ], 401);
+            }
+
+            // Get pagination parameters with validation
+            $perPage = $request->input('per_page', 5);
+            $page = $request->input('page', 1);
+
+            // Validate pagination inputs
+            $request->validate([
+                'per_page' => 'integer|min:1|max:100',
+                'page' => 'integer|min:1',
+            ]);
+
+            // Build the query
+            $query = Bookings::query()
+                ->join('properties', 'properties.id', '=', 'bookings.property_id')
+                ->join('users as guests', 'guests.id', '=', 'bookings.user_id')
+                ->join('currency', 'currency.code', '=', 'bookings.currency_code')
+                ->join('users as hosts', 'hosts.id', '=', 'bookings.host_id')
+                ->join('property_address as pa', 'properties.id', '=', 'pa.property_id')
+                ->select([
+                    'bookings.id',
+                    'hosts.first_name as host_name',
+                    'guests.first_name as guest_name',
+                    'bookings.property_id',
+                    'properties.name as property_name',
+                    'bookings.total as total_amount',
+                    'bookings.payment_method_id',
+                    'bookings.status',
+                    'bookings.created_at',
+                    'bookings.updated_at',
+                    'bookings.start_date',
+                    'bookings.end_date',
+                    'bookings.guest as guests',
+                    'hosts.id as host_id',
+                    'guests.id as user_id',
+                    'bookings.currency_code',
+                    'currency.symbol',
+                    'bookings.service_charge',
+                    'bookings.host_fee',
+                    'bookings.iva_tax',
+                    'bookings.accomodation_tax',
+                    'bookings.booking_property_status',
+                    'pa.city',
+                    'pa.state',
+                    'pa.country',
+                    'pa.area',
+                    'pa.building',
+                    'pa.flat_no',
+                ])
+                ->where('bookings.user_id', $user->id);
+
+            // Execute query with pagination
+            $bookings = $query->paginate($perPage, ['*'], 'page', $page);
+
+            // Format results
+            $formattedBookings = $bookings->getCollection()->map(function ($booking) {
+                // Format location
+                $locationParts = array_filter([
+                    $booking->flat_no ? "Flat {$booking->flat_no}" : null,
+                    $booking->building,
+                    $booking->area,
+                    $booking->city,
+                    $booking->country,
+                ]);
+
+                return [
+                    'id' => $booking->id,
+                    'host' => [
+                        'id' => $booking->host_id,
+                        'name' => ucfirst($booking->host_name),
+                    ],
+                    'guest' => [
+                        'id' => $booking->user_id,
+                        'name' => ucfirst($booking->guest_name),
+                    ],
+                    'property' => [
+                        'id' => $booking->property_id,
+                        'name' => ucfirst($booking->property_name),
+                    ],
+                    'location' => implode(', ', $locationParts),
+                    'start_date' => Carbon::parse($booking->start_date)->format('Y-m-d'),
+                    'end_date' => Carbon::parse($booking->end_date)->format('Y-m-d'),
+                    'total_amount' => $this->formatMoney($booking->symbol, $booking->total_amount),
+                    'status' => $booking->status,
+                    'booking_property_status' => $booking->booking_property_status,
+                    'created_at' => Carbon::parse($booking->created_at)->format('Y-m-d H:i:s'),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $formattedBookings,
+                'pagination' => [
+                    'total' => $bookings->total(),
+                    'per_page' => $bookings->perPage(),
+                    'current_page' => $bookings->currentPage(),
+                    'last_page' => $bookings->lastPage(),
+                    'from' => $bookings->firstItem(),
+                    'to' => $bookings->lastItem(),
+                ],
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching bookings: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching bookings',
+            ], 500);
+        }
+    }
+    private function formatMoney($symbol, $amount): string
+    {
+        return $symbol . number_format($amount, 2);
+    }
 }

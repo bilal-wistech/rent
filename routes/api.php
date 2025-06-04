@@ -33,4 +33,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', [AuthController::class, 'user']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('add-booking',[BookingController::class,'addBooking']);
+    Route::get('my-bookings',[BookingController::class,'myBookings']);
 });
