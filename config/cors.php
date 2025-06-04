@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173','https://wisdomskt-dev-com.stackstaging.com'],
+    'allowed_origins' => ['http://localhost:5173','https://wisdomskt-dev-com.stackstaging.com','https://ahomes-ae.stackstaging.com','https://ahomes.ae'],
 
     'allowed_origins_patterns' => [],
 
