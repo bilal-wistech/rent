@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\PropertyController;
+use App\Http\Controllers\Api\EnquireMessageController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,6 +27,7 @@ Route::get('properties/{slug}', [PropertyController::class, 'show']);
 Route::get('locations', [PropertyController::class, 'getLocations']);
 Route::get('get-bookings', [BookingController::class, 'getBookings']);
 Route::post('services', [ServiceController::class, 'store']);
+Route::post('enquire-messages', [EnquireMessageController::class, 'store']);
 Route::get('sanctum/csrf-cookie', [\Laravel\Sanctum\Http\Controllers\CsrfCookieController::class, 'show']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
