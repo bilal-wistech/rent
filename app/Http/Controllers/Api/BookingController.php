@@ -161,16 +161,73 @@ class BookingController extends Controller
             ], 500);
         }
     }
+    /**
+     * Check if the current user is authenticated and token is valid
+     */
+    private function checkAuthenticatedUser()
+    {
+        $user = auth('sanctum')->user();
+
+        if (!$user) {
+            return [
+                'authenticated' => false,
+                'user' => null,
+                'response' => response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required. Please login again.',
+                    'error_code' => 'AUTH_REQUIRED'
+                ], 401)
+            ];
+        }
+
+        // Check if token exists and is not expired
+        $token = auth('sanctum')->user()->currentAccessToken();
+
+        if (!$token) {
+            return [
+                'authenticated' => false,
+                'user' => null,
+                'response' => response()->json([
+                    'success' => false,
+                    'message' => 'Invalid or missing authentication token. Please login again.',
+                    'error_code' => 'INVALID_TOKEN'
+                ], 401)
+            ];
+        }
+
+        // Check if token is expired (assuming you have expires_at column)
+        if ($token->expires_at && Carbon::now()->gt($token->expires_at)) {
+            // Delete expired token
+            $token->delete();
+
+            return [
+                'authenticated' => false,
+                'user' => null,
+                'response' => response()->json([
+                    'success' => false,
+                    'message' => 'Authentication token has expired. Please login again.',
+                    'error_code' => 'TOKEN_EXPIRED'
+                ], 401)
+            ];
+        }
+
+        return [
+            'authenticated' => true,
+            'user' => $user,
+            'response' => null
+        ];
+    }
+
     public function addBooking(AddBookingRequest $request): JsonResponse
     {
-        $authenticatedUserId = Auth::id();
-
-        if (!$authenticatedUserId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not authenticated'
-            ], 401);
+        // Check authentication and token validity
+        $authCheck = $this->checkAuthenticatedUser();
+        if (!$authCheck['authenticated']) {
+            return $authCheck['response'];
         }
+
+        $authenticatedUser = $authCheck['user'];
+        $authenticatedUserId = $authenticatedUser->id;
 
         $currencyDefault = Currency::getAll()->where('default', 1)->first();
         $property = Properties::where('slug', $request->slug)->first();
@@ -199,10 +256,8 @@ class BookingController extends Controller
 
             $bookingData = [
                 'property_id' => $property->id,
-
                 'user_id' => $request->user_id ?? $authenticatedUserId,
                 'host_id' => $property->host_id,
-
                 'booking_added_by' => $authenticatedUserId,
                 'start_date' => $request->check_in,
                 'end_date' => $request->check_out,
@@ -254,10 +309,8 @@ class BookingController extends Controller
             $invoice = Invoice::create([
                 'booking_id' => $booking->id,
                 'property_id' => $property->id,
-                // Use the same user for customer as for booking
                 'customer_id' => $request->user_id ?? $authenticatedUserId,
                 'currency_code' => $currencyDefault->code,
-                // Always use authenticated user as creator
                 'created_by' => $authenticatedUserId,
                 'invoice_date' => Carbon::now(),
                 'due_date' => Carbon::now()->addDays(5),
@@ -280,6 +333,311 @@ class BookingController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Booking not created: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function myBookings(Request $request): JsonResponse
+    {
+        try {
+            // Check authentication and token validity
+            $authCheck = $this->checkAuthenticatedUser();
+            if (!$authCheck['authenticated']) {
+                return $authCheck['response'];
+            }
+
+            $user = $authCheck['user'];
+
+            // Get pagination parameters with validation
+            $perPage = $request->input('per_page', 5);
+            $page = $request->input('page', 1);
+
+            // Validate pagination inputs
+            $request->validate([
+                'per_page' => 'integer|min:1|max:100',
+                'page' => 'integer|min:1',
+            ]);
+
+            // Build the query
+            $query = Bookings::query()
+                ->join('properties', 'properties.id', '=', 'bookings.property_id')
+                ->join('users as guests', 'guests.id', '=', 'bookings.user_id')
+                ->join('currency', 'currency.code', '=', 'bookings.currency_code')
+                ->join('users as hosts', 'hosts.id', '=', 'bookings.host_id')
+                ->join('property_address as pa', 'properties.id', '=', 'pa.property_id')
+                ->select([
+                    'bookings.id',
+                    'hosts.first_name as host_name',
+                    'guests.first_name as guest_name',
+                    'bookings.property_id',
+                    'properties.name as property_name',
+                    'bookings.total as total_amount',
+                    'bookings.payment_method_id',
+                    'bookings.status',
+                    'bookings.created_at',
+                    'bookings.updated_at',
+                    'bookings.start_date',
+                    'bookings.end_date',
+                    'bookings.guest as guests',
+                    'hosts.id as host_id',
+                    'guests.id as user_id',
+                    'bookings.currency_code',
+                    'currency.symbol',
+                    'bookings.service_charge',
+                    'bookings.host_fee',
+                    'bookings.iva_tax',
+                    'bookings.accomodation_tax',
+                    'bookings.booking_property_status',
+                    'pa.city',
+                    'pa.state',
+                    'pa.country',
+                    'pa.area',
+                    'pa.building',
+                    'pa.flat_no',
+                ])
+                ->where('bookings.user_id', $user->id);
+
+            // Execute query with pagination
+            $bookings = $query->paginate($perPage, ['*'], 'page', $page);
+
+            // Format results
+            $formattedBookings = $bookings->getCollection()->map(function ($booking) {
+                // Format location
+                $locationParts = array_filter([
+                    $booking->flat_no ? "Flat {$booking->flat_no}" : null,
+                    $booking->building,
+                    $booking->area,
+                    $booking->city,
+                    $booking->country,
+                ]);
+
+                return [
+                    'id' => $booking->id,
+                    'host' => [
+                        'id' => $booking->host_id,
+                        'name' => ucfirst($booking->host_name),
+                    ],
+                    'guest' => [
+                        'id' => $booking->user_id,
+                        'name' => ucfirst($booking->guest_name),
+                    ],
+                    'property' => [
+                        'id' => $booking->property_id,
+                        'name' => ucfirst($booking->property_name),
+                    ],
+                    'location' => implode(', ', $locationParts),
+                    'start_date' => Carbon::parse($booking->start_date)->format('Y-m-d'),
+                    'end_date' => Carbon::parse($booking->end_date)->format('Y-m-d'),
+                    'total_amount' => $this->formatMoney($booking->symbol, $booking->total_amount),
+                    'status' => $booking->status,
+                    'booking_property_status' => $booking->booking_property_status,
+                    'created_at' => Carbon::parse($booking->created_at)->format('Y-m-d H:i:s'),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $formattedBookings,
+                'pagination' => [
+                    'total' => $bookings->total(),
+                    'per_page' => $bookings->perPage(),
+                    'current_page' => $bookings->currentPage(),
+                    'last_page' => $bookings->lastPage(),
+                    'from' => $bookings->firstItem(),
+                    'to' => $bookings->lastItem(),
+                ],
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching bookings: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching bookings',
+            ], 500);
+        }
+    }
+
+    private function formatMoney($symbol, $amount): string
+    {
+        return $symbol . number_format($amount, 2);
+    }
+
+    public function viewMyBookingDetails(Request $request): JsonResponse
+    {
+        try {
+            // Check authentication and token validity
+            $authCheck = $this->checkAuthenticatedUser();
+            if (!$authCheck['authenticated']) {
+                return $authCheck['response'];
+            }
+
+            $user = $authCheck['user'];
+
+            // Validate request parameters
+            $request->validate([
+                'booking_id' => 'required|integer|exists:bookings,id',
+            ]);
+
+            // Get the specific booking for the authenticated user
+            $booking = Bookings::query()
+                ->join('properties', 'properties.id', '=', 'bookings.property_id')
+                ->join('users as guests', 'guests.id', '=', 'bookings.user_id')
+                ->join('currency', 'currency.code', '=', 'bookings.currency_code')
+                ->join('users as hosts', 'hosts.id', '=', 'bookings.host_id')
+                ->join('property_address as pa', 'properties.id', '=', 'pa.property_id')
+                ->select([
+                    'bookings.*',
+                    'hosts.first_name as host_name',
+                    'hosts.last_name as host_last_name',
+                    'hosts.email as host_email',
+                    'guests.first_name as guest_name',
+                    'guests.last_name as guest_last_name',
+                    'properties.name as property_name',
+                    'properties.slug as property_slug',
+                    'currency.symbol',
+                    'pa.city',
+                    'pa.state',
+                    'pa.country',
+                    'pa.area',
+                    'pa.building',
+                    'pa.flat_no',
+                    'pa.address_line_1',
+                    'pa.address_line_2',
+                ])
+                ->where('bookings.id', $request->booking_id)
+                ->where('bookings.user_id', $user->id)
+                ->first();
+
+            if (!$booking) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking not found or you do not have permission to view this booking',
+                ], 404);
+            }
+
+            // Format location
+            $locationParts = array_filter([
+                $booking->flat_no ? "Flat {$booking->flat_no}" : null,
+                $booking->building,
+                $booking->area,
+                $booking->city,
+                $booking->state,
+                $booking->country,
+            ]);
+
+            $formattedBooking = [
+                'id' => $booking->id,
+                'host' => [
+                    'id' => $booking->host_id,
+                    'name' => ucfirst($booking->host_name) . ' ' . ucfirst($booking->host_last_name),
+                    'email' => $booking->host_email,
+                ],
+                'property' => [
+                    'id' => $booking->property_id,
+                    'name' => ucfirst($booking->property_name),
+                    'slug' => $booking->property_slug,
+                ],
+                'location' => [
+                    'formatted' => implode(', ', $locationParts),
+                    'address_line_1' => $booking->address_line_1,
+                    'address_line_2' => $booking->address_line_2,
+                    'city' => $booking->city,
+                    'state' => $booking->state,
+                    'country' => $booking->country,
+                ],
+                'dates' => [
+                    'start_date' => Carbon::parse($booking->start_date)->format('Y-m-d'),
+                    'end_date' => Carbon::parse($booking->end_date)->format('Y-m-d'),
+                    'total_nights' => $booking->total_night,
+                ],
+                'guests' => $booking->guest,
+                'pricing' => [
+                    'base_price' => $this->formatMoney($booking->symbol, $booking->base_price),
+                    'per_night' => $this->formatMoney($booking->symbol, $booking->per_night),
+                    'service_charge' => $this->formatMoney($booking->symbol, $booking->service_charge),
+                    'host_fee' => $this->formatMoney($booking->symbol, $booking->host_fee),
+                    'iva_tax' => $this->formatMoney($booking->symbol, $booking->iva_tax),
+                    'accommodation_tax' => $this->formatMoney($booking->symbol, $booking->accomodation_tax),
+                    'guest_charge' => $this->formatMoney($booking->symbol, $booking->guest_charge),
+                    'security_money' => $this->formatMoney($booking->symbol, $booking->security_money),
+                    'cleaning_charge' => $this->formatMoney($booking->symbol, $booking->cleaning_charge),
+                    'total_amount' => $this->formatMoney($booking->symbol, $booking->total),
+                    'currency' => $booking->currency_code,
+                ],
+                'status' => [
+                    'booking_status' => $booking->status,
+                    'property_status' => $booking->booking_property_status,
+                    'payment_status' => $booking->payment_status ?? 'pending',
+                ],
+                'booking_details' => [
+                    'booking_type' => $booking->booking_type,
+                    'renewal_type' => $booking->renewal_type,
+                    'cancellation_policy' => $booking->cancellation,
+                    'transaction_id' => $booking->transaction_id,
+                    'payment_method_id' => $booking->payment_method_id,
+                ],
+                'created_at' => Carbon::parse($booking->created_at)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($booking->updated_at)->format('Y-m-d H:i:s'),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $formattedBooking
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching booking details: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching booking details',
+            ], 500);
+        }
+    }
+    public function cancelMyBooking(Request $request): JsonResponse
+    {
+        try {
+            // Check authentication and token validity
+            $authCheck = $this->checkAuthenticatedUser();
+            if (!$authCheck['authenticated']) {
+                return $authCheck['response'];
+            }
+
+            $user = $authCheck['user'];
+
+            // Validate request parameters
+            $request->validate([
+                'booking_id' => 'required|integer|exists:bookings,id',
+            ]);
+            Bookings::where('id', $request->booking_id)->update([
+                'status' => 'Cancelled'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking Cancelled Successfully',
+                'data' => Bookings::select('id', 'status')->where('id', $request->booking_id)->get()
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error in Booking Cancellation: ' . $e->getMessage().' '. $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while cancelling the booking',
             ], 500);
         }
     }

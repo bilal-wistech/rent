@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
 use App\Http\Requests\Api\RegisterRequest;
+use App\Http\Requests\Api\ForgotPasswordRequest;
+use App\Http\Requests\Api\UpdateProfileRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +20,9 @@ use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\TransientToken;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
@@ -113,6 +118,122 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An unexpected error occurred during login'
+            ], 500);
+        }
+    }
+
+    /**
+     * Handle forgot password request
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        try {
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
+
+            if ($status === Password::RESET_LINK_SENT) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Password reset link sent to your email'
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unable to send reset link'
+            ], 400);
+        } catch (Exception $e) {
+            Log::error('Forgot password failed', [
+                'error' => $e->getMessage(),
+                'email' => $request->email
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An unexpected error occurred while sending reset link'
+            ], 500);
+        }
+    }
+
+    /**
+     * Update user profile including password
+     */
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                throw new AuthenticationException('Unauthenticated');
+            }
+
+            $updateData = array_filter([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'phone' => $request->phone,
+                'email' => $request->email
+            ]);
+
+            // Check if email is being updated and verify it's not taken
+            if (isset($updateData['email']) && $updateData['email'] !== $user->email) {
+                if (User::where('email', $updateData['email'])->exists()) {
+                    throw ValidationException::withMessages([
+                        'email' => ['The email address is already taken.'],
+                    ]);
+                }
+            }
+
+            // Handle password update if provided
+            if ($request->filled('current_password') && $request->filled('new_password')) {
+                if (!Hash::check($request->current_password, $user->password)) {
+                    throw ValidationException::withMessages([
+                        'current_password' => ['The current password is incorrect.'],
+                    ]);
+                }
+                $updateData['password'] = Hash::make($request->new_password);
+                $this->revokeUserTokens($user);
+            }
+
+            $user->update($updateData);
+
+            $responseData = [
+                'user' => $this->getUserData($user)
+            ];
+
+            // Include new token if password was updated
+            if (isset($updateData['password'])) {
+                $accessToken = $this->createAccessToken($user);
+                $responseData['access_token'] = $accessToken;
+                $responseData['token_type'] = 'Bearer';
+                $responseData['expires_at'] = Carbon::now()->addMinutes(self::ACCESS_TOKEN_EXPIRATION)->toIso8601String();
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $responseData,
+                'message' => 'Profile updated successfully'
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (AuthenticationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 401);
+        } catch (Exception $e) {
+            Log::error('Profile update failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $request->user()?->id
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update profile'
             ], 500);
         }
     }

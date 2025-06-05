@@ -78,133 +78,133 @@ class Bookings extends Model
 
     protected $table = 'bookings';
 
-    protected $appends = ['host_payout', 'label_color', 'date_range', 'expiration_time'];
+    protected $appends = [];
 
     public function users()
     {
-        return $this->belongsTo('App\Models\User', 'user_id', 'id');
+        return @$this->belongsTo('App\Models\User', 'user_id', 'id');
     }
 
     public function host()
     {
-        return $this->belongsTo('App\Models\User', 'host_id', 'id');
+        return @$this->belongsTo('App\Models\User', 'host_id', 'id');
     }
 
     public function properties()
     {
-        return $this->belongsTo('App\Models\Properties', 'property_id', 'id');
+        return @$this->belongsTo('App\Models\Properties', 'property_id', 'id');
     }
     public function property_dates()
     {
-        return $this->hasMany('App\Models\PropertyDates', 'booking_id', 'id');
+        return @$this->hasMany('App\Models\PropertyDates', 'booking_id', 'id');
     }
     public function payment_methods()
     {
-        return $this->belongsTo('Modules\Gateway\Entities\Gateway', 'payment_method_id', 'id');
+        return @$this->belongsTo('Modules\Gateway\Entities\Gateway', 'payment_method_id', 'id');
     }
 
     public function booking_details()
     {
-        return $this->hasMany('App\Models\BookingDetails', 'booking_id', 'id');
+        return @$this->hasMany('App\Models\BookingDetails', 'booking_id', 'id');
     }
 
     public function penalty()
     {
-        return $this->hasMany('App\Models\Penalty', 'booking_id', 'id');
+        return @$this->hasMany('App\Models\Penalty', 'booking_id', 'id');
     }
 
     public function payouts()
     {
-        return $this->hasMany('App\Models\Payouts', 'booking_id', 'id');
+        return @$this->hasMany('App\Models\Payouts', 'booking_id', 'id');
     }
 
     public function reviews()
     {
-        return $this->hasMany('App\Models\Reviews', 'booking_id', 'id');
+        return @$this->hasMany('App\Models\Reviews', 'booking_id', 'id');
     }
 
     public function messages()
     {
-        return $this->hasMany('App\Models\Messages', 'booking_id', 'id');
+        return @$this->hasMany('App\Models\Messages', 'booking_id', 'id');
     }
 
     public function currency()
     {
-        return $this->belongsTo('App\Models\Currency', 'currency_code', 'code');
+        return @$this->belongsTo('App\Models\Currency', 'currency_code', 'code');
     }
 
     public function bank()
     {
-        return $this->belongsTo('App\Models\Bank');
+        return @$this->belongsTo('App\Models\Bank');
     }
     public function time_period()
     {
-        return $this->belongsTo('App\Models\PricingType', 'pricing_type_id', 'id');
+        return @$this->belongsTo('App\Models\PricingType', 'pricing_type_id', 'id');
     }
 
     public function getHostPenaltyAmountAttribute()
     {
-        $amount = Penalty::where('booking_id', $this->attributes['id'])->where('user_type', 'Host')->sum('amount');
-        return $this->currency_convert($amount);
+        $amount = Penalty::where('booking_id', @$this->attributes['id'])->where('user_type', 'Host')->sum('amount');
+        return @$this->currency_convert($amount);
     }
 
     public function getGuestPenaltyAmountAttribute()
     {
-        $amount = Penalty::where('booking_id', $this->attributes['id'])->where('user_type', 'Guest')->sum('amount');
-        return $this->currency_convert($amount);
+        $amount = Penalty::where('booking_id', @$this->attributes['id'])->where('user_type', 'Guest')->sum('amount');
+        return @$this->currency_convert($amount);
     }
 
     //Host/Guest original Payouts
     public function getOriginalHostPayoutAttribute()
     {
-        $payout = Payouts::where('user_id', $this->attributes['host_id'])->where('booking_id', $this->attributes['id'])->first();
+        $payout = Payouts::where('user_id', @$this->attributes['host_id'])->where('booking_id', @$this->attributes['id'])->first();
         if (isset($payout->original_amount)) {
             return $payout->original_amount;
         } else {
-            return $this->attributes['total'] - $this->attributes['service_charge'] - $this->attributes['host_fee'] - $this->attributes['iva_tax'] - $this->attributes['accomodation_tax'];
+            return @$this->attributes['total'] - @$this->attributes['service_charge'] - @$this->attributes['host_fee'] - @$this->attributes['iva_tax'] - @$this->attributes['accomodation_tax'];
         }
     }
 
     public function getOriginalGuestPayoutAttribute()
     {
-        $payout = Payouts::where('user_id', $this->attributes['user_id'])->where('booking_id', $this->attributes['id'])->first();
+        $payout = Payouts::where('user_id', @$this->attributes['user_id'])->where('booking_id', @$this->attributes['id'])->first();
         if (isset($payout->original_amount)) {
             return $payout->original_amount;
         } else {
-            return $this->attributes['total'] - $this->attributes['service_charge'];
+            return @$this->attributes['total'] - @$this->attributes['service_charge'];
         }
     }
 
     //Host/Guest payout
     public function getHostPayoutAttribute()
     {
-        $payout = Payouts::where('user_id', $this->attributes['host_id'])->where('booking_id', $this->attributes['id'])->first();
+        $payout = Payouts::where('user_id', @@$this->attributes['host_id'])->where('booking_id', @$this->attributes['id'])->first();
 
         if (isset($payout->amount)) {
             return $payout->amount;
         } else {
-            return $this->currency_adjust('total') - $this->currency_adjust('service_charge') - $this->currency_adjust('host_fee') - $this->currency_adjust('iva_tax') - $this->currency_adjust('accomodation_tax');
+            return @$this->currency_adjust('total') - @$this->currency_adjust('service_charge') - @$this->currency_adjust('host_fee') - @$this->currency_adjust('iva_tax') - @$this->currency_adjust('accomodation_tax');
         }
     }
 
     public function getGuestPayoutAttribute()
     {
-        $payout = Payouts::where('user_id', $this->attributes['user_id'])->where('booking_id', $this->attributes['id'])->first();
+        $payout = Payouts::where('user_id', @$this->attributes['user_id'])->where('booking_id', @$this->attributes['id'])->first();
 
         if (isset($payout->amount)) {
             return $payout->amount;
         } else {
-            return $this->currency_adjust('total');
+            return @$this->currency_adjust('total');
         }
     }
 
     public function currency_adjust($field)
     {
         $default_currency = Currency::getAll()->where('default', 1)->first()->code;
-        $rate = Currency::getAll()->where('code', $this->attributes['currency_code'] ?? $default_currency)->first()->rate;
+        $rate = Currency::getAll()->where('code', @$this->attributes['currency_code'] ?? $default_currency)->first()->rate;
 
 
-        $base_amount = @$this->attributes[$field] / $rate;
+        $base_amount = @@$this->attributes[$field] / $rate;
 
 
         $session_rate = Currency::getAll()->where('code', $default_currency)->first()->rate;
@@ -214,9 +214,9 @@ class Bookings extends Model
 
     public function currency_adjust_reports($field)
     {
-        $rate = Currency::whereCode($this->attributes['currency_code'])->first()->rate;
+        $rate = Currency::whereCode(@$this->attributes['currency_code'])->first()->rate;
 
-        $base_amount = $this->attributes[$field] / $rate;
+        $base_amount = @$this->attributes[$field] / $rate;
 
         $default_currency_rate = Currency::where('default', 1)->first()->rate;
         return round($base_amount * $default_currency_rate);
@@ -224,7 +224,7 @@ class Bookings extends Model
 
     public function getCheckinCrossAttribute()
     {
-        $date1 = date_create($this->attributes['start_date']);
+        $date1 = date_create(@$this->attributes['start_date']);
         $date2 = date_create(date('Y-m-d'));
         if ($date2 < $date1) {
             return 1;
@@ -235,7 +235,7 @@ class Bookings extends Model
 
     public function getCheckoutCrossAttribute()
     {
-        $date1 = date_create($this->attributes['end_date']);
+        $date1 = date_create(@$this->attributes['end_date']);
         $date2 = date_create(date('Y-m-d'));
         if ($date2 < $date1) {
             return 0;
@@ -247,13 +247,13 @@ class Bookings extends Model
 
     public function getOriginalPerNightAttribute()
     {
-        return $this->attributes['per_night'];
+        return @$this->attributes['per_night'];
     }
 
     public function getOriginalCustomPriceDatesAttribute()
     {
-        if ($this->attributes['custom_price_dates'] != null) {
-            return json_decode($this->attributes['custom_price_dates'], true);
+        if (@$this->attributes['custom_price_dates'] != null) {
+            return json_decode(@$this->attributes['custom_price_dates'], true);
         } else {
             return [];
         }
@@ -261,118 +261,118 @@ class Bookings extends Model
 
     public function getOriginalBasePriceAttribute()
     {
-        return $this->attributes['base_price'];
+        return @$this->attributes['base_price'];
     }
 
     public function getOriginalCleaningChargeAttribute()
     {
-        return $this->attributes['cleaning_charge'];
+        return @$this->attributes['cleaning_charge'];
     }
 
     public function getOriginalAccomodationTaxAttribute()
     {
-        return $this->attributes['accomodation_tax'];
+        return @$this->attributes['accomodation_tax'];
     }
 
     public function getOriginalIvaTaxAttribute()
     {
-        return $this->attributes['iva_tax'];
+        return @$this->attributes['iva_tax'];
     }
 
     public function getOriginalGuestChargeAttribute()
     {
-        return $this->attributes['guest_charge'];
+        return @$this->attributes['guest_charge'];
     }
 
     public function getOriginalServiceChargeAttribute()
     {
-        return $this->attributes['service_charge'];
+        return @$this->attributes['service_charge'];
     }
 
     public function getOriginalSecurityMoneyAttribute()
     {
-        return $this->attributes['security_money'];
+        return @$this->attributes['security_money'];
     }
 
     public function getOriginalHostFeeAttribute()
     {
-        return $this->attributes['host_fee'];
+        return @$this->attributes['host_fee'];
     }
 
     public function getOriginalTotalAttribute()
     {
-        return $this->attributes['total'];
+        return @$this->attributes['total'];
     }
     public function getPerNightAttribute()
     {
-        return $this->currency_adjust('per_night');
+        return @$this->currency_adjust('per_night');
     }
 
     public function getBasePriceAttribute()
     {
-        return $this->currency_adjust('base_price');
+        return @$this->currency_adjust('base_price');
     }
 
     public function getCleaningChargeAttribute()
     {
-        return $this->currency_adjust('cleaning_charge');
+        return @$this->currency_adjust('cleaning_charge');
     }
 
     public function getGuestChargeAttribute()
     {
-        return $this->currency_adjust('guest_charge');
+        return @$this->currency_adjust('guest_charge');
     }
 
     public function getServiceChargeAttribute()
     {
-        return $this->currency_adjust('service_charge');
+        return @$this->currency_adjust('service_charge');
     }
 
     public function getIvaTaxAttribute()
     {
-        return $this->currency_adjust('iva_tax');
+        return @$this->currency_adjust('iva_tax');
     }
 
     public function getAccomodationTaxAttribute()
     {
-        return $this->currency_adjust('accomodation_tax');
+        return @$this->currency_adjust('accomodation_tax');
     }
 
     public function getSecurityMoneyAttribute()
     {
-        return $this->currency_adjust('security_money');
+        return @$this->currency_adjust('security_money');
     }
 
     public function getHostFeeAttribute()
     {
-        return $this->currency_adjust('host_fee');
+        return @$this->currency_adjust('host_fee');
     }
 
     public function getTotalAttribute()
     {
-        return $this->currency_adjust('total');
+        return @$this->currency_adjust('total');
     }
 
     public function getAmountsAttribute()
     {
-        return $this->currency_adjust_reports('total');
+        return @$this->currency_adjust_reports('total');
     }
 
     public function getLabelColorAttribute()
     {
-        if ($this->attributes['status'] == 'Accepted') {
+        if (@$this->attributes['status'] == 'Accepted') {
             return 'success';
-        } elseif ($this->attributes['status'] == 'Expired') {
+        } elseif (@$this->attributes['status'] == 'Expired') {
             return 'info';
-        } elseif ($this->attributes['status'] == 'Declined') {
+        } elseif (@$this->attributes['status'] == 'Declined') {
             return 'info';
-        } elseif ($this->attributes['status'] == 'Pending') {
+        } elseif (@$this->attributes['status'] == 'Pending') {
             return 'warning';
-        } elseif ($this->attributes['status'] == 'Cancelled') {
+        } elseif (@$this->attributes['status'] == 'Cancelled') {
             return 'info';
-        } elseif ($this->attributes['status'] == 'processing') {
+        } elseif (@$this->attributes['status'] == 'processing') {
             return 'secondary';
-        } elseif ($this->attributes['status'] == '') {
+        } elseif (@$this->attributes['status'] == '') {
             return 'inquiry';
         }
 
@@ -381,20 +381,20 @@ class Bookings extends Model
 
     public function getHostAccountAttribute()
     {
-        $payout = Accounts::where('user_id', $this->attributes['host_id'])->where('selected', 'yes')->first();
+        $payout = Accounts::where('user_id', @$this->attributes['host_id'])->where('selected', 'yes')->first();
 
         return (isset($payout->account) ? $payout->account : '');
     }
 
     public function getGuestAccountAttribute()
     {
-        $payout = Accounts::where('user_id', $this->attributes['user_id'])->where('selected', 'yes')->first();
+        $payout = Accounts::where('user_id', @$this->attributes['user_id'])->where('selected', 'yes')->first();
         return (isset($payout->account) ? $payout->account : '');
     }
 
     public function getCheckHostPayoutAttribute()
     {
-        $exist = Payouts::where('booking_id', $this->attributes['id'])->where('user_type', 'Host')->where('status', 'Completed')->get();
+        $exist = Payouts::where('booking_id', @$this->attributes['id'])->where('user_type', 'Host')->where('status', 'Completed')->get();
 
         if ($exist->count()) {
             return 'yes';
@@ -405,19 +405,19 @@ class Bookings extends Model
 
     public function getGuestPayoutIdAttribute()
     {
-        $payout = Payouts::where('user_id', $this->attributes['user_id'])->where('booking_id', $this->attributes['id'])->first();
+        $payout = Payouts::where('user_id', @$this->attributes['user_id'])->where('booking_id', @$this->attributes['id'])->first();
         return $payout->id;
     }
 
     public function getHostPayoutIdAttribute()
     {
-        $payout = Payouts::where('user_id', $this->attributes['host_id'])->where('booking_id', $this->attributes['id'])->first();
+        $payout = Payouts::where('user_id', @$this->attributes['host_id'])->where('booking_id', @$this->attributes['id'])->first();
         return $payout->id;
     }
 
     public function getCheckGuestPayoutAttribute()
     {
-        $exist = Payouts::where('booking_id', $this->attributes['id'])->where('user_type', 'Guest')->where('status', 'Completed')->get();
+        $exist = Payouts::where('booking_id', @$this->attributes['id'])->where('user_type', 'Guest')->where('status', 'Completed')->get();
 
         if ($exist->count()) {
             return 'yes';
@@ -428,7 +428,7 @@ class Bookings extends Model
 
     public function getOriginalAdminHostPaymentAttribute()
     {
-        $exist = Payouts::where('user_id', $this->attributes['host_id'])->where('booking_id', $this->attributes['id'])->get();
+        $exist = Payouts::where('user_id', @$this->attributes['host_id'])->where('booking_id', @$this->attributes['id'])->get();
 
         if ($exist->count()) {
             return $exist[0]->original_amount;
@@ -439,7 +439,7 @@ class Bookings extends Model
 
     public function getOriginalAdminGuestPaymentAttribute()
     {
-        $exist = Payouts::where('user_id', $this->attributes['user_id'])->where('booking_id', $this->attributes['id'])->get();
+        $exist = Payouts::where('user_id', @$this->attributes['user_id'])->where('booking_id', @$this->attributes['id'])->get();
 
         if ($exist->count()) {
             return $exist[0]->original_amount;
@@ -450,7 +450,7 @@ class Bookings extends Model
 
     public function getAdminHostPaymentAttribute()
     {
-        $exist = Payouts::where('user_id', $this->attributes['host_id'])->where('booking_id', $this->attributes['id'])->get();
+        $exist = Payouts::where('user_id', @$this->attributes['host_id'])->where('booking_id', @$this->attributes['id'])->get();
 
         if ($exist->count()) {
             return $exist[0]->amount;
@@ -461,7 +461,7 @@ class Bookings extends Model
 
     public function getAdminGuestPaymentAttribute()
     {
-        $exist = Payouts::where('user_id', $this->attributes['user_id'])->where('booking_id', $this->attributes['id'])->get();
+        $exist = Payouts::where('user_id', @$this->attributes['user_id'])->where('booking_id', @$this->attributes['id'])->get();
 
         if ($exist->count()) {
             return $exist[0]->amount;
@@ -472,7 +472,7 @@ class Bookings extends Model
 
     public function currency_convert($amount)
     {
-        $rate = Currency::whereCode($this->attributes['currency_code'])->first()->rate;
+        $rate = Currency::whereCode(@$this->attributes['currency_code'])->first()->rate;
 
         $base_amount = $amount / $rate;
 
@@ -486,38 +486,38 @@ class Bookings extends Model
 
     public function getStartdateDmyAttribute()
     {
-        $start_date = date('D, F d, Y', strtotime($this->attributes['start_date']));
+        $start_date = date('D, F d, Y', strtotime(@$this->attributes['start_date']));
         return $start_date;
     }
 
 
     public function getEnddateDmyAttribute()
     {
-        $end_date = date('D, F d, Y', strtotime($this->attributes['end_date']));
+        $end_date = date('D, F d, Y', strtotime(@$this->attributes['end_date']));
         return $end_date;
     }
 
     public function getStartdateMdAttribute()
     {
-        $start_date = date('M d', strtotime($this->attributes['start_date']));
+        $start_date = date('M d', strtotime(@$this->attributes['start_date']));
         return $start_date;
     }
 
 
     public function getEnddateMdAttribute()
     {
-        $end_date = date('M d', strtotime($this->attributes['end_date']));
+        $end_date = date('M d', strtotime(@$this->attributes['end_date']));
         return $end_date;
     }
 
     public function getDateRangeAttribute()
     {
-        return date('M d', strtotime($this->attributes['start_date'])) . ' - ' . date('d, Y', strtotime($this->attributes['end_date']));
+        return date('M d', strtotime(@@$this->attributes['start_date'])) . ' - ' . date('d, Y', strtotime(@@$this->attributes['end_date']));
     }
 
     public function getExpirationTimeAttribute()
     {
-        $expired_at = date('Y/m/d H:i:s', strtotime(str_replace('-', '/', $this->attributes['created_at']) . ' +1 day'));
+        $expired_at = date('Y/m/d H:i:s', strtotime(str_replace('-', '/', @$this->attributes['created_at']) . ' +1 day'));
         return $expired_at;
     }
 
@@ -542,7 +542,7 @@ class Bookings extends Model
 
     public function getReviewDaysAttribute()
     {
-        $end_date = date('Y-m-d', strtotime($this->attributes['end_date'] . ' +14 days'));
+        $end_date = date('Y-m-d', strtotime(@$this->attributes['end_date'] . ' +14 days'));
 
         $datetime1 = new DateTime(date('Y-m-d'));
         $datetime2 = new DateTime($end_date);
@@ -553,10 +553,10 @@ class Bookings extends Model
 
     public function review_user($id)
     {
-        if ($this->attributes['user_id'] == $id) {
-            $user_id = $this->attributes['host_id'];
+        if (@$this->attributes['user_id'] == $id) {
+            $user_id = @$this->attributes['host_id'];
         } else {
-            $user_id = $this->attributes['user_id'];
+            $user_id = @$this->attributes['user_id'];
         }
 
         return User::find($user_id);
@@ -569,23 +569,23 @@ class Bookings extends Model
 
     public function getAttachmentAttribute()
     {
-        if (!$this->attributes['attachment']) {
+        if (!@$this->attributes['attachment']) {
             return null;
         }
 
-        $attachment = mb_substr($this->attributes['attachment'], 0, 1);
+        $attachment = mb_substr(@$this->attributes['attachment'], 0, 1);
 
         if ($attachment != '[') {
-            $this->attributes['attachment'] = '["' . $this->attributes['attachment'] . '"]';
+            @$this->attributes['attachment'] = '["' . @$this->attributes['attachment'] . '"]';
         }
 
-        foreach (json_decode($this->attributes['attachment']) as $value) {
+        foreach (json_decode(@$this->attributes['attachment']) as $value) {
             $url[] = url('/public/uploads/booking/' . $value);
         }
         return $url;
     }
     public function paymentReceipts()
     {
-        return $this->hasMany(PaymentReceipt::class, 'booking_id', 'id');
+        return @$this->hasMany(PaymentReceipt::class, 'booking_id', 'id');
     }
 }
