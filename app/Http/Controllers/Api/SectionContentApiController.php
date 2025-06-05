@@ -18,18 +18,6 @@ class SectionContentApiController extends Controller
     public function getContent(Request $request): JsonResponse
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'type' => 'required|string|max:255',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
             $contents = SectionContent::where('type', $request->type)->get();
 
             return response()->json([

@@ -28,7 +28,6 @@ Route::get('properties/{slug}', [PropertyController::class, 'show']);
 Route::get('locations', [PropertyController::class, 'getLocations']);
 Route::get('get-bookings', [BookingController::class, 'getBookings']);
 Route::post('get-section-content', [SectionContentApiController::class, 'getContent']);
-
 Route::post('services', [ServiceController::class, 'store']);
 Route::post('enquire-messages', [EnquireMessageController::class, 'store']);
 Route::get('sanctum/csrf-cookie', [\Laravel\Sanctum\Http\Controllers\CsrfCookieController::class, 'show']);
