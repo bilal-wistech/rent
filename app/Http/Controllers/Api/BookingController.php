@@ -603,4 +603,42 @@ class BookingController extends Controller
             ], 500);
         }
     }
+    public function cancelMyBooking(Request $request): JsonResponse
+    {
+        try {
+            // Check authentication and token validity
+            $authCheck = $this->checkAuthenticatedUser();
+            if (!$authCheck['authenticated']) {
+                return $authCheck['response'];
+            }
+
+            $user = $authCheck['user'];
+
+            // Validate request parameters
+            $request->validate([
+                'booking_id' => 'required|integer|exists:bookings,id',
+            ]);
+            Bookings::where('id', $request->booking_id)->update([
+                'status' => 'Cancelled'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking Cancelled Successfully',
+                'data' => Bookings::select('id', 'status')->where('id', $request->booking_id)->get()
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error in Booking Cancellation: ' . $e->getMessage().' '. $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while cancelling the booking',
+            ], 500);
+        }
+    }
 }

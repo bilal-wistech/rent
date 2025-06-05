@@ -35,4 +35,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('add-booking', [BookingController::class, 'addBooking']);
     Route::get('my-bookings', [BookingController::class, 'myBookings']);
     Route::post('view-my-booking-details', [BookingController::class, 'viewMyBookingDetails']);
+    Route::post('cancel-my-booking', [BookingController::class, 'cancelMyBooking']);
 });
