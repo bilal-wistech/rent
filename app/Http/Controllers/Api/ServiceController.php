@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\ServiceStoreRequest;
 use App\Models\Service;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ServiceStoreRequest;
 
 class ServiceController extends Controller
 {
