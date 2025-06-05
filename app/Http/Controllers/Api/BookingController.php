@@ -467,7 +467,7 @@ class BookingController extends Controller
         return $symbol . number_format($amount, 2);
     }
 
-    public function viewMyBooking(Request $request): JsonResponse
+    public function viewMyBookingDetails(Request $request): JsonResponse
     {
         try {
             // Check authentication and token validity

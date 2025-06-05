@@ -32,6 +32,7 @@ Route::post('refresh', [AuthController::class, 'refresh'])->middleware('throttle
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', [AuthController::class, 'user']);
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::post('add-booking',[BookingController::class,'addBooking']);
-    Route::get('my-bookings',[BookingController::class,'myBookings']);
+    Route::post('add-booking', [BookingController::class, 'addBooking']);
+    Route::get('my-bookings', [BookingController::class, 'myBookings']);
+    Route::post('view-my-booking-details', [BookingController::class, 'viewMyBookingDetails']);
 });
