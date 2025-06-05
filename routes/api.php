@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\PropertyController;
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +25,7 @@ Route::get('properties', [PropertyController::class, 'searchProperties']);
 Route::get('properties/{slug}', [PropertyController::class, 'show']);
 Route::get('locations', [PropertyController::class, 'getLocations']);
 Route::get('get-bookings', [BookingController::class, 'getBookings']);
-
+Route::post('services', [ServiceController::class, 'store']);
 Route::get('sanctum/csrf-cookie', [\Laravel\Sanctum\Http\Controllers\CsrfCookieController::class, 'show']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
