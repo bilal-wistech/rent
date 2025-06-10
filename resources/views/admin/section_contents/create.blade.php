@@ -43,6 +43,8 @@
                                         <option value="features">Features</option>
                                         <option value="services">Services</option>
                                         <option value="additional-services">Additional Services</option>
+                                        <option value="value-proposition">Value Proposition</option>
+                                        <option value="concierge-services">Concierge Services</option>
                                     </select>
                                 </div>
 

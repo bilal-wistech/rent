@@ -26,7 +26,7 @@
 
                                 <div class="form-group">
                                     <label>Description</label>
-                                    <textarea name="desc" id="desc" class="form-control">{{ old('desc', $sectionContent->decsription) }}</textarea>
+                                    <textarea name="desc" id="desc" class="form-control">{{ old('desc', $sectionContent->description) }}</textarea>
                                 </div>
 
                                 <div class="form-group">
@@ -50,8 +50,14 @@
                                             {{ old('type', $sectionContent->type) == 'services' ? 'selected' : '' }}>
                                             Services</option>
                                         <option value="additionalServices"
-                                            {{ old('type', $sectionContent->type) == 'additionalServices' ? 'selected' : '' }}>
+                                            {{ old('type', $sectionContent->type) == 'additional-services' ? 'selected' : '' }}>
                                             Additional Services</option>
+                                            <option value="concierge-services"
+                                            {{ old('type', $sectionContent->type) == 'concierge-services' ? 'selected' : '' }}>
+                                            Concierge Services</option>
+                                            <option value="value-proposition"
+                                            {{ old('type', $sectionContent->type) == 'value-proposition' ? 'selected' : '' }}>
+                                            Value Proposition</option>
                                     </select>
                                 </div>
 
