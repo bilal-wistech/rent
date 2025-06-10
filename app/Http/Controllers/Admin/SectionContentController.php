@@ -41,7 +41,7 @@ class SectionContentController extends Controller
 
         SectionContent::create([
             'name' => $request->name,
-            'description' => Purifier::clean($request->desc), // Sanitize HTML
+            'description' => strip_tags(Purifier::clean($request->desc)), // Strip HTML tags
             'icon' => $request->icon,
             'type' => $request->type,
             'parent_id' => $request->input('parent_id', 0),
@@ -88,7 +88,7 @@ class SectionContentController extends Controller
         ]);
         $sectionContent->update([
             'name' => $request->name,
-            'description' => Purifier::clean($request->desc), // Sanitize HTML
+            'description' => strip_tags(Purifier::clean($request->desc)), // Strip HTML tags
             'icon' => $request->icon,
             'type' => $request->type,
             'parent_id' => $request->input('parent_id', 0),
