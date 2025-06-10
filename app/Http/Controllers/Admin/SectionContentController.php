@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Http\Request;
+use App\Models\SectionContent;
+use Mews\Purifier\Facades\Purifier;
 use App\Http\Controllers\Controller;
 use App\DataTables\SectionContentDataTable;
-use App\Models\SectionContent;
-use Illuminate\Http\Request;
 
 class SectionContentController extends Controller
 {
@@ -28,26 +29,24 @@ class SectionContentController extends Controller
         return view('admin.section_contents.create', compact('parents'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'desc' => 'nullable|string',
             'icon' => 'nullable|string|max:255', // now it's just a string
-            'type' => 'required|in:features,services,additionalServices',
+            'type' => 'required',
             'parent_id' => 'nullable|integer',
         ]);
 
         SectionContent::create([
             'name' => $request->name,
-            'decsription' => $request->desc,
-            'icon' => $request->icon, // use string directly
+            'description' => Purifier::clean($request->desc), // Sanitize HTML
+            'icon' => $request->icon,
             'type' => $request->type,
             'parent_id' => $request->input('parent_id', 0),
             'status' => 1,
+            'sort_order' => $request->sort_order
         ]);
 
         return redirect()->route('section-contents.index')->with('success', 'Section content created successfully.');
@@ -78,24 +77,23 @@ class SectionContentController extends Controller
 
     public function update(Request $request, $id)
     {
+        $sectionContent = SectionContent::findOrFail($id);
         $request->validate([
             'name' => 'required|string|max:255',
             'desc' => 'nullable|string',
             'icon' => 'nullable|string|max:255', // treat icon as plain string
-            'type' => 'required|in:features,services,additionalServices',
+            'type' => 'required',
             'parent_id' => 'nullable|integer',
             'status' => 'required|in:0,1',
         ]);
-
-        $sectionContent = SectionContent::findOrFail($id);
-
         $sectionContent->update([
             'name' => $request->name,
-            'decsription' => $request->desc,
-            'icon' => $request->icon, // directly use the string value
+            'description' => Purifier::clean($request->desc), // Sanitize HTML
+            'icon' => $request->icon,
             'type' => $request->type,
             'parent_id' => $request->input('parent_id', 0),
             'status' => $request->status,
+            'sort_order' => $request->sort_order
         ]);
 
         return redirect()->route('section-contents.index')->with('success', 'Section content updated successfully.');

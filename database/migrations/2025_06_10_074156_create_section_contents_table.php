@@ -17,10 +17,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('parent_id')->default(0);
             $table->string('name');
-            $table->text('decsription')->nullable();
+            $table->text('description')->nullable();
             $table->string('icon')->nullable();
             $table->tinyInteger('status')->default(1);
-            $table->enum('type', ['features', 'services', 'additionalServices']);
+            $table->enum('type', ['features', 'services', 'additional-services']);
             $table->timestamps();
         });
     }

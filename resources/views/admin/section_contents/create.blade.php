@@ -24,13 +24,13 @@
 
                                 <div class="form-group">
                                     <label>Description</label>
-                                    <textarea name="desc" id="desc"  class="form-control"></textarea>
+                                    <textarea name="desc" id="desc" class="form-control"></textarea>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="icon">Icon</label>
+                                    <label for="icon">Icon (Lucid Icon class)</label>
                                     <input type="text" name="icon" id="icon" class="form-control"
-                                        placeholder="Enter icon text or class">
+                                        placeholder="e.g., lucide lucide-award">
 
                                     @error('icon')
                                         <small class="text-danger">{{ $message }}</small>
@@ -42,7 +42,7 @@
                                     <select name="type" class="form-control" required>
                                         <option value="features">Features</option>
                                         <option value="services">Services</option>
-                                        <option value="additionalServices">Additional Services</option>
+                                        <option value="additional-services">Additional Services</option>
                                     </select>
                                 </div>
 
@@ -55,7 +55,13 @@
                                         @endforeach
                                     </select>
                                 </div>
-
+                                <div class="form-group">
+                                    <label for="sort_order">Sort Order</label>
+                                    <input type="number" name="sort_order" id="sort_order" class="form-control">
+                                    @error('sort_order')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
                                 <button type="submit" class="btn btn-primary">Submit</button>
                                 <a href="{{ route('section-contents.index') }}" class="btn btn-default">Cancel</a>
                             </form>
@@ -72,17 +78,33 @@
     <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
     <script>
         CKEDITOR.replace('desc', {
-            toolbar: [
-                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike'] },
-                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
-                { name: 'links', items: ['Link', 'Unlink'] },
-                { name: 'clipboard', items: ['Undo', 'Redo'] },
-                { name: 'styles', items: ['Format'] },
-                { name: 'tools', items: ['Maximize'] }
+            toolbar: [{
+                    name: 'basicstyles',
+                    items: ['Bold', 'Italic', 'Underline', 'Strike']
+                },
+                {
+                    name: 'paragraph',
+                    items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent']
+                },
+                {
+                    name: 'links',
+                    items: ['Link', 'Unlink']
+                },
+                {
+                    name: 'clipboard',
+                    items: ['Undo', 'Redo']
+                },
+                {
+                    name: 'styles',
+                    items: ['Format']
+                },
+                {
+                    name: 'tools',
+                    items: ['Maximize']
+                }
             ],
             removePlugins: 'elementspath',
             resize_enabled: true
         });
     </script>
 @endsection
-

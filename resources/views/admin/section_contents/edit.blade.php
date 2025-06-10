@@ -30,10 +30,10 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="icon">Icon (Font Awesome class)</label>
+                                    <label for="icon">Icon (Lucid Icon class)</label>
                                     <input type="text" name="icon" id="icon" class="form-control"
                                         value="{{ old('icon', $sectionContent->icon) }}"
-                                        placeholder="e.g., fa-solid fa-house">
+                                        placeholder="e.g., lucide lucide-award">
 
                                     @error('icon')
                                         <small class="text-danger">{{ $message }}</small>
@@ -81,7 +81,15 @@
                                         </option>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="sort_order">Sort Order</label>
+                                    <input type="number" name="sort_order" id="sort_order" class="form-control"
+                                        value="{{ old('sort_order', $sectionContent->sort_order) }}">
 
+                                    @error('sort_order')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
                                 <button type="submit" class="btn btn-primary">Update</button>
                                 <a href="{{ route('section-contents.index') }}" class="btn btn-default">Cancel</a>
                             </form>
@@ -98,13 +106,30 @@
     <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
     <script>
         CKEDITOR.replace('desc', {
-            toolbar: [
-                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike'] },
-                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
-                { name: 'links', items: ['Link', 'Unlink'] },
-                { name: 'clipboard', items: ['Undo', 'Redo'] },
-                { name: 'styles', items: ['Format'] },
-                { name: 'tools', items: ['Maximize'] }
+            toolbar: [{
+                    name: 'basicstyles',
+                    items: ['Bold', 'Italic', 'Underline', 'Strike']
+                },
+                {
+                    name: 'paragraph',
+                    items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent']
+                },
+                {
+                    name: 'links',
+                    items: ['Link', 'Unlink']
+                },
+                {
+                    name: 'clipboard',
+                    items: ['Undo', 'Redo']
+                },
+                {
+                    name: 'styles',
+                    items: ['Format']
+                },
+                {
+                    name: 'tools',
+                    items: ['Maximize']
+                }
             ],
             removePlugins: 'elementspath',
             resize_enabled: true
