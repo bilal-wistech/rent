@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\API\SectionContentApiController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\PropertyController;
 use App\Http\Controllers\Api\EnquireMessageController;
+use App\Http\Controllers\Api\SectionContentApiController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
