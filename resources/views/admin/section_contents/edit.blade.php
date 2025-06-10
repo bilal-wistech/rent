@@ -70,7 +70,7 @@
                                         @foreach ($parents as $parent)
                                             <option value="{{ $parent->id }}"
                                                 {{ old('parent_id', $sectionContent->parent_id) == $parent->id ? 'selected' : '' }}>
-                                                {{ $parent->name }}
+                                                {{ $parent->name }} ({{ $parent->type }})
                                             </option>
                                         @endforeach
                                     </select>
