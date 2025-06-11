@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use App\Models\PropertyPrice;
 use App\Models\PropertyPhotos;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
@@ -405,6 +406,91 @@ class PropertyController extends Controller
                 'success' => false,
                 'message' => 'Error fetching locations',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    /**
+     * Check if the current user is authenticated and token is valid
+     */
+    private function checkAuthenticatedUser()
+    {
+        $user = auth('sanctum')->user();
+
+        if (!$user) {
+            return [
+                'authenticated' => false,
+                'user' => null,
+                'response' => response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required. Please login again.',
+                    'error_code' => 'AUTH_REQUIRED'
+                ], 401)
+            ];
+        }
+
+        // Check if token exists and is not expired
+        $token = auth('sanctum')->user()->currentAccessToken();
+
+        if (!$token) {
+            return [
+                'authenticated' => false,
+                'user' => null,
+                'response' => response()->json([
+                    'success' => false,
+                    'message' => 'Invalid or missing authentication token. Please login again.',
+                    'error_code' => 'INVALID_TOKEN'
+                ], 401)
+            ];
+        }
+
+        // Check if token is expired (assuming you have expires_at column)
+        if ($token->expires_at && Carbon::now()->gt($token->expires_at)) {
+            // Delete expired token
+            $token->delete();
+
+            return [
+                'authenticated' => false,
+                'user' => null,
+                'response' => response()->json([
+                    'success' => false,
+                    'message' => 'Authentication token has expired. Please login again.',
+                    'error_code' => 'TOKEN_EXPIRED'
+                ], 401)
+            ];
+        }
+
+        return [
+            'authenticated' => true,
+            'user' => $user,
+            'response' => null
+        ];
+    }
+
+    public function listProperty(Request $request): JsonResponse
+    {
+        // Check authentication and token validity
+        $authCheck = $this->checkAuthenticatedUser();
+        if (!$authCheck['authenticated']) {
+            return $authCheck['response'];
+        }
+
+        $authenticatedUser = $authCheck['user'];
+        $authenticatedUserId = $authenticatedUser->id;
+
+
+        DB::beginTransaction();
+        try {
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Property created successfully',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Property not created: ' . $e->getMessage()
             ], 500);
         }
     }
