@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\EmergencyContactController;
 use App\Http\Controllers\Admin\PricingTypeController;
 use App\Http\Controllers\Admin\SectionContentController;
+use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\EnquiryMessageController;
 
 /*
@@ -108,6 +109,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::match(array('GET', 'POST'), 'add-customer', 'CustomerController@add')->middleware(['permission:add_customer']);
     Route::get('delete-customer/{id}', 'CustomerController@delete')->middleware(['permission:delete_customer']);
 
+    //service
+    Route::get('services', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('services/{id}', [ServiceController::class, 'show'])->name('services.show');
     Route::group(['middleware' => 'permission:edit_customer'], function () {
         Route::match(array('GET', 'POST'), 'edit-customer/{id}', 'CustomerController@update');
         Route::get('customer/properties/{id}', 'CustomerController@customerProperties');

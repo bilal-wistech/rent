@@ -105,6 +105,12 @@
                 </li>
             @endif
 
+              <li class="{{ Request::segment(2) == 'services' ? 'active' : '' }}">
+                <a href="{{ url('admin/services') }}">
+                    <i class="fa fa-cogs"></i><span>Services</span>
+                </a>
+            </li>
+
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_messages'))
                 <li
                     class="{{ Route::current()->uri() == 'admin/messages' || Route::current()->uri() == 'admin/messaging/host/{id}' || Route::current()->uri() == 'admin/send-message-email/{id}' ? 'active' : '' }}">
