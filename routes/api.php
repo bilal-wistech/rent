@@ -44,4 +44,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('my-bookings', [BookingController::class, 'myBookings']);
     Route::post('view-my-booking-details', [BookingController::class, 'viewMyBookingDetails']);
     Route::post('cancel-my-booking', [BookingController::class, 'cancelMyBooking']);
+    Route::post('list-property', [PropertyController::class, 'listProperty']);
 });

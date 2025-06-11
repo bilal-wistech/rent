@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
+use App\Models\City;
 use App\Models\Country;
 use App\Models\Bookings;
 use App\Models\Currency;
@@ -17,13 +18,16 @@ use App\Models\PropertyType;
 use Illuminate\Http\Request;
 use App\Models\PropertyPrice;
 use App\Models\PropertyPhotos;
+use App\Models\PropertyAddress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Http\Resources\PropertyResource;
 use App\Http\Requests\PropertySearchRequest;
+use App\Http\Requests\Api\PropertyListingRequest;
 
 class PropertyController extends Controller
 {
@@ -466,31 +470,153 @@ class PropertyController extends Controller
         ];
     }
 
-    public function listProperty(Request $request): JsonResponse
+    public function listProperty(PropertyListingRequest $request): JsonResponse
     {
-        // Check authentication and token validity
         $authCheck = $this->checkAuthenticatedUser();
         if (!$authCheck['authenticated']) {
             return $authCheck['response'];
         }
 
-        $authenticatedUser = $authCheck['user'];
-        $authenticatedUserId = $authenticatedUser->id;
-
-
-        DB::beginTransaction();
+        $authenticatedUserId = $authCheck['user']->id;
         try {
+            DB::beginTransaction();
+
+            // Step 1: Create Property
+            $country = Country::where('short_name', $request->country)->firstOrFail();
+            $city = City::findOrFail($request->city);
+
+            $property = new Properties();
+            $property->host_id = $authenticatedUserId;
+            $property->name = $request->bedrooms . ' ' .
+                            BedType::findOrFail($request->bed_type)->name . ' Bedroom ' .
+                            PropertyType::findOrFail($request->property_type_id)->name . ' , ' .
+                            $request->area;
+            $property->property_type = $request->property_type_id;
+            $property->space_type = $request->space_type;
+            $property->accommodates = $request->accommodates;
+            $property->bedrooms = $request->bedrooms;
+            $property->beds = $request->beds;
+            $property->bathrooms = $request->bathrooms;
+            $property->bed_type = $request->bed_type;
+            $property->slug = Common::pretty_url($property->name);
+
+            $adminPropertyApproval = Settings::where('name', 'property_approval')->first()->value ?? 'No';
+            $property->is_verified = $adminPropertyApproval === 'Yes' ? 'Pending' : 'Approved';
+            $property->save();
+
+            // Step 2: Create Property Address
+            $property_address = new PropertyAddress();
+            $property_address->property_id = $property->id;
+            $property_address->address_line_1 = $request->address_line_1;
+            $property_address->address_line_2 = $request->address_line_2;
+            $property_address->city = $city->name;
+            $property_address->state = $request->state ?? $country->short_name;
+            $property_address->country = $country->short_name;
+            $property_address->postal_code = $request->postal_code;
+            $property_address->latitude = $request->latitude;
+            $property_address->longitude = $request->longitude;
+            $property_address->area = $request->area;
+            $property_address->building = $request->building;
+            $property_address->flat_no = $request->flat_no;
+            $property_address->save();
+
+            // Step 3: Create Property Steps
+            $property_steps = new PropertySteps();
+            $property_steps->property_id = $property->id;
+            $property_steps->basics = 1;
+            $property_steps->description = 1;
+            $property_steps->location = 1;
+            $property_steps->amenities = $request->amenities ? 1 : 0;
+            $property_steps->photos = $request->photos ? 1 : 0;
+            $property_steps->pricing = 1;
+            $property_steps->booking = 1;
+            $property_steps->save();
+
+            // Step 4: Create Property Description
+            $property_description = new PropertyDescription();
+            $property_description->property_id = $property->id;
+            $property_description->summary = $request->summary;
+            $property_description->about_place = $request->about_place;
+            $property_description->place_is_great_for = $request->place_is_great_for;
+            $property_description->guest_can_access = $request->guest_can_access;
+            $property_description->interaction_guests = $request->interaction_guests;
+            $property_description->other = $request->other;
+            $property_description->about_neighborhood = $request->about_neighborhood;
+            $property_description->get_around = $request->get_around;
+            $property_description->save();
+
+            // Step 5: Handle Amenities
+            if ($request->amenities && is_array($request->amenities)) {
+                $property->amenities = implode(',', $request->amenities);
+                $property->save();
+            }
+
+            // Step 6: Handle Photos
+            if ($request->photos && is_array($request->photos)) {
+                $path = public_path('images/property/' . $property->id . '/');
+                if (!file_exists($path)) {
+                    mkdir($path, 0777, true);
+                }
+
+                foreach ($request->photos as $index => $photo) {
+                    $baseText = explode(';base64,', $photo['data']);
+                    $name = explode('.', $photo['img_name']);
+                    $convertedImage = base64_decode($baseText[1]);
+                    $image = $name[0] . uniqid() . '.' . end($name);
+                    file_put_contents($path . $image, $convertedImage);
+
+                    $property_photo = new PropertyPhotos();
+                    $property_photo->property_id = $property->id;
+                    $property_photo->photo = $image;
+                    $property_photo->serial = $index + 1;
+                    $property_photo->cover_photo = $index === 0 ? 1 : 0;
+                    $property_photo->save();
+                }
+            }
+            $prices = $request->input('prices', []);
+            $pricingTypes = $request->input('pricing_type', []);
+            $processedTypes = [];
+
+            foreach ($prices as $index => $price) {
+                $property_type_id = $pricingTypes[$index];
+                if (empty($property_type_id)) {
+                    continue;
+                }
+
+                $processedTypes[] = $property_type_id;
+                PropertyPrice::updateOrCreate(
+                    [
+                        'property_id' => $property->id,
+                        'property_type_id' => $property_type_id,
+                    ],
+                    [
+                        'price' => $price,
+                    ]
+                );
+            }
+
+            PropertyPrice::where('property_id', $property->id)
+                ->whereNotIn('property_type_id', $processedTypes)
+                ->delete();
+
+            // Step 8: Handle Booking
+            $property->booking_type = $request->booking_type;
+            $property->status = ($property_steps->steps_completed == 0) ? 'Listed' : 'Unlisted';
+            $property->save();
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Property created successfully',
+                'message' => 'Property stored successfully',
+                'property_id' => $property->id
             ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Property not created: ' . $e->getMessage()
+                'message' => 'Property creation failed: ' . $e->getMessage()
             ], 500);
         }
     }
