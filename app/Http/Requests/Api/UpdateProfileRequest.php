@@ -27,6 +27,7 @@ class UpdateProfileRequest extends FormRequest
             'phone' => 'sometimes|string|max:20|nullable',
             'current_password' => 'sometimes|string|required_with:new_password',
             'new_password' => 'sometimes|string|min:8|confirmed|required_with:current_password',
+            'new_password_confirmation' => 'sometimes|string|required_with:new_password'
         ];
     }
 
