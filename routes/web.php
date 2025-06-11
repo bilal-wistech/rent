@@ -99,15 +99,15 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::put('pricing-type/update/{id}', [PricingTypeController::class, 'update'])->name('pricing-type.update');
     Route::delete('pricing-type/delete/{id}', [PricingTypeController::class, 'destroy'])->name('pricing-type.destroy');
 
-    //service
-    Route::get('services', [ServiceController::class, 'index'])->name('services.index');
-    Route::get('services/{id}', [ServiceController::class, 'show'])->name('services.show');
-    
+
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
     Route::post('add-ajax-customer', 'CustomerController@ajaxCustomerAdd')->middleware(['permission:add_customer']);
     Route::match(array('GET', 'POST'), 'add-customer', 'CustomerController@add')->middleware(['permission:add_customer']);
     Route::get('delete-customer/{id}', 'CustomerController@delete')->middleware(['permission:delete_customer']);
 
+    //service
+    Route::get('services', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('services/{id}', [ServiceController::class, 'show'])->name('services.show');
     Route::group(['middleware' => 'permission:edit_customer'], function () {
         Route::match(array('GET', 'POST'), 'edit-customer/{id}', 'CustomerController@update');
         Route::get('customer/properties/{id}', 'CustomerController@customerProperties');
