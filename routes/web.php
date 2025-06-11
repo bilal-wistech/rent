@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\EmergencyContactController;
 use App\Http\Controllers\Admin\PricingTypeController;
 use App\Http\Controllers\Admin\SectionContentController;
+use App\Http\Controllers\Admin\EnquiryMessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,7 +61,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     // routes/api.php or web.php
 
     Route::resource('section-contents', SectionContentController::class);
-    
+
     Route::get('cache-clear', 'AdminController@cacheClear');
     Route::get('addons', [AddonController::class, 'index'])->name('addon.index');
     Route::match(['GET', 'POST'], 'settings/sms', 'SettingsController@smsSettings');
@@ -77,7 +78,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::resource('city', CityController::class);
     Route::resource('area', AreaController::class);
     Route::post('admin/area/toggle-show-on-front/{id}', [AreaController::class, 'toggleShowOnFront'])
-    ->name('area.toggleShowOnFront');
+        ->name('area.toggleShowOnFront');
 
     Route::get('city/add/{countryId}', [CityController::class, 'add'])->name('city.add');
     Route::get('area/add/{cityId}', [AreaController::class, 'add'])->name('area.add');
@@ -98,6 +99,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::put('pricing-type/update/{id}', [PricingTypeController::class, 'update'])->name('pricing-type.update');
     Route::delete('pricing-type/delete/{id}', [PricingTypeController::class, 'destroy'])->name('pricing-type.destroy');
 
+    //Enquiry
+    Route::get('enquiries', [EnquiryMessageController::class, 'index'])->name('enquiries.index');
+    Route::get('enquiries/{id}', [EnquiryMessageController::class, 'show'])->name('enquiries.view');
 
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
     Route::post('add-ajax-customer', 'CustomerController@ajaxCustomerAdd')->middleware(['permission:add_customer']);
