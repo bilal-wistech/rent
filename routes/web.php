@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\EmergencyContactController;
 use App\Http\Controllers\Admin\PricingTypeController;
 use App\Http\Controllers\Admin\SectionContentController;
+use App\Http\Controllers\Admin\ServiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,7 +61,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     // routes/api.php or web.php
 
     Route::resource('section-contents', SectionContentController::class);
-    
+
     Route::get('cache-clear', 'AdminController@cacheClear');
     Route::get('addons', [AddonController::class, 'index'])->name('addon.index');
     Route::match(['GET', 'POST'], 'settings/sms', 'SettingsController@smsSettings');
@@ -98,7 +99,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::put('pricing-type/update/{id}', [PricingTypeController::class, 'update'])->name('pricing-type.update');
     Route::delete('pricing-type/delete/{id}', [PricingTypeController::class, 'destroy'])->name('pricing-type.destroy');
 
-
+    //service
+    Route::get('services', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('services/{id}', [ServiceController::class, 'show'])->name('services.show');
+    
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
     Route::post('add-ajax-customer', 'CustomerController@ajaxCustomerAdd')->middleware(['permission:add_customer']);
     Route::match(array('GET', 'POST'), 'add-customer', 'CustomerController@add')->middleware(['permission:add_customer']);
