@@ -45,4 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('view-my-booking-details', [BookingController::class, 'viewMyBookingDetails']);
     Route::post('cancel-my-booking', [BookingController::class, 'cancelMyBooking']);
     Route::post('list-property', [PropertyController::class, 'listProperty']);
+    Route::post('list-property-basics', [PropertyController::class, 'propertyBasics']);
+    Route::post('list-property-description', [PropertyController::class, 'propertyDescription']);
+    Route::post('list-property-location', [PropertyController::class, 'propertyLocation']);
+    Route::post('list-property-amenities', [PropertyController::class, 'propertyAmenities']);
+    Route::post('list-property-photos', [PropertyController::class, 'propertyPhotos']);
+    Route::post('list-property-pricings', [PropertyController::class, 'propertyPricings']);
+    Route::post('list-property-bookings', [PropertyController::class, 'propertyBookings']);
 });
