@@ -89,6 +89,11 @@
                 </li>
             @endif
 
+            <li class="{{ Request::segment(2) == 'enquiries' ? 'active' : '' }}">
+                <a href="{{ url('admin/enquiries') }}">
+                    <i class="fa fa-envelope"></i><span>Enquiries</span>
+                </a>
+            </li>
 
 
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'manage_admin'))
