@@ -143,11 +143,7 @@
 
             {{-- Add Content Section menu item here --}}
 
-            <li class="{{ Request::segment(2) == 'section-contents' ? 'active' : '' }}">
-                <a href="{{ url('admin/section-contents') }}">
-                    <i class="fa fa-th-large"></i><span>Content Sections</span>
-                </a>
-            </li>
+            
 
         </ul>
     </section>

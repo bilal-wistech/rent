@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PropertySeoController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Admin\AreaController;
@@ -60,7 +61,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     // routes/api.php or web.php
 
     Route::resource('section-contents', SectionContentController::class);
-    
+
     Route::get('cache-clear', 'AdminController@cacheClear');
     Route::get('addons', [AddonController::class, 'index'])->name('addon.index');
     Route::match(['GET', 'POST'], 'settings/sms', 'SettingsController@smsSettings');
@@ -77,7 +78,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::resource('city', CityController::class);
     Route::resource('area', AreaController::class);
     Route::post('admin/area/toggle-show-on-front/{id}', [AreaController::class, 'toggleShowOnFront'])
-    ->name('area.toggleShowOnFront');
+        ->name('area.toggleShowOnFront');
 
     Route::get('city/add/{countryId}', [CityController::class, 'add'])->name('city.add');
     Route::get('area/add/{cityId}', [AreaController::class, 'add'])->name('area.add');
@@ -97,6 +98,20 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
     Route::get('pricing-type/edit/{id}', [PricingTypeController::class, 'edit'])->name('pricing-type.edit');
     Route::put('pricing-type/update/{id}', [PricingTypeController::class, 'update'])->name('pricing-type.update');
     Route::delete('pricing-type/delete/{id}', [PricingTypeController::class, 'destroy'])->name('pricing-type.destroy');
+
+
+    // Route::prefix('admin/listing')->name('admin.listing.')->group(function () {
+    // Route::get('seo', [PropertySeoController::class, 'index'])->name('seo.index');
+    Route::get('{property_id}/create', [PropertySeoController::class, 'create'])->name('seo.create');
+    Route::post('{property_id}', [PropertySeoController::class, 'store'])->name('seo.store');
+    Route::get('{property_id}/edit', [PropertySeoController::class, 'edit'])->name('seo.edit');
+    Route::post('{property_id}/update', [PropertySeoController::class, 'update'])->name('seo.update');
+
+    //     Route::delete('{property_id}/seo', [PropertySeoController::class, 'destroy'])->name('seo.destroy');
+// });
+
+
+
 
 
     Route::get('customers/customer_search', 'CustomerController@searchCustomer')->middleware(['permission:customers']);
