@@ -49,15 +49,15 @@
 
                             <div class="row mt-4">
                                 <div class="col-md-6 text-right">
-                                    <button type="submit" class="btn btn-primary btn-lg">Update SEO</button>
+                                    <button type="submit" class="btn btn-primary btn-md">Update SEO</button>
                                 </div>
                             </div>
 
                         </form>
-                    </div> <!-- /.box-body -->
-                </div> <!-- /.box -->
-            </div> <!-- /.col -->
-        </div> <!-- /.row -->
+                    </div>
+                </div> 
+            </div> 
+        </div> 
     </section>
 </div>
 @endsection
