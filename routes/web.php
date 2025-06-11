@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PropertySeoController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Admin\AreaController;
@@ -230,6 +231,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
         Route::match(array('GET', 'POST'), 'edit-admin/{id}', 'AdminController@update');
         Route::match(array('GET', 'POST'), 'delete-admin/{id}', 'AdminController@delete');
     });
+
+
+    Route::get('{property_id}/create', [PropertySeoController::class, 'create'])->name('seo.create');
+    Route::post('{property_id}', [PropertySeoController::class, 'store'])->name('seo.store');
+    Route::get('{property_id}/edit', [PropertySeoController::class, 'edit'])->name('seo.edit');
+    Route::post('{property_id}/update', [PropertySeoController::class, 'update'])->name('seo.update');
+
 
     Route::group(['middleware' => 'permission:general_setting'], function () {
         Route::match(array('GET', 'POST'), 'settings', 'SettingsController@general')->middleware(['permission:general_setting']);
