@@ -149,6 +149,13 @@
                 </li>
             @endif
 
+            {{-- Add Content Section menu item here --}}
+
+            <li class="{{ Request::segment(2) == 'section-contents' ? 'active' : '' }}">
+                <a href="{{ url('admin/section-contents') }}">
+                  <span>Content Sections</span>
+                </a>
+            </li>
 
 
         </ul>

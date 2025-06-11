@@ -1,8 +1,8 @@
 <div class="box box-info box_info">
     <div class="panel-body">
-    <h4 class="all_settings f-18 mt-1">Property Settings</h4>
+        <h4 class="all_settings f-18 mt-1">Property Settings</h4>
         <?php
-        $requestUri = request()->segment(4);
+$requestUri = request()->segment(4);
         ?>
         <ul class="nav navbar-pills nav-tabs nav-stacked no-margin d-flex flex-column f-14" role="tablist">
             <li class="{{ ($requestUri == 'basics') ? 'active' : ''  }}">
@@ -31,8 +31,19 @@
 
             <li class="{{ ($requestUri == 'booking') ? 'active' : ''  }}">
                 <a href='{{ url("admin/listing/$result->id/booking") }}' data-group="profile">Booking</a>
+                @php
+                    $seoExists = \App\Models\PropertySeo::where('property_id', $result->id)->exists();
+                    $isSeoActive = request()->is("admin/listing/{$result->id}/create") || request()->is("admin/listing/{$result->id}/edit");
+                @endphp
+
+            <li class="{{ $isSeoActive ? 'active' : '' }}">
+                <a href="{{ $seoExists ? route('seo.edit', $result->id) : route('seo.create', $result->id) }}"
+                    data-group="profile">
+                    SEO
+                </a>
             </li>
-<!-- 
+
+            <!-- 
             <li class="{{ ($requestUri == 'calender') ? 'active' : ''  }}">
                 <a href='{{ url("admin/listing/$result->id/calender") }}' data-group="profile">Calendar</a>
             </li> -->
