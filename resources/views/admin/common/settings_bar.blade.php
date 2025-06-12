@@ -144,10 +144,18 @@
             @endif
 
             @if (Helpers::has_permission(Auth::guard('admin')->user()->id, 'database_backup'))
-               <li class="{{ Route::current()->uri() == 'admin/pricing-type' ? 'active' : '' }}">
+                <li class="{{ Route::current()->uri() == 'admin/pricing-type' ? 'active' : '' }}">
                     <a href="{{ url('admin/pricing-type') }}"><span>Pricing Types</span></a>
                 </li>
             @endif
+
+            {{-- Add Content Section menu item here --}}
+
+            <li class="{{ Request::segment(2) == 'section-contents' ? 'active' : '' }}">
+                <a href="{{ url('admin/section-contents') }}">
+                    <span>Content Sections</span>
+                </a>
+            </li>
 
 
 

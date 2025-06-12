@@ -31,5 +31,8 @@ class Area extends Model
     {
         return $this->hasMany(Building::class);
     }
+    public function city() {
+    return $this->belongsTo(City::class);
+}
 
 }
