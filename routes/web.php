@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\AreaSeoController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Admin\AreaController;
@@ -290,6 +291,12 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['gue
             Route::match(array('GET', 'POST'), 'settings/edit-country/{id}', 'CountryController@update');
             Route::get('settings/delete-country/{id}', 'CountryController@delete');
         });
+
+        // Route::get('area/{id}/seo', [AreaController::class, 'editSeo'])->name('area.seo.edit');
+Route::get('admin/area/{area}/seo', [AreaSeoController::class, 'edit'])->name('area.seo.edit');
+Route::post('admin/area/{area}/seo', [AreaSeoController::class, 'update'])->name('area.seo.update');
+
+
 
         Route::group(['middleware' => 'permission:manage_amenities_type'], function () {
             Route::get('settings/amenities-type', 'AmenitiesTypeController@index');
