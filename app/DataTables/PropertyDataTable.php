@@ -15,14 +15,18 @@ class PropertyDataTable extends DataTable
         return datatables()
             ->of($properties)
             ->addColumn('action', function ($properties) {
-                $edit = $delete = $pricing = $status = '';
+                $edit = $delete = $pricing = $status = $seo = '';
+
                 if (Common::has_permission(\Auth::guard('admin')->user()->id, 'edit_properties')) {
-                    $edit = '<a href="' . url('admin/listing/' . $properties->id) . '/basics" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>&nbsp;';
+                    $edit = '<a href="' . url('admin/listing/' . $properties->id) . '/basics" class="btn btn-xs btn-primary" title="Edit Property"><i class="fa fa-edit"></i></a>&nbsp;';
                 }
+
                 if (Common::has_permission(\Auth::guard('admin')->user()->id, 'delete_property')) {
-                    $delete = '<a href="' . url('admin/delete-property/' . $properties->id) . '" class="btn btn-xs btn-info delete-warning"><i class="fa fa-trash"></i></a>';
+                    $delete = '<a href="' . url('admin/delete-property/' . $properties->id) . '" class="btn btn-xs btn-info delete-warning" title="Delete Property"><i class="fa fa-trash"></i></a>';
                 }
-                $pricing = '<a href="' . url('admin/show-pricing/' . $properties->id) . '" class="btn btn-xs btn-secondary "><i class="fa fa-dollar"></i></a>';
+
+                $pricing = '<a href="' . url('admin/show-pricing/' . $properties->id) . '" class="btn btn-xs btn-secondary" title="Pricing"><i class="fa fa-dollar"></i></a>';
+
                 if ($properties->status === 'Listed') {
                     $icon = 'fa-arrow-up';
                     $btnClass = 'btn-success';
@@ -32,13 +36,17 @@ class PropertyDataTable extends DataTable
                 }
 
                 $status = '<a href="#"
-             class="btn btn-xs ' . $btnClass . ' toggle-status"
-             data-property-id="' . $properties->id . '"
-             data-toggle="tooltip"
-             title="' . ($properties->status === 'Listed' ? 'Unlist Property' : 'List Property') . '">
-             <i class="fa ' . $icon . '"></i>
-           </a>';
-                return $edit . $delete . $pricing . $status;
+                    class="btn btn-xs ' . $btnClass . ' toggle-status"
+                    data-property-id="' . $properties->id . '"
+                    data-toggle="tooltip"
+                    title="' . ($properties->status === 'Listed' ? 'Unlist Property' : 'List Property') . '">
+                    <i class="fa ' . $icon . '"></i>
+                </a>';
+
+                // Add SEO Edit button
+                $seo = '<a href="' . url('admin/property/' . $properties->id . '/seo') . '" class="btn btn-xs btn-warning" title="Edit SEO"><i class="fa fa-search-plus"></i></a>';
+
+                return $edit . $delete . $pricing . $status . $seo;
             })
             ->addColumn('id', function ($properties) {
                 return $properties->id;
@@ -51,44 +59,33 @@ class PropertyDataTable extends DataTable
             })
             ->addColumn('location', function ($properties) {
                 $address = $properties->property_address;
-
                 $parts = [];
 
                 if (!empty($address->flat_no)) {
-                    $parts[] = 'Flat '.$address->flat_no;
+                    $parts[] = 'Flat ' . $address->flat_no;
                 }
-
                 if (!empty($address->building)) {
                     $parts[] = $address->building;
                 }
-
                 if (!empty($address->area)) {
                     $parts[] = $address->area;
                 }
-
                 if (!empty($address->city)) {
                     $parts[] = $address->city;
                 }
-
                 if (!empty($address->country)) {
                     $parts[] = $address->country;
                 }
 
                 return ucfirst(implode(', ', $parts));
             })
-
             ->addColumn('created_at', function ($properties) {
                 return dateFormat($properties->created_at);
             })
             ->addColumn('recomended', function ($properties) {
-
-                if ($properties->recomended == 1) {
-                    return 'Yes';
-                }
-                return 'No';
+                return $properties->recomended == 1 ? 'Yes' : 'No';
             })
             ->addColumn('verified', function ($properties) {
-
                 return ($properties->is_verified == 'Approved' || $properties->is_verified == '') ? 'Approved' : 'Pending';
             })
             ->rawColumns(['host_name', 'name', 'action'])
@@ -97,17 +94,17 @@ class PropertyDataTable extends DataTable
 
     public function query()
     {
-        $user_id    = Request::segment(4);
-        $status     = isset(request()->status) ? request()->status : null;
-        $from = isset(request()->from) ? setDateForDb(request()->from) : null;
-        $to = isset(request()->to) ? setDateForDb(request()->to) : null;
-        $property_type = isset(request()->property_type) ? request()->property_type : null;
+        $user_id = Request::segment(4);
+        $status = request()->status ?? null;
+        $from = request()->from ? setDateForDb(request()->from) : null;
+        $to = request()->to ? setDateForDb(request()->to) : null;
+        $property_type = request()->property_type ?? null;
 
         $query = Properties::with(['users:id,first_name,profile_image', 'property_address']);
-        if (isset($user_id)) {
+
+        if ($user_id) {
             $query->where('host_id', '=', $user_id);
         }
-
 
         if ($from) {
             $query->whereDate('created_at', '>=', $from);
@@ -121,6 +118,7 @@ class PropertyDataTable extends DataTable
         if ($property_type) {
             $query->where('property_type', '=', $property_type);
         }
+
         return $this->applyScopes($query);
     }
 
@@ -129,7 +127,7 @@ class PropertyDataTable extends DataTable
         return $this->builder()
             ->addColumn(['data' => 'id', 'name' => 'properties.id', 'title' => 'Id'])
             ->addColumn(['data' => 'name', 'name' => 'properties.name', 'title' => 'Name'])
-            ->addColumn(['data' => 'location', 'name' => 'location', 'Location'])
+            ->addColumn(['data' => 'location', 'name' => 'location', 'title' => 'Location'])
             ->addColumn(['data' => 'host_name', 'name' => 'users.first_name', 'title' => 'Host Name'])
             ->addColumn(['data' => 'property_type_name', 'name' => 'property_type', 'title' => 'Property Type'])
             ->addColumn(['data' => 'status', 'name' => 'status', 'title' => 'Status'])
@@ -139,7 +137,6 @@ class PropertyDataTable extends DataTable
             ->addColumn(['data' => 'action', 'name' => 'action', 'title' => 'Action', 'orderable' => false, 'searchable' => false])
             ->parameters(dataTableOptions());
     }
-
 
     protected function filename()
     {
