@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\PropertySeoController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Admin\AreaController;
@@ -687,6 +688,14 @@ Route::group(['middleware' => ['guest:users', 'locale']], function () {
         return Redirect::to('login');
     });
 });
+
+
+//Property Seo
+Route::get('admin/property/{property}/seo', [PropertySeoController::class, 'edit'])->name('property.seo.edit');
+Route::post('admin/property/{property}/seo', [PropertySeoController::class, 'update'])->name('property.seo.update');
+
+
+
 
 //for exporting iCalendar
 Route::get('icalender/export/{id}', 'CalendarController@icalendarExport');
