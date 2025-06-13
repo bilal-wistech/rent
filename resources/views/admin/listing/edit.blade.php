@@ -3,7 +3,7 @@
 @section('main')
 <div class="content-wrapper">
     <section class="content-header">
-        <h1>Edit SEO</h1>
+        <h1>Seo <small>Seo</small></h1>
     </section>
 
     <section class="content">
@@ -49,7 +49,7 @@
 
                             <div class="row mt-4">
                                 <div class="col-md-6 text-right">
-                                    <button type="submit" class="btn btn-primary btn-md">Update SEO</button>
+                                    <button type="submit" class="btn btn-primary btn-md">Save</button>
                                 </div>
                             </div>
 

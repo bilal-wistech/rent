@@ -28,13 +28,10 @@ $requestUri = request()->segment(4);
             <li class="{{ ($requestUri == 'pricing') ? 'active' : ''  }}">
                 <a href='{{ url("admin/listing/$result->id/pricing") }}' data-group="profile">Pricing</a>
             </li>
-
-            <li class="{{ ($requestUri == 'booking') ? 'active' : ''  }}">
-                <a href='{{ url("admin/listing/$result->id/booking") }}' data-group="profile">Booking</a>
-                @php
-                    $seoExists = \App\Models\PropertySeo::where('property_id', $result->id)->exists();
-                    $isSeoActive = request()->is("admin/listing/{$result->id}/create") || request()->is("admin/listing/{$result->id}/edit");
-                @endphp
+            @php
+                $seoExists = \App\Models\PropertySeo::where('property_id', $result->id)->exists();
+                $isSeoActive = request()->is("admin/listing/{$result->id}/create") || request()->is("admin/listing/{$result->id}/edit");
+            @endphp
 
             <li class="{{ $isSeoActive ? 'active' : '' }}">
                 <a href="{{ $seoExists ? route('seo.edit', $result->id) : route('seo.create', $result->id) }}"
@@ -43,7 +40,11 @@ $requestUri = request()->segment(4);
                 </a>
             </li>
 
-            <!-- 
+            <li class="{{ ($requestUri == 'booking') ? 'active' : ''  }}">
+                <a href='{{ url("admin/listing/$result->id/booking") }}' data-group="profile">Booking</a>
+
+
+                <!-- 
             <li class="{{ ($requestUri == 'calender') ? 'active' : ''  }}">
                 <a href='{{ url("admin/listing/$result->id/calender") }}' data-group="profile">Calendar</a>
             </li> -->

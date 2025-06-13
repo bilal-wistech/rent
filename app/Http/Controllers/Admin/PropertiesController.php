@@ -46,7 +46,8 @@ use App\Models\{
     Currency,
     City,
     PricingType,
-    Building
+    Building,
+    PropertySeo
 };
 
 class PropertiesController extends Controller
@@ -248,7 +249,7 @@ class PropertiesController extends Controller
                 $property->space_type = $request->space_type;
                 // $property->name = $request->bedrooms . ' ' . BedType::getAll()->find($request->bed_type)->name . ' Bedroom ' . $property->name;
                 $property->name = $request->bedrooms . ' ' . BedType::getAll()->find($request->bed_type)->name . ' Bedroom ' . PropertyType::getAll()->find($request->property_type)->name . ' , ' . $property->name;
-                $property->slug            = Common::pretty_url($property->name);
+                $property->slug = Common::pretty_url($property->name);
                 $property->accommodates = $request->accommodates;
                 $property->recomended = $request->recomended;
                 $property->is_verified = $request->verified;
@@ -573,7 +574,17 @@ class PropertiesController extends Controller
                         return redirect('admin/properties')->with('success', __('Pricing updated successfully.'));
                     }
                     // Redirect to the booking page
-                    return redirect('admin/listing/' . $property_id . '/booking')->with('success', __('Pricing updated successfully.'));
+                    $seo = PropertySeo::where('property_id', $property_id)->first();
+
+                    if ($seo) {
+                        // Redirect to the SEO edit route
+                        return redirect('admin/listing/' . $property_id . '/edit')
+                            ->with( __('Pricing updated successfully.'));
+                    }
+
+                    // Else, redirect to the SEO create route
+                    return redirect('admin/listing/' . $property_id . '/create')
+                        ->with('success', __('Pricing updated successfully.'));
                 }
             }
         } elseif ($step == 'booking') {
