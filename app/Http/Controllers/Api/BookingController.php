@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
+use App\Models\Admin;
 use App\Models\Invoice;
 use App\Models\Bookings;
 use App\Models\Currency;
@@ -19,7 +20,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Api\AddBookingRequest;
-
+use App\Notifications\BookingCreatedNotification;
+use Illuminate\Support\Facades\Notification;
 class BookingController extends Controller
 {
     public function getBookings(Request $request): JsonResponse
@@ -286,7 +288,6 @@ class BookingController extends Controller
             ];
 
             $booking = Bookings::create($bookingData);
-
             // Create an array of booked dates
             $bookedDates = [];
             for ($i = $start_date_timestamp; $i <= $end_date_timestamp; $i += 86400) {
@@ -321,7 +322,18 @@ class BookingController extends Controller
             ]);
 
             DB::commit();
-
+            try {
+                $booking->load('users','properties');
+                $admins = Admin::where('status', 'Active')->get();
+                Notification::send($admins, new BookingCreatedNotification($booking));
+            } catch (\Exception $notificationException) {
+                // Log the notification error but don't fail the booking
+                // since the booking was already successfully created
+                \Log::error('Failed to send booking notification: ' . $notificationException->getMessage(), [
+                    'booking_id' => $booking->id,
+                    'property_id' => $property->id
+                ]);
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'Booking created successfully',
@@ -634,7 +646,7 @@ class BookingController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            \Log::error('Error in Booking Cancellation: ' . $e->getMessage().' '. $e->getTraceAsString());
+            \Log::error('Error in Booking Cancellation: ' . $e->getMessage() . ' ' . $e->getTraceAsString());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while cancelling the booking',
